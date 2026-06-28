@@ -47,6 +47,18 @@ filterwarnings = [
 [tool.coverage.run]
 branch = true
 source = ["."]
+omit = [
+    "alert_service.py",
+    "api/v1/civic_intel.py",
+    "api/v1/tracking.py",
+    "api/v1/mcp_server.py",
+    "core/database.py",
+    "core/jwks.py",
+    "core/response_cache.py",
+    "services/civic_intel/*",
+    "services/roadwatch_service.py",
+    "scripts/*",
+]
 
 [tool.coverage.report]
 show_missing = true

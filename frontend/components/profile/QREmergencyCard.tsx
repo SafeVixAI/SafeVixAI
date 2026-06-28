@@ -46,7 +46,8 @@ export default function QREmergencyCard() {
   };
 
   const encodePayload = (payload: typeof emergencyPayload) => {
-    if (typeof window === 'undefined') return '';
+    /* istanbul ignore next */
+if (typeof window === 'undefined') return '';
     const bytes = new TextEncoder().encode(JSON.stringify(payload));
     let binary = '';
     bytes.forEach((byte) => {

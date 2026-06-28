@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2026 SafeVixAI Team
 
+import asyncio
 import json
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -290,3 +291,79 @@ class TestTaskQueue:
         assert stored["status"] == "pending"
         assert stored["retries_left"] == 5
         assert stored["job_id"] == job_id
+
+
+# ── _worker_loop exception handling ───────────────────────────────────────────
+
+class TestWorkerLoop:
+    @pytest.mark.asyncio
+    async def test_worker_loop_cancelled_error_breaks(self):
+        """_worker_loop handles CancelledError and breaks out of the loop."""
+        mock_redis = AsyncMock()
+        mock_redis.blpop = AsyncMock(side_effect=asyncio.CancelledError())
+        worker = BackgroundWorker(mock_redis)
+        worker.running = True
+        with patch("core.queue.asyncio.sleep", AsyncMock()) as mock_sleep:
+            await worker._worker_loop(0)
+        mock_sleep.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_worker_loop_processes_job_when_blpop_returns_data(self):
+        """When blpop returns data, _worker_loop processes the job (covers lines 155-156)."""
+        mock_redis = AsyncMock()
+        mock_redis.blpop = AsyncMock(side_effect=[
+            (b"queue", b"job-abc"),
+            asyncio.CancelledError(),
+        ])
+        worker = BackgroundWorker(mock_redis)
+        worker.running = True
+        with patch.object(worker, '_process_job', AsyncMock()) as mock_process:
+            with patch("core.queue.asyncio.sleep", AsyncMock()):
+                await worker._worker_loop(0)
+        mock_process.assert_awaited_once_with(b"job-abc")
+
+    @pytest.mark.asyncio
+    async def test_worker_loop_blpop_none_continues(self):
+        """When blpop returns None (timeout), _worker_loop continues to next iteration."""
+        mock_redis = AsyncMock()
+        mock_redis.blpop = AsyncMock(side_effect=[None, asyncio.CancelledError()])
+        worker = BackgroundWorker(mock_redis)
+        worker.running = True
+        with patch("core.queue.asyncio.sleep", AsyncMock()) as mock_sleep:
+            await worker._worker_loop(0)
+        mock_sleep.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_worker_loop_general_exception_caught(self):
+        """_worker_loop catches generic exceptions, sleeps, and continues."""
+        mock_redis = AsyncMock()
+        mock_redis.blpop = AsyncMock(side_effect=ValueError("test-error"))
+        worker = BackgroundWorker(mock_redis)
+        worker.running = True
+        async def _stop(duration):
+            worker.running = False
+        with patch("core.queue.asyncio.sleep", _stop):
+            with patch("core.queue.logger.exception") as mock_log:
+                await worker._worker_loop(0)
+        mock_log.assert_called_once()
+        assert "test-error" in str(mock_log.call_args[0][2])
+
+
+# ── enqueue with registered task ──────────────────────────────────────────────
+
+class TestEnqueueRegistered:
+    @pytest.mark.asyncio
+    async def test_enqueue_registered_task_skips_warning(self):
+        """Enqueueing a registered task does not hit the unregistered warning path (branch 99->102)."""
+        async def _dummy():
+            pass
+        _TASK_REGISTRY["_test_registered_enqueue"] = _dummy
+        mock_redis = AsyncMock()
+        mock_redis.rpush = AsyncMock()
+        mock_redis.hset = AsyncMock()
+        queue = TaskQueue(mock_redis)
+        job_id = await queue.enqueue("_test_registered_enqueue", 42)
+        assert job_id is not None
+        stored = json.loads(mock_redis.hset.call_args[0][2])
+        assert stored["task_name"] == "_test_registered_enqueue"
+        assert stored["args"] == [42]

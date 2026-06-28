@@ -5,6 +5,8 @@ from __future__ import annotations
 
 from fastapi.testclient import TestClient
 
+from services.geocoding_service import GeocodingError
+
 
 class FakeGeocodingService:
     async def reverse(self, *, lat: float, lon: float):
@@ -56,3 +58,29 @@ def test_search_geocode_endpoint(app):
     payload = body.get("data", body)
     assert len(payload['results']) == 1
     assert payload['results'][0]['display_name'].startswith('Chennai')
+
+
+class FakeFailingGeocodingService:
+    async def reverse(self, *, lat: float, lon: float):
+        raise GeocodingError("Geocode API unavailable")
+
+    async def search(self, query: str):
+        raise GeocodingError("Geocode API unavailable")
+
+
+def test_reverse_geocode_error(app):
+    with TestClient(app) as client:
+        client.app.state.geocoding_service = FakeFailingGeocodingService()
+        response = client.get('/api/v1/geocode/reverse?lat=13.0827&lon=80.2707')
+
+    assert response.status_code == 503
+    assert "Geocode API unavailable" in response.text
+
+
+def test_search_geocode_error(app):
+    with TestClient(app) as client:
+        client.app.state.geocoding_service = FakeFailingGeocodingService()
+        response = client.get('/api/v1/geocode/search?q=Chennai')
+
+    assert response.status_code == 503
+    assert "Geocode API unavailable" in response.text

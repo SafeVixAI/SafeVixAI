@@ -31,6 +31,7 @@ const customJestConfig = {
     'components/**/*.{ts,tsx}',
     'lib/**/*.{ts,tsx}',
     'hooks/**/*.{ts,tsx}',
+    'app/providers/**/*.{ts,tsx}',
     '!components/**/*.stories.*',
     '!**/*.d.ts',
     '!**/__tests__/**',

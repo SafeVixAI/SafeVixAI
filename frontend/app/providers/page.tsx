@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import {
   Plus, Trash2, Check, X, RefreshCw, Wifi,
   Server, Key, Globe, Sliders, ChevronDown, ChevronUp,
-  ExternalLink, AlertTriangle, Zap, Cpu,
+  ExternalLink, AlertTriangle, Zap, Cpu, GripVertical, ArrowDown, ArrowUp,
 } from 'lucide-react';
 import { usePageEntry } from '@/hooks/usePageEntry';
 import { TerminalHeader } from '@/components/ui/TerminalHeader';
@@ -401,6 +401,76 @@ export default function ProvidersPage() {
                       <Check size={12} />
                       {editingId ? 'Update' : 'Add Provider'}
                     </button>
+                  </div>
+                </div>
+              </SurfaceCard>
+            )}
+
+            {/* Fallback Chain Visualizer */}
+            {userConfigs.filter(c => c.isActive).length > 1 && (
+              <SurfaceCard padding="lg">
+                <div className="flex items-center gap-2 mb-4">
+                  <ArrowDown size={14} className="text-brand-light" />
+                  <h3 className="text-[10px] font-bold text-text-3 uppercase tracking-wider">Fallback Chain</h3>
+                  <span className="text-[8px] font-mono text-text-4">Drag to reorder priority</span>
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  {userConfigs
+                    .filter(c => c.isActive)
+                    .sort((a, b) => a.priority - b.priority)
+                    .map((cfg, idx) => (
+                      <div
+                        key={cfg.id}
+                        draggable
+                        onDragStart={(e) => {
+                          e.dataTransfer.setData('text/plain', cfg.id!);
+                          (e.currentTarget as HTMLElement).classList.add('opacity-40');
+                        }}
+                        onDragEnd={(e) => {
+                          (e.currentTarget as HTMLElement).classList.remove('opacity-40');
+                        }}
+                        onDragOver={(e) => e.preventDefault()}
+                        onDrop={async (e) => {
+                          e.preventDefault();
+                          const draggedId = e.dataTransfer.getData('text/plain');
+                          if (draggedId === cfg.id) return;
+                          const active = userConfigs.filter(c => c.isActive).sort((a, b) => a.priority - b.priority);
+                          const fromIdx = active.findIndex(c => c.id === draggedId);
+                          const toIdx = active.findIndex(c => c.id === cfg.id);
+                          if (fromIdx === -1 || toIdx === -1) return;
+                          const reordered = [...active];
+                          const [moved] = reordered.splice(fromIdx, 1);
+                          reordered.splice(toIdx, 0, moved);
+                          for (let i = 0; i < reordered.length; i++) {
+                            await updateProviderConfig(reordered[i].id!, { priority: i }).catch(() => {});
+                          }
+                          await loadData();
+                        }}
+                        className="flex items-center gap-3 p-3 rounded-xl bg-surface-2 border border-border hover:border-brand/30 transition-all cursor-grab active:cursor-grabbing"
+                      >
+                        <div className="flex items-center gap-2 text-text-3 shrink-0">
+                          <GripVertical size={14} />
+                          <span className="w-5 h-5 rounded-md bg-surface-3 flex items-center justify-center text-[9px] font-bold text-text-3 font-mono">{idx + 1}</span>
+                        </div>
+                        <div className={`w-2 h-2 rounded-full shrink-0 ${idx === 0 ? 'bg-green-500' : idx === 1 ? 'bg-brand-light' : 'bg-text-3'}`} />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-semibold text-text-1 truncate">{cfg.displayName}</p>
+                          <p className="text-[9px] font-mono text-text-4 truncate">{cfg.providerName} → {cfg.defaultModel || 'default'}</p>
+                        </div>
+                        {idx === 0 && <span className="px-2 py-0.5 rounded-full bg-green-500/10 text-green-500 text-[8px] font-bold uppercase tracking-wider">Primary</span>}
+                      </div>
+                    ))}
+                  {/* Template fallback */}
+                  <div className="flex items-center gap-3 p-3 rounded-xl bg-surface-3/50 border border-dashed border-border opacity-60">
+                    <div className="flex items-center gap-2 text-text-4 shrink-0">
+                      <GripVertical size={14} className="opacity-30" />
+                      <span className="w-5 h-5 rounded-md bg-surface-3 flex items-center justify-center text-[9px] font-bold text-text-4 font-mono">{userConfigs.filter(c => c.isActive).length + 1}</span>
+                    </div>
+                    <div className="w-2 h-2 rounded-full shrink-0 bg-text-4" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-semibold text-text-4 truncate">Template (Fallback)</p>
+                      <p className="text-[9px] font-mono text-text-5 truncate">deterministic-rag — always works, no API key</p>
+                    </div>
                   </div>
                 </div>
               </SurfaceCard>

@@ -45,7 +45,7 @@ describe('rum', function () {
   })
 
   it('handles errors gracefully', async function () {
-    ;(global as any).PerformanceObserver = jest.fn(function () { throw new Error('no perf') })
+    (global as any).PerformanceObserver = jest.fn(function () { throw new Error('no perf') })
     var mod = await import('../rum')
     expect(function () { mod.initRUM() }).not.toThrow()
   })

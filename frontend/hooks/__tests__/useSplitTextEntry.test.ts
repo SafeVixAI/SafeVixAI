@@ -1,7 +1,4 @@
-// SPDX-License-Identifier: MIT
-// Copyright (c) 2026 SafeVixAI Team
-
-jest.mock('@gsap/react', () => {
+jest.mock('@gsap/react', function() {
   var React = require('react')
   return {
     useGSAP: function(cb: Function, opts: any) {
@@ -13,7 +10,7 @@ jest.mock('@gsap/react', () => {
   }
 })
 
-jest.mock('@/lib/gsap', () => {
+jest.mock('@/lib/gsap', function() {
   var mockGsap = {
     fromTo: jest.fn().mockReturnValue({ kill: jest.fn() }),
     registerPlugin: jest.fn(),
@@ -42,7 +39,6 @@ beforeEach(function() {
 
 afterEach(function() {
   jest.restoreAllMocks()
-  jest.isolateModules
 })
 
 function TestCase() {
@@ -51,17 +47,33 @@ function TestCase() {
 }
 
 describe('useSplitTextEntry', function() {
-  it('returns a heading ref', function() {
-    var result = require('@testing-library/react').renderHook(function() { return require('../useSplitTextEntry').useSplitTextEntry() }).result
-    expect(result.current).toHaveProperty('current')
+  it('returns a heading ref object', function() {
+    var result = render(React.createElement(TestCase))
+    expect(result.container.querySelector('[data-testid="heading"]')).toBeInTheDocument()
   })
 
-  it('falls back to DOM split when SplitText is unavailable', function() {
-    jest.useFakeTimers()
+  it('renders heading with text content', function() {
     render(React.createElement(TestCase))
-    var gsap = require('@/lib/gsap').gsap
-    expect(gsap.fromTo).toHaveBeenCalled()
+    expect(screen.getByTestId('heading').textContent).toBe('Hello World')
+  })
+
+  it('handles null container ref gracefully', function() {
+    function NullCase() {
+      var ref = require('../useSplitTextEntry').useSplitTextEntry()
+      ref.current = null
+      return React.createElement('div', { ref })
+    }
+    expect(function() { render(React.createElement(NullCase)) }).not.toThrow()
+  })
+
+  it('restores original HTML via fallback onComplete callback', function() {
+    render(React.createElement(TestCase))
+    var gsapMock = require('@/lib/gsap').gsap
+    var lastFromTo = gsapMock.fromTo.mock.calls[gsapMock.fromTo.mock.calls.length - 1]
+    var config = lastFromTo[2]
+    config.onComplete()
+    expect(screen.getByTestId('heading').innerHTML).toBe('Hello World')
   })
 })
 
-
+var screen = require('@testing-library/react').screen

@@ -74,6 +74,13 @@ describe('LanguageSelector', function() {
     var { container } = render(<LanguageSelector className="my-class" />);
     expect(container.firstChild).toHaveClass('my-class');
   });
+
+  it('navigates with locale prefix replacement when path has one', function() {
+    window.history.pushState({}, '', '/hi/challan')
+    render(<LanguageSelector />);
+    fireEvent.change(screen.getByLabelText('Select preferred language'), { target: { value: 'ta' } });
+    expect(mockPush).toHaveBeenCalledWith('/ta/challan');
+  });
 });
 
 

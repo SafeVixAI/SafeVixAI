@@ -90,6 +90,31 @@ describe('offline-sos-queue', function () {
     expect(mockDb.add).toHaveBeenCalled()
   })
 
+  it('enqueueSOS tries SyncManager when available', async function () {
+    var origSyncManager = (window as any).SyncManager
+    ;(window as any).SyncManager = function SyncManager() {}
+    var swReady = { sync: { register: jest.fn().mockResolvedValue(undefined) } }
+    var origSWReady = (navigator as any).serviceWorker.ready
+    ;(navigator as any).serviceWorker.ready = Promise.resolve(swReady)
+    var mod = requireModule()
+    mockDb.add.mockResolvedValue(undefined)
+    await mod.enqueueSOS({ lat: 13, lon: 80 })
+    expect(swReady.sync.register).toHaveBeenCalledWith('sos-queue-flush')
+    ;(window as any).SyncManager = origSyncManager
+    ;(navigator as any).serviceWorker.ready = origSWReady
+  })
+
+  it('enqueueSOS catches SyncManager error gracefully', async function () {
+    (window as any).SyncManager = function SyncManager() {}
+    var swReady = { sync: { register: jest.fn().mockRejectedValue(new Error('sync error')) } }
+
+    ;(navigator as any).serviceWorker.ready = Promise.resolve(swReady)
+    var mod = requireModule()
+    mockDb.add.mockResolvedValue(undefined)
+    await expect(mod.enqueueSOS({ lat: 13, lon: 80 })).resolves.toBeUndefined()
+    delete (window as any).SyncManager
+  })
+
   it('enqueueSOS uses fallback when IndexedDB fails', async function () {
     var mod = requireModule(null)
     await mod.enqueueSOS({ lat: 13, lon: 80 })
@@ -106,6 +131,17 @@ describe('offline-sos-queue', function () {
     mockDb.add.mockResolvedValue(undefined)
     await mod.enqueueRoadReport({ lat: 13, lon: 80, issue_type: 'pothole', severity: 3 })
     expect(mockDb.add).toHaveBeenCalled()
+  })
+
+  it('enqueueRoadReport tries SyncManager when available', async function () {
+    (window as any).SyncManager = function SyncManager() {}
+    var swReady = { sync: { register: jest.fn().mockResolvedValue(undefined) } }
+    ;(navigator as any).serviceWorker.ready = Promise.resolve(swReady)
+    var mod = requireModule()
+    mockDb.add.mockResolvedValue(undefined)
+    await mod.enqueueRoadReport({ lat: 13, lon: 80, issue_type: 'pothole', severity: 3 })
+    expect(swReady.sync.register).toHaveBeenCalledWith('road-report-queue-flush')
+    delete (window as any).SyncManager
   })
 
   it('enqueueRoadReport uses fallback when IndexedDB fails', async function () {
@@ -152,6 +188,15 @@ describe('offline-sos-queue', function () {
     mockStore.getAllKeys.mockResolvedValue([])
     mockStore.getAll.mockResolvedValue([])
     await expect(mod.syncOfflineSOSQueue()).resolves.toBeUndefined()
+  })
+
+  it('syncOfflineSOSQueue waits for readTx.done', async function () {
+    var mod = requireModule()
+    mockStore.getAllKeys.mockResolvedValue([1])
+    mockStore.getAll.mockResolvedValue([{ lat: 13, lon: 80 }])
+    mockFetch.mockResolvedValueOnce({ ok: true })
+    await mod.syncOfflineSOSQueue()
+    expect(mockStore.delete).toHaveBeenCalledWith(1)
   })
 
   it('syncOfflineSOSQueue stops on fetch error', async function () {

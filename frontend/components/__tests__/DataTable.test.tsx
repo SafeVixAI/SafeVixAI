@@ -98,4 +98,38 @@ describe('DataTable', function() {
     fireEvent.click(screen.getByLabelText('Select all rows'))
     expect(selection.size).toBe(3)
   })
+
+  it('deselects all when all rows already selected', function() {
+    var selection = new Set<string>(['1', '2', '3'])
+    var onSelectionChange = jest.fn(function(keys: Set<string>) { selection = keys })
+    render(React.createElement(DataTable, { columns: columns, data: data, keyExtractor: keyExtractor, selectable: true, selectedKeys: selection, onSelectionChange: onSelectionChange }))
+    fireEvent.click(screen.getByLabelText('Select all rows'))
+    expect(selection.size).toBe(0)
+  })
+
+  it('calls onRowClick when row is clicked', function() {
+    var onRowClick = jest.fn()
+    render(React.createElement(DataTable, { columns: columns, data: data, keyExtractor: keyExtractor, onRowClick: onRowClick }))
+    fireEvent.click(screen.getByText('Alice'))
+    expect(onRowClick).toHaveBeenCalledWith(data[0])
+  })
+
+  it('navigates pages with prev/next buttons', function() {
+    var manyItems: TestItem[] = Array.from({ length: 25 }, function(_, i) { return { id: i, name: 'Item ' + i, age: 20 + i } })
+    render(React.createElement(DataTable, { columns: columns, data: manyItems, keyExtractor: keyExtractor, pageSize: 10 }))
+    expect(screen.getByText('Item 0')).toBeTruthy()
+    fireEvent.click(screen.getByLabelText('Next page'))
+    expect(screen.getByText('Item 10')).toBeTruthy()
+    fireEvent.click(screen.getByLabelText('Previous page'))
+    expect(screen.getByText('Item 0')).toBeTruthy()
+  })
+
+  it('shows page number buttons when many pages', function() {
+    var manyItems: TestItem[] = Array.from({ length: 100 }, function(_, i) { return { id: i, name: 'Item ' + i, age: 20 + i } })
+    render(React.createElement(DataTable, { columns: columns, data: manyItems, keyExtractor: keyExtractor, pageSize: 10 }))
+    expect(screen.getByLabelText('Page 1')).toBeTruthy()
+    expect(screen.getByLabelText('Page 2')).toBeTruthy()
+    fireEvent.click(screen.getByLabelText('Page 2'))
+    expect(screen.getByLabelText('Page 2')?.getAttribute('aria-current')).toBe('page')
+  })
 })

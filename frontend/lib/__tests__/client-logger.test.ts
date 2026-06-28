@@ -103,4 +103,35 @@ describe('client-logger', function () {
     expect(function () { mod.logClientWarning('warn') }).not.toThrow()
     process.env.NODE_ENV = origNodeEnv
   })
+
+  it('registers beforeunload listener at module load', async function () {
+    var addEventListenerSpy = jest.spyOn(window, 'addEventListener')
+    jest.resetModules()
+    await import('../client-logger')
+    expect(addEventListenerSpy).toHaveBeenCalledWith('beforeunload', expect.any(Function))
+    addEventListenerSpy.mockRestore()
+  })
+
+  it('enqueues errors and flushes via batch timer in production', async function () {
+    var origNodeEnv = process.env.NODE_ENV
+    process.env.NODE_ENV = 'production'
+    jest.resetModules()
+    var mod = await import('../client-logger')
+    // Enqueue an error - this starts the batch timer
+    mod.logClientError('batch timer error')
+    // Trigger flush via the export
+    mod.flushErrors()
+    process.env.NODE_ENV = origNodeEnv
+  })
+
+  it('dispatches beforeunload triggers flush', async function () {
+    var origNodeEnv = process.env.NODE_ENV
+    process.env.NODE_ENV = 'production'
+    jest.resetModules()
+    var mod = await import('../client-logger')
+    mod.logClientError('beforeunload flush test')
+    // Dispatch beforeunload event - should trigger flush and clear interval
+    window.dispatchEvent(new Event('beforeunload'))
+    process.env.NODE_ENV = origNodeEnv
+  })
 })

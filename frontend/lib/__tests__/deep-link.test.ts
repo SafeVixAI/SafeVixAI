@@ -1,6 +1,13 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 SafeVixAI Team
+import React from 'react'
+import { render } from '@testing-library/react'
+var mockSearchParams = new URLSearchParams()
+jest.mock('next/navigation', function() {
+  return { useSearchParams: function() { return mockSearchParams }, useRouter: function() { return { push: jest.fn() } }, usePathname: function() { return '/' } }
+})
 describe('deep-link', function () {
+  beforeEach(function() { mockSearchParams = new URLSearchParams() })
   describe('parseDeepLink', function () {
     it('parses lat and lon correctly', async function () {
       var mod = await import('../deep-link')
@@ -63,6 +70,42 @@ describe('deep-link', function () {
       expect(result.mode).toBeNull()
       expect(result.source).toBeNull()
       expect(result.hasLocation).toBe(false)
+    })
+  })
+
+  describe('useDeepLinkContext', function () {
+    it('parses lat/lon/mode/state/section/source from search params', async function () {
+      mockSearchParams.set('lat', '13.08')
+      mockSearchParams.set('lon', '80.27')
+      mockSearchParams.set('mode', 'sos')
+      mockSearchParams.set('state', 'TN')
+      mockSearchParams.set('section', 'MVA_185')
+      mockSearchParams.set('source', 'share')
+      mockSearchParams.set('session', 'abc123')
+      var mod = await import('../deep-link')
+      var captured
+      function TestComp() { captured = mod.useDeepLinkContext(); return null }
+      render(React.createElement(TestComp))
+      expect(captured.lat).toBe(13.08)
+      expect(captured.lon).toBe(80.27)
+      expect(captured.mode).toBe('sos')
+      expect(captured.state).toBe('TN')
+      expect(captured.section).toBe('MVA_185')
+      expect(captured.source).toBe('share')
+      expect(captured.sessionId).toBe('abc123')
+      expect(captured.hasLocation).toBe(true)
+    })
+
+    it('returns nulls for missing search params', async function () {
+      var mod = await import('../deep-link')
+      var captured
+      function TestComp() { captured = mod.useDeepLinkContext(); return null }
+      render(React.createElement(TestComp))
+      expect(captured.lat).toBeNull()
+      expect(captured.lon).toBeNull()
+      expect(captured.mode).toBeNull()
+      expect(captured.source).toBeNull()
+      expect(captured.hasLocation).toBe(false)
     })
   })
 })

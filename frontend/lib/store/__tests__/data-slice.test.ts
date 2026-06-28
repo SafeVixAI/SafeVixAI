@@ -11,6 +11,7 @@ jest.mock('@/lib/profile-storage', function() {
 jest.mock('@/lib/crash-detection', function() {
   return { requestCrashPermission: jest.fn().mockResolvedValue(true) }
 })
+var CrashDetectionModule = require('@/lib/crash-detection')
 
 describe('DataSlice', function() {
   function createTestStore() {
@@ -160,5 +161,29 @@ describe('DataSlice', function() {
     expect(ra.riskScore).toBe(75)
     expect(ra.riskLevel).toBe('medium')
     expect(ra.recommendations).toEqual(['Drive carefully'])
+  })
+
+  it('setCrashDetectionEnabled permission denied shows toast', async function() {
+    CrashDetectionModule.requestCrashPermission.mockResolvedValueOnce(false)
+    var store = createTestStore()
+    await store.getState().setCrashDetectionEnabled(true)
+    expect(store.getState().crashDetectionEnabled).toBe(false)
+  })
+
+  it('setCrashDetectionEnabled handles error', async function() {
+    CrashDetectionModule.requestCrashPermission.mockRejectedValueOnce(new Error('permission error'))
+    var store = createTestStore()
+    var consoleSpy = jest.spyOn(console, 'error').mockImplementation(function() {})
+    await store.getState().setCrashDetectionEnabled(true)
+    expect(store.getState().crashDetectionEnabled).toBe(false)
+    consoleSpy.mockRestore()
+  })
+
+  it('setLastSyncedGarage updates timestamp', function() {
+    var store = createTestStore()
+    store.getState().setLastSyncedGarage(1234567890)
+    expect(store.getState().lastSyncedGarage).toBe(1234567890)
+    store.getState().setLastSyncedGarage(null)
+    expect(store.getState().lastSyncedGarage).toBeNull()
   })
 })

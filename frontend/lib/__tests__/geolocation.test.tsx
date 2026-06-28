@@ -34,11 +34,18 @@ function setBrowserLocationSupport({
 }
 
 describe('useGeolocation', function() {
+  afterEach(function() {
+    jest.restoreAllMocks();
+    Object.defineProperty(window, 'isSecureContext', { configurable: true, value: true });
+    delete (navigator as any).geolocation;
+    delete (navigator as any).permissions;
+  });
   beforeEach(function() {
     jest.clearAllMocks();
     useAppStore.setState({
       gpsLocation: null,
       gpsError: null,
+      locationTracking: true,
     });
   });
 
@@ -86,6 +93,129 @@ describe('useGeolocation', function() {
 
     await waitFor(() => {
       expect(useAppStore.getState().gpsError).toBe('Location request timed out. Please try again.');
+    });
+  });
+
+  it('reports permission denied error code', async function() {
+    var deniedError = { code: 1 } as GeolocationPositionError;
+    setBrowserLocationSupport({
+      permissionState: 'granted',
+      geolocation: {
+        getCurrentPosition: jest.fn((_success, error) => error?.(deniedError)),
+        watchPosition: jest.fn((_success, error) => {
+          error?.(deniedError);
+          return 42;
+        }),
+        clearWatch: jest.fn(),
+      },
+    });
+
+    renderHook(() => useGeolocation());
+
+    await waitFor(() => {
+      expect(useAppStore.getState().gpsError).toBe('Location permission denied. Please allow access in browser settings.');
+    });
+  });
+
+  it('reports unavailable error code', async function() {
+    var unavailableError = { code: 2 } as GeolocationPositionError;
+    setBrowserLocationSupport({
+      permissionState: 'granted',
+      geolocation: {
+        getCurrentPosition: jest.fn((_success, error) => error?.(unavailableError)),
+        watchPosition: jest.fn((_success, error) => {
+          error?.(unavailableError);
+          return 42;
+        }),
+        clearWatch: jest.fn(),
+      },
+    });
+
+    renderHook(() => useGeolocation());
+
+    await waitFor(() => {
+      expect(useAppStore.getState().gpsError).toBe('Location unavailable. Try again or check GPS signal.');
+    });
+  });
+
+  it('handles successful geolocation', async function() {
+    var pos = {
+      coords: { latitude: 13.08, longitude: 80.27, accuracy: 30 },
+      timestamp: 2000,
+    } as GeolocationPosition;
+    setBrowserLocationSupport({
+      permissionState: 'granted',
+      geolocation: {
+        getCurrentPosition: jest.fn((success) => success?.(pos)),
+        watchPosition: jest.fn((success) => {
+          success?.(pos);
+          return 42;
+        }),
+        clearWatch: jest.fn(),
+      },
+    });
+
+    renderHook(() => useGeolocation());
+
+    await waitFor(() => {
+      expect(useAppStore.getState().gpsLocation?.lat).toBe(13.08);
+    });
+  });
+
+  it('reports consent error when locationTracking is false', async function() {
+    useAppStore.setState({ locationTracking: false })
+    setBrowserLocationSupport({
+      geolocation: {
+        clearWatch: jest.fn(),
+      },
+    })
+    renderHook(() => useGeolocation())
+    await waitFor(() => {
+      expect(useAppStore.getState().gpsError).toBe('Location tracking consent not granted. Enable location services in settings.')
+    })
+  })
+
+  it('calls clearWatch on unmount', async function() {
+    var clearWatch = jest.fn();
+    setBrowserLocationSupport({
+      permissionState: 'granted',
+      geolocation: {
+        getCurrentPosition: jest.fn((success) => success?.({ coords: { latitude: 13.0, longitude: 80.0, accuracy: 30 }, timestamp: 1000 } as GeolocationPosition)),
+        watchPosition: jest.fn(() => 42),
+        clearWatch: clearWatch,
+      },
+    });
+    var { unmount } = renderHook(() => useGeolocation());
+    await waitFor(() => {
+      expect(useAppStore.getState().gpsLocation?.lat).toBe(13.0);
+    });
+    unmount();
+    expect(clearWatch).toHaveBeenCalledWith(42);
+  })
+
+  it('calls resolvePosition when permissions query throws', async function() {
+    setBrowserLocationSupport({
+      permissionState: 'granted',
+      geolocation: {
+        getCurrentPosition: jest.fn((success) => success?.({ coords: { latitude: 12.0, longitude: 77.0, accuracy: 50 }, timestamp: 1000 } as GeolocationPosition)),
+        watchPosition: jest.fn((success) => {
+          success?.({ coords: { latitude: 12.0, longitude: 77.0, accuracy: 50 }, timestamp: 1000 } as GeolocationPosition);
+          return 42;
+        }),
+        clearWatch: jest.fn(),
+      },
+    });
+    Object.defineProperty(navigator, 'permissions', {
+      configurable: true,
+      value: {
+        query: jest.fn().mockRejectedValue(new Error('permissions error')),
+      },
+    });
+
+    renderHook(() => useGeolocation());
+
+    await waitFor(() => {
+      expect(useAppStore.getState().gpsLocation?.lat).toBe(12.0);
     });
   });
 });

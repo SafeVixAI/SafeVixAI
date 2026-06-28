@@ -1,25 +1,60 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 SafeVixAI Team
-jest.mock('axios', function () {
-  var interceptors = {
-    request: { use: jest.fn() },
-    response: { use: jest.fn() },
+jest.mock('../store', function () {
+  return {
+    useAppStore: {
+      getState: jest.fn(function () {
+        return {
+          authToken: null,
+          userProfile: { preferredLanguage: 'en' },
+          setServerWarming: jest.fn(),
+        }
+      }),
+    },
   }
-  var mockAxiosInstance = {
+})
+
+jest.mock('../duckdb-challan', function () {
+  return { calculateOfflineChallan: jest.fn().mockResolvedValue({
+    base_fine: 500, repeat_fine: null, section: '185 MVA', description: 'Drunk driving'
+  })}
+})
+
+jest.mock('axios', function () {
+  var _requestHandlers: Array<{ fulfilled: Function; rejected?: Function }> = []
+  var _responseHandlers: Array<{ fulfilled: Function; rejected?: Function }> = []
+  var mockAxiosInstanceFn = jest.fn().mockResolvedValue({ data: 'ok' })
+  Object.assign(mockAxiosInstanceFn, {
     get: jest.fn(),
     post: jest.fn(),
-    interceptors: interceptors,
+    interceptors: {
+      request: { use: jest.fn(function (f: Function, r?: Function) { _requestHandlers.push({ fulfilled: f, rejected: r }) }) },
+      response: { use: jest.fn(function (f: Function, r?: Function) { _responseHandlers.push({ fulfilled: f, rejected: r }) }) },
+    },
     defaults: { headers: {} },
-  }
+  })
   var mockAxios = {
-    create: jest.fn(function () { return mockAxiosInstance }),
+    create: jest.fn(function () { return mockAxiosInstanceFn }),
     isAxiosError: jest.fn(function (err: any) { return err?.isAxiosError === true }),
+    _requestHandlers: _requestHandlers,
+    _responseHandlers: _responseHandlers,
   }
   return mockAxios
 })
 
 var mockAxios = require('axios')
 var mockClient: any = mockAxios.create()
+var mockStore = require('../store')
+
+function setMockToken(token: string | null) {
+  mockStore.useAppStore.getState = jest.fn(function () {
+    return {
+      authToken: token,
+      userProfile: { preferredLanguage: 'en' },
+      setServerWarming: jest.fn(),
+    }
+  })
+}
 
 describe('api', function () {
   beforeEach(function () {
@@ -334,6 +369,23 @@ describe('api', function () {
     expect(result.violation_code).toBe('MVA_185')
   })
 
+  it('calculateChallan throws when both API and offline fail', async function () {
+    var consoleSpy = jest.spyOn(console, 'error').mockImplementation(function () {})
+    mockClient.post.mockRejectedValueOnce(new Error('API error'))
+    var duckdb = require('../duckdb-challan')
+    duckdb.calculateOfflineChallan.mockRejectedValueOnce(new Error('Offline error'))
+    try {
+      var mod = require('../api')
+      await expect(mod.calculateChallan({
+        violation_code: 'MVA_185', vehicle_class: 'motorcycle',
+        state_code: 'TN', is_repeat: false,
+      })).rejects.toThrow('API error')
+      expect(consoleSpy).toHaveBeenCalled()
+    } finally {
+      consoleSpy.mockRestore()
+    }
+  })
+
   // ── Client instance ──
 
   it('client has interceptors configured', function () {
@@ -494,6 +546,22 @@ describe('api', function () {
     expect(result.status).toBe('completed')
   })
 
+  it('fieldCompleteWork posts complete without photo', async function () {
+    mockClient.post.mockResolvedValueOnce({ data: { status: 'completed' } })
+    var mod = await import('../api')
+    var result = await mod.fieldCompleteWork('uuid-1', null, null, 13, 80)
+    expect(result.status).toBe('completed')
+  })
+
+  it('fieldUploadEvidence posts FormData', async function () {
+    mockClient.post.mockResolvedValueOnce({ data: { status: 'uploaded' } })
+    var mod = await import('../api')
+    var fd = new FormData()
+    fd.append('photo', new Blob(['test']), 'img.jpg')
+    var result = await mod.fieldUploadEvidence('uuid-1', fd)
+    expect(result.status).toBe('uploaded')
+  })
+
   // ── fetchRoadInfrastructure ──
 
   it('fetchRoadInfrastructure returns infrastructure', async function () {
@@ -530,13 +598,210 @@ describe('api', function () {
 
   // ── sendChatMessage ──
 
-  it('sendChatMessage sends message', async function () {
-    // chatbotClient is not exported, but the function exists
-    var mod = require('../api')
-    expect(typeof mod.sendChatMessage).toBe('function')
+  it('sendChatMessage sends message via chatbotClient', async function () {
+    mockClient.post.mockResolvedValueOnce({ data: { response: 'hello', session_id: 's1' } })
+    var mod = await import('../api')
+    var result = await mod.sendChatMessage({ message: 'hi', session_id: 's1' })
+    expect(result.response).toBe('hello')
+    expect(result.session_id).toBe('s1')
   })
 
-  // ── Normalizer: normalizeEmergencyService ──
+  it('sendChatMessage sends without session_id', async function () {
+    mockClient.post.mockResolvedValueOnce({ data: { response: 'hello', session_id: 's-new' } })
+    var mod = await import('../api')
+    var result = await mod.sendChatMessage({ message: 'hi' })
+    expect(result.response).toBe('hello')
+    expect(mockClient.post).toHaveBeenCalledWith('/api/v1/chat/', { message: 'hi' })
+  })
+
+  // ── Request interceptors ──
+
+  it('request interceptor adds auth and language headers', function () {
+    setMockToken('test-token')
+    var mod = require('../api')
+    mod.setCsrfToken('csrf-abc')
+    var handlers = (require('axios') as any)._requestHandlers
+    expect(handlers.length).toBeGreaterThan(0)
+    var handler = handlers[0].fulfilled
+    var config = { headers: {} }
+    var result = handler(config)
+    expect(result.headers['Authorization']).toMatch(/^Bearer /)
+    expect(result.headers['Accept-Language']).toBe('en')
+    expect(result.headers['X-CSRF-Token']).toBe('csrf-abc')
+  })
+
+  it('request interceptor omits Authorization when no token', function () {
+    setMockToken(null)
+    var mod = require('../api')
+    mod.setCsrfToken(null)
+    var handlers = (require('axios') as any)._requestHandlers
+    var handler = handlers[0].fulfilled
+    var config = { headers: {} }
+    var result = handler(config)
+    expect(result.headers['Authorization']).toBeUndefined()
+  })
+
+  // ── Error toast interceptor ──
+
+  it('warming interceptor sets and clears timers via request/response', function () {
+    jest.useFakeTimers()
+    var mod = require('../api')
+    var handlers = (require('axios') as any)._requestHandlers
+    var respHandlers = (require('axios') as any)._responseHandlers
+
+    var warmingReq = handlers[1].fulfilled  // client warming request (index 1, after csrfAuthLang at 0)
+    var warmingRes = respHandlers[0].fulfilled  // client warming response
+    var warmingErr = respHandlers[1].rejected  // client warming error
+
+    var config: any = { headers: {} }
+    var result = warmingReq(config)
+    expect(result._warmingTimer).toBeDefined()
+    expect(typeof result._warmingTimer).toBe('number')
+
+    var response: any = { config: result, status: 200 }
+    warmingRes(response)
+
+    jest.useRealTimers()
+  })
+
+  it('warming timer fires setServerWarming(true) after 5s', function () {
+    jest.useFakeTimers()
+    require('../api')
+    var handlers = (require('axios') as any)._requestHandlers
+    var warmingReq = handlers[1].fulfilled
+    var setWarmingFn = jest.fn()
+    mockStore.useAppStore.getState = jest.fn(function () {
+      return {
+        authToken: null,
+        userProfile: { preferredLanguage: 'en' },
+        setServerWarming: setWarmingFn,
+      }
+    })
+    var config: any = { headers: {} }
+    warmingReq(config)
+    jest.advanceTimersByTime(5000)
+    expect(setWarmingFn).toHaveBeenCalledWith(true)
+    jest.useRealTimers()
+  })
+
+  it('warming error handler clears timer and rejects', function () {
+    jest.useFakeTimers()
+    var respHandlers = (require('axios') as any)._responseHandlers
+    var warmingErr = respHandlers[0].rejected
+
+    var config: any = { _warmingTimer: setTimeout(function () {}, 1000) }
+    var error = { config: config, isAxiosError: true, message: 'fail' }
+    expect(function () {
+      warmingErr(error).catch(function () {})
+    }).not.toThrow()
+
+    jest.useRealTimers()
+  })
+
+  it('retry interceptor passes through successful responses', function () {
+    var respHandlers = (require('axios') as any)._responseHandlers
+    var retryFulfilled = respHandlers[1].fulfilled
+    var response = { data: 'ok', status: 200 }
+    var result = retryFulfilled(response)
+    expect(result).toBe(response)
+  })
+
+  it('chatbotClient request interceptor adds CSRF and auth headers', function () {
+    setMockToken('chat-token')
+    var apiMod = require('../api')
+    apiMod.setCsrfToken('chat-csrf')
+    var handlers = (require('axios') as any)._requestHandlers
+    var handler = handlers[2].fulfilled
+    var config = { headers: {} }
+    var result = handler(config)
+    expect(result.headers['X-CSRF-Token']).toBe('chat-csrf')
+    expect(result.headers['Authorization']).toMatch(/^Bearer /)
+    expect(result.headers['Accept-Language']).toBe('en')
+  })
+
+  it('global error toast interceptor passes through successful responses', function () {
+    var respHandlers = (require('axios') as any)._responseHandlers
+    var toastFulfilled = respHandlers[4].fulfilled
+    var response = { data: 'ok', status: 200 }
+    var result = toastFulfilled(response)
+    expect(result).toBe(response)
+  })
+
+  it('retry indicator interceptor dismisses toast on success', function () {
+    var respHandlers = (require('axios') as any)._responseHandlers
+    var indicatorFulfilled = respHandlers[6].fulfilled
+    var response = { data: 'ok', status: 200 }
+    var result = indicatorFulfilled(response)
+    expect(result).toBe(response)
+  })
+
+  it('retry indicator interceptor passes through error on retry', function () {
+    var respHandlers = (require('axios') as any)._responseHandlers
+    var indicatorErr = respHandlers[6].rejected
+    var config: any = { headers: {}, _retryCount: 2 }
+    var error = { config: config, isAxiosError: true, message: 'fail' }
+    return indicatorErr(error).catch(function (err: any) {
+      expect(err.message).toBe('fail')
+    })
+  })
+
+  it('retry interceptor retries on network error', async function () {
+    jest.useFakeTimers()
+    var respHandlers = (require('axios') as any)._responseHandlers
+    var retryErr = respHandlers[1].rejected
+
+    mockClient.get.mockResolvedValueOnce({ data: 'ok' })
+    var config: any = { headers: {}, _retryCount: 0 }
+    var error = { config: config, isAxiosError: true, message: 'Network error' }
+    var promise = retryErr(error)
+    jest.advanceTimersByTime(1000)
+    var result = await promise
+    expect(result.data).toBe('ok')
+
+    jest.useRealTimers()
+  })
+
+  it('retry interceptor does not retry after max retries', function () {
+    var respHandlers = (require('axios') as any)._responseHandlers
+    var retryErr = respHandlers[1].rejected
+
+    var config: any = { headers: {}, _retryCount: 3 }
+    var error = { config: config, isAxiosError: true, response: { status: 503 }, message: 'Server error' }
+    return retryErr(error).catch(function (err: any) {
+      expect(err.message).toBe('Server error')
+    })
+  })
+
+  it('retry interceptor does not retry on 4xx error', function () {
+    var respHandlers = (require('axios') as any)._responseHandlers
+    var retryErr = respHandlers[1].rejected
+
+    var config: any = { headers: {}, _retryCount: 0 }
+    var error = { config: config, isAxiosError: true, response: { status: 400 }, message: 'Bad request' }
+    return retryErr(error).catch(function (err: any) {
+      expect(err.message).toBe('Bad request')
+    })
+  })
+
+  it('error toast interceptor shows toast on network error', function () {
+    var respHandlers = (require('axios') as any)._responseHandlers
+    var toastErr = respHandlers[4].rejected
+
+    var error = { isAxiosError: true, message: 'Network error' }
+    return toastErr(error).catch(function (err: any) {
+      expect(err.message).toBe('Network error')
+    })
+  })
+
+  it('error toast interceptor shows toast on 5xx error', function () {
+    var respHandlers = (require('axios') as any)._responseHandlers
+    var toastErr = respHandlers[4].rejected
+
+    var error = { isAxiosError: true, response: { status: 500, data: { detail: 'Server is busy' } }, message: 'Server error' }
+    return toastErr(error).catch(function (err: any) {
+      expect(err.message).toBe('Server error')
+    })
+  })
 
   it('normalizeEmergencyService converts raw service', async function () {
     var raw = { id: '1', name: 'AIIMS', type: 'hospital', lat: 13.0, lon: 80.0, distance_meters: 500, eta_seconds: 300 }

@@ -20,4 +20,11 @@ describe('use-hydrated', function () {
     var mod = await import('../use-hydrated')
     expect(function () { mod.markHydrated(); mod.markHydrated() }).not.toThrow()
   })
+
+  it('returns true immediately when already hydrated', async function () {
+    var mod = await import('../use-hydrated')
+    mod.markHydrated()
+    var { result } = renderHook(function () { return mod.useHydrated() })
+    expect(result.current).toBe(true)
+  })
 })

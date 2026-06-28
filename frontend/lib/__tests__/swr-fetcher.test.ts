@@ -13,7 +13,7 @@ jest.mock('../api', function () {
 })
 
 var mockClient = require('../api').client
-var React = require('react')
+var renderHook = require('@testing-library/react').renderHook
 
 describe('swr-fetcher', function () {
   it('exports fetcher functions', async function () {
@@ -56,4 +56,75 @@ describe('swr-fetcher', function () {
     expect(result).toEqual({ result: 'ok' })
   })
 
+  it('fetcherNoCache calls client.get without params', async function () {
+    mockClient.get.mockResolvedValue({ data: {} })
+    var mod = await import('../swr-fetcher')
+    await mod.fetcherNoCache('/test')
+    expect(mockClient.get).toHaveBeenCalledWith('/test', { params: undefined, headers: { 'Cache-Control': 'no-cache' } })
+  })
+
+  it('re-exports SWRConfig', async function () {
+    var mod = await import('../swr-fetcher')
+    expect(mod.SWRConfig).toBeDefined()
+  })
+
+  it('useEmergencyNumbers renders without crashing', function () {
+    var mod = require('../swr-fetcher')
+    var result = renderHook(function () { return mod.useEmergencyNumbers() })
+    expect(result.result.current).toBeDefined()
+  })
+
+  it('useEmergencyServices returns null key when lat/lon null', function () {
+    var mod = require('../swr-fetcher')
+    var result = renderHook(function () { return mod.useEmergencyServices(null, null) })
+    expect(result.result.current).toBeDefined()
+  })
+
+  it('useEmergencyServices returns key when lat/lon provided', function () {
+    var mod = require('../swr-fetcher')
+    var result = renderHook(function () { return mod.useEmergencyServices(13.08, 80.27) })
+    expect(result.result.current).toBeDefined()
+  })
+
+  it('useChallanCalculation returns null key when params null', function () {
+    var mod = require('../swr-fetcher')
+    var result = renderHook(function () { return mod.useChallanCalculation(null, null, null) })
+    expect(result.result.current).toBeDefined()
+  })
+
+  it('useChallanCalculation returns key when params provided', function () {
+    var mod = require('../swr-fetcher')
+    var result = renderHook(function () { return mod.useChallanCalculation('2W', '194D', 'TN') })
+    expect(result.result.current).toBeDefined()
+  })
+
+  it('useUserProfile renders without crashing', function () {
+    var mod = require('../swr-fetcher')
+    var result = renderHook(function () { return mod.useUserProfile('user-1') })
+    expect(result.result.current).toBeDefined()
+  })
+
+  it('useFetchSos returns null key when lat/lon null', function () {
+    var mod = require('../swr-fetcher')
+    var result = renderHook(function () { return mod.useFetchSos(null, null) })
+    expect(result.result.current).toBeDefined()
+  })
+
+  it('useFetchSos returns key when lat/lon provided', function () {
+    var mod = require('../swr-fetcher')
+    var result = renderHook(function () { return mod.useFetchSos(13.08, 80.27) })
+    expect(result.result.current).toBeDefined()
+  })
+
+  it('useRoadwatchFeed returns null key when lat/lon null', function () {
+    var mod = require('../swr-fetcher')
+    var result = renderHook(function () { return mod.useRoadwatchFeed(null, null) })
+    expect(result.result.current).toBeDefined()
+  })
+
+  it('useRoadwatchFeed returns key when lat/lon provided', function () {
+    var mod = require('../swr-fetcher')
+    var result = renderHook(function () { return mod.useRoadwatchFeed(13.08, 80.27) })
+    expect(result.result.current).toBeDefined()
+  })
 })

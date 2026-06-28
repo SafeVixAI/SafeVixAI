@@ -20,7 +20,7 @@ jest.mock('@/lib/store', function() {
 jest.mock('@gsap/react', function() { return { useGSAP: function() { return null } } })
 jest.mock('@/lib/gsap', function() { return { gsap: { fromTo: jest.fn(), to: jest.fn() } } })
 
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import React from 'react'
 import { RightSidebar } from '../RightSidebar'
 
@@ -28,7 +28,7 @@ beforeAll(function() {
   Object.defineProperty(window, 'matchMedia', {
     writable: true,
     value: function() {
-      return { matches: false, addEventListener: function() {}, removeEventListener: function() {} }
+      return { matches: true, addEventListener: function() {}, removeEventListener: function() {} }
     },
   })
 })
@@ -48,5 +48,13 @@ describe('RightSidebar', function() {
     mockState = { gpsLocation: null, nearbyServices: [], nearbyRoadIssues: [], serviceSearchMeta: { total: 0 }, connectivity: 'offline' }
     render(React.createElement(RightSidebar))
     expect(screen.getByText(/Scanning Area/)).toBeTruthy()
+  })
+
+  it('toggles panel via mobile handle', function() {
+    mockState = { gpsLocation: { lat: 13.0827, lon: 80.2707 }, nearbyServices: [{ id: '1', name: 'Hospital' }], nearbyRoadIssues: [{ id: 'i1', issueType: 'pothole', roadName: 'Main St', distance: 250, severity: 'high' }], serviceSearchMeta: { total: 1 }, connectivity: 'online' }
+    render(React.createElement(RightSidebar))
+    var toggles = screen.getAllByLabelText('Collapse panel')
+    fireEvent.click(toggles[0])
+    expect(screen.getAllByLabelText('Expand panel').length).toBeGreaterThanOrEqual(1)
   })
 })

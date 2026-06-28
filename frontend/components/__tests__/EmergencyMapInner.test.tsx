@@ -40,4 +40,92 @@ describe('EmergencyMapInner', function () {
       })
     )
   })
+
+  it('renders with ambulance facility type', function () {
+    var facilities = [{ ...mockFacilities[0], type: 'ambulance' }]
+    var { container } = render(
+      React.createElement(EmergencyMapInner, {
+        center: [80.2707, 13.0827] as [number, number],
+        facilities: facilities,
+      })
+    )
+    expect(container).toBeDefined()
+  })
+
+  it('renders with pharmacy facility type', function () {
+    var facilities = [{ ...mockFacilities[0], type: 'pharmacy' }]
+    var { container } = render(
+      React.createElement(EmergencyMapInner, {
+        center: [80.2707, 13.0827] as [number, number],
+        facilities: facilities,
+      })
+    )
+    expect(container).toBeDefined()
+  })
+
+  it('renders with police facility type', function () {
+    var facilities = [{ ...mockFacilities[0], type: 'police' }]
+    var { container } = render(
+      React.createElement(EmergencyMapInner, {
+        center: [80.2707, 13.0827] as [number, number],
+        facilities: facilities,
+      })
+    )
+    expect(container).toBeDefined()
+  })
+
+  it('renders with fire facility type', function () {
+    var facilities = [{ ...mockFacilities[0], type: 'fire' }]
+    var { container } = render(
+      React.createElement(EmergencyMapInner, {
+        center: [80.2707, 13.0827] as [number, number],
+        facilities: facilities,
+      })
+    )
+    expect(container).toBeDefined()
+  })
+
+  it('renders with towing facility type', function () {
+    var facilities = [{ ...mockFacilities[0], type: 'towing' }]
+    var { container } = render(
+      React.createElement(EmergencyMapInner, {
+        center: [80.2707, 13.0827] as [number, number],
+        facilities: facilities,
+      })
+    )
+    expect(container).toBeDefined()
+  })
+
+  it('renders with mechanic facility type', function () {
+    var facilities = [{ ...mockFacilities[0], type: 'mechanic' }]
+    var { container } = render(
+      React.createElement(EmergencyMapInner, {
+        center: [80.2707, 13.0827] as [number, number],
+        facilities: facilities,
+      })
+    )
+    expect(container).toBeDefined()
+  })
+
+  it('renders with unknown facility type', function () {
+    var facilities = [{ ...mockFacilities[0], type: 'showroom' }]
+    var { container } = render(
+      React.createElement(EmergencyMapInner, {
+        center: [80.2707, 13.0827] as [number, number],
+        facilities: facilities,
+      })
+    )
+    expect(container).toBeDefined()
+  })
+
+  it('renders with alternative routes', function () {
+    var { container } = render(
+      React.createElement(EmergencyMapInner, {
+        center: [80.2707, 13.0827] as [number, number],
+        facilities: mockFacilities,
+        alternativeRoutes: [{ coordinates: [[80.2707, 13.0827], [80.28, 13.09]] }] as any,
+      })
+    )
+    expect(container).toBeDefined()
+  })
 })

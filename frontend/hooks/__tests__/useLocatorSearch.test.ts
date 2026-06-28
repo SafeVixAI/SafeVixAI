@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 SafeVixAI Team
 
+var storeListeners = new Set()
 jest.mock('@/lib/store', () => {
   var React = require('react')
   var storeState = {
@@ -13,6 +14,12 @@ jest.mock('@/lib/store', () => {
   }
   return {
     useAppStore: function(selector) {
+      var [, forceUpdate] = React.useState(0)
+      React.useEffect(function() {
+        var fn = function() { forceUpdate(function(n) { return n + 1 }) }
+        storeListeners.add(fn)
+        return function() { storeListeners.delete(fn) }
+      }, [])
       if (typeof selector === 'function') {
         if (selector.toString().includes('useShallow')) {
           var shallow = require('zustand/react/shallow').useShallow
@@ -22,12 +29,13 @@ jest.mock('@/lib/store', () => {
       }
       return storeState
     },
-    __setStoreState: function(k, v) { storeState[k] = v; if (typeof v === 'object') { Object.assign(storeState, v) } },
+    __setStoreState: function(k, v) { storeState[k] = v; if (typeof v === 'object') { Object.assign(storeState, v) }; storeListeners.forEach(function(fn) { fn() }) },
     __resetStore: function() {
       storeState.gpsError = null
       storeState.gpsLocation = { lat: 13.0827, lon: 80.2707, accuracy: 50, timestamp: Date.now(), city: 'Chennai', state: 'Tamil Nadu' }
       storeState.nearbyServices = []
       storeState.serviceSearchMeta = { count: 0, radiusUsed: 0, requestedRadius: 0, source: 'api' }
+      storeListeners.forEach(function(fn) { fn() })
     },
   }
 })
@@ -45,6 +53,7 @@ jest.mock('@/lib/api', () => ({
   fetchRoutePreview: function() { return mockFetchRoutePreview.apply(null, arguments) },
 }))
 
+var mockMinimumDeviation = 50
 jest.mock('@/app/locator/locator-utils', () => ({
   mapService: function(service) {
     var typeMap = { hospital: 'Hospital', ambulance: 'Ambulance', police: 'Police', fire: 'Fire', towing: 'Towing' }
@@ -63,7 +72,7 @@ jest.mock('@/app/locator/locator-utils', () => ({
   },
   formatCoverageRadius: function(d) { return d >= 1000 ? Math.round(d / 1000) + ' km' : Math.round(d) + ' m' },
   haversineMeters: function(from, to) { return 100 },
-  minimumRouteDeviationMeters: function(route, location) { return 50 },
+  minimumRouteDeviationMeters: function(route, location) { return mockMinimumDeviation },
   buildNavigationHref: function(origin, dest) { return 'https://maps.google.com/dir/?api=1&origin=' + origin[0] + ',' + origin[1] + '&destination=' + dest[0] + ',' + dest[1] + '&travelmode=driving' },
 }))
 
@@ -263,6 +272,60 @@ describe('useLocatorSearch', function() {
     act(function() { result.current.handlePreviewService(result.current.services[0]) })
     act(function() { store.__setStoreState('gpsLocation', { lat: 13.10, lon: 80.30, accuracy: 30, timestamp: Date.now() }) })
     expect(result.current.activeRoute).toBeNull()
+  })
+
+  it('sets selectedRouteId from activeRoute when current routeId invalid', async function() {
+    var store = require('@/lib/store')
+    store.__setStoreState('nearbyServices', mockServices as any)
+    var result = renderHook(function() { return require('../useLocatorSearch').useLocatorSearch() }).result
+    await act(async function() { await result.current.handleLocateService(result.current.services[0]) })
+    act(function() { result.current.handleSelectRoute('nonexistent-route') })
+    expect(result.current.selectedRouteId).toBe('route-1')
+  })
+
+  it('returns default error message for non-object errors', async function() {
+    mockFetchRoutePreview.mockRejectedValue('just a string')
+    var store = require('@/lib/store')
+    store.__setStoreState('nearbyServices', mockServices as any)
+    var result = renderHook(function() { return require('../useLocatorSearch').useLocatorSearch() }).result
+    await act(async function() { await result.current.handleLocateService(result.current.services[0]) })
+    expect(result.current.routeError).toBe('Unable to calculate the route right now.')
+  })
+
+  it('handlePreviewService clears active route when switching services', async function() {
+    var store = require('@/lib/store')
+    store.__setStoreState('nearbyServices', mockServices as any)
+    var result = renderHook(function() { return require('../useLocatorSearch').useLocatorSearch() }).result
+    await act(async function() { await result.current.handleLocateService(result.current.services[0]) })
+    expect(result.current.activeRoute).toEqual(mockRoute)
+    act(function() { result.current.handlePreviewService(result.current.services[1]) })
+    expect(result.current.activeRoute).toBeNull()
+    expect(result.current.selectedRouteId).toBeNull()
+  })
+
+  it('auto-reroutes when gps deviates above threshold', async function() {
+    var originalMinimumDeviation = mockMinimumDeviation
+    mockMinimumDeviation = 250
+    jest.useFakeTimers()
+
+    var store = require('@/lib/store')
+    store.__setStoreState('nearbyServices', mockServices as any)
+    var result = renderHook(function() { return require('../useLocatorSearch').useLocatorSearch() }).result
+    await act(async function() { await result.current.handleLocateService(result.current.services[0]) })
+    expect(result.current.activeRoute).toEqual(mockRoute)
+    mockFetchRoutePreview.mockClear()
+
+    jest.advanceTimersByTime(20000)
+
+    act(function() {
+      store.__setStoreState('gpsLocation', { lat: 13.12, lon: 80.35, accuracy: 30, timestamp: Date.now() })
+    })
+
+    await act(async function() { jest.runAllTimers() })
+    expect(mockFetchRoutePreview).toHaveBeenCalled()
+
+    mockMinimumDeviation = originalMinimumDeviation
+    jest.useRealTimers()
   })
 })
 

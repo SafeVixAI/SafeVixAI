@@ -83,6 +83,74 @@ describe('PotholeDetector', function() {
     unmount();
     expect(mockTrack.stop).toHaveBeenCalledTimes(1);
   });
+
+  it('scan shows processing state and completes with error fallback', async function() {
+    jest.useFakeTimers()
+    // Mock getContext to return null, triggering error path
+    var origCreateElement = document.createElement.bind(document)
+    var createElementSpy = jest.fn(function(tag: string) {
+      var el = origCreateElement(tag)
+      if (tag === 'canvas') {
+        jest.spyOn(el, 'getContext').mockReturnValue(null)
+      }
+      return el
+    })
+    document.createElement = createElementSpy
+
+    renderPotholeDetector()
+    await waitFor(function () {
+      expect(screen.getByRole('button', { name: /initiate ai scan/i })).toBeEnabled()
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: /initiate ai scan/i }))
+    expect(screen.getByText(/processing sensor grid/i)).toBeDisabled()
+
+    act(function () { jest.advanceTimersByTime(2000) })
+
+    // Error fallback sets detected=true
+    expect(screen.getByText(/ph-crater detected/i)).toBeInTheDocument()
+
+    document.createElement = origCreateElement
+    jest.useRealTimers()
+  })
+
+  it('scan completes with no anomaly when no edge pixels', async function() {
+    jest.useFakeTimers()
+    var origCreateElement = document.createElement.bind(document)
+    var createElementSpy = jest.fn(function(tag: string) {
+      var el = origCreateElement(tag)
+      if (tag === 'canvas') {
+        var mockCtx = {
+          drawImage: jest.fn(),
+          getImageData: jest.fn(function() {
+            return { data: new Uint8ClampedArray(160 * 120 * 4), width: 160, height: 120 }
+          }),
+        }
+        jest.spyOn(el, 'getContext').mockReturnValue(mockCtx as any)
+        Object.defineProperty(el, 'width', { value: 160, writable: true })
+        Object.defineProperty(el, 'height', { value: 120, writable: true })
+      }
+      return el
+    })
+    document.createElement = createElementSpy
+
+    renderPotholeDetector()
+    await waitFor(function () {
+      expect(screen.getByRole('button', { name: /initiate ai scan/i })).toBeEnabled()
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: /initiate ai scan/i }))
+
+    act(function () { jest.advanceTimersByTime(2000) })
+
+    var toast = require('sonner').toast
+    expect(toast.success).toHaveBeenCalledWith(
+      expect.stringContaining('No high-contrast')
+    )
+
+    document.createElement = origCreateElement
+    jest.useRealTimers()
+  })
 });
 
 

@@ -10,7 +10,7 @@ import { useGSAP } from '@gsap/react';
 import {
   ShieldCheck, BookOpen, Copy,
   HelpCircle, ThumbsUp, ThumbsDown, RotateCcw,
-  Volume2, VolumeX, Wifi, WifiOff
+  Volume2, VolumeX, Wifi, WifiOff, Cpu
 } from 'lucide-react';
 import { useAppStore } from '@/lib/store';
 import { useShallow } from 'zustand/react/shallow';
@@ -40,11 +40,12 @@ async function* streamChat(
  session_id: string,
  lat?: number,
  lon?: number,
+ provider_hint?: string,
 ): AsyncGenerator<{ type: string; text?: string; intent?: string; sources?: string[]; session_id?: string; message?: string; provider?: string; model?: string }> {
  const resp = await fetch(`${CHATBOT_URL}/api/v1/chat/stream`, {
  method: 'POST',
  headers: { 'Content-Type': 'application/json' },
- body: JSON.stringify({ message, session_id, lat, lon }),
+ body: JSON.stringify({ message, session_id, lat, lon, provider_hint }),
  });
  if (!resp.ok || !resp.body) throw new Error(`Chat error: ${resp.status}`);
  const reader = resp.body.getReader();
@@ -82,11 +83,13 @@ export default function ChatPage() {
   const [loading, setLoading] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const { aiMode, setAiMode, setModelLoadProgress } = useAppStore(
+  const { aiMode, setAiMode, setModelLoadProgress, selectedProvider, setSelectedProvider } = useAppStore(
     useShallow((s) => ({
       aiMode: s.aiMode,
       setAiMode: s.setAiMode,
       setModelLoadProgress: s.setModelLoadProgress,
+      selectedProvider: s.selectedProvider,
+      setSelectedProvider: s.setSelectedProvider,
     }))
   );
 
@@ -282,8 +285,9 @@ export default function ChatPage() {
          speakText(offlineReply);
        }
      } else {
-       let accumulated = '';
-       for await (const event of streamChat(text, sessionId, location?.lat, location?.lon)) {
+        const providerHint = selectedProvider?.providerName || undefined;
+        let accumulated = '';
+        for await (const event of streamChat(text, sessionId, location?.lat, location?.lon, providerHint)) {
          if (event.type === 'token' && event.text) {
            accumulated += event.text;
            setMessages(prev =>
@@ -378,6 +382,54 @@ export default function ChatPage() {
           </button>
         </div>
  
+        {/* Provider/Model Selector */}
+        <div className="relative group">
+          <button
+            onClick={() => {
+              const el = document.getElementById('provider-selector-dropdown');
+              if (el) el.classList.toggle('hidden');
+            }}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-surface-2 border border-border text-[9px] font-bold text-text-3 uppercase tracking-widest hover:border-brand-light hover:text-brand-light transition-all"
+          >
+            <Cpu size={11} />
+            {selectedProvider ? selectedProvider.displayName.slice(0, 12) : 'Auto'}
+          </button>
+          <div id="provider-selector-dropdown" className="hidden absolute right-0 top-full mt-1 w-56 bg-surface-2 border border-border rounded-xl shadow-2xl z-50 overflow-hidden">
+            <div className="p-2 border-b border-border">
+              <button
+                onClick={() => {
+                  setSelectedProvider(null);
+                  document.getElementById('provider-selector-dropdown')?.classList.add('hidden');
+                }}
+                className={`w-full text-left px-3 py-2 rounded-lg text-[10px] font-semibold transition-all ${!selectedProvider ? 'bg-brand/10 text-brand-light' : 'text-text-3 hover:bg-surface-3'}`}
+              >
+                Auto (Router)
+              </button>
+            </div>
+            <div className="max-h-48 overflow-y-auto p-2 space-y-1">
+              <p className="px-3 py-1 text-[8px] font-bold text-text-3 uppercase tracking-wider">Providers</p>
+              {[
+                { name: 'groq', display: 'Groq', model: 'llama-3.1-8b-instant' },
+                { name: 'gemini', display: 'Gemini', model: 'gemini-1.5-flash' },
+                { name: 'cerebras', display: 'Cerebras', model: 'llama-3.1-8b' },
+                { name: 'openai', display: 'OpenAI', model: 'gpt-4o-mini' },
+              ].map((p) => (
+                <button
+                  key={p.name}
+                  onClick={() => {
+                    setSelectedProvider({ providerName: p.name, model: p.model, displayName: p.display });
+                    document.getElementById('provider-selector-dropdown')?.classList.add('hidden');
+                  }}
+                  className={`w-full text-left px-3 py-2 rounded-lg text-[10px] font-semibold transition-all ${selectedProvider?.providerName === p.name ? 'bg-brand/10 text-brand-light' : 'text-text-3 hover:bg-surface-3'}`}
+                >
+                  {p.display}
+                  <span className="block text-[8px] font-mono text-text-4">{p.model}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
         {isSpeaking && (
           <button
             onClick={stopSpeaking}

@@ -20,7 +20,8 @@ import {
   Menu,
   X,
   PanelLeft,
-  Building2
+  Building2,
+  Cpu
 } from 'lucide-react';
 import { useAppStore } from '@/lib/store';
 import { Logo } from '@/components/ui/Logo';
@@ -34,6 +35,7 @@ const navItems = [
   { icon: <Scale size={20} />, label: 'Challan Calculator', href: '/challan', color: 'text-text-3' },
   { icon: <ShieldAlert size={20} />, label: 'Emergency', href: '/emergency', color: 'text-emergency' },
   { icon: <Building2 size={20} />, label: 'Municipality Guide', href: '/guide', color: 'text-brand-light' },
+  { icon: <Cpu size={20} />, label: 'Providers', href: '/providers', color: 'text-brand-light' },
   { icon: <User size={20} />, label: 'Profile', href: '/profile', color: 'text-brand-light' },
   { icon: <Settings size={20} />, label: 'Settings', href: '/settings', color: 'text-text-3' },
 ];

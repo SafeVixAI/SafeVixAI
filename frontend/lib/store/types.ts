@@ -6,12 +6,13 @@ import type { MapSlice, MapSearchTarget, MapProvider, MapStatus } from './map-sl
 import type { SettingsSlice } from './settings-slice';
 import type { UISlice } from './ui-slice';
 import type { DataSlice, GpsLocation, NearbyService, NearbyRoadIssue, ServiceSearchMeta, RoadIssueSearchMeta, UserProfile, AiMode, ConnectivityState, ChallanState } from './data-slice';
+import type { ProvidersSlice } from './providers-slice';
 
-export type AppState = AuthSlice & MapSlice & SettingsSlice & UISlice & DataSlice;
+export type AppState = AuthSlice & MapSlice & SettingsSlice & UISlice & DataSlice & ProvidersSlice;
 
 export type {
   AuthSlice, MapSlice, MapSearchTarget, MapProvider, MapStatus,
-  SettingsSlice, UISlice,
+  SettingsSlice, UISlice, ProvidersSlice, ProviderSelection,
   DataSlice, GpsLocation, NearbyService, NearbyRoadIssue,
   ServiceSearchMeta, RoadIssueSearchMeta, UserProfile,
   AiMode, ConnectivityState, ChallanState,

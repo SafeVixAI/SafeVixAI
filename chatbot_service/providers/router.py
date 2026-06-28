@@ -45,6 +45,7 @@ from providers.sarvam_provider import (
     SarvamProvider,
 )
 from providers.together_provider import TogetherProvider
+from providers.openai_compat import OpenAICompatibleProvider
 
 import sys as _sys
 from pathlib import Path as _Path
@@ -161,6 +162,136 @@ class ProviderRouter:
             'template',    # 9. Always works (deterministic fallback)
         ]
         self._fallback_chain = list(dict.fromkeys(self._fallback_chain))
+
+        # ── User-configured providers (overrides env-var defaults) ─────────
+        self._user_providers: dict[str, dict] = {}
+        self._user_providers_configured = False
+
+    def configure_user_providers(self, provider_configs: list[dict]) -> list[str]:
+        """Override providers with user-supplied API keys and custom endpoints.
+
+        Args:
+            provider_configs: List of dicts with keys:
+                - provider_name: str (e.g. 'groq', 'openai', 'ollama')
+                - api_key: str
+                - base_url: str | None
+                - default_model: str | None
+                - is_custom: bool
+                - priority: int
+                - extra_headers: dict | None
+
+        Returns:
+            List of configured provider names.
+        """
+        configured = []
+        for cfg in provider_configs:
+            name = cfg.get("provider_name", "").strip().lower()
+            if not name:
+                continue
+
+            api_key = cfg.get("api_key", "") or ""
+            base_url = cfg.get("base_url") or ""
+            model = cfg.get("default_model") or ""
+            is_custom = cfg.get("is_custom", False)
+            extra_headers = cfg.get("extra_headers") or {}
+
+            if is_custom or name not in self.providers:
+                provider = OpenAICompatibleProvider(
+                    api_key=api_key,
+                    base_url=base_url,
+                    model=model or "gpt-3.5-turbo",
+                    display_name=cfg.get("display_name", name),
+                )
+                provider_name = name
+                self.providers[provider_name] = provider
+            else:
+                existing = self.providers.get(name)
+                if existing and hasattr(existing, '__init__'):
+                    try:
+                        provider = existing.__class__(api_key=api_key, model=model or existing.default_model())
+                        if base_url and hasattr(provider, '_custom_base_url'):
+                            provider._custom_base_url = base_url
+                        self.providers[name] = provider
+                    except Exception:
+                        pass
+                provider_name = name
+
+            self._user_providers[provider_name] = cfg
+            configured.append(provider_name)
+
+        if configured:
+            self._user_providers_configured = True
+            self._rebuild_fallback_chain()
+            logger.info("User-configured %d providers: %s", len(configured), configured)
+
+        return configured
+
+    def _rebuild_fallback_chain(self) -> None:
+        """Rebuild fallback chain based on user priority ordering."""
+        user_active = {
+            name for name, cfg in self._user_providers.items()
+            if cfg.get("is_active", True)
+        }
+        if not user_active:
+            return
+
+        existing = [p for p in self._fallback_chain if p not in user_active]
+        user_sorted = sorted(
+            self._user_providers.items(),
+            key=lambda x: x[1].get("priority", 0),
+        )
+        user_names = [name for name, cfg in user_sorted if cfg.get("is_active", True)]
+        self._fallback_chain = list(dict.fromkeys(user_names + existing))
+        logger.info("Fallback chain rebuilt: %s", self._fallback_chain[:6])
+
+    def reset_to_env_providers(self) -> None:
+        """Reset all user-configured providers, reverting to env-var defaults."""
+        for name in list(self._user_providers.keys()):
+            self.providers.pop(name, None)
+        self._user_providers.clear()
+        self._user_providers_configured = False
+
+        self.providers.update({
+            'groq': GroqProvider(),
+            'cerebras': CerebrasProvider(),
+            'gemini': GeminiProvider(),
+            'sarvam': SarvamProvider(),
+            'sarvam_30b': SarvamProvider(),
+            'sarvam_105b': Sarvam105BProvider(),
+            'github': GitHubModelsProvider(),
+            'nvidia': NvidiaNimProvider(),
+            'openrouter': OpenRouterProvider(),
+            'mistral': MistralProvider(),
+            'together': TogetherProvider(),
+        })
+        self._fallback_chain = list(dict.fromkeys([
+            'groq', 'cerebras', 'sarvam_30b', 'github',
+            'groq', 'cerebras', 'gemini', 'nvidia',
+            'openrouter', 'mistral', 'together', 'template',
+        ]))
+        logger.info("ProviderRouter reset to default env-var providers")
+
+    def get_active_provider_info(self) -> list[dict]:
+        """Return currently active provider configurations (info only, no keys)."""
+        info = []
+        seen = set()
+        for name in self._fallback_chain:
+            if name in seen:
+                continue
+            seen.add(name)
+            provider = self.providers.get(name)
+            if provider is None:
+                continue
+            is_user = name in self._user_providers
+            info.append({
+                "name": name,
+                "display": getattr(provider, '_display_name', name),
+                "model": getattr(provider, '_model', ''),
+                "has_api_key": bool(getattr(provider, '_api_key', '')),
+                "is_user_configured": is_user,
+                "base_url": getattr(provider, '_custom_base_url', '') or getattr(provider, 'base_url', lambda: '')(),
+            })
+        return info
 
     def _select_provider_name(
         self,

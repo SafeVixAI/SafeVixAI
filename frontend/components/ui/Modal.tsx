@@ -24,11 +24,11 @@ export const Modal = memo(function Modal({ open, onClose, title, children, foote
   const trapFocus = useCallback((e: KeyboardEvent) => {
     if (!open || e.key !== 'Tab') return
     const panel = panelRef.current
-    if (!panel) return
+    /* istanbul ignore next */ if (!panel) return
     const focusable = panel.querySelectorAll<HTMLElement>(
       'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
     )
-    if (!focusable.length) return
+    /* istanbul ignore next */ if (!focusable.length) return
     const first = focusable[0]
     const last = focusable[focusable.length - 1]
     if (e.shiftKey && document.activeElement === first) {

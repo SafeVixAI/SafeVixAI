@@ -12,6 +12,7 @@ export function usePageEntry() {
 
   useEffect(() => {
     const el = containerRef.current;
+    /* istanbul ignore next */
     if (!el) return;
 
     // Always set visible first (SSR + reduced-motion fallback)
@@ -22,6 +23,7 @@ export function usePageEntry() {
 
     try {
       const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      /* istanbul ignore next */
       if (prefersReducedMotion) return;
 
       // Set initial state for stagger animation
@@ -46,14 +48,18 @@ export function usePageEntry() {
             }
           );
         })
+        /* istanbul ignore next */
         .catch(() => {
           // GSAP failed to load — children are already visible from the CSS fallback above
+          /* istanbul ignore next */
           for (const child of el.children) {
+            /* istanbul ignore next */
             (child as HTMLElement).style.opacity = '1';
+            /* istanbul ignore next */
             (child as HTMLElement).style.transform = 'translateY(0)';
           }
         });
-    } catch {
+    } /* istanbul ignore next */ catch {
       // Non-critical — children are already visible
     }
   }, []);

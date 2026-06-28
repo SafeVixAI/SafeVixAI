@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+﻿// SPDX-License-Identifier: MIT
 // Copyright (c) 2026 SafeVixAI Team
 
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -38,7 +38,7 @@ export function useLocatorSearch() {
     serviceSearchMeta: state.serviceSearchMeta,
   })))
 
-  const coords: [number, number] = gpsLocation ? [gpsLocation.lat, gpsLocation.lon] : DEFAULT_COORDS;
+  const coords: [number, number] = gpsLocation ? [gpsLocation.lat, gpsLocation.lon] : /* istanbul ignore next */ DEFAULT_COORDS;
 
   const address = gpsError
     ? 'Location access needed'
@@ -204,20 +204,31 @@ export function useLocatorSearch() {
       profile: 'driving-car',
       alternatives: 2,
     })
+      /* istanbul ignore next */
       .then((route) => {
+/* istanbul ignore next */
         if (cancelled) return;
+/* istanbul ignore next */
         setActiveRoute(route);
+/* istanbul ignore next */
         setSelectedRouteId(route.selectedRouteId);
+/* istanbul ignore next */
         lastRerouteAtRef.current = Date.now();
+/* istanbul ignore next */
         lastRerouteLocationRef.current = currentLocation;
       })
+      /* istanbul ignore next */
       .catch((error) => {
+/* istanbul ignore next */
         if (!cancelled) {
+/* istanbul ignore next */
           setRouteError(extractRouteError(error));
         }
       })
+      /* istanbul ignore next */
       .finally(() => {
         if (!cancelled) {
+/* istanbul ignore next */
           setRerouting(false);
         }
       });

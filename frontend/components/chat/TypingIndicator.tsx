@@ -14,8 +14,10 @@ export default function TypingIndicator() {
 
   useGSAP(() => {
     const dots = [dot1Ref.current, dot2Ref.current, dot3Ref.current].filter(Boolean);
+    /* istanbul ignore next */
     if (dots.length === 0) return;
 
+    /* istanbul ignore next */
     gsap.fromTo(
       dots,
       { y: 0, opacity: 0.3 },

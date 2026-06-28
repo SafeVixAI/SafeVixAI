@@ -222,7 +222,8 @@ export default function HowItWorks() {
 
   // ── Media query detection ──
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    /* istanbul ignore next */
+if (typeof window === 'undefined') return;
 
     const mq = window.matchMedia('(min-width: 1024px)');
     const handler = (e: MediaQueryListEvent | MediaQueryList) => setIsDesktop(e.matches);

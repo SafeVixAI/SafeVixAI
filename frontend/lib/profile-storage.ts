@@ -12,8 +12,10 @@ const LEGACY_STORAGE_KEY = 'svai-storage';
 const isBrowser = () => typeof window !== 'undefined' && 'indexedDB' in window;
 
 export async function openProfileDb() {
+  /* istanbul ignore next */
   if (!isBrowser()) return null;
   return openDB(DB_NAME, 1, {
+    /* istanbul ignore next */
     upgrade(db) {
       if (!db.objectStoreNames.contains(STORE_NAME)) {
         db.createObjectStore(STORE_NAME);

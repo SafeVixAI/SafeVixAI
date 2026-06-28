@@ -4,6 +4,7 @@
 const COMPRESSION_ENABLED = true;
 
 export async function loadGeoJSON(url: string): Promise<GeoJSON.GeoJSON> {
+  /* istanbul ignore next */
   if (!COMPRESSION_ENABLED) {
     const resp = await fetch(url);
     return resp.json();

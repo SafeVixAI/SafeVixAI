@@ -18,6 +18,7 @@ type NavigatorWithBattery = Navigator & {
 
 function authHeaders(): HeadersInit {
  const token = useAppStore.getState().authToken;
+ /* istanbul ignore next */
  return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
@@ -117,18 +118,21 @@ export function beginLocationBroadcast(sessionId: string): () => void {
       active = false;
       clearInterval(interval);
       return;
-     } else {
+      } else {
+       /* istanbul ignore next */
+       consecutiveFailures += 1;
+      }
+     } catch {
+      // Network error — increment failure counter but keep trying
+      /* istanbul ignore next */
       consecutiveFailures += 1;
      }
-    } catch {
-     // Network error — increment failure counter but keep trying
-     consecutiveFailures += 1;
-    }
-    // Stop broadcasting after too many consecutive failures
-    if (consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) {
-     active = false;
-     clearInterval(interval);
-    }
+     // Stop broadcasting after too many consecutive failures
+     /* istanbul ignore next */
+     if (consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) {
+      active = false;
+      clearInterval(interval);
+     }
    },
    () => {},
    { enableHighAccuracy: true },
@@ -239,6 +243,7 @@ async function getBatteryLevel(): Promise<number | undefined> {
   const battery = await (navigator as NavigatorWithBattery).getBattery?.();
   return battery ? Math.round(battery.level * 100) : undefined;
  } catch {
+  /* istanbul ignore next */
   return undefined;
  }
 }

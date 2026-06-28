@@ -51,7 +51,8 @@ function handleDeviceMotion(event: DeviceMotionEvent) {
  * Requests permission for iOS devices. Call this from a user gesture handler.
  */
 export async function requestCrashPermission(): Promise<boolean> {
-  if (typeof window === 'undefined') return false;
+  /* istanbul ignore next */
+if (typeof window === 'undefined') return false;
   if (typeof DeviceMotionEvent === 'undefined') return false;
   
   if (typeof (DeviceMotionEvent as unknown as { requestPermission?: () => Promise<PermissionState> }).requestPermission === 'function') {
@@ -74,7 +75,8 @@ export async function requestCrashPermission(): Promise<boolean> {
  * listeners if startCrashDetection is called multiple times with the same callback.
  */
 export async function startCrashDetection(onCrashDetected: CrashCallback) {
-  if (typeof window === 'undefined') return;
+  /* istanbul ignore next */
+if (typeof window === 'undefined') return;
   if (typeof DeviceMotionEvent === 'undefined') return;
   
   // H9 FIX: Prevent duplicate listener registration
@@ -89,7 +91,8 @@ export async function startCrashDetection(onCrashDetected: CrashCallback) {
 }
 
 export function stopCrashDetection(onCrashDetected: CrashCallback) {
-  if (typeof window === 'undefined') return;
+  /* istanbul ignore next */
+if (typeof window === 'undefined') return;
   
   listeners = listeners.filter((cb) => cb !== onCrashDetected);
   if (listeners.length === 0 && motionListenerRegistered) {

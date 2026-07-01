@@ -14,7 +14,7 @@ class FakeRetriever:
     def __init__(self, *, return_results=True):
         self.return_results = return_results
 
-    def retrieve(self, query, *, top_k=None, scopes=None):
+    async def retrieve(self, query, *, top_k=None, scopes=None):
         if not self.return_results:
             return []
         source = "kb:emergency" if scopes else "kb:general"
@@ -66,7 +66,7 @@ class FakeLegalSearchTool:
     def __init__(self, retriever):
         self.retriever = retriever
 
-    def search(self, message):
+    async def search(self, message):
         return [
             SimpleNamespace(
                 source="kb:legal",

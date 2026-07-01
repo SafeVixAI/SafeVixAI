@@ -6,6 +6,7 @@ import logging
 from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
 logger = logging.getLogger('safevixai.provider_encrypt')
 
@@ -20,7 +21,7 @@ def _derive_key(master_key: str) -> bytes:
         salt=_SALT,
         iterations=_ITERATIONS,
     )
-    return base64.urlsafe_b64encode(kdf.derive(master_key.encode()))
+    return kdf.derive(master_key.encode())
 
 
 def encrypt_api_key(api_key: str, master_key: str | None = None) -> str | None:
@@ -31,8 +32,12 @@ def encrypt_api_key(api_key: str, master_key: str | None = None) -> str | None:
         logger.warning("PROVIDER_ENCRYPTION_KEY not set — storing API key in plaintext")
         return api_key
     try:
-        f = Fernet(_derive_key(key))
-        return f.encrypt(api_key.encode()).decode()
+        derived_key = _derive_key(key)
+        aesgcm = AESGCM(derived_key)
+        nonce = os.urandom(12)
+        ct = aesgcm.encrypt(nonce, api_key.encode('utf-8'), None)
+        # Prefix with v2_ to distinguish from Fernet easily
+        return "v2_" + base64.urlsafe_b64encode(nonce + ct).decode('utf-8')
     except Exception as e:
         logger.error("Failed to encrypt API key: %s", e)
         return api_key
@@ -44,9 +49,22 @@ def decrypt_api_key(encrypted: str | None, master_key: str | None = None) -> str
     key = master_key or os.getenv('PROVIDER_ENCRYPTION_KEY', '')
     if not key:
         return encrypted
+
+    derived_key = _derive_key(key)
+    
+    if encrypted.startswith("v2_"):
+        try:
+            data = base64.urlsafe_b64decode(encrypted[3:].encode('utf-8'))
+            nonce, ct = data[:12], data[12:]
+            aesgcm = AESGCM(derived_key)
+            return aesgcm.decrypt(nonce, ct, None).decode('utf-8')
+        except Exception:
+            return encrypted
+    
+    # Fallback to Fernet
     try:
-        f = Fernet(_derive_key(key))
-        return f.decrypt(encrypted.encode()).decode()
+        f = Fernet(base64.urlsafe_b64encode(derived_key))
+        return f.decrypt(encrypted.encode('utf-8')).decode('utf-8')
     except Exception:
         return encrypted
 

@@ -280,6 +280,10 @@ class ChatRequest(BaseModel):
     session_id: str | None = Field(default=None, min_length=1, max_length=128)
     lat: float | None = Field(default=None, ge=-90, le=90)
     lon: float | None = Field(default=None, ge=-180, le=180)
+    client_ip: str | None = Field(default=None)
+    provider_hint: str | None = Field(default=None, max_length=64)
+    provider_model: str | None = Field(default=None, max_length=128)
+    user_id: str | None = Field(default=None, max_length=128)
 
 
 class ChatResponse(BaseModel):
@@ -502,6 +506,29 @@ class AdminBoundaryFeature(BaseModel):
     name: str
     state_code: str
     area_sqkm: float | None = None
+    geom_wkb: str | None = None
+    geojson: dict | None = None
+
+    @field_validator('geom_wkb', mode='before')
+    @classmethod
+    def validate_wkb(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
+        val_str = str(value).strip()
+        if not all(c in '0123456789abcdefABCDEF' for c in val_str):
+            raise ValueError("Invalid WKB: must be a valid hex string")
+        return val_str
+
+    @field_validator('geojson', mode='before')
+    @classmethod
+    def validate_geojson(cls, value: dict | None) -> dict | None:
+        if value is None:
+            return None
+        if not isinstance(value, dict):
+            raise ValueError("Invalid GeoJSON: must be a dictionary")
+        if 'type' not in value or 'coordinates' not in value:
+            raise ValueError("Invalid GeoJSON: missing 'type' or 'coordinates'")
+        return value
 
 
 class CivicFeatureItem(BaseModel):

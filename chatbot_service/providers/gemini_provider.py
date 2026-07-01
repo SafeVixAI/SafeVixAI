@@ -50,7 +50,7 @@ class GeminiProvider(HttpProvider):
         if not api_key:
             return
 
-        model = self._model
+        model = request.provider_model or self._model
 
         oai_messages = build_messages(request)
         contents = []
@@ -114,7 +114,7 @@ class GeminiProvider(HttpProvider):
         if not api_key:
             raise RuntimeError("GeminiProvider: Missing env var 'GEMINI_API_KEY' or 'GOOGLE_API_KEY'")
 
-        model = self._model
+        model = request.provider_model or self._model
 
         # Convert OpenAI-style messages → Gemini contents format
         oai_messages = build_messages(request)

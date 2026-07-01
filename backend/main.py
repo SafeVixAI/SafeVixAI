@@ -512,6 +512,9 @@ def create_app() -> FastAPI:
     app.mount('/uploads', StaticFiles(directory=settings.upload_dir), name='uploads')
 
     # ── Global unhandled exception handler with alerting ─────────────────
+    from core.exception_handlers import register_exception_handlers
+    register_exception_handlers(app)
+
     @app.exception_handler(Exception)
     async def _unhandled_exception_handler(request: Request, exc: Exception):
         logger.error("Unhandled exception on %s %s: %s", request.method, request.url.path, exc)

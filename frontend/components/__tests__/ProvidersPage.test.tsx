@@ -32,12 +32,23 @@ jest.mock('@/lib/provider-api', function() {
   return mockApi;
 });
 
+var zustand = require('zustand');
+var shallow = require('zustand/react/shallow');
+var testStore = zustand.create(function(set) {
+  return {
+    isDarkMode: false,
+    selectedProvider: null,
+    setSelectedProvider: jest.fn(function(p) { set({ selectedProvider: p }); }),
+    providerSyncStatus: 'idle',
+    setProviderSyncStatus: jest.fn(function(status) { set({ providerSyncStatus: status }); }),
+    activeFallbackChain: [],
+    setActiveFallbackChain: jest.fn(function(chain) { set({ activeFallbackChain: chain }); }),
+  };
+});
+
 jest.mock('@/lib/store', function() {
   return {
-    useAppStore: jest.fn(function(selector) {
-      var state = { isDarkMode: false };
-      return selector ? selector(state) : state;
-    }),
+    useAppStore: testStore,
   };
 });
 
@@ -96,6 +107,11 @@ function clickSyncBtn() {
 describe('ProvidersPage', function() {
   beforeEach(function() {
     jest.clearAllMocks();
+    testStore.setState({
+      providerSyncStatus: 'idle',
+      activeFallbackChain: [],
+      selectedProvider: null,
+    });
   });
 
   // ═══════════════ Basic Render ═══════════════

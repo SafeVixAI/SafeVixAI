@@ -1,73 +1,62 @@
-// SPDX-License-Identifier: MIT
-// Copyright (c) 2026 SafeVixAI Team
+jest.mock('@/lib/emergency-numbers', function () {
+  return {
+    PRIMARY_EMERGENCY_BAR: [
+      { id: 'police', service: '112', label: 'Emergency', color: '#FF0000' },
+      { id: 'ambulance', service: '108', label: 'Ambulance', color: '#00FF00' },
+      { id: 'fire', service: '101', label: 'Fire', color: '#FF6600' },
+    ],
+  }
+})
+jest.mock('@/lib/analytics', function () { return { track: { emergencyCallMade: jest.fn() } } })
 
-import React from 'react';
-import { render } from '@testing-library/react';
-import '@testing-library/jest-dom';
+import { render, screen, fireEvent } from '@testing-library/react'
+import React from 'react'
+import { EmergencyNumbers } from '../EmergencyNumbers'
 
-jest.mock('../../lib/emergency-numbers', () => ({
-  PRIMARY_EMERGENCY_BAR: [
-    { id: 'police', service: '100', label: 'Police', color: 'var(--accent-blue)' },
-    { id: 'ambulance', service: '102', label: 'Ambulance', color: 'var(--accent-red)' },
-    { id: 'fire', service: '101', label: 'Fire', color: 'var(--accent-orange)' },
-  ],
-}));
+describe('EmergencyNumbers', function () {
+  it('renders all emergency numbers', function () {
+    render(React.createElement(EmergencyNumbers))
+    expect(screen.getByText('112')).toBeInTheDocument()
+    expect(screen.getByText('108')).toBeInTheDocument()
+    expect(screen.getByText('101')).toBeInTheDocument()
+  })
 
-jest.mock('../../lib/analytics', () => ({
-  track: {
-    emergencyCallMade: jest.fn(),
-  },
-}));
+  it('renders labels for each number', function () {
+    render(React.createElement(EmergencyNumbers))
+    expect(screen.getByText('Emergency')).toBeInTheDocument()
+    expect(screen.getByText('Ambulance')).toBeInTheDocument()
+    expect(screen.getByText('Fire')).toBeInTheDocument()
+  })
 
-describe('EmergencyNumbers', function() {
-  it('renders all emergency numbers', async function() {
-    var { EmergencyNumbers } = await import('../EmergencyNumbers');
-    var { getByText } = render(<EmergencyNumbers />);
-    expect(getByText('100')).toBeInTheDocument();
-    expect(getByText('102')).toBeInTheDocument();
-    expect(getByText('101')).toBeInTheDocument();
-  });
+  it('has nav with correct aria label', function () {
+    render(React.createElement(EmergencyNumbers))
+    expect(screen.getByLabelText('Emergency phone numbers')).toBeInTheDocument()
+  })
 
-  it('renders labels for each number', async function() {
-    var { EmergencyNumbers } = await import('../EmergencyNumbers');
-    var { getByText } = render(<EmergencyNumbers />);
-    expect(getByText('Police')).toBeInTheDocument();
-    expect(getByText('Ambulance')).toBeInTheDocument();
-    expect(getByText('Fire')).toBeInTheDocument();
-  });
+  it('renders bar dividers between items', function () {
+    var container = render(React.createElement(EmergencyNumbers))
+    var dividers = container.container.querySelectorAll('.bar-divider')
+    expect(dividers.length).toBe(2)
+  })
 
-  it('has tel: links for each number', async function() {
-    var { EmergencyNumbers } = await import('../EmergencyNumbers');
-    var { container } = render(<EmergencyNumbers />);
-    var links = container.querySelectorAll('a[href^="tel:"]');
-    expect(links.length).toBe(3);
-    expect(links[0]).toHaveAttribute('href', 'tel:100');
-    expect(links[1]).toHaveAttribute('href', 'tel:102');
-    expect(links[2]).toHaveAttribute('href', 'tel:101');
-  });
+  it('calls emergencyCallMade analytics on click', function () {
+    var analytics = require('@/lib/analytics')
+    render(React.createElement(EmergencyNumbers))
+    fireEvent.click(screen.getByText('112'))
+    expect(analytics.track.emergencyCallMade).toHaveBeenCalledWith('112')
+  })
 
-  it('has navigation role and aria label', async function() {
-    var { EmergencyNumbers } = await import('../EmergencyNumbers');
-    var { getByRole } = render(<EmergencyNumbers />);
-    var nav = getByRole('navigation');
-    expect(nav).toHaveAttribute('aria-label', 'Emergency phone numbers');
-  });
+  it('renders tel: hrefs on each anchor', function () {
+    render(React.createElement(EmergencyNumbers))
+    var links = screen.getAllByRole('link')
+    expect(links[0]).toHaveAttribute('href', 'tel:112')
+    expect(links[1]).toHaveAttribute('href', 'tel:108')
+    expect(links[2]).toHaveAttribute('href', 'tel:101')
+  })
 
-  it('has accessible aria labels on links', async function() {
-    var { EmergencyNumbers } = await import('../EmergencyNumbers');
-    var { getByLabelText } = render(<EmergencyNumbers />);
-    expect(getByLabelText('Call Police: 100')).toBeInTheDocument();
-    expect(getByLabelText('Call Ambulance: 102')).toBeInTheDocument();
-    expect(getByLabelText('Call Fire: 101')).toBeInTheDocument();
-  });
-
-  it('renders bar dividers between numbers', async function() {
-    var { EmergencyNumbers } = await import('../EmergencyNumbers');
-    var { container } = render(<EmergencyNumbers />);
-    var dividers = container.querySelectorAll('.bar-divider');
-    expect(dividers.length).toBe(2);
-  });
-});
-
-
-
+  it('renders aria-label with service name and number', function () {
+    render(React.createElement(EmergencyNumbers))
+    expect(screen.getByLabelText('Call Emergency: 112')).toBeInTheDocument()
+    expect(screen.getByLabelText('Call Ambulance: 108')).toBeInTheDocument()
+  })
+})

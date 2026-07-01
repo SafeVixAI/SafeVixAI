@@ -31,6 +31,56 @@ from models.schemas import (
 from services.authority_router import ROAD_TYPE_LABELS, AuthorityRouter
 from services.exceptions import ExternalServiceError, ServiceValidationError
 from services.geocoding_service import GeocodingService
+from core.cqrs import Command, Query, CommandHandler, QueryHandler, cqrs_bus
+from core.distributed_lock import distributed_lock
+
+
+class SubmitReportCommand(Command[RoadReportResponse]):
+    def __init__(self, service: RoadWatchService, db: AsyncSession, lat: float, lon: float, issue_type: str, severity: int, description: str | None, photo: UploadFile | None, citizen_phone: str | None, queue: Any) -> None:
+        self.service = service
+        self.db = db
+        self.lat = lat
+        self.lon = lon
+        self.issue_type = issue_type
+        self.severity = severity
+        self.description = description
+        self.photo = photo
+        self.citizen_phone = citizen_phone
+        self.queue = queue
+
+
+class VerifyReportCommand(Command[dict]):
+    def __init__(self, service: RoadWatchService, db: AsyncSession, report_id: str) -> None:
+        self.service = service
+        self.db = db
+        self.report_id = report_id
+
+
+class SubmitReportHandler(CommandHandler[SubmitReportCommand, RoadReportResponse]):
+    async def handle(self, command: SubmitReportCommand) -> RoadReportResponse:
+        return await command.service._execute_submit_report(
+            db=command.db,
+            lat=command.lat,
+            lon=command.lon,
+            issue_type=command.issue_type,
+            severity=command.severity,
+            description=command.description,
+            photo=command.photo,
+            citizen_phone=command.citizen_phone,
+            queue=command.queue,
+        )
+
+
+class VerifyReportHandler(CommandHandler[VerifyReportCommand, dict]):
+    async def handle(self, command: VerifyReportCommand) -> dict:
+        return await command.service._execute_verify_report(
+            db=command.db,
+            report_id=command.report_id,
+        )
+
+
+cqrs_bus.register_command_handler(SubmitReportCommand, SubmitReportHandler())
+cqrs_bus.register_command_handler(VerifyReportCommand, VerifyReportHandler())
 
 
 ACTIVE_ROAD_ISSUE_STATUSES = ['open', 'acknowledged', 'in_progress']
@@ -241,6 +291,24 @@ class RoadWatchService:
         return response
 
     async def submit_report(
+        self,
+        *,
+        db: AsyncSession,
+        lat: float,
+        lon: float,
+        issue_type: str,
+        severity: int,
+        description: str | None,
+        photo: UploadFile | None,
+        citizen_phone: str | None = None,
+        queue: Any = None,
+    ) -> RoadReportResponse:
+        normalized_issue_type = issue_type.strip()
+        async with distributed_lock(f"report:{lat:.4f}:{lon:.4f}:{normalized_issue_type}", ttl_seconds=10, cache=self.cache):
+            cmd = SubmitReportCommand(self, db, lat, lon, issue_type, severity, description, photo, citizen_phone, queue)
+            return await cqrs_bus.execute_command(cmd)
+
+    async def _execute_submit_report(
         self,
         *,
         db: AsyncSession,
@@ -556,6 +624,11 @@ class RoadWatchService:
         )
 
     async def verify_report(self, *, db: AsyncSession, report_id: str) -> dict:
+        async with distributed_lock(f"verify:{report_id}", ttl_seconds=10, cache=self.cache):
+            cmd = VerifyReportCommand(self, db, report_id)
+            return await cqrs_bus.execute_command(cmd)
+
+    async def _execute_verify_report(self, *, db: AsyncSession, report_id: str) -> dict:
         """Mark a RoadWatch report as acknowledged and return contribution-ready data."""
         try:
             report_uuid = uuid.UUID(report_id)

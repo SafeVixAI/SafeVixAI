@@ -142,6 +142,10 @@ class ProviderRouter:
         self.provider_timeout_seconds = max(0.001, float(settings.http_timeout_seconds))
         self._unavailable_until: dict[str, float] = {}
 
+        # Phase 18: Token Bucket rate limiters per provider
+        from providers.circuit_breaker import TokenBucket
+        self._rate_limiters: dict[str, TokenBucket] = {}
+
         # Confidence score tracking per provider per intent
         self._provider_scores: dict[str, dict[str, list[float]]] = {}
         self._confidence_threshold = 0.3
@@ -215,6 +219,14 @@ class ProviderRouter:
                     except Exception:
                         pass
                 provider_name = name
+
+            from providers.circuit_breaker import TokenBucket
+            # Base capacity on priority or default
+            priority = cfg.get("priority", 10)
+            capacity = 100 if priority < 5 else 30
+            refill = 10.0 if priority < 5 else 2.0
+            if provider_name not in self._rate_limiters:
+                self._rate_limiters[provider_name] = TokenBucket(capacity=capacity, refill_rate=refill)
 
             self._user_providers[provider_name] = cfg
             configured.append(provider_name)
@@ -322,6 +334,8 @@ class ProviderRouter:
 
         return self.default_provider
 
+
+
     async def generate(
         self,
         request: ProviderRequest,
@@ -330,6 +344,16 @@ class ProviderRouter:
         try_fallbacks: bool = True,
     ) -> ProviderResult:
         """Generate a response using the selected provider with automatic fallback."""
+        import uuid
+        if not request.correlation_id:
+            request.correlation_id = str(uuid.uuid4())
+            
+        logger.info(
+            "LLM generate [%s] - Intent: %s - Provider: %s",
+            request.correlation_id,
+            request.intent,
+            request.provider_hint or "auto"
+        )
 
         # C9: Check LLM response cache before making API call
         if self.cache:
@@ -559,6 +583,17 @@ class ProviderRouter:
         if detected_lang is None:
             detected_lang = detect_lang(request.message or '')
 
+        import uuid
+        if not request.correlation_id:
+            request.correlation_id = str(uuid.uuid4())
+            
+        logger.info(
+            "LLM stream_generate [%s] - Intent: %s - Provider: %s",
+            request.correlation_id,
+            request.intent,
+            request.provider_hint or "auto"
+        )
+
         primary = self._select_provider_name(request, detected_lang=detected_lang)
         provider = self.providers.get(primary) or self.providers.get('groq') or self.providers['template']
 
@@ -642,6 +677,13 @@ class ProviderRouter:
         """Check if provider is available, using in-memory fast-path and Redis fallback."""
         if provider_name == 'template':
             return True
+            
+        # TokenBucket Rate Limiting (Phase 18)
+        limiter = self._rate_limiters.get(provider_name)
+        if limiter and not limiter.allow(1):
+            logger.warning(f"Rate limit exceeded for provider {provider_name} via TokenBucket.")
+            return False
+
         now = time.time()
         until = self._unavailable_until.get(provider_name)
         if until is not None:

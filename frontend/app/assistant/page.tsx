@@ -10,7 +10,7 @@ import { useGSAP } from '@gsap/react';
 import {
   ShieldCheck, BookOpen, Copy,
   HelpCircle, ThumbsUp, ThumbsDown, RotateCcw,
-  Volume2, VolumeX, Wifi, WifiOff, Cpu
+  Volume2, VolumeX, Wifi, WifiOff, Cpu, Zap
 } from 'lucide-react';
 import { useAppStore } from '@/lib/store';
 import { useShallow } from 'zustand/react/shallow';
@@ -25,6 +25,8 @@ import { formatTime } from '@/lib/intl-formatters';
 import { PUBLIC_CHATBOT_BASE_URL } from '@/lib/public-env';
 import { getLanguageByCode } from '@/lib/languages';
 import { appendChatLog, loadChatHistory } from '@/lib/chat-history';
+import { fetchProviderConfigs, fetchBuiltinProviders } from '@/lib/provider-api';
+import type { ProviderConfig, BuiltinProvider } from '@/lib/provider-api';
 import { useTranslation } from 'react-i18next';
 
 const TypingIndicator = dynamic(() => import('@/components/chat/TypingIndicator'), { ssr: false })
@@ -41,11 +43,12 @@ async function* streamChat(
  lat?: number,
  lon?: number,
  provider_hint?: string,
+ provider_model?: string,
 ): AsyncGenerator<{ type: string; text?: string; intent?: string; sources?: string[]; session_id?: string; message?: string; provider?: string; model?: string }> {
  const resp = await fetch(`${CHATBOT_URL}/api/v1/chat/stream`, {
  method: 'POST',
  headers: { 'Content-Type': 'application/json' },
- body: JSON.stringify({ message, session_id, lat, lon, provider_hint }),
+ body: JSON.stringify({ message, session_id, lat, lon, provider_hint, provider_model }),
  });
  if (!resp.ok || !resp.body) throw new Error(`Chat error: ${resp.status}`);
  const reader = resp.body.getReader();
@@ -92,6 +95,35 @@ export default function ChatPage() {
       setSelectedProvider: s.setSelectedProvider,
     }))
   );
+
+  const [providerOptions, setProviderOptions] = useState<{ name: string; display: string; model: string }[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      try {
+        const [userConfigs, builtins] = await Promise.all([
+          fetchProviderConfigs().catch(() => [] as ProviderConfig[]),
+          fetchBuiltinProviders().catch(() => [] as BuiltinProvider[]),
+        ]);
+        if (cancelled) return;
+        const options: { name: string; display: string; model: string }[] = [];
+        for (const p of builtins) {
+          options.push({ name: p.name, display: p.display, model: p.models[0] ?? '' });
+        }
+        for (const p of userConfigs) {
+          if (p.isActive && !options.some(o => o.name === p.providerName)) {
+            options.push({ name: p.providerName, display: p.displayName, model: p.defaultModel ?? '' });
+          }
+        }
+        setProviderOptions(options);
+      } catch {
+        // fallback — keep dropdown empty
+      }
+    }
+    void load();
+    return () => { cancelled = true; };
+  }, []);
 
   const toggleAiMode = useCallback(async (mode: 'online' | 'offline') => {
     if (mode === 'online') {
@@ -285,9 +317,10 @@ export default function ChatPage() {
          speakText(offlineReply);
        }
      } else {
-        const providerHint = selectedProvider?.providerName || undefined;
+         const providerHint = selectedProvider?.providerName || undefined;
+         const providerModel = selectedProvider?.model || undefined;
         let accumulated = '';
-        for await (const event of streamChat(text, sessionId, location?.lat, location?.lon, providerHint)) {
+        for await (const event of streamChat(text, sessionId, location?.lat, location?.lon, providerHint, providerModel)) {
          if (event.type === 'token' && event.text) {
            accumulated += event.text;
            setMessages(prev =>
@@ -333,7 +366,7 @@ export default function ChatPage() {
    } finally {
      setLoading(false);
    }
-  }, [sessionId, location, autoRead, speakText, aiMode, t]);
+  }, [sessionId, location, autoRead, speakText, aiMode, selectedProvider, t]);
 
   useGSAP(() => {
     gsap.from(pageRef.current, { opacity: 0, y: 16, duration: 0.35, ease: 'power2.out' });
@@ -391,7 +424,7 @@ export default function ChatPage() {
             }}
             className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-surface-2 border border-border text-[9px] font-bold text-text-3 uppercase tracking-widest hover:border-brand-light hover:text-brand-light transition-all"
           >
-            <Cpu size={11} />
+            {selectedProvider ? <Cpu size={11} /> : <Zap size={11} className="text-amber-500" />}
             {selectedProvider ? selectedProvider.displayName.slice(0, 12) : 'Auto'}
           </button>
           <div id="provider-selector-dropdown" className="hidden absolute right-0 top-full mt-1 w-56 bg-surface-2 border border-border rounded-xl shadow-2xl z-50 overflow-hidden">
@@ -408,12 +441,9 @@ export default function ChatPage() {
             </div>
             <div className="max-h-48 overflow-y-auto p-2 space-y-1">
               <p className="px-3 py-1 text-[8px] font-bold text-text-3 uppercase tracking-wider">Providers</p>
-              {[
-                { name: 'groq', display: 'Groq', model: 'llama-3.1-8b-instant' },
-                { name: 'gemini', display: 'Gemini', model: 'gemini-1.5-flash' },
-                { name: 'cerebras', display: 'Cerebras', model: 'llama-3.1-8b' },
-                { name: 'openai', display: 'OpenAI', model: 'gpt-4o-mini' },
-              ].map((p) => (
+              {providerOptions.length === 0 ? (
+                <p className="px-3 py-2 text-[9px] text-text-4 italic">Loading providers...</p>
+              ) : providerOptions.map((p) => (
                 <button
                   key={p.name}
                   onClick={() => {

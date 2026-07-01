@@ -67,6 +67,7 @@ export const useAppStore = create<AppState>()(
         operatorName: state.operatorName,
         authRole: state.authRole,
         selectedProvider: state.selectedProvider,
+        activeFallbackChain: state.activeFallbackChain,
       }),
     }
   )
@@ -136,3 +137,8 @@ export const useIsAuthenticated = () => useAppStore((s) => s.isAuthenticated);
 export const useOperatorName = () => useAppStore((s) => s.operatorName);
 export const useAuthToken = () => useAppStore((s) => s.authToken);
 export const useAuthRole = () => useAppStore((s) => s.authRole);
+
+// Providers
+export const useSelectedProvider = () => useAppStore((s) => s.selectedProvider);
+export const useActiveFallbackChain = () => useAppStore((s) => s.activeFallbackChain);
+export const useProviderSyncStatus = () => useAppStore((s) => s.providerSyncStatus);

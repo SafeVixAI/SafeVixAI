@@ -29,4 +29,22 @@ describe('ProvidersSlice', function() {
     store.getState().setSelectedProvider(null)
     expect(store.getState().selectedProvider).toBeNull()
   })
+
+  it('sets activeFallbackChain', function() {
+    var store = createTestStore()
+    store.getState().setActiveFallbackChain(['groq', 'gemini'])
+    expect(store.getState().activeFallbackChain).toEqual(['groq', 'gemini'])
+  })
+
+  it('sets providerSyncStatus to syncing', function() {
+    var store = createTestStore()
+    store.getState().setProviderSyncStatus('syncing')
+    expect(store.getState().providerSyncStatus).toBe('syncing')
+  })
+
+  it('sets providerSyncStatus to error', function() {
+    var store = createTestStore()
+    store.getState().setProviderSyncStatus('error')
+    expect(store.getState().providerSyncStatus).toBe('error')
+  })
 })

@@ -329,3 +329,45 @@ def test_idempotency_constants():
     """Test idempotency constants."""
     assert _IDEMPOTENCY_TTL == 86400  # 24 hours
     assert _IDEMPOTENCY_PREFIX == "idempotency:"
+
+
+@pytest.mark.asyncio
+async def test_idempotency_middleware_empty_response_body(mock_request, mock_call_next, mock_cache):
+    """Test handling of empty response body in caching (line 77-78 branch)."""
+    mock_request.method = "POST"
+    mock_request.headers = {"Idempotency-Key": "test-key-emptybody"}
+    mock_cache.get = AsyncMock(return_value=None)
+
+    async def empty_body_call_next(request):
+        response = MagicMock()
+        response.status_code = 200
+        response.body_iterator = AsyncIterator([b''])
+        return response
+
+    middleware = IdempotencyMiddleware(app=MagicMock())
+
+    with patch('core.idempotency.create_cache', return_value=mock_cache):
+        response = await middleware.dispatch(mock_request, empty_body_call_next)
+        assert response.status_code == 200
+        mock_cache.setex.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_idempotency_middleware_json_decode_error(mock_request, mock_call_next, mock_cache):
+    """Test handling of JSON decode error during caching (line 77-78 decode branch)."""
+    mock_request.method = "POST"
+    mock_request.headers = {"Idempotency-Key": "test-key-jsonerror"}
+    mock_cache.get = AsyncMock(return_value=None)
+
+    async def bad_json_call_next(request):
+        response = MagicMock()
+        response.status_code = 200
+        response.body_iterator = AsyncIterator([b'not valid json'])
+        return response
+
+    middleware = IdempotencyMiddleware(app=MagicMock())
+
+    with patch('core.idempotency.create_cache', return_value=mock_cache):
+        response = await middleware.dispatch(mock_request, bad_json_call_next)
+        assert response.status_code == 200
+        # Should gracefully handle the JSON decode error

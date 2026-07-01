@@ -93,6 +93,29 @@ def _format_timestamp(iso_str: str | None) -> str:
 
 # ── CIFS Feed Endpoint ────────────────────────────────────────────────────────
 
+import time
+from collections import defaultdict
+
+class TokenBucket:
+    """Explicit Token Bucket rate limiter for Waze feed polling."""
+    def __init__(self, capacity: int = 10, refill_rate: float = 0.2) -> None:
+        self.capacity = capacity
+        self.refill_rate = refill_rate
+        self.tokens: dict[str, float] = defaultdict(lambda: float(capacity))
+        self.last_refill: dict[str, float] = defaultdict(time.monotonic)
+
+    def allow(self, key: str) -> bool:
+        now = time.monotonic()
+        elapsed = now - self.last_refill[key]
+        self.tokens[key] = min(float(self.capacity), self.tokens[key] + elapsed * self.refill_rate)
+        self.last_refill[key] = now
+        if self.tokens[key] >= 1.0:
+            self.tokens[key] -= 1.0
+            return True
+        return False
+
+waze_token_bucket = TokenBucket(capacity=10, refill_rate=0.2)
+
 
 @router.get("/waze", response_class=JSONResponse)
 @limiter.limit("10/minute")
@@ -109,6 +132,10 @@ async def get_waze_cifs_feed(
     From Waze docs: "Road closures and supported hazard types submitted to Waze
     will also appear on Google Maps." — ONE integration, TWO platforms.
     """
+    client_ip = request.client.host if request.client else "unknown"
+    if not waze_token_bucket.allow(client_ip):
+        return _empty_feed("Rate limit exceeded. Token bucket depleted.")
+
     settings = get_settings()
     cutoff = datetime.now(timezone.utc) - timedelta(hours=24)
     result = await db.execute(

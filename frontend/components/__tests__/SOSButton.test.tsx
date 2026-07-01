@@ -100,4 +100,54 @@ describe('SOSButton', function() {
     fireEvent.click(screen.getByLabelText('Send emergency alert via SMS'))
     await waitFor(function() { expect(sosShare.generateSosSmsLink).toHaveBeenCalled() })
   })
+
+  it('shows "Acquiring GPS..." when no GPS location', async function() {
+    require('../../lib/store').useAppStore.mockImplementation(function() {
+      return {
+        userProfile: { name: 'Test', phone: '123' },
+        gpsLocation: null,
+        soundsEnabled: false,
+      }
+    })
+    var { SOSButton } = await import('../SOSButton')
+    render(React.createElement(SOSButton))
+    fireEvent.click(screen.getByLabelText('Emergency SOS'))
+    expect(screen.getByText('Acquiring GPS...')).toBeInTheDocument()
+  })
+
+  it('plays sound when soundsEnabled is true', async function() {
+    require('../../lib/store').useAppStore.mockImplementation(function() {
+      return {
+        userProfile: { name: 'Test', phone: '123' },
+        gpsLocation: { lat: 10, lon: 20, accuracy: 50 },
+        soundsEnabled: true,
+      }
+    })
+    var sounds = require('../../lib/sounds')
+    var { SOSButton } = await import('../SOSButton')
+    window.open = jest.fn(function() { return null }) as jest.Mock
+    render(React.createElement(SOSButton))
+    fireEvent.click(screen.getByLabelText('Emergency SOS'))
+    fireEvent.click(screen.getByLabelText('Send emergency alert via WhatsApp'))
+    await waitFor(function() { expect(sounds.sounds.sosSent).toHaveBeenCalled() })
+  })
+
+  it('sets popup.opener to null when popup exists', async function() {
+    var popup = { opener: null, close: jest.fn() }
+    window.open = jest.fn(function() { return popup }) as jest.Mock
+    var { SOSButton } = await import('../SOSButton')
+    render(React.createElement(SOSButton))
+    fireEvent.click(screen.getByLabelText('Emergency SOS'))
+    fireEvent.click(screen.getByLabelText('Send emergency alert via WhatsApp'))
+    await waitFor(function() { expect(popup.opener).toBeNull() })
+  })
+
+  it('closes panel when SOS button clicked again', async function() {
+    var { SOSButton } = await import('../SOSButton')
+    render(React.createElement(SOSButton))
+    fireEvent.click(screen.getByLabelText('Emergency SOS'))
+    expect(screen.getByText('Confirm SOS Trigger')).toBeInTheDocument()
+    fireEvent.click(screen.getByLabelText('Emergency SOS'))
+    expect(screen.queryByText('Confirm SOS Trigger')).not.toBeInTheDocument()
+  })
 })

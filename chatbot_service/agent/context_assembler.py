@@ -33,6 +33,7 @@ class ContextAssembler:
         submit_report_tool: SubmitReportTool,
         weather_tool: WeatherTool,
         drug_info_tool: DrugInfoTool,
+        episodic_memory_agent = None,
     ) -> None:
         self.retriever = retriever
         self.sos_tool = sos_tool
@@ -44,6 +45,7 @@ class ContextAssembler:
         self.submit_report_tool = submit_report_tool
         self.weather_tool = weather_tool
         self.drug_info_tool = drug_info_tool
+        self.episodic_memory_agent = episodic_memory_agent
 
     async def assemble(
         self,
@@ -55,6 +57,7 @@ class ContextAssembler:
         lon: float | None,
         client_ip: str | None = None,
         history: list[dict],
+        user_id: str | None = None,
     ) -> ConversationContext:
         context = ConversationContext(
             session_id=session_id,
@@ -65,6 +68,22 @@ class ContextAssembler:
             client_ip=client_ip,
             history=history,
         )
+        
+        if self.episodic_memory_agent and user_id and user_id not in ('anonymous', 'authenticated'):
+            try:
+                memories = self.episodic_memory_agent.retrieve_memory(user_id, message)
+                if memories:
+                    context.tools.append(
+                        ToolContext(
+                            name='episodic_memory',
+                            summary='User context (remembered facts): ' + ' | '.join(memories),
+                            payload={'memories': memories},
+                            sources=['memory:episodic'],
+                        )
+                    )
+            except Exception as e:
+                import logging
+                logging.getLogger(__name__).warning("Episodic memory retrieval failed: %s", e)
 
         if intent == 'emergency':
             # C10: Run independent tools in parallel (SOS + weather + RAG)
@@ -100,15 +119,15 @@ class ContextAssembler:
                             sources=['tool:weather'],
                         )
                     )
-            self._add_retrieved(context, self.retriever.retrieve(message, scopes={'medical', 'emergency', 'hospitals'}))
+            await self._add_rag_context(context, message, scopes={'medical', 'emergency', 'hospitals'})
         elif intent == 'first_aid':
             await self._add_first_aid_context(context)
-            self._add_retrieved(context, self.retriever.retrieve(message, scopes={'medical'}))
+            await self._add_rag_context(context, message, scopes={'medical'})
         elif intent == 'challan':
             await self._add_challan_context(context)
-            self._add_retrieved(context, self.legal_search_tool.search(message))
+            self._add_retrieved(context, await self.legal_search_tool.search(message))
         elif intent == 'legal':
-            self._add_retrieved(context, self.legal_search_tool.search(message))
+            self._add_retrieved(context, await self.legal_search_tool.search(message))
         elif intent == 'road_issue':
             # C10: Run independent road tools in parallel (infra + issues + RAG)
             if context.lat is not None and context.lon is not None:
@@ -138,10 +157,10 @@ class ContextAssembler:
                             sources=['tool:road_issues', 'backend:/api/v1/roads/issues'],
                         )
                     )
-            self._add_retrieved(context, self.retriever.retrieve(message, scopes={'roads', 'accidents'}))
+            await self._add_rag_context(context, message, scopes={'roads', 'accidents'})
         elif intent == 'road_weather':
             await self._add_weather_context(context)
-            self._add_retrieved(context, self.retriever.retrieve(message, scopes={'roads', 'accidents'}))
+            await self._add_rag_context(context, message, scopes={'roads', 'accidents'})
         elif intent == 'safe_route':
             # C10: Run independent route tools in parallel (issues + weather)
             context.tools.append(
@@ -179,12 +198,12 @@ class ContextAssembler:
                             sources=['tool:weather'],
                         )
                     )
-            self._add_retrieved(context, self.retriever.retrieve(message, scopes={'roads', 'accidents'}))
+            await self._add_rag_context(context, message, scopes={'roads', 'accidents'})
         elif intent == 'road_infrastructure':
             await self._add_infrastructure_context(context)
-            self._add_retrieved(context, self.retriever.retrieve(message, scopes={'roads'}))
+            await self._add_rag_context(context, message, scopes={'roads'})
         else:
-            self._add_retrieved(context, self.retriever.retrieve(message))
+            await self._add_rag_context(context, message)
 
         return context
 
@@ -282,6 +301,20 @@ class ContextAssembler:
                     sources=['tool:road_infrastructure', 'backend:/api/v1/roads/infrastructure'],
                 )
             )
+
+    async def _add_rag_context(self, context: ConversationContext, message: str, scopes: set[str] | None = None) -> None:
+        results = await self.retriever.retrieve(message, scopes=scopes)
+        if not results:
+            import re
+            words = re.findall(r'\b\w+\b', message.lower())
+            stopwords = {'is', 'the', 'a', 'an', 'what', 'where', 'how', 'why', 'who', 'in', 'on', 'at', 'to', 'for', 'of', 'and', 'or', 'my', 'i', 'need', 'help', 'with', 'can', 'you', 'tell', 'me', 'about', 'some', 'any'}
+            keywords = [w for w in words if w not in stopwords]
+            rewritten_query = ' '.join(keywords)
+            if rewritten_query and rewritten_query != message.lower():
+                import logging
+                logging.getLogger(__name__).info("RAG Fallback: Rewriting query '%s' -> '%s'", message, rewritten_query)
+                results = await self.retriever.retrieve(rewritten_query, scopes=scopes)
+        self._add_retrieved(context, results)
 
     @staticmethod
     def _add_retrieved(context: ConversationContext, results) -> None:

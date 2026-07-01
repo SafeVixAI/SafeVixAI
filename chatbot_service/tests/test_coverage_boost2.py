@@ -43,18 +43,23 @@ class FakeConversationMemoryStore:
         pass
 
 class FakeVectorStore:
-    def __init__(self, persist_dir, data_dir, **kwargs):
-        self.persist_dir = persist_dir
-        self.data_dir = data_dir
-    def build_index(self, *, force=False):
+    def __init__(self, *args, **kwargs):
+        pass
+
+    async def ensure_index(self):
         return []
-    def stats(self):
+
+    async def build_index(self, *, force=False):
+        return []
+
+    async def stats(self):
         return {"chunks": 1, "categories": 1, "chroma_chunks": 1, "embedding_model": "test"}
 
 class FakeRetriever:
-    def __init__(self, vectorstore, *, default_top_k=5, min_score=0.0):
+    def __init__(self, vectorstore, *args, **kwargs):
         self.vectorstore = vectorstore
-    def retrieve(self, query, *, top_k=None, scopes=None):
+
+    async def retrieve(self, query, *, top_k=None, scopes=None):
         return []
 
 class FakeSosTool:

@@ -306,7 +306,6 @@ async def test_tenant_aware_query_execute_no_tenant():
 
 def test_all_tenant_aware_tables_have_org_id():
     """Test that all tenant-aware tables are expected to have org_id."""
-    # This is a documentation test - verifies the tables we expect to filter
     expected_tables = {
         'users',
         'user_profiles',
@@ -322,25 +321,61 @@ def test_all_tenant_aware_tables_have_org_id():
 def test_tenant_aware_query_with_multiple_entities():
     """Test filtering with multiple entities in column_descriptions."""
     mock_session = MagicMock(spec=AsyncSession)
-    
-    # Create mock entities
     mock_user_entity = MagicMock()
     mock_user_entity.__tablename__ = 'users'
     mock_user_entity.org_id = MagicMock()
-    
     mock_other_entity = MagicMock()
     mock_other_entity.__tablename__ = 'some_other_table'
     mock_other_entity.org_id = MagicMock()
-    
     mock_stmt = MagicMock()
     mock_stmt.column_descriptions = [
         {'entity': mock_user_entity},
         {'entity': mock_other_entity},
     ]
     mock_stmt.where.return_value = mock_stmt
-    
     query = TenantAwareQuery(mock_session, 'org_456')
     query.filter_by_tenant(mock_stmt)
-    
-    # Verify where clause was called once (for users table only)
     assert mock_stmt.where.call_count == 1
+
+
+def test_do_orm_execute_skips_non_select():
+    """do_orm_execute should skip non-SELECT statements (line 57 branch)."""
+    from core.tenant import apply_tenant_filter
+    from sqlalchemy import create_engine, Column, String, Integer, select, update
+    from sqlalchemy.orm import declarative_base, Session
+    Base = declarative_base()
+    class TestUser(Base):
+        __tablename__ = 'users'
+        id = Column(Integer, primary_key=True)
+        name = Column(String)
+        org_id = Column(String)
+    engine = create_engine('sqlite://', echo=False)
+    Base.metadata.create_all(engine)
+    with Session(engine) as session:
+        apply_tenant_filter(session, 'org_1')
+        session.add(TestUser(name='dave', org_id='org_2'))
+        session.flush()
+        stmt = update(TestUser).where(TestUser.name == 'dave').values(name='dave2')
+        session.execute(stmt)
+        session.commit()
+
+
+def test_do_orm_execute_skips_non_tenant_aware():
+    """do_orm_execute should skip non-tenant-aware tables (line 57 else branch)."""
+    from core.tenant import apply_tenant_filter
+    from sqlalchemy import create_engine, Column, String, Integer, select
+    from sqlalchemy.orm import declarative_base, Session
+    Base = declarative_base()
+    class NonTenantTable(Base):
+        __tablename__ = 'non_tenant_table'
+        id = Column(Integer, primary_key=True)
+        name = Column(String)
+    engine = create_engine('sqlite://', echo=False)
+    Base.metadata.create_all(engine)
+    with Session(engine) as session:
+        apply_tenant_filter(session, 'org_1')
+        session.add(NonTenantTable(name='test'))
+        session.flush()
+        rows = session.execute(select(NonTenantTable)).scalars().all()
+        assert len(rows) == 1
+        session.commit()

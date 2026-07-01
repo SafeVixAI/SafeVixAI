@@ -36,10 +36,16 @@ class FakeMemoryStore:
 
 
 class FakeVectorStore:
-    def build_index(self, *, force=False):
+    def __init__(self, *args, **kwargs):
+        pass
+
+    async def ensure_index(self):
         return []
 
-    def stats(self):
+    async def build_index(self, *, force=False):
+        return []
+
+    async def stats(self):
         return {"chunks": 1, "categories": 1, "chroma_chunks": 1, "embedding_model": "test"}
 
 
@@ -59,17 +65,11 @@ class FakeIntentDetector:
 
 
 class FakeRetriever:
-    def retrieve(self, query, *, top_k=None, scopes=None):
-        return [
-            SimpleNamespace(
-                source="kb:general",
-                title="Test KB",
-                category="general",
-                content=f"Reference for: {query}",
-                score=0.98,
-            )
-        ]
+    def __init__(self, vectorstore, *args, **kwargs):
+        self.vectorstore = vectorstore
 
+    async def retrieve(self, query, *, top_k=None, scopes=None):
+        return []
 
 class FakeSosTool:
     async def get_payload(self, *, lat, lon):
@@ -352,8 +352,9 @@ async def test_get_history(engine):
     assert len(history) >= 4
 
 
-def test_stats(engine):
-    stats = engine.stats()
+@pytest.mark.asyncio
+async def test_stats(engine):
+    stats = await engine.stats()
     assert "chunks" in stats
     assert "categories" in stats
 

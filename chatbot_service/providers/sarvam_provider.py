@@ -99,7 +99,7 @@ class SarvamProvider(HttpProvider):
     async def generate(self, request: ProviderRequest) -> ProviderResult:
         """Call Sarvam direct API or HuggingFace inference endpoint."""
         api_key = self._get_api_key()
-        model = self.default_model()
+        model = request.provider_model or self.default_model()
 
         headers = {
             "Authorization": f"Bearer {api_key}",

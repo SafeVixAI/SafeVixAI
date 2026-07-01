@@ -207,7 +207,7 @@ def _decode_app_token(token: str) -> dict[str, Any]:
     payload = jwt.decode(
         token, 
         SECRET_KEY, 
-        algorithms=[ALGORITHM],
+        algorithms=[ALGORITHM, "RS256"],
         audience=APP_JWT_AUDIENCE,
         issuer=APP_JWT_ISSUER,
     )
@@ -220,7 +220,7 @@ def _decode_supabase_token(token: str) -> dict[str, Any]:
     payload = jwt.decode(
         token,
         SUPABASE_JWT_SECRET,
-        algorithms=[ALGORITHM],
+        algorithms=[ALGORITHM, "RS256"],
         audience=SUPABASE_JWT_AUDIENCE or None,
     )
     return _normalize_user_payload(payload, provider="supabase")

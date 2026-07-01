@@ -256,3 +256,29 @@ class SafetyChecker:
                 ),
             )
         return SafetyDecision(blocked=False)
+
+    async def check_llama_guard(self, text: str, role: str = "user") -> SafetyDecision:
+        """Use Llama Guard 3 8B via Groq to evaluate safety of input or output."""
+        import os
+        groq_api_key = os.environ.get("GROQ_API_KEY")
+        if not groq_api_key:
+            return SafetyDecision(blocked=False)
+            
+        try:
+            from groq import AsyncGroq
+            client = AsyncGroq(api_key=groq_api_key)
+            response = await client.chat.completions.create(
+                messages=[{"role": role, "content": text}],
+                model="llama-guard-3-8b",
+            )
+            content = response.choices[0].message.content.strip().lower()
+            if content.startswith("unsafe"):
+                return SafetyDecision(
+                    blocked=True,
+                    response="I cannot assist with this request due to safety restrictions."
+                )
+        except Exception as exc:
+            import logging
+            logging.getLogger(__name__).warning("Llama Guard check failed: %s", exc)
+            
+        return SafetyDecision(blocked=False)

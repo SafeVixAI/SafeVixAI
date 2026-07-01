@@ -125,22 +125,35 @@ class OSMBulkIngestor(BaseIngestor):
             data = resp.json()
 
         elements = data.get('elements', [])
-        results = []
+        return list(self.iter_parse_elements(elements, city, feature_type))
+
+    def iter_parse_elements(self, elements: list[dict[str, Any]], city: str, feature_type: str) -> Any:
+        """Iterative generator to parse OSM elements without large memory buffers."""
         for elem in elements:
             if elem.get('type') != 'node':
                 continue
             lat, lon = elem.get('lat'), elem.get('lon')
             if lat is None or lon is None:
                 continue
-            results.append({
+            yield {
                 'osm_id': elem['id'],
                 'feature_type': feature_type,
                 'city': city,
                 'lat': lat,
                 'lon': lon,
                 'tags_json': elem.get('tags', {}),
-            })
-        return results
+            }
+
+    async def fetch_stream(self) -> Any:
+        """Streaming iterative fetch yielding feature batches per city and feature type."""
+        for city, bbox in CITY_BBOXES.items():
+            for feature_type, query_frag in CIVIC_FEATURE_QUERIES.items():
+                try:
+                    features = await self._query_overpass(city, bbox, feature_type, query_frag)
+                    if features:
+                        yield features
+                except Exception as exc:
+                    logger.warning('[OSM] %s/%s stream failed: %s', city, feature_type, exc)
 
     async def transform(self, raw: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """Deduplicate by osm_id."""

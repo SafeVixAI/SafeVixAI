@@ -24,5 +24,8 @@ class UserProviderConfig(Base):
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     priority: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     is_custom: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    is_local_model: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    timeout_ms: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    circuit_breaker_failures: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))

@@ -122,6 +122,27 @@ describe('AppFrame', function() {
     expect(container.firstChild).toHaveClass('flex');
     expect(container.firstChild).toHaveClass('min-h-dvh');
   });
+
+  it('shows Expand Sidebar button when collapsed and thin disabled', function() {
+    mockStore.isDesktopSidebarCollapsed = true;
+    mockStore.isThinSidebarEnabled = false;
+    render(<AppFrame>content</AppFrame>);
+    expect(screen.getByLabelText('Expand Sidebar')).toBeInTheDocument();
+  });
+
+  it('hides Expand Sidebar button when thin enabled', function() {
+    mockStore.isDesktopSidebarCollapsed = true;
+    mockStore.isThinSidebarEnabled = true;
+    render(<AppFrame>content</AppFrame>);
+    expect(screen.queryByLabelText('Expand Sidebar')).toBeNull();
+  });
+
+  it('hides Expand Sidebar button when not collapsed', function() {
+    mockStore.isDesktopSidebarCollapsed = false;
+    mockStore.isThinSidebarEnabled = false;
+    render(<AppFrame>content</AppFrame>);
+    expect(screen.queryByLabelText('Expand Sidebar')).toBeNull();
+  });
 });
 
 

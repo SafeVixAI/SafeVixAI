@@ -148,8 +148,9 @@ async def replica_aware_session(write: bool = False):
         async with AsyncSessionLocal() as session:
             yield session
     else:
-        async with get_read_db() as session:
+        async for session in get_read_db():
             yield session
+            break
 
 
 async def check_database() -> bool:

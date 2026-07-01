@@ -1,52 +1,64 @@
-// SPDX-License-Identifier: MIT
-// Copyright (c) 2026 SafeVixAI Team
-
-jest.mock('next/navigation', function() {
-  return { useRouter: function() { return { push: jest.fn() } }, usePathname: function() { return '/settings' }, useSearchParams: function() { return new URLSearchParams() } }
+jest.mock('@/hooks/usePageEntry', function() { return { usePageEntry: function() { return { current: null } } } })
+jest.mock('next/navigation', function() { return { useRouter: function() { return { push: jest.fn(), back: jest.fn() } } } })
+jest.mock('@/components/ui/TerminalHeader', function() { return { TerminalHeader: function() { return null } } })
+jest.mock('@/components/ui/SurfaceCard', function() { return { SurfaceCard: function({ children }) { return children } } })
+jest.mock('@/components/ui/SettingRow', function() { return { SettingRow: function({ title, description }) { var React = require('react'); return React.createElement('div', { 'data-testid': 'setting-row' }, title, description) } } })
+jest.mock('@/components/dashboard/Toggle', function() { return function() { return null } })
+jest.mock('@/components/dashboard/ProfileCard', function() { return function() { return null } })
+jest.mock('@/components/dashboard/TopSearch', function() { return function() { return null } })
+jest.mock('@/components/dashboard/Toast', function() { return function() { return null } })
+jest.mock('@/components/ui/LanguageSelector', function() { return function() { return null } })
+jest.mock('@/lib/store', function() {
+  var state = { crashDetectionEnabled: false, isAuthenticated: true, operatorName: 'TestOp', userProfile: {}, speedAlert: false, hazardNotifs: true, locationTracking: false, sosVibration: true, autoOffline: false, analyticsOptIn: false, navApp: 'google', soundsEnabled: true, setCrashDetectionEnabled: jest.fn(), setSpeedAlert: jest.fn(), setHazardNotifs: jest.fn(), setLocationTracking: jest.fn(), setSosVibration: jest.fn(), setAutoOffline: jest.fn(), setAnalyticsOptIn: jest.fn(), setNavApp: jest.fn(), setSoundsEnabled: jest.fn() }
+  return { useAppStore: Object.assign(function(sel) { return typeof sel === 'function' ? sel(state) : state }, { getState: function() { return state }, setState: jest.fn(), subscribe: jest.fn() }) }
 })
-jest.mock('next/link', function() {
-  return function Link({ children }: { children: React.ReactNode }) { return children }
-})
-jest.mock('@/lib/gsap', function() {
-  return { gsap: { fromTo: jest.fn(), to: jest.fn(), globalTimeline: { timeScale: jest.fn() }, killTweensOf: jest.fn() }, default: { fromTo: jest.fn(), to: jest.fn() } }
-})
-jest.mock('@gsap/react', function() { return { useGSAP: function() {} } })
+jest.mock('@/components/ThemeProvider', function() { return { useTheme: function() { return { theme: 'dark', setTheme: jest.fn() } } } })
 jest.mock('@/lib/navigation-launch', function() { return { setPreferredNavApp: jest.fn() } })
-jest.mock('posthog-js', function() { return { opt_out_capturing: jest.fn(), opt_in_capturing: jest.fn() } })
-jest.mock('@/lib/analytics-provider', function() { return { ANALYTICS_CONSENT_KEY: 'analytics_consent' } })
+jest.mock('@/lib/analytics-provider', function() { return { ANALYTICS_CONSENT_KEY: 'analytics-consent' } })
+jest.mock('posthog-js', function() { return { opt_in_capturing: jest.fn(), opt_out_capturing: jest.fn() } })
+jest.mock('react-i18next', function() { return { useTranslation: function() { return { t: function(k, fb) { return typeof fb === 'string' ? fb : k } } } } })
+jest.mock('lucide-react', function() { return new Proxy({}, { get: function() { return function() { return null } } }) })
 
-import { render, screen } from '@testing-library/react'
-import React from 'react'
-import SettingsPage from '../app/settings/page'
-import { useAppStore } from '@/lib/store'
+var React = require('react')
+var { render, screen } = require('@testing-library/react')
+var SettingsPage = require('../app/settings/page').default
 
 describe('Settings Page', function() {
-  beforeEach(function() {
-    useAppStore.setState({
-      soundsEnabled: true,
-      speedAlert: true,
-      hazardNotifs: true,
-      locationTracking: false,
-      sosVibration: true,
-      crashDetectionEnabled: false,
-      showSatellite: false,
-      showTraffic: false,
-      showSafeSpaces: true,
-      showHazardHeatmap: false,
-      showEmergencyServices: true,
-      aiMode: 'online',
-      userProfile: { name: 'TestUser', bloodGroup: 'O+', vehicleNumber: 'TN01AB1234', emergencyContact: '+919876543210', emergencyContacts: [], medicalConditions: '', preferredLanguage: 'en', id: 'test-1', phone: '+911234567890' },
-    })
+  it('renders sr-only Settings heading', function() {
+    render(React.createElement(SettingsPage))
+    expect(screen.getByText('Settings')).toBeTruthy()
   })
 
-  it('renders settings page heading', function() {
+  it('renders setting rows', function() {
     render(React.createElement(SettingsPage))
-    var headings = screen.getAllByText(/Settings/)
-    expect(headings.length).toBeGreaterThan(0)
+    var rows = screen.getAllByTestId('setting-row')
+    expect(rows.length).toBeGreaterThan(0)
   })
 
-  it('renders Sentinel Active status', function() {
+  it('renders theme buttons', function() {
     render(React.createElement(SettingsPage))
-    expect(screen.getByText('Sentinel Active')).toBeTruthy()
+    expect(screen.getByText('settings.light')).toBeTruthy()
+    expect(screen.getByText('settings.dark')).toBeTruthy()
+    expect(screen.getByText('settings.system')).toBeTruthy()
+  })
+
+  it('renders signed in status when authenticated', function() {
+    render(React.createElement(SettingsPage))
+    expect(screen.getByText('settings.signed_in')).toBeTruthy()
+  })
+
+  it('renders operator name', function() {
+    render(React.createElement(SettingsPage))
+    expect(screen.getByText('TestOp')).toBeTruthy()
+  })
+
+  it('renders JWT badge when authenticated', function() {
+    render(React.createElement(SettingsPage))
+    expect(screen.getByText('JWT')).toBeTruthy()
+  })
+
+  it('renders active user badge', function() {
+    render(React.createElement(SettingsPage))
+    expect(screen.getByText('settings.active_user')).toBeTruthy()
   })
 })

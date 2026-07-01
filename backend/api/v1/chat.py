@@ -102,10 +102,10 @@ async def chat_stream(
                     async for chunk in response.aiter_bytes():
                         yield chunk
             except Exception:
-                yield f"data: {json.dumps({'type': 'error', 'message': 'Chatbot service unavailable, using fallback'})}\n\n"
+                yield f"data: {json.dumps({'type': 'error', 'message': 'Chatbot service unavailable, using fallback'})}\n\n".encode("utf-8")
                 fallback = _get_fallback_response(payload.message, payload.session_id or "")
-                yield f"data: {json.dumps({'type': 'token', 'text': fallback.response})}\n\n"
-                yield f"data: {json.dumps({'type': 'done', 'intent': fallback.intent, 'sources': fallback.sources})}\n\n"
+                yield f"data: {json.dumps({'type': 'token', 'text': fallback.response})}\n\n".encode("utf-8")
+                yield f"data: {json.dumps({'type': 'done', 'intent': fallback.intent, 'sources': fallback.sources})}\n\n".encode("utf-8")
 
     return StreamingResponse(
         _generate(),

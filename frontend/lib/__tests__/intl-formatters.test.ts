@@ -342,4 +342,50 @@ describe('intl-formatters', function() {
       expect(result.length).toBeGreaterThan(0);
     });
   });
+
+  // ── Catch block fallbacks ──
+
+  describe('catch block fallbacks', function() {
+    afterEach(function() {
+      jest.restoreAllMocks();
+    });
+
+    it('formatNumber falls back to toLocaleString when Intl.NumberFormat throws (line 38)', function() {
+      jest.spyOn(Intl, 'NumberFormat').mockImplementation(function() { throw new Error('mock'); });
+      expect(formatNumber(42)).toBe('42');
+    });
+
+    it('formatCurrency falls back when Intl.NumberFormat throws (line 53)', function() {
+      jest.spyOn(Intl, 'NumberFormat').mockImplementation(function() { throw new Error('mock'); });
+      var result = formatCurrency(500);
+      expect(result).toMatch(/₹/);
+      expect(result).toContain('500');
+    });
+
+    it('formatDecimal falls back to toFixed when Intl.NumberFormat throws (line 67)', function() {
+      jest.spyOn(Intl, 'NumberFormat').mockImplementation(function() { throw new Error('mock'); });
+      expect(formatDecimal(3.456, 1)).toBe('3.5');
+    });
+
+    it('formatTime falls back to toTimeString when Intl.DateTimeFormat throws (line 154)', function() {
+      jest.spyOn(Intl, 'DateTimeFormat').mockImplementation(function() { throw new Error('mock'); });
+      var d = new Date(2026, 5, 22, 14, 30, 0);
+      var result = formatTime(d);
+      expect(result).toMatch(/14:30/);
+    });
+
+    it('formatDateTime falls back when Intl.DateTimeFormat throws (lines 168-169)', function() {
+      jest.spyOn(Intl, 'DateTimeFormat').mockImplementation(function() { throw new Error('mock'); });
+      var d = new Date(2026, 5, 22, 14, 30, 0);
+      var result = formatDateTime(d);
+      expect(result).toMatch(/Jun/);
+    });
+
+    it('formatRelativeTime falls back when Intl.RelativeTimeFormat throws (lines 203-210)', function() {
+      jest.spyOn(Intl, 'RelativeTimeFormat').mockImplementation(function() { throw new Error('mock'); });
+      var past = new Date(Date.now() - 60000);
+      var result = formatRelativeTime(past);
+      expect(result).toMatch(/min ago|just now/);
+    });
+  });
 });

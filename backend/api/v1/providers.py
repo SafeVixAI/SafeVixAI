@@ -4,7 +4,7 @@ import uuid
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from sqlalchemy import select, delete as sa_delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -28,6 +28,15 @@ class ProviderConfigCreate(BaseModel):
     is_active: bool = True
     priority: int = 0
     is_custom: bool = False
+    is_local_model: bool = False
+    timeout_ms: int | None = Field(None, ge=1000, le=60000)
+
+    @field_validator('base_url')
+    @classmethod
+    def validate_base_url(cls, v: str | None) -> str | None:
+        if v and not str(v).startswith(('http://', 'https://')):
+            raise ValueError("base_url must start with http:// or https://")
+        return v
 
 
 class ProviderConfigUpdate(BaseModel):
@@ -38,6 +47,15 @@ class ProviderConfigUpdate(BaseModel):
     extra_headers: dict[str, str] | None = None
     is_active: bool | None = None
     priority: int | None = None
+    is_local_model: bool | None = None
+    timeout_ms: int | None = Field(None, ge=1000, le=60000)
+
+    @field_validator('base_url')
+    @classmethod
+    def validate_base_url(cls, v: str | None) -> str | None:
+        if v and not str(v).startswith(('http://', 'https://')):
+            raise ValueError("base_url must start with http:// or https://")
+        return v
 
 
 class ProviderConfigResponse(BaseModel):
@@ -50,6 +68,9 @@ class ProviderConfigResponse(BaseModel):
     is_active: bool
     priority: int
     is_custom: bool
+    is_local_model: bool
+    timeout_ms: int | None
+    circuit_breaker_failures: int
     created_at: str
     updated_at: str
 
@@ -112,6 +133,9 @@ async def list_provider_configs(
             is_active=c.is_active,
             priority=c.priority,
             is_custom=c.is_custom,
+            is_local_model=c.is_local_model,
+            timeout_ms=c.timeout_ms,
+            circuit_breaker_failures=c.circuit_breaker_failures,
             created_at=c.created_at.isoformat(),
             updated_at=c.updated_at.isoformat(),
         )
@@ -152,6 +176,8 @@ async def create_provider_config(
         is_active=data.is_active,
         priority=data.priority,
         is_custom=data.is_custom,
+        is_local_model=data.is_local_model,
+        timeout_ms=data.timeout_ms,
     )
     db.add(config)
     await db.commit()
@@ -167,6 +193,9 @@ async def create_provider_config(
         is_active=config.is_active,
         priority=config.priority,
         is_custom=config.is_custom,
+        is_local_model=config.is_local_model,
+        timeout_ms=config.timeout_ms,
+        circuit_breaker_failures=config.circuit_breaker_failures,
         created_at=config.created_at.isoformat(),
         updated_at=config.updated_at.isoformat(),
     )
@@ -208,6 +237,10 @@ async def update_provider_config(
         config.is_active = data.is_active
     if data.priority is not None:
         config.priority = data.priority
+    if data.is_local_model is not None:
+        config.is_local_model = data.is_local_model
+    if data.timeout_ms is not None:
+        config.timeout_ms = data.timeout_ms
 
     await db.commit()
     await db.refresh(config)
@@ -222,6 +255,9 @@ async def update_provider_config(
         is_active=config.is_active,
         priority=config.priority,
         is_custom=config.is_custom,
+        is_local_model=config.is_local_model,
+        timeout_ms=config.timeout_ms,
+        circuit_breaker_failures=config.circuit_breaker_failures,
         created_at=config.created_at.isoformat(),
         updated_at=config.updated_at.isoformat(),
     )
@@ -290,7 +326,10 @@ async def test_provider_connection(
                 body = await resp.aread()
                 return {"status": "error", "message": f"HTTP {resp.status_code}: {body[:200].decode(errors='replace')}"}
     except httpx.ConnectError:
-        return {"status": "error", "message": f"Cannot connect to {base_url}. Check URL and network."}
+        err_msg = f"Cannot connect to {base_url}. Check URL and network."
+        if "localhost" in base_url or "127.0.0.1" in base_url:
+            err_msg += " Note: If running in Docker, 'localhost' refers to the container. Use 'host.docker.internal' or your machine's IP."
+        return {"status": "error", "message": err_msg}
     except httpx.TimeoutException:
         return {"status": "error", "message": "Connection timed out after 10s"}
     except Exception as e:
@@ -307,34 +346,43 @@ async def sync_providers_to_chatbot(
     """Sync active provider configs to the chatbot service for the current session."""
     user_id = str(current_user.get("sub")) if current_user else "anonymous"
 
-    result = await db.execute(
-        select(UserProviderConfig)
-        .where(
-            UserProviderConfig.user_id == user_id,
-            UserProviderConfig.is_active == True,
+    from core.distributed_lock import distributed_lock
+
+    # P17: Enforce distributed Redlock isolation around /api/v1/providers/sync
+    async with distributed_lock(f"sync_providers:{user_id}", ttl_seconds=5) as acquired:
+        if not acquired:
+            raise HTTPException(status_code=409, detail="Sync operation already in progress")
+
+        result = await db.execute(
+            select(UserProviderConfig)
+            .where(
+                UserProviderConfig.user_id == user_id,
+                UserProviderConfig.is_active == True,
+            )
+            .order_by(UserProviderConfig.priority)
         )
-        .order_by(UserProviderConfig.priority)
-    )
-    configs = result.scalars().all()
+        configs = result.scalars().all()
 
-    provider_list = []
-    for c in configs:
-        key = decrypt_api_key(c.api_key_encrypted)
-        provider_list.append({
-            "provider_name": c.provider_name,
-            "display_name": c.display_name,
-            "api_key": key,
-            "base_url": c.base_url,
-            "default_model": c.default_model,
-            "extra_headers": c.extra_headers,
-            "is_custom": c.is_custom,
-            "priority": c.priority,
-        })
+        provider_list = []
+        for c in configs:
+            key = decrypt_api_key(c.api_key_encrypted)
+            provider_list.append({
+                "provider_name": c.provider_name,
+                "display_name": c.display_name,
+                "api_key": key,
+                "base_url": c.base_url,
+                "default_model": c.default_model,
+                "extra_headers": c.extra_headers,
+                "is_custom": c.is_custom,
+                "is_local_model": c.is_local_model,
+                "timeout_ms": c.timeout_ms,
+                "priority": c.priority,
+            })
 
-    from core.redis_client import get_redis_client
-    redis = await get_redis_client()
-    if redis:
-        import json
-        await redis.setex(f"user_providers:{user_id}", 86400, json.dumps(provider_list))
+        from core.redis_client import get_redis_client
+        redis = await get_redis_client()
+        if redis:
+            import json
+            await redis.setex(f"user_providers:{user_id}", 86400, json.dumps(provider_list))
 
-    return {"synced": len(provider_list), "providers": [p["provider_name"] for p in provider_list]}
+        return {"synced": len(provider_list), "providers": [p["provider_name"] for p in provider_list]}

@@ -47,4 +47,40 @@ describe('ContactChannels', function() {
     render(React.createElement(ContactChannels, { municipality: mockMunicipality as any }))
     expect(screen.getByText('MuniApp')).toBeTruthy()
   })
+
+  it('handles null/empty fields showing Not available', function() {
+    var partial = {
+      headquartersAddress: null,
+      helplinePhone: null,
+      email: null,
+      websiteUrl: null,
+      whatsappNumber: null,
+      grievancePortalUrl: null,
+      appName: null,
+    }
+    render(React.createElement(ContactChannels, { municipality: partial as any }))
+    var notAvailables = screen.getAllByText('Not available')
+    expect(notAvailables.length).toBeGreaterThanOrEqual(6)
+    expect(screen.queryByRole('link')).toBeNull()
+  })
+
+  it('handles partial fields with some null', function() {
+    var partial = {
+      headquartersAddress: 'Office',
+      helplinePhone: null,
+      email: 'test@test.com',
+      websiteUrl: null,
+      whatsappNumber: null,
+      grievancePortalUrl: 'https://grievance.test',
+      appName: 'App',
+    }
+    render(React.createElement(ContactChannels, { municipality: partial as any }))
+    expect(screen.getByText('Office')).toBeTruthy()
+    expect(screen.getByText('test@test.com')).toBeTruthy()
+    expect(screen.getByText('File a Complaint')).toBeTruthy()
+    expect(screen.getByText('App')).toBeTruthy()
+    // Null fields show 'Not available'
+    var notAvail = screen.getAllByText('Not available')
+    expect(notAvail.length).toBeGreaterThanOrEqual(1)
+  })
 })

@@ -1,6 +1,3 @@
-// SPDX-License-Identifier: MIT
-// Copyright (c) 2026 SafeVixAI Team
-
 jest.mock('next/navigation', function() {
   return { useRouter: function() { return { push: jest.fn() } }, usePathname: function() { return '/profile' }, useSearchParams: function() { return new URLSearchParams() } }
 })
@@ -14,8 +11,15 @@ jest.mock('@gsap/react', function() { return { useGSAP: function() {} } })
 jest.mock('@/lib/analytics', function() { return { track: jest.fn() } })
 jest.mock('sonner', function() { return { toast: { error: jest.fn(), success: jest.fn() } } })
 jest.mock('@/lib/guest-auth', function() {
-  return { getOrCreateGuestId: function() { return 'guest-1' }, getGuestProfile: function() { return null }, updateGuestProfile: jest.fn(), isGuestMode: function() { return false } }
+  return { getOrCreateGuestId: function() { return 'guest-1' }, getGuestProfile: function() { return null }, updateGuestProfile: jest.fn(), isGuestMode: function() { return true } }
 })
+jest.mock('@/components/dashboard/TopSearch', function() { return function() { return null } })
+jest.mock('@/components/ui/TerminalHeader', function() { return { TerminalHeader: function() { return null } } })
+jest.mock('@/components/ui/SurfaceCard', function() { return { SurfaceCard: function({ children, padding, className }) { var React = require('react'); return React.createElement('div', { className }, children) } } })
+jest.mock('@/components/ui/SettingRow', function() { return { SettingRow: function({ icon, title, description, rightElement }) { var React = require('react'); return React.createElement('div', null, title, rightElement) } } })
+jest.mock('@/components/dashboard/Toggle', function() { return function() { return null } })
+jest.mock('@/components/profile/QREmergencyCard', function() { return function() { return null } })
+jest.mock('lucide-react', function() { return new Proxy({}, { get: function() { return function() { return null } } }) })
 
 import { render, screen } from '@testing-library/react'
 import React from 'react'
@@ -36,13 +40,73 @@ describe('Profile Page', function() {
     expect(screen.getByText('User Profile')).toBeTruthy()
   })
 
-  it('renders main heading', function() {
+  it('renders user name', function() {
     render(React.createElement(ProfilePage))
-    expect(screen.getByText('Operator Identity Matrix')).toBeTruthy()
+    expect(screen.getByText('TestUser')).toBeTruthy()
   })
 
-  it('renders QR Emergency Card section', function() {
-    var { container } = render(React.createElement(ProfilePage))
-    expect(container.textContent).toContain('QR Emergency Card')
+  it('renders blood group', function() {
+    render(React.createElement(ProfilePage))
+    expect(screen.getByText('O+')).toBeTruthy()
+  })
+
+  it('renders vehicle number', function() {
+    render(React.createElement(ProfilePage))
+    expect(screen.getByText('TN01AB1234')).toBeTruthy()
+  })
+
+  it('renders emergency contact', function() {
+    render(React.createElement(ProfilePage))
+    expect(screen.getByText('+919876543210')).toBeTruthy()
+  })
+
+  it('renders Edit Profile button', function() {
+    render(React.createElement(ProfilePage))
+    expect(screen.getByText('Edit Profile')).toBeTruthy()
+  })
+
+  it('renders Crash Detection toggle', function() {
+    render(React.createElement(ProfilePage))
+    expect(screen.getByText('Crash Detection')).toBeTruthy()
+  })
+
+  it('renders V8 Offline Mode toggle', function() {
+    render(React.createElement(ProfilePage))
+    expect(screen.getByText('V8 Offline Mode')).toBeTruthy()
+  })
+
+  it('renders Push Hub toggle', function() {
+    render(React.createElement(ProfilePage))
+    expect(screen.getByText('Push Hub')).toBeTruthy()
+  })
+
+  it('renders Sign Out Operator button when authenticated', function() {
+    render(React.createElement(ProfilePage))
+    expect(screen.getByText('Sign Out Operator')).toBeTruthy()
+  })
+
+  it('renders PURGE LOCAL SESSION button', function() {
+    render(React.createElement(ProfilePage))
+    expect(screen.getByText('PURGE LOCAL SESSION')).toBeTruthy()
+  })
+
+  it('renders Mission Protocol section heading', function() {
+    render(React.createElement(ProfilePage))
+    expect(screen.getByText('Mission Protocol')).toBeTruthy()
+  })
+
+  it('renders display ID tag', function() {
+    render(React.createElement(ProfilePage))
+    expect(screen.getByText(/test-1/)).toBeTruthy()
+  })
+
+  it('renders Profile Matrix Sync badge', function() {
+    render(React.createElement(ProfilePage))
+    expect(screen.getByText('Profile Matrix Sync')).toBeTruthy()
+  })
+
+  it('renders VEHICLE_REGISTRATION label', function() {
+    render(React.createElement(ProfilePage))
+    expect(screen.getByText('VEHICLE_REGISTRATION')).toBeTruthy()
   })
 })

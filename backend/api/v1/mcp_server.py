@@ -494,3 +494,19 @@ async def get_mcp_info() -> dict[str, Any]:
         ],
     }
 
+
+@router.get("/health")
+async def get_mcp_health() -> dict[str, Any]:
+    """Health check endpoint for MCP server integration."""
+    try:
+        return {
+            "status": "healthy",
+            "mcp_server": "online",
+            "transport": "sse",
+            "tools_count": len(mcp._mcp_server.tools) if hasattr(mcp._mcp_server, "tools") else 7,
+        }
+    except Exception as exc:
+        logger.exception("MCP health check failed")
+        from fastapi import HTTPException
+        raise HTTPException(status_code=500, detail=f"MCP health check failed: {exc}") from exc
+

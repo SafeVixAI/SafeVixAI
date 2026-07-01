@@ -8,6 +8,8 @@ import logging
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
+import asyncpg
+
 from rag.document_loader import LoadedDocument, load_documents
 from rag.embeddings import build_embedding_function, normalize_text, score_query
 
@@ -32,198 +34,187 @@ class DocumentChunk:
 class LocalVectorStore:
     def __init__(
         self,
-        persist_dir: Path,
+        database_url: str,
         data_dir: Path,
         *,
+        collection_name: str = 'safevixai_rag',
         embedding_model: str = 'sentence-transformers/all-MiniLM-L6-v2',
-        use_chroma: bool = True,
+        embedding_dim: int = 384,
     ) -> None:
-        self.persist_dir = persist_dir
+        self.database_url = database_url
         self.data_dir = data_dir
-        self.index_path = persist_dir / 'simple_index.json'
-        self._chunks: list[DocumentChunk] = []
+        self.collection_name = collection_name
         self.embedding_model = embedding_model
-        self.use_chroma = use_chroma
+        self.embedding_dim = embedding_dim
         self._embedding_function = build_embedding_function(embedding_model)
-        self._collection = None
+        self._pool: asyncpg.Pool | None = None
+        self._chunks: list[DocumentChunk] = []
 
-    def ensure_index(self) -> list[DocumentChunk]:
+    async def _get_pool(self) -> asyncpg.Pool:
+        if self._pool is None:
+            self._pool = await asyncpg.create_pool(self.database_url)
+        return self._pool
+
+    async def init_db(self) -> None:
+        pool = await self._get_pool()
+        async with pool.acquire() as conn:
+            await conn.execute('CREATE EXTENSION IF NOT EXISTS vector')
+            await conn.execute(f'''
+                CREATE TABLE IF NOT EXISTS {self.collection_name} (
+                    chunk_id TEXT PRIMARY KEY,
+                    source TEXT,
+                    title TEXT,
+                    category TEXT,
+                    content TEXT,
+                    embedding vector({self.embedding_dim})
+                )
+            ''')
+            # Create HNSW index for L2 distance
+            await conn.execute(f'''
+                CREATE INDEX IF NOT EXISTS {self.collection_name}_embedding_idx
+                ON {self.collection_name} USING hnsw (embedding vector_l2_ops)
+            ''')
+
+    async def ensure_index(self) -> list[DocumentChunk]:
         if self._chunks:
             return self._chunks
 
-        collection = self._get_collection()
-        if collection is not None:
-            try:
-                if collection.count() > 0:
-                    if self.index_path.exists():
-                        self._chunks = self._load_index_file()
-                        return self._chunks
-            except Exception as exc:
-                logger.warning('Unable to read Chroma collection metadata: %s', exc)
+        await self.init_db()
+        pool = await self._get_pool()
+        
+        async with pool.acquire() as conn:
+            count = await conn.fetchval(f'SELECT COUNT(*) FROM {self.collection_name}')
+            
+            if count > 0:
+                rows = await conn.fetch(f'SELECT chunk_id, source, title, category, content FROM {self.collection_name}')
+                self._chunks = [DocumentChunk(**dict(row)) for row in rows]
+                return self._chunks
 
-        if self.index_path.exists():
-            self._chunks = self._load_index_file()
-            if collection is not None:
-                self._upsert_chroma(collection, self._chunks)
-            return self._chunks
-        return self.build_index(force=True)
+        return await self.build_index(force=True)
 
-    def build_index(self, *, force: bool = False) -> list[DocumentChunk]:
+    async def build_index(self, *, force: bool = False) -> list[DocumentChunk]:
         if self._chunks and not force:
             return self._chunks
+            
+        await self.init_db()
+        
         documents = load_documents(self.data_dir)
         chunks: list[DocumentChunk] = []
         for document in documents:
             chunks.extend(self._chunk_document(document))
+            
         self._chunks = self._filter_chunks(chunks)
-        self._write_index_file(self._chunks)
-        collection = self._get_collection()
-        if collection is not None:
-            self._upsert_chroma(collection, self._chunks)
+        await self._upsert_pg(self._chunks)
         return self._chunks
-
-    def _load_index_file(self) -> list[DocumentChunk]:
-        raw = json.loads(self.index_path.read_text(encoding='utf-8'))
-        all_chunks = [DocumentChunk(**item) for item in raw]
-        chunks = self._filter_chunks(all_chunks)
-        if len(chunks) != len(all_chunks):
-            self._write_index_file(chunks)
-        return chunks
-
-    def _write_index_file(self, chunks: list[DocumentChunk]) -> None:
-        self.persist_dir.mkdir(parents=True, exist_ok=True)
-        self.index_path.write_text(
-            json.dumps([asdict(chunk) for chunk in chunks], ensure_ascii=False, indent=2),
-            encoding='utf-8',
-        )
 
     @staticmethod
     def _filter_chunks(chunks: list[DocumentChunk]) -> list[DocumentChunk]:
         return [chunk for chunk in chunks if chunk.category not in EXCLUDED_INDEX_CATEGORIES]
 
-    def search(
+    async def _upsert_pg(self, chunks: list[DocumentChunk]) -> None:
+        if not chunks:
+            return
+            
+        pool = await self._get_pool()
+        
+        # We need to compute embeddings for all chunks before inserting
+        contents = [chunk.content for chunk in chunks]
+        try:
+            embeddings = self._embedding_function(contents)
+        except Exception as exc:
+            logger.warning('Failed to generate embeddings: %s', exc)
+            return
+
+        async with pool.acquire() as conn:
+            async with conn.transaction():
+                for chunk, embedding in zip(chunks, embeddings):
+                    # pgvector expects string representation like '[1.2, 0.5, ...]'
+                    emb_str = f"[{','.join(str(x) for x in embedding)}]"
+                    await conn.execute(
+                        f'''
+                        INSERT INTO {self.collection_name} (chunk_id, source, title, category, content, embedding)
+                        VALUES ($1, $2, $3, $4, $5, $6::vector)
+                        ON CONFLICT (chunk_id) DO UPDATE SET
+                            source = EXCLUDED.source,
+                            title = EXCLUDED.title,
+                            category = EXCLUDED.category,
+                            content = EXCLUDED.content,
+                            embedding = EXCLUDED.embedding
+                        ''',
+                        chunk.chunk_id, chunk.source, chunk.title, chunk.category, chunk.content, emb_str
+                    )
+
+    async def search(
         self,
         query: str,
         *,
         top_k: int = 5,
         scopes: set[str] | None = None,
     ) -> list[tuple[DocumentChunk, float]]:
-        chunks = self.ensure_index()
-        chroma_results = self._search_chroma(query, top_k=top_k, scopes=scopes)
-        if chroma_results:
-            return chroma_results
+        pool = await self._get_pool()
+        
+        try:
+            query_embedding = self._embedding_function([query])[0]
+            emb_str = f"[{','.join(str(x) for x in query_embedding)}]"
+        except Exception as exc:
+            logger.warning('Failed to generate query embedding: %s', exc)
+            return []
 
-        scored: list[tuple[DocumentChunk, float]] = []
-        for chunk in chunks:
-            if scopes and chunk.category not in scopes:
-                continue
-            score = score_query(query, chunk.content)
-            if score > 0:
-                scored.append((chunk, score))
-        scored.sort(key=lambda item: item[1], reverse=True)
-        return scored[:top_k]
+        async with pool.acquire() as conn:
+            where_clause = ""
+            args = [emb_str, top_k]
+            if scopes:
+                # Format scopes for SQL IN clause
+                placeholders = ', '.join(f'${i+3}' for i in range(len(scopes)))
+                where_clause = f"WHERE category IN ({placeholders})"
+                args.extend(list(scopes))
 
-    def stats(self) -> dict[str, int | str]:
-        chunks = self.ensure_index()
-        categories = {chunk.category for chunk in chunks}
-        chroma_chunks = 0
-        collection = self._get_collection()
-        if collection is not None:
             try:
-                chroma_chunks = collection.count()
+                # Using L2 distance (<->) for similarity scoring
+                query_sql = f'''
+                    SELECT chunk_id, source, title, category, content,
+                           1.0 / (1.0 + (embedding <-> $1::vector)) as score
+                    FROM {self.collection_name}
+                    {where_clause}
+                    ORDER BY embedding <-> $1::vector
+                    LIMIT $2
+                '''
+                rows = await conn.fetch(query_sql, *args)
+                
+                matches = []
+                for row in rows:
+                    if row['category'] in EXCLUDED_INDEX_CATEGORIES:
+                        continue
+                    chunk = DocumentChunk(
+                        chunk_id=row['chunk_id'],
+                        source=row['source'],
+                        title=row['title'],
+                        category=row['category'],
+                        content=row['content']
+                    )
+                    matches.append((chunk, float(row['score'])))
+                return matches
             except Exception as exc:
-                logger.warning('Unable to count Chroma chunks: %s', exc)
+                logger.warning('pgvector query failed: %s', exc)
+                return []
+
+    async def stats(self) -> dict[str, int | str]:
+        pool = await self._get_pool()
+        async with pool.acquire() as conn:
+            try:
+                count = await conn.fetchval(f'SELECT COUNT(*) FROM {self.collection_name}')
+                categories = await conn.fetchval(f'SELECT COUNT(DISTINCT category) FROM {self.collection_name}')
+            except Exception as exc:
+                logger.warning('Unable to count pgvector chunks: %s', exc)
+                count = 0
+                categories = 0
+                
         return {
-            'chunks': len(chunks),
-            'categories': len(categories),
-            'chroma_chunks': chroma_chunks,
+            'chunks': count,
+            'categories': categories,
             'embedding_model': self.embedding_model,
+            'database': 'pgvector'
         }
-
-    def _get_collection(self):
-        if not self.use_chroma:
-            return None
-        if self._collection is not None:
-            return self._collection
-        try:
-            import chromadb
-
-            self.persist_dir.mkdir(parents=True, exist_ok=True)
-            client = chromadb.PersistentClient(path=str(self.persist_dir))
-            self._collection = client.get_or_create_collection(
-                name='safevixai_rag',
-                embedding_function=self._embedding_function,
-                metadata={'hnsw:space': 'cosine'},
-            )
-            return self._collection
-        except Exception as exc:
-            logger.warning('ChromaDB unavailable, using lexical retrieval fallback: %s', exc)
-            return None
-
-    @staticmethod
-    def _metadata(chunk: DocumentChunk) -> dict[str, str]:
-        return {
-            'source': chunk.source,
-            'title': chunk.title,
-            'category': chunk.category,
-        }
-
-    def _upsert_chroma(self, collection, chunks: list[DocumentChunk]) -> None:
-        if not chunks:
-            return
-        try:
-            collection.upsert(
-                ids=[chunk.chunk_id for chunk in chunks],
-                documents=[chunk.content for chunk in chunks],
-                metadatas=[self._metadata(chunk) for chunk in chunks],
-            )
-        except Exception as exc:
-            logger.warning('Unable to upsert RAG chunks into ChromaDB: %s', exc)
-
-    def _search_chroma(
-        self,
-        query: str,
-        *,
-        top_k: int,
-        scopes: set[str] | None,
-    ) -> list[tuple[DocumentChunk, float]]:
-        collection = self._get_collection()
-        if collection is None:
-            return []
-        try:
-            where = {'category': {'$in': sorted(scopes)}} if scopes else None
-            kwargs = {
-                'query_texts': [query],
-                'n_results': max(1, top_k),
-                'include': ['documents', 'metadatas', 'distances'],
-            }
-            if where is not None:
-                kwargs['where'] = where
-            results = collection.query(**kwargs)
-        except Exception as exc:
-            logger.warning('ChromaDB query failed, using lexical retrieval fallback: %s', exc)
-            return []
-
-        ids = (results.get('ids') or [[]])[0]
-        documents = (results.get('documents') or [[]])[0]
-        metadatas = (results.get('metadatas') or [[]])[0]
-        distances = (results.get('distances') or [[]])[0]
-
-        matches: list[tuple[DocumentChunk, float]] = []
-        for chunk_id, content, metadata, distance in zip(ids, documents, metadatas, distances):
-            metadata = metadata or {}
-            chunk = DocumentChunk(
-                chunk_id=chunk_id,
-                source=str(metadata.get('source') or 'unknown'),
-                title=str(metadata.get('title') or 'SafeVixAI Knowledge Base'),
-                category=str(metadata.get('category') or 'general'),
-                content=content or '',
-            )
-            if chunk.category in EXCLUDED_INDEX_CATEGORIES:
-                continue
-            score = 1.0 / (1.0 + float(distance or 0.0))
-            matches.append((chunk, score))
-        return matches
 
     @staticmethod
     def _chunk_document(document: LoadedDocument) -> list[DocumentChunk]:

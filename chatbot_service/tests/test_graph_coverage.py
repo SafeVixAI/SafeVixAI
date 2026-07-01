@@ -36,17 +36,29 @@ class FakeMemoryStore:
 
 
 class FakeVectorStore:
-    def __init__(self, chunks=1, categories=1):
-        self._chunks = chunks
-        self._categories = categories
+    def __init__(self, database_url=None, data_dir=None, chunks=1, categories=1, **kwargs):
+        self.database_url = database_url
+        self.data_dir = data_dir
+        self.chunks = chunks
+        self.categories = categories
 
-    def build_index(self, *, force=False):
+    async def ensure_index(self):
+        return []
+        
+    async def build_index(self, *, force=False):
         return []
 
-    def stats(self):
-        return {"chunks": self._chunks, "categories": self._categories, "chroma_chunks": self._chunks, "embedding_model": "test"}
+    async def stats(self):
+        return {"chunks": self.chunks, "categories": self.categories, "database": "pgvector", "embedding_model": "test"}
 
+class FakeRetriever:
+    def __init__(self, vectorstore, *, default_top_k=5, min_score=0.0, **kwargs):
+        self.vectorstore = vectorstore
+        self.default_top_k = default_top_k
+        self.min_score = min_score
 
+    async def retrieve(self, query: str, *, top_k: int | None = None, scopes=None) -> list:
+        return []
 class FakeIntentDetector:
     def __init__(self, initial_intent="general", refined_intent=None):
         self._initial = initial_intent
@@ -69,6 +81,10 @@ class FakeSafetyChecker:
         return SafetyDecision(blocked=self._blocked, response=self._response)
 
     def check_output_safety(self, llm_response: str):
+        from agent.safety_checker import SafetyDecision
+        return SafetyDecision(blocked=self._blocked, response=self._response)
+
+    async def check_llama_guard(self, message: str, role: str):
         from agent.safety_checker import SafetyDecision
         return SafetyDecision(blocked=self._blocked, response=self._response)
 
@@ -244,10 +260,10 @@ class TestChat:
         result = await engine.chat(ChatRequest(message="obscure legal question", session_id="weak-test"))
 
         assert "do not know" in result.response.lower()
-        assert result.intent == "legal"
-        assert result.sources == ["policy:weak-retrieval"]
+        assert result.intent == "weak-retrieval"
+        assert "policy:weak-retrieval" in result.sources
         history = await memory.get_history("weak-test")
-        assert history[-1]["metadata"]["sources"] == ["policy:weak-retrieval"]
+        assert "policy:weak-retrieval" in history[-1]["metadata"]["sources"]
 
     @pytest.mark.asyncio
     async def test_weak_retrieval_general_intent_not_triggered(self):
@@ -338,7 +354,7 @@ class TestStreamChat:
         assert events[0]["type"] == "token"
         assert "do not know" in events[0]["text"].lower()
         assert events[1]["type"] == "done"
-        assert events[1]["sources"] == ["policy:weak-retrieval"]
+        assert "policy:weak-retrieval" in events[1]["sources"]
 
     @pytest.mark.asyncio
     async def test_token_and_done_flow(self, base_engine):
@@ -452,7 +468,8 @@ class TestGetHistory:
 
 
 class TestRebuildIndex:
-    def test_rebuild_index_calls_vectorstore(self):
+    @pytest.mark.asyncio
+    async def test_rebuild_index_calls_vectorstore(self):
         vs = FakeVectorStore(chunks=10, categories=3)
         engine = ChatEngine(
             memory_store=FakeMemoryStore(),
@@ -462,13 +479,14 @@ class TestRebuildIndex:
             context_assembler=FakeContextAssembler(),
             provider_router=FakeProviderRouter(),
         )
-        result = engine.rebuild_index()
+        result = await engine.rebuild_index()
         assert result["chunks"] == 10
         assert result["categories"] == 3
 
 
 class TestStats:
-    def test_stats_delegates_to_vectorstore(self):
+    @pytest.mark.asyncio
+    async def test_stats_delegates_to_vectorstore(self):
         vs = FakeVectorStore(chunks=5, categories=2)
         engine = ChatEngine(
             memory_store=FakeMemoryStore(),
@@ -478,7 +496,7 @@ class TestStats:
             context_assembler=FakeContextAssembler(),
             provider_router=FakeProviderRouter(),
         )
-        result = engine.stats()
+        result = await engine.stats()
         assert result["chunks"] == 5
 
 

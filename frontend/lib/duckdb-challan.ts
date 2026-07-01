@@ -186,6 +186,11 @@ export async function initOfflineChallanDB() {
   }
 }
 
+/** @internal — test helper to reset module-level singleton between tests */
+export function __testResetDbInstance() {
+  if (typeof dbInstance !== 'undefined') dbInstance = null;
+}
+
 export async function calculateOfflineChallan(
   violationCode: string, 
   vehicleClass: string, 

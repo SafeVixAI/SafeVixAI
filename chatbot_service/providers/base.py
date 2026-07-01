@@ -240,6 +240,9 @@ class ProviderRequest:
     tool_summaries: list[str] = field(default_factory=list)
     document_snippets: list[str] = field(default_factory=list)
     provider_hint: str | None = None
+    provider_model: str | None = None
+    correlation_id: str | None = None
+    idempotency_key: str | None = None
 
 
 @dataclass(slots=True)
@@ -375,7 +378,7 @@ class HttpProvider:
             return
 
         api_key = self._get_api_key()
-        model = self._model
+        model = request.provider_model or self._model
 
         headers = {
             "Authorization": f"Bearer {api_key}",
@@ -426,7 +429,7 @@ class HttpProvider:
             )
 
         api_key = self._get_api_key()
-        model = self._model
+        model = request.provider_model or self._model
 
         headers = {
             "Authorization": f"Bearer {api_key}",

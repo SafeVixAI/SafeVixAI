@@ -27,7 +27,7 @@ jest.mock('@/lib/api', function() {
 })
 
 jest.mock('@/lib/crash-detection', function() {
-  return { startCrashDetection: jest.fn(function() { return Promise.resolve() }), stopCrashDetection: jest.fn() }
+  return { startCrashDetection: jest.fn(function() { return Promise.resolve() }), stopCrashDetection: jest.fn(), requestCrashPermission: jest.fn() }
 })
 
 jest.mock('@/lib/offline-sos-queue', function() {
@@ -84,7 +84,8 @@ jest.mock('@/components/crash/CrashCountdown', function() {
   return { CrashCountdown: function CrashCountdownMock(props) {
     return React2.createElement('div', { 'data-testid': 'crash-countdown' },
       props.severity,
-      React2.createElement('button', { 'data-testid': 'dispatch-btn', onClick: props.onDispatch }, 'Dispatch')
+      React2.createElement('button', { 'data-testid': 'dispatch-btn', onClick: props.onDispatch }, 'Dispatch'),
+      React2.createElement('button', { 'data-testid': 'cancel-btn', onClick: props.onCancel }, 'Cancel')
     )
   }}
 })
@@ -427,4 +428,88 @@ describe('EnterpriseClientAppHooks', function() {
     await waitFor(function() { expect(queue.enqueueSOS).toHaveBeenCalled() })
   })
 
+  it('shows location error toast when crash dispatch has no GPS', async function() {
+    var features = require('@/lib/features')
+    features.FEATURES.crashDetection = true
+    var store = require('@/lib/store')
+    store.useAppStore.getState().crashDetectionEnabled = true
+    store.useAppStore.getState().gpsLocation = null
+    var crashDetection = require('@/lib/crash-detection')
+    crashDetection.startCrashDetection.mockImplementationOnce(function(handler) {
+      handler(98.0665)
+      return Promise.resolve()
+    })
+    var mod = await import('../EnterpriseClientAppHooks')
+    render(React.createElement(mod.EnterpriseClientAppHooks))
+    await waitFor(function() { expect(screen.getByTestId('dispatch-btn')).toBeInTheDocument() })
+    await act(async function() { screen.getByTestId('dispatch-btn').click() })
+    var { toast } = require('sonner')
+    expect(toast.error).toHaveBeenCalled()
+  })
+
+  it('shows toast when family tracking fails on crash dispatch', async function() {
+    var features = require('@/lib/features')
+    features.FEATURES.crashDetection = true
+    var store = require('@/lib/store')
+    store.useAppStore.getState().crashDetectionEnabled = true
+    store.useAppStore.getState().userProfile.name = 'Test User'
+    var api = require('@/lib/api')
+    api.triggerSos.mockResolvedValueOnce({ id: 'sos-1' })
+    var liveTracking = require('@/lib/live-tracking')
+    liveTracking.startFamilyTracking.mockRejectedValueOnce(new Error('tracking failed'))
+    var crashDetection = require('@/lib/crash-detection')
+    crashDetection.startCrashDetection.mockImplementationOnce(function(handler) {
+      handler(98.0665)
+      return Promise.resolve()
+    })
+    var mod = await import('../EnterpriseClientAppHooks')
+    render(React.createElement(mod.EnterpriseClientAppHooks))
+    await waitFor(function() { expect(screen.getByTestId('dispatch-btn')).toBeInTheDocument() })
+    await act(async function() { screen.getByTestId('dispatch-btn').click() })
+    var { toast } = require('sonner')
+    expect(toast.error).toHaveBeenCalled()
+  })
+
+  it('cancels crash on cancel button click', async function() {
+    var features = require('@/lib/features')
+    features.FEATURES.crashDetection = true
+    var store = require('@/lib/store')
+    store.useAppStore.getState().crashDetectionEnabled = true
+    var crashDetection = require('@/lib/crash-detection')
+    crashDetection.startCrashDetection.mockImplementationOnce(function(handler) {
+      handler(98.0665)
+      return Promise.resolve()
+    })
+    var mod = await import('../EnterpriseClientAppHooks')
+    render(React.createElement(mod.EnterpriseClientAppHooks))
+    await waitFor(function() { expect(screen.getByTestId('cancel-btn')).toBeInTheDocument() })
+    await act(async function() { screen.getByTestId('cancel-btn').click() })
+    expect(screen.queryByTestId('crash-countdown')).not.toBeInTheDocument()
+  })
+
+  it('shows iOS motion permission toast when DeviceMotionEvent.requestPermission exists', async function() {
+    var origDME = (globalThis as any).DeviceMotionEvent
+    ;(globalThis as any).DeviceMotionEvent = { requestPermission: jest.fn() }
+    var features = require('@/lib/features')
+    features.FEATURES.crashDetection = true
+    var store = require('@/lib/store')
+    store.useAppStore.getState().crashDetectionEnabled = true
+    var { toast } = require('sonner')
+    var crashDetection = require('@/lib/crash-detection')
+    crashDetection.requestCrashPermission.mockResolvedValue(true)
+    var mod = await import('../EnterpriseClientAppHooks')
+    render(React.createElement(mod.EnterpriseClientAppHooks))
+    await waitFor(function() { expect(toast.info).toHaveBeenCalled() })
+    var infoCall = toast.info.mock.calls[0]
+    expect(infoCall[0]).toMatch(/iOS Motion Sensors/)
+    expect(infoCall[1].action.label).toBe('Authorize')
+    var onAuthorize = infoCall[1].action.onClick
+    await act(async function() { await onAuthorize() })
+    expect(toast.success).toHaveBeenCalledWith('Motion sensors authorized successfully!')
+    crashDetection.requestCrashPermission.mockResolvedValue(false)
+    toast.success.mockClear()
+    await act(async function() { await onAuthorize() })
+    expect(toast.error).toHaveBeenCalled()
+    ;(globalThis as any).DeviceMotionEvent = origDME
+  })
 })

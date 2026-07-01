@@ -73,4 +73,27 @@ describe('AppSidebar', function() {
     render(React.createElement(AppSidebar))
     expect(screen.getByText('SYSTEM ONLINE')).toBeTruthy()
   })
+
+  it('calls setThinSidebarEnabled on pin toggle click', function() {
+    mockState.isDesktopSidebarCollapsed = false
+    render(React.createElement(AppSidebar))
+    fireEvent.click(screen.getByLabelText('Pin sidebar'))
+    expect(mockState.setThinSidebarEnabled).toHaveBeenCalledWith(true)
+  })
+
+  it('shows Unpin label when thin sidebar enabled', function() {
+    mockState.isDesktopSidebarCollapsed = false
+    mockState.isThinSidebarEnabled = true
+    render(React.createElement(AppSidebar))
+    expect(screen.getByLabelText('Unpin sidebar')).toBeTruthy()
+  })
+
+  it('hides labels when sidebar is collapsed', function() {
+    mockState.isDesktopSidebarCollapsed = true
+    mockState.isThinSidebarEnabled = false
+    render(React.createElement(AppSidebar))
+    // Nav item labels should not be visible
+    expect(screen.queryByText('Emergency Dial')).toBeNull()
+    expect(screen.queryByText('SYSTEM ONLINE')).toBeNull()
+  })
 })

@@ -1,6 +1,3 @@
-// SPDX-License-Identifier: MIT
-// Copyright (c) 2026 SafeVixAI Team
-
 import { addSafeSpacesLayer } from '../safe-spaces-layer';
 
 jest.mock('../public-env', () => ({
@@ -58,6 +55,79 @@ describe('addSafeSpacesLayer', function() {
     });
     expect(map.addLayer).toHaveBeenCalledWith(expect.objectContaining({ id: 'safe-spaces-circles' }));
     expect(map.addLayer).toHaveBeenCalledWith(expect.objectContaining({ id: 'safe-spaces-labels' }));
+  });
+
+  it('throws when API returns non-ok status (line 42)', async function() {
+    (global.fetch as jest.Mock).mockResolvedValue({
+      ok: false,
+      status: 500,
+      json: async () => ({}),
+    });
+
+    var map = {
+      getSource: jest.fn(() => undefined),
+      addSource: jest.fn(),
+      addLayer: jest.fn(),
+    };
+
+    await expect(addSafeSpacesLayer(map as any, 10, 20)).rejects.toThrow('Safe spaces request failed with 500');
+  });
+
+  it('updates existing source via setData when source already exists (lines 54-58)', async function() {
+    var setData = jest.fn();
+    (global.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      json: async () => [
+        { name: 'Police Station', type: 'police', lat: 13.0, lon: 80.0, phone: '100' },
+      ],
+    });
+
+    var map = {
+      getSource: jest.fn(() => ({ setData } as any)),
+      addSource: jest.fn(),
+      addLayer: jest.fn(),
+    };
+
+    await addSafeSpacesLayer(map as any, 13.0, 80.0);
+
+    expect(setData).toHaveBeenCalledWith({
+      type: 'FeatureCollection',
+      features: expect.arrayContaining([
+        expect.objectContaining({
+          type: 'Feature',
+          geometry: { type: 'Point', coordinates: [80.0, 13.0] },
+        }),
+      ]),
+    });
+    expect(map.addSource).not.toHaveBeenCalled();
+    expect(map.addLayer).not.toHaveBeenCalled();
+  });
+
+  it('handles array response format from backend', async function() {
+    (global.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      json: async () => [
+        { name: 'Fire Station', type: 'fire', lat: 14.0, lon: 78.0, phone: '101' },
+      ],
+    });
+
+    var map = {
+      getSource: jest.fn(() => undefined),
+      addSource: jest.fn(),
+      addLayer: jest.fn(),
+    };
+
+    await addSafeSpacesLayer(map as any, 14.0, 78.0);
+
+    expect(map.addSource).toHaveBeenCalledWith('safe-spaces', expect.objectContaining({
+      data: expect.objectContaining({
+        features: expect.arrayContaining([
+          expect.objectContaining({
+            geometry: { type: 'Point', coordinates: [78.0, 14.0] },
+          }),
+        ]),
+      }),
+    }));
   });
 });
 

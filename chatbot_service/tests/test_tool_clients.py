@@ -493,7 +493,8 @@ class TestLegalSearchTool:
         tool = LegalSearchTool(retriever=retriever)
         assert tool.retriever is retriever
 
-    def test_search_returns_results_from_retriever(self):
+    @pytest.mark.asyncio
+    async def test_search_returns_results_from_retriever(self):
         retriever = MagicMock(spec=Retriever)
         expected = [
             RetrievalResult(
@@ -506,21 +507,22 @@ class TestLegalSearchTool:
         ]
         retriever.retrieve.return_value = expected
         tool = LegalSearchTool(retriever=retriever)
-
-        results = tool.search("drunk driving", top_k=4)
-
+    
+        results = await tool.search("drunk driving", top_k=4)
+    
         assert results == expected
         retriever.retrieve.assert_called_once_with(
             "drunk driving", top_k=4, scopes={'legal'},
         )
 
-    def test_search_empty_results_returns_empty_list(self):
+    @pytest.mark.asyncio
+    async def test_search_empty_results_returns_empty_list(self):
         retriever = MagicMock(spec=Retriever)
         retriever.retrieve.return_value = []
         tool = LegalSearchTool(retriever=retriever)
-
-        results = tool.search("non existent law")
-
+    
+        results = await tool.search("non existent law")
+    
         assert results == []
         retriever.retrieve.assert_called_once_with(
             "non existent law", top_k=4, scopes={'legal'},

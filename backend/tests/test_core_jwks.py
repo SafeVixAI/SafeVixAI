@@ -4,6 +4,7 @@
 """Core JWKS Manager tests — _fetch_jwks, caching, HTTP error handling, rotation."""
 from __future__ import annotations
 
+import asyncio
 import time
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -277,3 +278,168 @@ class TestCoreJWKSSigningKey:
             key, kid = await manager.get_signing_key()
         assert key == "static-secret"
         assert kid == "static"
+
+    @pytest.mark.asyncio
+    async def test_get_signing_key_jwks_client_empty_keys(self):
+        """When JWKS has no keys, fall back to static secret."""
+        manager = JWKSManager(jwks_url="https://example.com/jwks")
+        manager._jwks_client = MagicMock()
+        with patch.object(manager, "_fetch_jwks", new=AsyncMock(return_value={"keys": []})), \
+             patch("core.security.SECRET_KEY", "fallback-secret"):
+            key, kid = await manager.get_signing_key()
+        assert key == "fallback-secret"
+        assert kid == "static"
+
+
+class TestCoreJWKSVerifyToken:
+    """Tests for verify_token method with various key sources."""
+
+    @pytest.mark.asyncio
+    async def test_verify_token_with_jwks_client_success(self):
+        """verify_token with JWKS client should decode token successfully."""
+        import jwt as pyjwt
+        manager = JWKSManager(jwks_url="https://example.com/jwks")
+        mock_signing_key = MagicMock()
+        mock_signing_key.key = "mock-key"
+        manager._jwks_client = MagicMock()
+        manager._jwks_client.get_signing_key_from_jwt.return_value = mock_signing_key
+
+        fake_payload = {"sub": "user123", "aud": "authenticated"}
+        with patch.object(pyjwt, "decode", return_value=fake_payload):
+            result = await manager.verify_token("fake-jwt-token")
+
+        assert result == fake_payload
+        assert result["sub"] == "user123"
+
+    @pytest.mark.asyncio
+    async def test_verify_token_jwks_fails_then_historical(self):
+        """When JWKS fails, try historical keys."""
+        import jwt as pyjwt
+        manager = JWKSManager(jwks_url="https://example.com/jwks")
+        mock_signing_key = MagicMock()
+        mock_signing_key.key = "historical-key"
+        manager._jwks_client = MagicMock()
+        # JWKS verification fails
+        manager._jwks_client.get_signing_key_from_jwt.side_effect = pyjwt.InvalidTokenError("Invalid")
+
+        # Add a historical key
+        manager._key_history = [("historical-kid", time.time() + 3600)]
+        manager._jwks_cache = {"historical-kid": "historical-key"}
+
+        fake_payload = {"sub": "user456", "aud": "authenticated"}
+        with patch.object(pyjwt, "decode", return_value=fake_payload):
+            result = await manager.verify_token("fake-jwt-token")
+
+        assert result == fake_payload
+
+    @pytest.mark.asyncio
+    async def test_verify_token_expired_historical_then_static(self):
+        """When historical keys are expired, fall through to static secret."""
+        import jwt as pyjwt
+        manager = JWKSManager(jwks_url="https://example.com/jwks")
+        mock_signing_key = MagicMock()
+        mock_signing_key.key = "expired-key"
+        manager._jwks_client = MagicMock()
+        manager._jwks_client.get_signing_key_from_jwt.side_effect = pyjwt.InvalidTokenError("Invalid")
+
+        # Add expired historical key
+        manager._key_history = [("expired-kid", time.time() - 100)]
+        manager._jwks_cache = {"expired-kid": "expired-key"}
+
+        fake_payload = {"sub": "user789", "aud": "authenticated"}
+        with patch.object(pyjwt, "decode", return_value=fake_payload), \
+             patch("core.security.SECRET_KEY", "static-secret"), \
+             patch("core.security.ALGORITHM", "HS256"):
+            result = await manager.verify_token("fake-jwt-token")
+
+        assert result == fake_payload
+
+    @pytest.mark.asyncio
+    async def test_verify_token_no_jwks_client(self):
+        """Without JWKS client, verify_token should use static secret directly."""
+        import jwt as pyjwt
+        manager = JWKSManager()  # No jwks_url = no client
+
+        fake_payload = {"sub": "user000", "aud": "authenticated"}
+        with patch.object(pyjwt, "decode", return_value=fake_payload), \
+             patch("core.security.SECRET_KEY", "static-secret"), \
+             patch("core.security.ALGORITHM", "HS256"):
+            result = await manager.verify_token("fake-jwt-token")
+
+        assert result == fake_payload
+
+    @pytest.mark.asyncio
+    async def test_verify_token_all_methods_fail_raises(self):
+        """When all verification methods fail, error should propagate."""
+        import jwt as pyjwt
+        manager = JWKSManager()  # No jwks_url = no client
+
+        with patch.object(pyjwt, "decode", side_effect=pyjwt.InvalidTokenError("Token expired")), \
+             patch("core.security.SECRET_KEY", "static-secret"), \
+             patch("core.security.ALGORITHM", "HS256"):
+            with pytest.raises(pyjwt.InvalidTokenError):
+                await manager.verify_token("bad-token")
+
+
+class TestCoreJWKSKeyInfo:
+    """Tests for get_key_info debugging method."""
+
+    def test_get_key_info_defaults(self):
+        manager = JWKSManager()
+        info = manager.get_key_info()
+        assert info["current_key_id"] is None
+        assert info["key_history_count"] == 0
+        assert info["jwks_cached"] is False
+        assert info["jwks_url"] == "not configured"
+
+    def test_get_key_info_with_jwks(self):
+        manager = JWKSManager(jwks_url="https://example.com/jwks")
+        manager._current_key_id = "key-123"
+        manager._key_history = [("old-key", time.time() + 3600)]
+        manager._jwks_cache = {"keys": []}
+        info = manager.get_key_info()
+        assert info["current_key_id"] == "key-123"
+        assert info["key_history_count"] == 1
+        assert info["jwks_cached"] is True
+        assert info["jwks_url"] == "https://example.com/jwks"
+
+
+class TestCoreJWKSRotationLoop:
+    """Tests for _rotation_loop async task."""
+
+    @pytest.mark.asyncio
+    async def test_rotation_loop_cancellation(self):
+        """_rotation_loop should exit cleanly on CancelledError."""
+        manager = JWKSManager(jwks_url="https://example.com/jwks")
+        # Create task and cancel it immediately
+        task = asyncio.create_task(manager._rotation_loop())
+        task.cancel()
+        try:
+            await task
+        except asyncio.CancelledError:
+            pass
+        assert task.cancelled()
+
+    @pytest.mark.asyncio
+    async def test_rotation_loop_error_handling(self):
+        """_rotation_loop should catch exceptions and continue."""
+        import asyncio
+        manager = JWKSManager(jwks_url="https://example.com/jwks")
+        call_count = 0
+
+        async def mock_rotate():
+            nonlocal call_count
+            call_count += 1
+            if call_count == 1:
+                raise ValueError("Rotation failed")
+            # On second call, cancel the loop
+            raise asyncio.CancelledError()
+
+        with patch.object(manager, "rotate_keys", new=mock_rotate), \
+             patch.object(manager, "_rotation_interval", 0.001):
+            try:
+                await manager._rotation_loop()
+            except asyncio.CancelledError:
+                pass
+
+        assert call_count == 2  # First call fails, second call gets cancelled

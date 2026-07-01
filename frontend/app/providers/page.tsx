@@ -41,10 +41,18 @@ type TestStatus = 'idle' | 'testing' | 'ok' | 'error';
 
 export default function ProvidersPage() {
   const pageRef = usePageEntry();
-  const { selectedProvider, setSelectedProvider } = useAppStore(
+  const {
+    selectedProvider, setSelectedProvider,
+    providerSyncStatus, setProviderSyncStatus,
+    activeFallbackChain, setActiveFallbackChain,
+  } = useAppStore(
     useShallow((s) => ({
       selectedProvider: s.selectedProvider,
       setSelectedProvider: s.setSelectedProvider,
+      providerSyncStatus: s.providerSyncStatus,
+      setProviderSyncStatus: s.setProviderSyncStatus,
+      activeFallbackChain: s.activeFallbackChain,
+      setActiveFallbackChain: s.setActiveFallbackChain,
     }))
   );
 
@@ -57,7 +65,6 @@ export default function ProvidersPage() {
   const [formData, setFormData] = useState<ProviderFormData>(INITIAL_FORM);
   const [testStatus, setTestStatus] = useState<TestStatus>('idle');
   const [testMessage, setTestMessage] = useState('');
-  const [syncStatus, setSyncStatus] = useState<'idle' | 'syncing' | 'ok' | 'error'>('idle');
   const [expandedProvider, setExpandedProvider] = useState<string | null>(null);
   const [showBuiltins, setShowBuiltins] = useState(true);
 
@@ -71,11 +78,13 @@ export default function ProvidersPage() {
       ]);
       setBuiltins(b);
       setUserConfigs(c);
+      const activeConfigs = c.filter((cfg) => cfg.isActive).sort((x, y) => x.priority - y.priority);
+      setActiveFallbackChain(activeConfigs.map((cfg) => cfg.providerName));
     } catch (e) {
       setError('Failed to load providers. Check your connection.');
     }
     setLoading(false);
-  }, []);
+  }, [setActiveFallbackChain]);
 
   useEffect(() => { loadData(); }, [loadData]);
 
@@ -182,14 +191,14 @@ export default function ProvidersPage() {
   };
 
   const handleSync = async () => {
-    setSyncStatus('syncing');
+    setProviderSyncStatus('syncing');
     try {
-      const result = await syncProvidersToChatbot();
-      setSyncStatus('ok');
-      setTimeout(() => setSyncStatus('idle'), 3000);
+      await syncProvidersToChatbot();
+      setProviderSyncStatus('success');
+      setTimeout(() => setProviderSyncStatus('idle'), 3000);
     } catch {
-      setSyncStatus('error');
-      setTimeout(() => setSyncStatus('idle'), 3000);
+      setProviderSyncStatus('error');
+      setTimeout(() => setProviderSyncStatus('idle'), 3000);
     }
   };
 
@@ -215,11 +224,11 @@ export default function ProvidersPage() {
           <div className="flex gap-2">
             <button
               onClick={handleSync}
-              disabled={syncStatus === 'syncing'}
+              disabled={providerSyncStatus === 'syncing'}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand/10 border border-brand/20 text-[10px] font-semibold text-brand-light uppercase tracking-widest hover:bg-brand/20 transition-all disabled:opacity-50"
             >
-              <RefreshCw size={12} className={syncStatus === 'syncing' ? 'animate-spin' : ''} />
-              {syncStatus === 'syncing' ? 'Syncing...' : syncStatus === 'ok' ? 'Synced' : syncStatus === 'error' ? 'Failed' : 'Sync to Chat'}
+              <RefreshCw size={12} className={providerSyncStatus === 'syncing' ? 'animate-spin' : ''} />
+              {providerSyncStatus === 'syncing' ? 'Syncing...' : providerSyncStatus === 'success' ? 'Synced' : providerSyncStatus === 'error' ? 'Failed' : 'Sync to Chat'}
             </button>
             <button
               onClick={loadData}

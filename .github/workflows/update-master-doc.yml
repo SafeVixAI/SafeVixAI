@@ -54,11 +54,11 @@ jobs:
           ALERT_EMAIL_PASSWORD: ${{ secrets.ALERT_EMAIL_PASSWORD }}
 
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@v7
         with:
           commit-message: "docs: auto-update master doc"
           title: "docs: Auto-update Master Document"
           body: "Automated update of SafeVixAI_MASTER.docx with live repository statistics and alerting metrics."
-          branch: "docs-auto-update"
+          branch: "docs-auto-update-${{ github.run_id }}"
           base: "main"
           add-paths: "docs/SafeVixAI_MASTER.docx"

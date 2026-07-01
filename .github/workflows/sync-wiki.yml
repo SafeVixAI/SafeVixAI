@@ -104,7 +104,7 @@ jobs:
         run: python scripts/docs/generate-health-dashboard.py
 
       - name: Create Pull Request for Wiki Updates
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@v7
         with:
           commit-message: "docs(wiki): auto-sync wiki documentation [automated]"
           title: "docs(wiki): Auto-sync Wiki Documentation"
@@ -121,7 +121,7 @@ jobs:
             - [ ] Verify no hallucinated API routes or env vars
           team-reviewers: |
             safevixai/core
-          branch: "docs-wiki-auto-update"
+          branch: "docs-wiki-auto-update-${{ github.run_id }}"
           base: "main"
           add-paths: |
             docs/wiki/**

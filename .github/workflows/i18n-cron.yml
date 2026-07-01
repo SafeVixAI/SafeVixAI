@@ -65,7 +65,7 @@ jobs:
         run: npm run lint:i18n
 
       - name: Create Pull Request for Translation Updates
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@v7
         with:
           commit-message: "i18n: auto-update localized target translations [automated]"
           title: "i18n: Auto-Sync Localized Target Translations"

@@ -104,7 +104,7 @@ jobs:
         run: python scripts/docs/generate-health-dashboard.py
 
       - name: Create Pull Request for Wiki Updates
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@v7
         with:
           commit-message: "docs(wiki): auto-sync wiki documentation [automated]"
           title: "docs(wiki): Auto-sync Wiki Documentation"

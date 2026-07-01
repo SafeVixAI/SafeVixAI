@@ -119,8 +119,6 @@ jobs:
             - [ ] Verify code examples are valid (Python/TS/Bash)
             - [ ] Check internal links resolve to existing files
             - [ ] Verify no hallucinated API routes or env vars
-          team-reviewers: |
-            safevixai/core
           branch: "docs-wiki-auto-update-${{ github.run_id }}"
           base: "main"
           add-paths: |

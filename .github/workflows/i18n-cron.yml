@@ -73,7 +73,7 @@ jobs:
             Automated translation synchronization and key verification updates.
             
             This pull request synchronizes the monolithic `en.json` file, splits it into namespace files, runs `generate-ai-translations.py` to compile translation targets, updates TypeScript type definitions, and executes verification tests to ensure parity.
-          branch: "i18n-auto-translations-sync"
+          branch: "i18n-auto-translations-sync-${{ github.run_id }}"
           base: "main"
           add-paths: |
             frontend/i18n/locales/**

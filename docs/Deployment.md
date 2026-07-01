@@ -360,7 +360,7 @@ MAIN_BACKEND_BASE_URL=http://localhost:8000
 
 # RAG
 CHROMA_PERSIST_DIR=./data/chroma_db
-EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2  # Config hint — runtime uses LocalHashEmbeddingFunction
+EMBEDDING_MODEL=LocalHashEmbeddingFunction (zero-dependency)  # Config hint — runtime uses LocalHashEmbeddingFunction
 
 # Cache
 REDIS_URL=rediss://default:[TOKEN]@[HOST].upstash.io:6379

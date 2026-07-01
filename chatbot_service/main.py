@@ -125,14 +125,15 @@ def create_app() -> FastAPI:
             session_ttl_seconds=settings.session_ttl_seconds,
         )
         vectorstore = LocalVectorStore(
-            settings.chroma_persist_dir,
-            settings.rag_data_dir,
+            database_url=settings.database_url,
+            data_dir=settings.rag_data_dir,
             embedding_model=settings.embedding_model,
         )
         retriever = Retriever(
             vectorstore,
             default_top_k=settings.top_k_retrieval,
             min_score=settings.rag_min_score,
+            cross_encoder_model=settings.rag_reranker,
         )
         weather_tool = WeatherTool(settings)
         speech_service = IndicSeamlessService(settings)
@@ -141,6 +142,13 @@ def create_app() -> FastAPI:
         drug_info_tool = DrugInfoTool()
         
         submit_report_tool = SubmitReportTool(settings.main_backend_base_url)
+
+        # C9: Initialize LLM response cache
+        llm_cache = LLMResponseCache(settings.redis_url, database_url=settings.database_url)
+        provider_router = ProviderRouter(settings, cache=llm_cache)
+        
+        from memory.episodic_memory import EpisodicMemoryAgent
+        episodic_memory_agent = EpisodicMemoryAgent(provider_router, settings.database_url, settings.chroma_persist_dir)
 
         context_assembler = ContextAssembler(
             retriever=retriever,
@@ -153,10 +161,8 @@ def create_app() -> FastAPI:
             submit_report_tool=submit_report_tool,
             weather_tool=weather_tool,
             drug_info_tool=drug_info_tool,
+            episodic_memory_agent=episodic_memory_agent,
         )
-        
-        # C9: Initialize LLM response cache
-        llm_cache = LLMResponseCache(settings.redis_url)
         
         chat_engine = ChatEngine(
             memory_store=memory_store,
@@ -164,8 +170,9 @@ def create_app() -> FastAPI:
             intent_detector=IntentDetector(),
             safety_checker=SafetyChecker(),
             context_assembler=context_assembler,
-            provider_router=ProviderRouter(settings, cache=llm_cache),
+            provider_router=provider_router,
             redis_url=settings.redis_url,  # Phase 0.7: AI governance audit trail
+            episodic_memory_agent=episodic_memory_agent,
         )
 
         app.state.memory_store = memory_store

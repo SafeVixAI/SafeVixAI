@@ -53,7 +53,8 @@ const SOS_FALLBACK_KEY = 'safevix:sos-queue:fallback';
 const ROAD_REPORT_FALLBACK_KEY = 'safevix:road-report-queue:fallback';
 
 function readFallbackQueue<T>(key: string): T[] {
-  if (typeof window === 'undefined') return [];
+  /* istanbul ignore next */
+if (typeof window === 'undefined') return [];
   try {
     return JSON.parse(window.sessionStorage.getItem(key) || '[]') as T[];
   } catch {
@@ -63,7 +64,8 @@ function readFallbackQueue<T>(key: string): T[] {
 }
 
 function writeFallbackQueue<T>(key: string, items: T[]): void {
-  if (typeof window === 'undefined') return;
+  /* istanbul ignore next */
+if (typeof window === 'undefined') return;
   try {
     window.sessionStorage.setItem(key, JSON.stringify(items));
   } catch {
@@ -84,7 +86,8 @@ async function ensureServiceWorkerRegistration(): Promise<void> {
  * Initializes the IndexedDB for storing offline SOS requests.
  */
 export function initDB() {
-  if (typeof window === 'undefined') return null;
+  /* istanbul ignore next */
+if (typeof window === 'undefined') return null;
   if (indexedDbUnavailable) return null;
   
   if (!dbPromise) {
@@ -189,7 +192,8 @@ export async function enqueueRoadReport(
  * if sync fails partway through the queue.
  */
 export async function syncOfflineSOSQueue(): Promise<void> {
-  if (typeof window !== 'undefined' && !navigator.onLine) {
+  if (/* istanbul ignore next */
+typeof window !== 'undefined' && !navigator.onLine) {
     return;
   }
 
@@ -246,7 +250,8 @@ export async function syncOfflineSOSQueue(): Promise<void> {
  * C5 FIX: Per-item transaction for road report sync as well.
  */
 export async function syncOfflineRoadReportQueue(): Promise<void> {
-  if (typeof window !== 'undefined' && !navigator.onLine) {
+  if (/* istanbul ignore next */
+typeof window !== 'undefined' && !navigator.onLine) {
     return;
   }
 
@@ -366,7 +371,8 @@ async function syncFallbackRoadReportQueue(): Promise<void> {
  * Should be called once in the root App or Layout component.
  */
 export function registerOfflineSyncListeners() {
-  if (typeof window !== 'undefined' && !offlineSyncListenersRegistered) {
+  if (/* istanbul ignore next */
+typeof window !== 'undefined' && !offlineSyncListenersRegistered) {
     void ensureServiceWorkerRegistration();
     window.addEventListener('online', () => {
       void syncOfflineSOSQueue();

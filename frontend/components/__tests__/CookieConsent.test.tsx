@@ -69,9 +69,25 @@ describe('CookieConsent', function() {
     expect(localStorage.getItem(ANALYTICS_CONSENT_KEY)).toBe('denied')
   })
 
+  it('stays hidden when E2E skip flag is set', function() {
+    localStorage.setItem('__E2E_SKIP_AUTH__', 'true')
+    var { container } = render(React.createElement(CookieConsent))
+    act(function() { jest.advanceTimersByTime(5000) })
+    expect(container.innerHTML).toBe('')
+  })
+
   it('has a link to privacy policy', function() {
     render(React.createElement(CookieConsent))
     act(function() { jest.advanceTimersByTime(2000) })
     expect(screen.getByText('View Policy')).toBeTruthy()
+  })
+
+  it('dismisses banner via X button', function() {
+    render(React.createElement(CookieConsent))
+    act(function() { jest.advanceTimersByTime(2000) })
+    fireEvent.click(screen.getByLabelText('Dismiss banner'))
+    expect(posthog.opt_out_capturing).toHaveBeenCalled()
+    expect(mockSetAnalyticsOptIn).toHaveBeenCalledWith(false)
+    expect(localStorage.getItem(ANALYTICS_CONSENT_KEY)).toBe('denied')
   })
 })

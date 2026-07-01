@@ -6,6 +6,7 @@ from __future__ import annotations
 from fastapi.testclient import TestClient
 
 from models.schemas import RouteBounds, RouteInstruction, RouteOption, RoutePoint, RoutePreviewResponse
+from services.exceptions import ExternalServiceError, ServiceValidationError
 
 
 class FakeRoutingService:
@@ -98,3 +99,39 @@ def test_routing_preview_rejects_invalid_profile(app):
         )
 
     assert response.status_code == 422
+
+
+class FakeFailingRoutingService:
+    async def preview_route(self, **kwargs) -> RoutePreviewResponse:
+        raise ServiceValidationError("Invalid coordinates")
+
+
+def test_routing_preview_validation_error(app):
+    with TestClient(app) as client:
+        client.app.state.routing_service = FakeFailingRoutingService()
+        response = client.get(
+            '/api/v1/routing/preview'
+            '?origin_lat=13.0827&origin_lon=80.2707'
+            '&destination_lat=13.0475&destination_lon=80.2202'
+        )
+
+    assert response.status_code == 422
+    assert "Invalid coordinates" in response.text
+
+
+class FakeExternalErrorRoutingService:
+    async def preview_route(self, **kwargs) -> RoutePreviewResponse:
+        raise ExternalServiceError("OSRM is down")
+
+
+def test_routing_preview_external_error(app):
+    with TestClient(app) as client:
+        client.app.state.routing_service = FakeExternalErrorRoutingService()
+        response = client.get(
+            '/api/v1/routing/preview'
+            '?origin_lat=13.0827&origin_lon=80.2707'
+            '&destination_lat=13.0475&destination_lon=80.2202'
+        )
+
+    assert response.status_code == 503
+    assert "OSRM is down" in response.text

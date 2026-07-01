@@ -5,24 +5,36 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
-jest.mock('@/hooks/useOnlineStatus', () => ({
-  useOnlineStatus: () => false,
-}));
+var mockIsOnline = false;
 
-jest.mock('lucide-react', () => ({
-  WifiOff: () => <span data-testid="wifi-off-icon" />,
-}));
+jest.mock('@/hooks/useOnlineStatus', function() {
+  return { useOnlineStatus: function() { return mockIsOnline } }
+});
 
-jest.mock('@gsap/react', () => ({
-  useGSAP: () => null,
-}));
+jest.mock('lucide-react', function() {
+  var React2 = require('react');
+  return { WifiOff: function() { return React2.createElement('span', { 'data-testid': 'wifi-off-icon' }) } }
+});
 
-jest.mock('@/lib/gsap', () => ({
-  gsap: {
-    fromTo: jest.fn(() => ({})),
-    to: jest.fn(() => ({})),
-  },
-}));
+jest.mock('@/lib/gsap', function() {
+  return {
+    gsap: {
+      fromTo: jest.fn(function() { return {} }),
+      to: jest.fn(function(_el: any, opts: any) { if (typeof opts?.onComplete === 'function') opts.onComplete(); return {} }),
+    },
+  }
+});
+
+jest.mock('@gsap/react', function() {
+  var React = require('react');
+  return {
+    useGSAP: function(cb: any, opts?: any) {
+      React.useEffect(function() {
+        if (typeof cb === 'function') cb();
+      }, opts?.dependencies || []);
+    },
+  };
+});
 
 import { OfflineBanner } from '../ui/OfflineBanner';
 
@@ -60,6 +72,36 @@ describe('OfflineBanner', function() {
     expect(banner.className).toContain('fixed');
     expect(banner.className).toContain('z-[999]');
     expect(banner.className).toContain('bg-brand');
+  });
+
+  it('returns null when online', function() {
+    mockIsOnline = true;
+    var { container } = render(<OfflineBanner />);
+    expect(container.firstChild).toBeNull();
+    mockIsOnline = false;
+  });
+
+  it('calls gsap.fromTo when offline', function() {
+    mockIsOnline = false;
+    render(<OfflineBanner />);
+    var gsapMock = require('@/lib/gsap');
+    expect(gsapMock.gsap.fromTo).toHaveBeenCalled();
+  });
+
+  it('calls gsap.to onComplete when transitioning to online', function() {
+    mockIsOnline = false;
+    var { rerender } = render(<OfflineBanner />);
+    mockIsOnline = true;
+    rerender(<OfflineBanner />);
+    var gsapMock = require('@/lib/gsap');
+    expect(gsapMock.gsap.to).toHaveBeenCalled();
+  });
+
+  it('uses i18n translation key', function() {
+    mockIsOnline = false;
+    render(<OfflineBanner />);
+    expect(screen.getByText(/Offline/)).toBeInTheDocument();
+    mockIsOnline = false;
   });
 });
 

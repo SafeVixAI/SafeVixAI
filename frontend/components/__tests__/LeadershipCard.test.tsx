@@ -37,4 +37,25 @@ describe('LeadershipCard', function() {
     expect(screen.getByText('JD')).toBeTruthy()
     expect(screen.getByText('JS')).toBeTruthy()
   })
+
+  it('shows "Information not available" when name is null', function() {
+    render(React.createElement(LeadershipCard, { municipality: { mayorName: null, commissionerName: null } as any }))
+    expect(screen.getAllByText('Information not available')).toHaveLength(2)
+  })
+
+  it('does not render phone link when phone is null', function() {
+    render(React.createElement(LeadershipCard, { municipality: { mayorName: 'John', commissionerName: 'Jane', commissionerPhone: null } as any }))
+    expect(screen.queryByText('1234567890')).toBeNull()
+  })
+
+  it('computes initials from single word name', function() {
+    render(React.createElement(LeadershipCard, { municipality: { mayorName: 'John', commissionerName: 'Doe', commissionerPhone: '999' } as any }))
+    expect(screen.getByText('J')).toBeTruthy()
+  })
+
+  it('renders User icon when name is null', function() {
+    var { container } = render(React.createElement(LeadershipCard, { municipality: { mayorName: null, commissionerName: null } as any }))
+    // Should render lucide User icon (SVG) instead of initials text
+    expect(container.querySelector('svg')).toBeTruthy()
+  })
 })

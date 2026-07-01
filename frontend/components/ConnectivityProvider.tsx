@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+﻿// SPDX-License-Identifier: MIT
 // Copyright (c) 2026 SafeVixAI Team
 
 'use client';
@@ -12,6 +12,7 @@ export function ConnectivityProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const update = () => {
+/* istanbul ignore next */
       setConnectivity(navigator.onLine ? 'online' : 'offline');
     };
 

@@ -56,6 +56,20 @@ describe('useOfflineQueue', function() {
     await act(async function() { resolveSync(); await syncPromise })
     expect(result.current.isSyncing).toBe(false)
   })
+
+  it('auto-syncs when connectivity becomes online', function() {
+    mockConnectivity = 'online'
+    renderHook(() => require('../useOfflineQueue').useOfflineQueue())
+    // useOfflineQueue effect fires triggerSync() when connectivity === 'online'
+    expect(mockSyncSOS).toHaveBeenCalled()
+    expect(mockSyncRoad).toHaveBeenCalled()
+  })
+
+  it('does not auto-sync when connectivity stays offline', function() {
+    mockConnectivity = 'offline'
+    renderHook(() => require('../useOfflineQueue').useOfflineQueue())
+    expect(mockSyncSOS).not.toHaveBeenCalled()
+  })
 })
 
 

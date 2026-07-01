@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 SafeVixAI Team
-jest.mock('@gsap/react', function () { return { useGSAP: jest.fn() } })
+jest.mock('@gsap/react', function () { return { useGSAP: jest.fn(function(cb) { if (typeof cb === 'function') cb() }) } })
 
 import { render } from '@testing-library/react'
 import React from 'react'

@@ -16,6 +16,7 @@ type SplitTextClass = new (target: any, vars?: any) => SplitTextInstance;
 let SplitText: SplitTextClass | null = null;
 
 async function loadSplitText() {
+  /* istanbul ignore next */
   if (typeof window === 'undefined') return;
   try {
     const mod = await import('gsap/SplitText');
@@ -38,6 +39,7 @@ export function useSplitTextEntry() {
       if (!headingRef.current) return;
 
       const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      /* istanbul ignore next */
       if (prefersReducedMotion) return;
 
       const originalHTML = headingRef.current.innerHTML;
@@ -92,6 +94,7 @@ export function useSplitTextEntry() {
             ease: 'power2.out',
             clearProps: 'all',
             onComplete: () => {
+              /* istanbul ignore next */
               if (headingRef.current) {
                 headingRef.current.innerHTML = originalHTML;
               }

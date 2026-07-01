@@ -9,6 +9,7 @@ import logging
 import html
 
 from agent.context_assembler import ContextAssembler
+from agent.multi_agent import MultiAgentGraph, ChatState
 from agent.governance import AIGovernance
 from agent.intent_detector import IntentDetector
 from agent.safety_checker import SafetyChecker
@@ -39,6 +40,7 @@ class ChatEngine:
         provider_router: ProviderRouter,
         redis_url: str | None = None,
         summarizer: ConversationSummarizer | None = None,
+        episodic_memory_agent = None,
     ) -> None:
         self.memory_store = memory_store
         self.vectorstore = vectorstore
@@ -49,13 +51,49 @@ class ChatEngine:
         self.summarizer = summarizer or ConversationSummarizer()
         # Phase 0.7: AI governance
         self.governance = AIGovernance(redis_url)
+        self.redis_url = redis_url
+        self.episodic_memory_agent = episodic_memory_agent
+        self.multi_agent_graph = MultiAgentGraph(
+            context_assembler=context_assembler,
+            provider_router=provider_router,
+            episodic_memory_agent=episodic_memory_agent
+        )
+
+    async def _load_user_providers(self, user_id: str | None) -> None:
+        """Load user-configured providers from Redis into the router."""
+        if not user_id:
+            return
+        try:
+            import json as _json
+            from redis.asyncio import Redis
+            
+            if not getattr(self, 'redis_url', None):
+                logger.info("No Redis available — skipping user provider sync")
+                return
+                
+            redis = Redis.from_url(self.redis_url, encoding='utf-8', decode_responses=True)
+            raw = await redis.get(f"user_providers:{user_id}")
+            if raw:
+                configs = _json.loads(raw)
+                self.provider_router.configure_user_providers(configs)
+                logger.info("Loaded %d user providers for %s", len(configs), user_id)
+            await redis.aclose()
+        except Exception as exc:
+            logger.warning("Failed to load user providers from Redis: %s", exc)
 
     async def chat(self, payload: ChatRequest) -> ChatResponse:
         session_id = payload.session_id or str(uuid4())
         await self.memory_store.append_message(session_id, 'user', payload.message)
         history = await self.memory_store.get_history(session_id, limit=12)
 
+        await self._load_user_providers(payload.user_id)
+
         safety = self.safety_checker.evaluate(payload.message)
+        if not safety.blocked:
+            llama_safety = await self.safety_checker.check_llama_guard(payload.message, role="user")
+            if llama_safety.blocked:
+                safety = llama_safety
+
         if safety.blocked:
             await self.memory_store.append_message(session_id, 'assistant', safety.response or '')
             return ChatResponse(
@@ -69,94 +107,75 @@ class ChatEngine:
         intent = self.intent_detector.detect(payload.message)
         refined_intent = self.intent_detector.refine_intent(intent, payload.message, history)
         _log_intent_refinement(intent, refined_intent, payload.message)
-        context = await self.context_assembler.assemble(
+        
+        state = ChatState(
             session_id=session_id,
             message=payload.message,
             intent=refined_intent,
+            history=history,
+            summarized_history=summarized_history,
+            user_id=payload.user_id,
             lat=payload.lat,
             lon=payload.lon,
             client_ip=payload.client_ip,
-            history=history,
+            provider_hint=payload.provider_hint,
+            provider_model=payload.provider_model,
         )
 
-        if not context.retrieved and not context.tools and refined_intent != 'general':
-            response = (
-                'I do not know from the SafeVixAI knowledge base. '
-                'Please share more details or try a different road-safety question.'
-            )
-            await self.memory_store.append_message(
-                session_id,
-                'assistant',
-                response,
-                metadata={'intent': refined_intent, 'sources': ['policy:weak-retrieval']},
-            )
-            return ChatResponse(
-                response=response,
-                intent=refined_intent,
-                sources=['policy:weak-retrieval'],
-                session_id=session_id,
+        state = await self.multi_agent_graph.execute(state)
+
+        # Phase 0.3 & Phase 4: Output safety check (static + Llama Guard)
+        if state.final_response:
+            output_safety = self.safety_checker.check_output_safety(state.final_response)
+            if not output_safety.blocked:
+                llama_output_safety = await self.safety_checker.check_llama_guard(state.final_response, role="assistant")
+                if llama_output_safety.blocked:
+                    output_safety = llama_output_safety
+                    
+            if output_safety.blocked:
+                await self.memory_store.append_message(
+                    session_id, 'assistant', output_safety.response or '',
+                    metadata={'intent': 'blocked_output', 'sources': ['policy:safety-output']},
+                )
+                return ChatResponse(
+                    response=output_safety.response or 'I encountered an issue generating a safe response.',
+                    intent='blocked_output',
+                    sources=['policy:safety-output'],
+                    session_id=session_id,
+                )
+            
+            # Medical disclaimer
+            state.final_response = self.safety_checker.add_medical_disclaimer_if_needed(
+                payload.message, state.final_response
             )
 
-        provider_result = await self.provider_router.generate(
-            ProviderRequest(
-                message=payload.message,
-                intent=refined_intent,
-                history=summarized_history,
-                tool_summaries=[item.summary for item in context.tools],
-                document_snippets=[
-                    f'{item.title} ({item.source}): {item.snippet}'
-                    for item in context.retrieved
-                ],
-            )
-        )
-
-        # Phase 0.3: Output safety check — catch harmful LLM responses
-        output_safety = self.safety_checker.check_output_safety(provider_result.text)
-        if output_safety.blocked:
-            await self.memory_store.append_message(
-                session_id, 'assistant', output_safety.response or '',
-                metadata={'intent': 'blocked_output', 'sources': ['policy:safety-output']},
-            )
-            return ChatResponse(
-                response=output_safety.response or 'I encountered an issue generating a safe response.',
-                intent='blocked_output',
-                sources=['policy:safety-output'],
-                session_id=session_id,
-            )
-
-        # Phase 0.3: Medical disclaimer — append for first-aid/medical topics
-        provider_result.text = self.safety_checker.add_medical_disclaimer_if_needed(
-            payload.message, provider_result.text
-        )
-
-        # Phase 0.7: AI governance evaluation
+        # AI governance evaluation
         governance_result = await self.governance.evaluate(
-            response_text=provider_result.text,
+            response_text=state.final_response or '',
             retrieved_context=[
                 {"content": item.snippet, "source": item.source, "title": item.title}
-                for item in context.retrieved
-            ],
-            tool_results=[{"payload": tool.payload} for tool in context.tools],
+                for item in state.context.retrieved
+            ] if state.context and state.context.retrieved else [],
+            tool_results=[{"payload": tool.payload} for tool in state.context.tools] if state.context and state.context.tools else [],
             prompt=payload.message,
         )
 
-        # Add governance metadata to response
-        response_text = provider_result.text
+        response_text = state.final_response or ''
         if governance_result.flagged:
             response_text = f"[⚠️ Low confidence] {response_text}"
         
-        sources = self._dedupe_sources(
-            [source for tool in context.tools for source in tool.sources]
-            + [item.source for item in context.retrieved]
-            + governance_result.citations
-        )
+        sources_list = []
+        if state.context:
+            sources_list = [source for tool in state.context.tools for source in tool.sources] + [item.source for item in state.context.retrieved]
+        
+        sources = self._dedupe_sources(sources_list + governance_result.citations + state.final_sources)
         
         await self.memory_store.append_message(
             session_id,
             'assistant',
             response_text,
             metadata={
-                'intent': refined_intent,
+                'intent': state.intent,
                 'sources': sources,
                 'governance': {
                     'hallucination_score': governance_result.hallucination_score,
@@ -166,9 +185,10 @@ class ChatEngine:
                 }
             },
         )
+
         return ChatResponse(
             response=response_text,
-            intent=refined_intent,
+            intent=state.intent,
             sources=sources,
             session_id=session_id,
         )
@@ -185,6 +205,8 @@ class ChatEngine:
         await self.memory_store.append_message(session_id, 'user', payload.message)
         history = await self.memory_store.get_history(session_id, limit=12)
 
+        await self._load_user_providers(payload.user_id)
+
         safety = self.safety_checker.evaluate(payload.message)
         if safety.blocked:
             blocked_text = safety.response or 'I cannot help with that request.'
@@ -197,55 +219,41 @@ class ChatEngine:
         intent = self.intent_detector.detect(payload.message)
         refined_intent = self.intent_detector.refine_intent(intent, payload.message, history)
         _log_intent_refinement(intent, refined_intent, payload.message)
-        context = await self.context_assembler.assemble(
+        
+        state = ChatState(
             session_id=session_id,
             message=payload.message,
             intent=refined_intent,
+            history=history,
+            summarized_history=summarized_history,
+            user_id=payload.user_id,
             lat=payload.lat,
             lon=payload.lon,
             client_ip=payload.client_ip,
-            history=history,
-        )
-
-        if not context.retrieved and not context.tools and refined_intent != 'general':
-            response = (
-                'I do not know from the SafeVixAI knowledge base. '
-                'Please share more details or try a different road-safety question.'
-            )
-            await self.memory_store.append_message(
-                session_id, 'assistant', response,
-                metadata={'intent': refined_intent, 'sources': ['policy:weak-retrieval']},
-            )
-            yield {'type': 'token', 'text': response}
-            yield {'type': 'done', 'intent': refined_intent, 'sources': ['policy:weak-retrieval'], 'session_id': session_id}
-            return
-
-        base_sources = self._dedupe_sources(
-            [source for tool in context.tools for source in tool.sources]
-            + [item.source for item in context.retrieved]
+            provider_hint=payload.provider_hint,
+            provider_model=payload.provider_model,
         )
 
         full_text = ""
+        last_intent = state.intent
+        last_sources = []
         try:
-            async for event in self.provider_router.stream_generate(
-                ProviderRequest(
-                    message=payload.message,
-                    intent=refined_intent,
-                    history=summarized_history,
-                    tool_summaries=[item.summary for item in context.tools],
-                    document_snippets=[
-                        f'{item.title} ({item.source}): {item.snippet}'
-                        for item in context.retrieved
-                    ],
-                )
-            ):
+            async for event in self.multi_agent_graph.stream_execute(state):
                 if event['type'] == 'token':
                     escaped = html.escape(event['text'])
                     full_text += escaped
                     yield {'type': 'token', 'text': escaped}
                 elif event['type'] == 'done':
-                    # Phase 0.3: Output safety check — catch harmful LLM responses
+                    last_intent = event.get('intent', state.intent)
+                    last_sources = event.get('sources', [])
+                    
+                    # Phase 0.3 & Phase 4: Output safety check (static + Llama Guard)
                     output_safety = self.safety_checker.check_output_safety(full_text)
+                    if not output_safety.blocked:
+                        llama_output_safety = await self.safety_checker.check_llama_guard(full_text, role="assistant")
+                        if llama_output_safety.blocked:
+                            output_safety = llama_output_safety
+                            
                     if output_safety.blocked:
                         safe_text = output_safety.response or 'I encountered an issue generating a safe response.'
                         yield {'type': 'token', 'text': safe_text}
@@ -256,28 +264,30 @@ class ChatEngine:
                         )
                         return
 
-                    # Phase 0.3: Medical disclaimer — append for first-aid/medical topics
+                    # Phase 0.3: Medical disclaimer
                     full_text = self.safety_checker.add_medical_disclaimer_if_needed(payload.message, full_text)
+                    state.final_response = full_text
 
                     governance_result = await self.governance.evaluate(
                         response_text=full_text,
                         retrieved_context=[
                             {"content": item.snippet, "source": item.source, "title": item.title}
-                            for item in context.retrieved
-                        ],
-                        tool_results=[{"payload": tool.payload} for tool in context.tools],
+                            for item in state.context.retrieved
+                        ] if state.context and state.context.retrieved else [],
+                        tool_results=[{"payload": tool.payload} for tool in state.context.tools] if state.context and state.context.tools else [],
                         prompt=payload.message,
                     )
+                    
                     response_text = full_text
                     if governance_result.flagged:
                         response_text = f"[⚠️ Low confidence] {full_text}"
 
-                    all_sources = self._dedupe_sources(base_sources + governance_result.citations)
+                    all_sources = self._dedupe_sources(last_sources + governance_result.citations)
 
                     await self.memory_store.append_message(
                         session_id, 'assistant', response_text,
                         metadata={
-                            'intent': refined_intent,
+                            'intent': last_intent,
                             'sources': all_sources,
                             'governance': {
                                 'hallucination_score': governance_result.hallucination_score,
@@ -287,7 +297,7 @@ class ChatEngine:
                             }
                         },
                     )
-                    yield {'type': 'done', 'intent': refined_intent, 'sources': all_sources, 'session_id': session_id}
+                    yield {'type': 'done', 'intent': last_intent, 'sources': all_sources, 'session_id': session_id}
                 elif event['type'] == 'error':
                     yield event
         except Exception as exc:
@@ -297,12 +307,12 @@ class ChatEngine:
     async def get_history(self, session_id: str) -> list[dict]:
         return await self.memory_store.get_history(session_id, limit=30)
 
-    def rebuild_index(self) -> dict[str, int | str]:
-        self.vectorstore.build_index(force=True)
-        return self.vectorstore.stats()
+    async def rebuild_index(self) -> dict[str, int | str]:
+        await self.vectorstore.build_index(force=True)
+        return await self.vectorstore.stats()
 
-    def stats(self) -> dict[str, int | str]:
-        return self.vectorstore.stats()
+    async def stats(self) -> dict[str, int | str]:
+        return await self.vectorstore.stats()
 
     @staticmethod
     def _dedupe_sources(values: list[str]) -> list[str]:

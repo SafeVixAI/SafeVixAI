@@ -33,28 +33,80 @@ def _has_any(text: str, terms: tuple[str, ...]) -> bool:
     return any(term in text for term in terms)
 
 
+from rag.embeddings import build_embedding_function
+
 class IntentDetector:
+    def __init__(self, embedding_model: str = 'sentence-transformers/all-MiniLM-L6-v2'):
+        self.embedding_function = build_embedding_function(embedding_model)
+        
+        # Define semantic examples for each intent
+        self.intent_examples = {
+            'emergency': ['help me', 'i am in an accident', 'call an ambulance', 'call the police', 'sos', 'crash', 'injured'],
+            'first_aid': ['im bleeding', 'how to treat a burn', 'cpr', 'choking', 'first aid', 'wound', 'unconscious', 'broken bone'],
+            'challan': ['traffic challan', 'speeding ticket', 'no helmet fine', 'seatbelt penalty', 'drunk driving', 'licence suspended'],
+            'legal': ['motor vehicles act', 'what are my rights', 'legal inspection', 'traffic laws', 'mva section'],
+            'road_weather': ['is it raining', 'flood on the road', 'fog visibility', 'heatwave', 'storm coming', 'monsoon'],
+            'safe_route': ['navigate to', 'safest route', 'directions to', 'best way to get to', 'avoid bad roads'],
+            'road_infrastructure': ['who maintains this road', 'road authority', 'pwd', 'nhai', 'contractor', 'report to authorities'],
+            'road_issue': ['pothole here', 'road is damaged', 'hazard on road', 'debris block', 'bad road condition'],
+        }
+        
+        # Precompute embeddings for examples
+        self.intent_embeddings = []
+        for intent, examples in self.intent_examples.items():
+            embs = self.embedding_function(examples)
+            for emb in embs:
+                self.intent_embeddings.append((intent, emb))
+                
+    def _cosine_similarity(self, v1: list[float], v2: list[float]) -> float:
+        dot_product = sum(a * b for a, b in zip(v1, v2))
+        norm_a = sum(a * a for a in v1) ** 0.5
+        norm_b = sum(b * b for b in v2) ** 0.5
+        if norm_a == 0 or norm_b == 0:
+            return 0.0
+        return dot_product / (norm_a * norm_b)
+
     def detect(self, message: str) -> str:
         text = message.lower()
-        if _has_any(text, ('accident', 'ambulance', 'hospital', 'police', 'emergency', 'sos', 'crash', 'injured')):
+        
+        # Fast paths for critical or highly specific terms
+        if _has_any(text, ('accident', 'ambulance', 'hospital', 'police', 'emergency', 'sos', 'crash', 'injured', 'help me')):
             return 'emergency'
-        if _has_any(text, ('bleeding', 'burn', 'fracture', 'cpr', 'choking', 'first aid', 'wound', 'unconscious')):
+            
+        if _has_any(text, ('first aid', 'cpr', 'bleeding', 'choking', 'burn', 'wound', 'unconscious')):
             return 'first_aid'
-        if CHALLAN_CODE_PATTERN.search(message) or any(
-            term in text for term in ('challan', 'fine', 'helmet', 'seatbelt', 'drunk driving', 'licence', 'license')
-        ):
+            
+        if CHALLAN_CODE_PATTERN.search(message) or _has_any(text, ('challan', 'fine', 'penalty', 'ticket')):
             return 'challan'
-        if _has_any(text, ('motor vehicles act', 'mv act', 'section', 'legal', 'rights', 'inspection', 'mva')):
+            
+        if _has_any(text, ('legal', 'rights', 'section', 'laws')) or re.search(r'\bact\b', text):
             return 'legal'
-        if _has_any(text, ('weather', 'rain', 'flood', 'fog', 'visibility', 'heatwave', 'storm', 'monsoon')):
+            
+        if _has_any(text, ('weather', 'rain', 'fog', 'flood', 'monsoon')):
             return 'road_weather'
-        if _has_any(text, ('route', 'routing', 'navigate', 'navigation', 'directions', 'safest way', 'safe route')):
+            
+        if _has_any(text, ('route', 'navigate', 'directions', 'way to')):
             return 'safe_route'
-        if _has_any(text, ('road authority', 'pwd', 'nhai', 'pmgsy', 'contractor', 'maintenance owner', 'who maintains')):
+            
+        if _has_any(text, ('who maintains', 'contractor', 'nhai', 'pwd', 'authority')):
             return 'road_infrastructure'
-        if _has_any(text, ('pothole', 'road issue', 'road hazard', 'debris', 'bad road', 'report road', 'damaged road')):
+            
+        if _has_any(text, ('pothole', 'hazard', 'debris', 'damaged')):
             return 'road_issue'
-        return 'general'
+            
+        # Semantic Routing Fallback
+        query_emb = self.embedding_function([message])[0]
+        
+        best_intent = 'general'
+        best_score = 0.55 # Threshold
+        
+        for intent, emb in self.intent_embeddings:
+            score = self._cosine_similarity(query_emb, emb)
+            if score > best_score:
+                best_score = score
+                best_intent = intent
+                
+        return best_intent
 
     def refine_intent(
         self,

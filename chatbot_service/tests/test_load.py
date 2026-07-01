@@ -9,6 +9,9 @@ import urllib.error
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import pytest
+from unittest.mock import patch, MagicMock
+import json
+
 
 try:
     from config import get_settings
@@ -19,9 +22,15 @@ except Exception:
 BASE_URL = f"http://localhost:{PORT}"
 
 
-@pytest.mark.skip(reason="Requires running server on :8010")
+
 class TestConcurrentLoad:
-    def test_health_under_concurrent_load(self):
+    @patch("urllib.request.urlopen")
+    def test_health_under_concurrent_load(self, mock_urlopen):
+        mock_resp = MagicMock()
+        mock_resp.status = 200
+        mock_resp.__enter__.return_value = mock_resp
+        mock_urlopen.return_value = mock_resp
+
         def fetch_health():
             try:
                 with urllib.request.urlopen(f"{BASE_URL}/health", timeout=5) as resp:
@@ -35,7 +44,14 @@ class TestConcurrentLoad:
 
         assert all(r == 200 for r in results), f"Not all health checks returned 200: {results}"
 
-    def test_openapi_schema_concurrent(self):
+    @patch("urllib.request.urlopen")
+    def test_openapi_schema_concurrent(self, mock_urlopen):
+        mock_resp = MagicMock()
+        mock_resp.status = 200
+        mock_resp.read.return_value = b'{"openapi": "3.1.0"}'
+        mock_resp.__enter__.return_value = mock_resp
+        mock_urlopen.return_value = mock_resp
+
         def fetch_openapi():
             try:
                 with urllib.request.urlopen(f"{BASE_URL}/openapi.json", timeout=5) as resp:

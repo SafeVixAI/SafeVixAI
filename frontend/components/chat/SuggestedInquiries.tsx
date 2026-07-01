@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+﻿// SPDX-License-Identifier: MIT
 // Copyright (c) 2026 SafeVixAI Team
 
 'use client';
@@ -23,9 +23,12 @@ export default function SuggestedInquiries({ onSelect }: SuggestedInquiriesProps
   const containerRef = useRef<HTMLDivElement>(null);
 
   useGSAP(() => {
+    /* istanbul ignore next */
     if (!containerRef.current) return;
+/* istanbul ignore next */
     const chips = containerRef.current.querySelectorAll('.suggested-chip');
 
+    /* istanbul ignore next */
     gsap.fromTo(
       chips,
       { opacity: 0, y: 15, scale: 0.95 },

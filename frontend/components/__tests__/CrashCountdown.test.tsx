@@ -30,7 +30,10 @@ jest.mock('../../components/crash/ProgressRing', () => ({
 }));
 
 jest.mock('@gsap/react', () => ({
-  useGSAP: () => null,
+  useGSAP: (callback: any) => {
+    if (typeof callback === 'function') callback();
+    return {};
+  },
 }));
 
 jest.mock('@/lib/gsap', () => ({
@@ -109,6 +112,13 @@ describe('CrashCountdown', function() {
     var { CrashCountdown } = await import('../crash/CrashCountdown');
     render(<CrashCountdown severity="high" onCancel={mockOnCancel} onDispatch={mockOnDispatch} />);
     expect(screen.getByLabelText('20 seconds to auto SOS')).toBeInTheDocument();
+  });
+
+  it('calls haptics.sos on mount', async function() {
+    var hapticsMod = require('@/lib/haptics');
+    var { CrashCountdown } = await import('../crash/CrashCountdown');
+    render(<CrashCountdown severity="high" onCancel={mockOnCancel} onDispatch={mockOnDispatch} />);
+    expect(hapticsMod.haptics.sos).toHaveBeenCalled();
   });
 });
 

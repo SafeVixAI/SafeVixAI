@@ -179,6 +179,61 @@ class CacheHelper:
             self._redis_healthy = False
             return False
 
+    async def hset(self, key: str, mapping: dict[str, Any]) -> None:
+        """Set fields in a Redis hash. Gracefully degrades to memory if Redis is unavailable."""
+        payloads = {k: json.dumps(v, default=str) for k, v in mapping.items()}
+        # Memory fallback: store the entire hash as a JSON string under the key
+        current = await self.hgetall(key) or {}
+        current.update(mapping)
+        self._memory_set(key, json.dumps(current, default=str))
+        
+        if not self._client:
+            return
+        try:
+            await self._client.hset(key, mapping=payloads)
+            self._redis_healthy = True
+        except Exception:
+            self._redis_healthy = False
+            return
+            
+    async def hgetall(self, key: str) -> dict[str, Any]:
+        """Get all fields from a Redis hash."""
+        if self._client:
+            try:
+                raw = await self._client.hgetall(key)
+                self._redis_healthy = True
+                if raw:
+                    return {k: json.loads(v) for k, v in raw.items()}
+            except Exception:
+                self._redis_healthy = False
+        
+        # Memory fallback
+        payload = self._memory_get(key)
+        if payload:
+            try:
+                return json.loads(payload)
+            except (json.JSONDecodeError, TypeError):
+                pass
+        return {}
+
+    async def hdel(self, key: str, *fields: str) -> None:
+        """Delete fields from a Redis hash."""
+        current = await self.hgetall(key)
+        if current:
+            for field in fields:
+                current.pop(field, None)
+            self._memory_set(key, json.dumps(current, default=str))
+
+        if not self._client:
+            return
+        try:
+            if fields:
+                await self._client.hdel(key, *fields)
+            self._redis_healthy = True
+        except Exception:
+            self._redis_healthy = False
+            return
+
     async def close(self) -> None:
         if not self._client:
             return

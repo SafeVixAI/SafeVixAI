@@ -57,43 +57,27 @@ class FakeConversationMemoryStore:
 
 
 class FakeVectorStore:
-    def __init__(self, persist_dir, data_dir, **kwargs) -> None:
-        self.persist_dir = persist_dir
+    def __init__(self, database_url=None, data_dir=None, **kwargs):
+        self.database_url = database_url
         self.data_dir = data_dir
-        self.embedding_model = kwargs.get('embedding_model', 'test-embedding-model')
 
-    def build_index(self, *, force: bool = False) -> list:
+    async def ensure_index(self):
+        return []
+        
+    async def build_index(self, *, force=False):
         return []
 
-    def stats(self) -> dict[str, int | str]:
-        return {
-            'chunks': 1,
-            'categories': 1,
-            'chroma_chunks': 1,
-            'embedding_model': self.embedding_model,
-        }
-
+    async def stats(self):
+        return {"chunks": 1, "categories": 1, "database": "pgvector", "embedding_model": "test"}
 
 class FakeRetriever:
-    def __init__(self, vectorstore, *, default_top_k: int = 5, min_score: float = 0.0) -> None:
+    def __init__(self, vectorstore, *, default_top_k=5, min_score=0.0, **kwargs):
         self.vectorstore = vectorstore
         self.default_top_k = default_top_k
         self.min_score = min_score
 
-    def retrieve(self, query: str, *, top_k: int | None = None, scopes: set[str] | None = None) -> list:
-        source = 'kb:emergency' if scopes else 'kb:general'
-        category = 'emergency' if scopes else 'general'
-        return [
-            SimpleNamespace(
-                source=source,
-                title='SafeVixAI Knowledge Base',
-                category=category,
-                content=f'Reference for: {query}',
-                score=0.98,
-            )
-        ]
-
-
+    async def retrieve(self, query: str, *, top_k: int | None = None, scopes=None) -> list:
+        return []
 class FakeSosTool:
     def __init__(self, backend_client, w3w_tool=None, geocode_client=None) -> None:
         self.backend_client = backend_client
@@ -139,7 +123,7 @@ class FakeLegalSearchTool:
     def __init__(self, retriever) -> None:
         self.retriever = retriever
 
-    def search(self, message: str) -> list:
+    async def search(self, message: str) -> list:
         return [
             SimpleNamespace(
                 source='kb:legal',

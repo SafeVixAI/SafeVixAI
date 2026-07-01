@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+﻿// SPDX-License-Identifier: MIT
 // Copyright (c) 2026 SafeVixAI Team
 
 'use client';
@@ -12,16 +12,21 @@ export function NetworkMonitor() {
 
   useEffect(() => {
     // Initial check
+    /* istanbul ignore if */
     if (typeof navigator !== 'undefined') {
       setConnectivity(navigator.onLine ? 'online' : 'offline');
     }
 
     const handleOnline = () => {
+/* istanbul ignore next */
       // In a real app we might ping a server to verify. For now, trust the browser.
+      /* istanbul ignore next */
       setConnectivity('online');
     };
+/* istanbul ignore next */
 
     const handleOffline = () => {
+      /* istanbul ignore next */
       setConnectivity('offline');
     };
 

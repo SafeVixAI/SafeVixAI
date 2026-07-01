@@ -29,6 +29,7 @@ from api.v1.citizen import router as citizen_router
 from api.v1.public import router as public_router
 from api.v1.command_center import router as command_center_router
 from api.v1.garage import router as garage_router
+from api.v1.providers import router as providers_router
 
 
 api_router = APIRouter()
@@ -56,4 +57,5 @@ api_router.include_router(citizen_router)
 api_router.include_router(public_router)
 api_router.include_router(command_center_router)
 api_router.include_router(garage_router)
+api_router.include_router(providers_router)
 

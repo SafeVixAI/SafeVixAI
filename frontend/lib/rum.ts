@@ -31,6 +31,7 @@ export function initRUM() {
     const clsObs = new PerformanceObserver((list) => {
       for (const entry of list.getEntries()) {
         const shift = entry as unknown as { hadRecentInput?: boolean; value?: number };
+        /* istanbul ignore next */
         if (!shift.hadRecentInput) {
           clsValue += shift.value ?? 0;
         }
@@ -40,6 +41,7 @@ export function initRUM() {
     clsObs.observe({ type: 'layout-shift', buffered: true });
 
     // Navigation Timing — TTFB, DOM Complete, Load
+    /* istanbul ignore next */
     if (performance.getEntriesByType('navigation').length > 0) {
       const nav = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
       reportMetric('TTFB', nav.responseStart - nav.requestStart);

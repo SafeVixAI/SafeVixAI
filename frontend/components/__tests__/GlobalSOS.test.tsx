@@ -2,7 +2,7 @@
 // Copyright (c) 2026 SafeVixAI Team
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
 var mockUsePathname = jest.fn();
@@ -115,6 +115,15 @@ describe('GlobalSOS', function() {
     expect(divs.length).toBe(2);
     expect(divs[1]).toHaveClass('hidden');
     expect(divs[1]).toHaveClass('lg:block');
+  });
+
+  it('calls haptics.heavy when SOS link is clicked', function() {
+    mockUsePathname.mockReturnValue('/assistant');
+    var hapticsMod = require('@/lib/haptics');
+    render(<GlobalSOS />);
+    var links = screen.getAllByRole('link');
+    fireEvent.click(links[0]);
+    expect(hapticsMod.haptics.heavy).toHaveBeenCalled();
   });
 });
 

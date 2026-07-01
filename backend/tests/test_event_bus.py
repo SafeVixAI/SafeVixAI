@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import asyncio
 import json
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
 from services.event_bus import EventBus, DomainEvent, get_event_bus, reset_event_bus
@@ -237,6 +237,28 @@ async def test_handler_timeout():
     metrics = bus.get_metrics()
     bus.get_dead_letters()
     assert metrics["handler_failures"] >= 0  # timeout may or may not fire in 0.1s
+
+
+@pytest.mark.asyncio
+async def test_handler_timeout_error_fires():
+    """Covers the except asyncio.TimeoutError path in _safe_execute (lines 161-166)."""
+    bus = EventBus()
+
+    async def any_handler(event):
+        pass
+
+    bus.subscribe("test.event", any_handler)
+    event = DomainEvent.create("test.event", {})
+
+    with patch("services.event_bus.asyncio.wait_for", side_effect=asyncio.TimeoutError()):
+        await bus.publish(event)
+        await asyncio.sleep(0.05)
+
+    metrics = bus.get_metrics()
+    assert metrics["handler_failures"] == 1
+    dead_letters = bus.get_dead_letters()
+    assert len(dead_letters) == 1
+    assert "TimeoutError" in dead_letters[0]["error"]
 
 
 @pytest.mark.asyncio

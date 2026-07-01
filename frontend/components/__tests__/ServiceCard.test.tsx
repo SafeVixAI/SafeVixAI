@@ -1,6 +1,20 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 SafeVixAI Team
 
+jest.mock('@/lib/navigation-launch', function() {
+  return {
+    openBestNavApp: jest.fn(),
+    openNavApp: jest.fn(),
+    setPreferredNavApp: jest.fn(),
+    getPreferredNavApp: jest.fn().mockReturnValue('google-maps'),
+    NAV_APPS: [
+      { key: 'google-maps', label: 'Google Maps', emoji: '📍' },
+      { key: 'waze', label: 'Waze', emoji: '🗺️' },
+      { key: 'apple-maps', label: 'Apple Maps', emoji: '🗺️' },
+    ],
+  }
+});
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -126,6 +140,33 @@ describe('ServiceCard', function() {
   it('applies custom className', function() {
     var { container } = render(<ServiceCard service={mockService} className="my-class" />);
     expect(container.firstChild).toHaveClass('my-class');
+  });
+
+  it('calls openBestNavApp on Map Directions click', function() {
+    var nav = require('@/lib/navigation-launch');
+    render(<ServiceCard service={mockService} />);
+    fireEvent.click(screen.getByLabelText('Get directions to Apollo Hospital'));
+    expect(nav.openBestNavApp).toHaveBeenCalled();
+  });
+
+  it('selects nav app from dropdown', function() {
+    var nav = require('@/lib/navigation-launch');
+    render(<ServiceCard service={mockService} />);
+    fireEvent.click(screen.getByLabelText('Choose navigation app'));
+    var wazeBtn = screen.getByText('Waze');
+    fireEvent.click(wazeBtn);
+    expect(nav.setPreferredNavApp).toHaveBeenCalledWith('waze');
+    expect(nav.openNavApp).toHaveBeenCalled();
+  });
+
+  it('shows preferred nav as active in dropdown', function() {
+    var nav = require('@/lib/navigation-launch');
+    nav.getPreferredNavApp.mockReturnValue('waze');
+    render(<ServiceCard service={mockService} />);
+    fireEvent.click(screen.getByLabelText('Choose navigation app'));
+    var wazeBtn = screen.getByText('Waze');
+    expect(wazeBtn).toBeInTheDocument();
+    nav.getPreferredNavApp.mockReturnValue('google-maps');
   });
 });
 

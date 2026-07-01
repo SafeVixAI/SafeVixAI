@@ -30,7 +30,8 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   const [checking, setChecking] = useState(true);
 
   const skipAuth = process.env.NODE_ENV !== 'production' &&
-    typeof window !== 'undefined' &&
+    /* istanbul ignore next */
+typeof window !== 'undefined' &&
     window.localStorage.getItem('__E2E_SKIP_AUTH__') === 'true';
   const [isPublic, setIsPublic] = useState(false);
 

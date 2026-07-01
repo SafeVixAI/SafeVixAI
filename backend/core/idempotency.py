@@ -48,6 +48,13 @@ class IdempotencyMiddleware(BaseHTTPMiddleware):
             cached = await cache.get(cache_key)
             if cached:
                 logger.info("Idempotency cache hit for key: %s", idempotency_key)
+                from core.audit import AuditLog, AuditEvent
+                AuditLog.log(
+                    AuditEvent.ADMIN_ACTION,
+                    user_id=request.client.host if request.client else "unknown",
+                    ip_address=request.client.host if request.client else None,
+                    details={"action": "idempotency_replay_intercepted", "idempotency_key": idempotency_key},
+                )
                 data = json.loads(cached)
                 return JSONResponse(
                     content=data["body"],

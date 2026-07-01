@@ -97,4 +97,53 @@ describe('useWebSocket', function () {
     jest.advanceTimersByTime(2000)
     jest.useRealTimers()
   })
+
+  it('calls updateStatus disconnected when max reconnect attempts reached', async function () {
+    jest.useFakeTimers()
+    var mod = await import('../useWebSocket')
+    var onStatusChange = jest.fn()
+    var { result } = renderHook(function () {
+      return mod.useWebSocket({ onMessage: jest.fn(), onStatusChange: onStatusChange, reconnectMaxAttempts: 0 })
+    })
+    act(function () { result.current.connect('ws://test.com') })
+    act(function () { mockWs.onclose() })
+    // scheduleReconnect runs → attempt=1 > 0 → calls updateStatus('disconnected')
+    expect(onStatusChange).toHaveBeenCalledWith('disconnected')
+    jest.useRealTimers()
+  })
+
+  it('handles ws.onerror gracefully', async function () {
+    var mod = await import('../useWebSocket')
+    var { result } = renderHook(function () { return mod.useWebSocket({ onMessage: jest.fn() }) })
+    act(function () { result.current.connect('ws://test.com') })
+    act(function () { mockWs.onerror() })
+    // onerror does nothing but should not throw
+    expect(result.current.status).toBe('connecting')
+  })
+
+  it('handles WebSocket constructor throw with reconnect exhausted', async function () {
+    MockWebSocket = jest.fn(function () { throw new Error('ws fail') })
+    ;(global as any).WebSocket = MockWebSocket
+    var mod = await import('../useWebSocket')
+    var onStatusChange = jest.fn()
+    var { result } = renderHook(function () {
+      return mod.useWebSocket({ onMessage: jest.fn(), onStatusChange: onStatusChange, reconnectMaxAttempts: 0 })
+    })
+    act(function () { result.current.connect('ws://test.com') })
+    // Constructor throw → catch sets 'disconnected', then scheduleReconnect
+    // with maxAttempts=0 → attempt=1>0 → updateStatus('disconnected') again
+    expect(onStatusChange).toHaveBeenCalledWith('disconnected')
+  })
+
+  it('clears pong timeout on cleanup after heartbeat', async function () {
+    jest.useFakeTimers()
+    var mod = await import('../useWebSocket')
+    var { result } = renderHook(function () { return mod.useWebSocket({ onMessage: jest.fn(), heartbeatIntervalMs: 100 }) })
+    act(function () { result.current.connect('ws://test.com') })
+    act(function () { mockWs.onopen() })
+    // Advance past heartbeat interval to trigger pong timeout set
+    jest.advanceTimersByTime(150)
+    act(function () { result.current.disconnect() })
+    jest.useRealTimers()
+  })
 })

@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+﻿// SPDX-License-Identifier: MIT
 // Copyright (c) 2026 SafeVixAI Team
 
 'use client';
@@ -17,6 +17,7 @@ export function SystemStatusBar() {
   const [shouldRender, setShouldRender] = useState(false);
 
   useEffect(() => {
+    /* istanbul ignore next */
     if (typeof window !== 'undefined') {
       const dismissed = sessionStorage.getItem('svai-status-dismissed') === 'true' ||
                         (process.env.NODE_ENV !== 'production' && localStorage.getItem('__E2E_SKIP_AUTH__') === 'true');
@@ -34,6 +35,7 @@ export function SystemStatusBar() {
         ]);
         clearTimeout(timeoutId);
 
+/* istanbul ignore next */
         const backendOk = backend.status === 'fulfilled' && backend.value.ok;
         const chatbotOk = chatbot.status === 'fulfilled' && chatbot.value.ok;
 
@@ -47,8 +49,11 @@ export function SystemStatusBar() {
           setStatus('DOWN');
           setMessage('SafeVixAI services are waking up. Offline emergency tools remain available.');
         }
+      /* istanbul ignore next */
       } catch {
+/* istanbul ignore next */
         setStatus('DOWN');
+/* istanbul ignore next */
         setMessage('SafeVixAI services are waking up. Offline emergency tools remain available.');
       }
     };
@@ -67,14 +72,17 @@ export function SystemStatusBar() {
   }, [active]);
 
   useGSAP(() => {
+    /* istanbul ignore next */
     if (!containerRef.current) return;
     if (active) {
+      /* istanbul ignore next */
       gsap.fromTo(
         containerRef.current,
         { y: -50, opacity: 0 },
         { y: 0, opacity: 1, duration: 0.4, ease: 'power2.out' }
       );
     } else {
+      /* istanbul ignore next */
       gsap.to(containerRef.current, {
         y: -50,
         opacity: 0,

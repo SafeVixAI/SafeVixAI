@@ -2,7 +2,7 @@
 // Copyright (c) 2026 SafeVixAI Team
 
 import React from 'react';
-import { render, screen, fireEvent, act } from '@testing-library/react';
+import { render, screen, fireEvent, act, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
 var mockOnResult = jest.fn();
@@ -105,6 +105,37 @@ describe('VoiceInput', function() {
       (mockRecognitionInstance.onerror as (e: unknown) => void)({ error: 'not-allowed' });
     });
     expect(screen.getByRole('button', { name: /start voice input/i })).toBeInTheDocument();
+  });
+
+  it('stops loading when speech recognition onend fires', async function() {
+    renderVoiceInput();
+    fireEvent.click(screen.getByRole('button', { name: /start voice input/i }));
+    await act(async () => { (mockRecognitionInstance.onstart as () => void)(); });
+    await act(async () => { (mockRecognitionInstance.onend as () => void)(); });
+    expect(screen.getByRole('button', { name: /start voice input/i })).toBeInTheDocument();
+  });
+
+  it('stops recording when toggle clicked while recording', async function() {
+    renderVoiceInput();
+    fireEvent.click(screen.getByRole('button', { name: /start voice input/i }));
+    await act(async () => { (mockRecognitionInstance.onstart as () => void)(); });
+    fireEvent.click(screen.getByRole('button', { name: /stop recording/i }));
+    expect(mockRecognitionInstance.stop).toHaveBeenCalledTimes(1);
+  });
+
+  it('gracefully falls back when SpeechRecognition not available', async function() {
+    (window as any).SpeechRecognition = undefined;
+    (window as any).webkitSpeechRecognition = undefined;
+    renderVoiceInput();
+    fireEvent.click(screen.getByRole('button', { name: /start voice input/i }));
+    expect(mockOnResult).toHaveBeenCalledWith('Reporting a road hazard at my current location.');
+  });
+
+  it('handles start failure gracefully', async function() {
+    mockRecognitionInstance.start = jest.fn(function() { throw new Error('start fail') });
+    renderVoiceInput();
+    fireEvent.click(screen.getByRole('button', { name: /start voice input/i }));
+    await waitFor(function() { expect(screen.getByRole('button', { name: /start voice input/i })).toBeInTheDocument() });
   });
 });
 

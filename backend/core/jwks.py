@@ -138,23 +138,25 @@ class JWKSManager:
             logger.info("No JWKS URL; skipping rotation")
             return
 
-        old_key_id = self._current_key_id
-        await self._fetch_jwks()
+        from core.distributed_lock import distributed_lock
+        async with distributed_lock("jwks_rotation", ttl_seconds=10):
+            old_key_id = self._current_key_id
+            await self._fetch_jwks()
 
-        if old_key_id and old_key_id != self._current_key_id:
-            # Add old key to history with rotation window
-            expiry = time.time() + ROTATION_WINDOW_SECONDS
-            self._key_history.append((old_key_id, expiry))
-            logger.info(
-                "Key rotated: %s -> %s (old key valid until %s)",
-                old_key_id,
-                self._current_key_id,
-                time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(expiry)),
-            )
+            if old_key_id and old_key_id != self._current_key_id:
+                # Add old key to history with rotation window
+                expiry = time.time() + ROTATION_WINDOW_SECONDS
+                self._key_history.append((old_key_id, expiry))
+                logger.info(
+                    "Key rotated: %s -> %s (old key valid until %s)",
+                    old_key_id,
+                    self._current_key_id,
+                    time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(expiry)),
+                )
 
-        # Clean up expired keys
-        now = time.time()
-        self._key_history = [(kid, exp) for kid, exp in self._key_history if now < exp]
+            # Clean up expired keys
+            now = time.time()
+            self._key_history = [(kid, exp) for kid, exp in self._key_history if now < exp]
 
     async def _fetch_jwks(self) -> dict[str, Any]:
         """Fetch JWKS from the configured URL."""

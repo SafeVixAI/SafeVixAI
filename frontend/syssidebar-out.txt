@@ -1,0 +1,118 @@
+
+> safevixai-frontend@1.0.0 test
+> jest components/dashboard/__tests__/SystemSidebar.test.tsx --no-coverage
+
+FAIL components/dashboard/__tests__/SystemSidebar.test.tsx (16.781 s)
+  SystemSidebar
+    GêÜ renders null when closed (224 ms)
+    +ù renders dialog when open (666 ms)
+    +ù renders app name (45 ms)
+    +ù renders nav items (118 ms)
+    +ù renders emergency quick dials (42 ms)
+    GêÜ calls setOpen(false) on close button click (1063 ms)
+    GêÜ closes on backdrop click (317 ms)
+    GêÜ closes on Escape key (680 ms)
+    GêÜ highlights active nav item (1557 ms)
+    GêÜ renders SOS button linking to /sos (68 ms)
+    GêÜ renders quick dial tel: links (81 ms)
+    GêÜ removes Escape listener on cleanup (19 ms)
+System.Management.Automation.RemoteException
+  GùÅ SystemSidebar GÇ¦ renders dialog when open
+System.Management.Automation.RemoteException
+    TestingLibraryElementError: Unable to find an accessible element with the role "dialog"
+System.Management.Automation.RemoteException
+    There are no accessible roles. But there might be some inaccessible roles. If you wish to access them, then set the `hidden` option to `true`. Learn more about this here: https://testing-library.com/docs/dom-testing-library/api-queries#byrole
+System.Management.Automation.RemoteException
+    Ignored nodes: comments, script, style
+    [36m<body>[39m
+      [36m<div />[39m
+    [36m</body>[39m
+System.Management.Automation.RemoteException
+    [0m [90m 45 |[39m   it([32m'renders dialog when open'[39m[33m,[39m [36mfunction[39m () {
+     [90m 46 |[39m     render([33mReact[39m[33m.[39mcreateElement([33mSystemSidebar[39m))
+    [31m[1m>[22m[39m[90m 47 |[39m     expect(screen[33m.[39mgetByRole([32m'dialog'[39m))[33m.[39mtoBeInTheDocument()
+     [90m    |[39m                   [31m[1m^[22m[39m
+     [90m 48 |[39m     expect(screen[33m.[39mgetByLabelText([32m'Mobile Navigation'[39m))[33m.[39mtoBeInTheDocument()
+     [90m 49 |[39m   })
+     [90m 50 |[39m[0m
+System.Management.Automation.RemoteException
+      at Object.getElementError (node_modules/@testing-library/dom/dist/config.js:37:19)
+      at node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+      at node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+      at node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+      at Object.getByRole (components/dashboard/__tests__/SystemSidebar.test.tsx:47:19)
+System.Management.Automation.RemoteException
+  GùÅ SystemSidebar GÇ¦ renders app name
+System.Management.Automation.RemoteException
+    TestingLibraryElementError: Unable to find an element with the text: SafeVixAI. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+System.Management.Automation.RemoteException
+    Ignored nodes: comments, script, style
+    [36m<body>[39m
+      [36m<div />[39m
+    [36m</body>[39m
+System.Management.Automation.RemoteException
+    [0m [90m 51 |[39m   it([32m'renders app name'[39m[33m,[39m [36mfunction[39m () {
+     [90m 52 |[39m     render([33mReact[39m[33m.[39mcreateElement([33mSystemSidebar[39m))
+    [31m[1m>[22m[39m[90m 53 |[39m     expect(screen[33m.[39mgetByText([32m'SafeVixAI'[39m))[33m.[39mtoBeInTheDocument()
+     [90m    |[39m                   [31m[1m^[22m[39m
+     [90m 54 |[39m   })
+     [90m 55 |[39m
+     [90m 56 |[39m   it([32m'renders nav items'[39m[33m,[39m [36mfunction[39m () {[0m
+System.Management.Automation.RemoteException
+      at Object.getElementError (node_modules/@testing-library/dom/dist/config.js:37:19)
+      at node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+      at node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+      at node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+      at Object.getByText (components/dashboard/__tests__/SystemSidebar.test.tsx:53:19)
+System.Management.Automation.RemoteException
+  GùÅ SystemSidebar GÇ¦ renders nav items
+System.Management.Automation.RemoteException
+    TestingLibraryElementError: Unable to find an element with the text: Map. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+System.Management.Automation.RemoteException
+    Ignored nodes: comments, script, style
+    [36m<body>[39m
+      [36m<div />[39m
+    [36m</body>[39m
+System.Management.Automation.RemoteException
+    [0m [90m 56 |[39m   it([32m'renders nav items'[39m[33m,[39m [36mfunction[39m () {
+     [90m 57 |[39m     render([33mReact[39m[33m.[39mcreateElement([33mSystemSidebar[39m))
+    [31m[1m>[22m[39m[90m 58 |[39m     expect(screen[33m.[39mgetByText([32m'Map'[39m))[33m.[39mtoBeInTheDocument()
+     [90m    |[39m                   [31m[1m^[22m[39m
+     [90m 59 |[39m     expect(screen[33m.[39mgetByText([32m'AI Assistant'[39m))[33m.[39mtoBeInTheDocument()
+     [90m 60 |[39m     expect(screen[33m.[39mgetByText([32m'Locator'[39m))[33m.[39mtoBeInTheDocument()
+     [90m 61 |[39m     expect(screen[33m.[39mgetByText([32m'First Aid'[39m))[33m.[39mtoBeInTheDocument()[0m
+System.Management.Automation.RemoteException
+      at Object.getElementError (node_modules/@testing-library/dom/dist/config.js:37:19)
+      at node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+      at node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+      at node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+      at Object.getByText (components/dashboard/__tests__/SystemSidebar.test.tsx:58:19)
+System.Management.Automation.RemoteException
+  GùÅ SystemSidebar GÇ¦ renders emergency quick dials
+System.Management.Automation.RemoteException
+    TestingLibraryElementError: Unable to find an element with the text: 112. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+System.Management.Automation.RemoteException
+    Ignored nodes: comments, script, style
+    [36m<body>[39m
+      [36m<div />[39m
+    [36m</body>[39m
+System.Management.Automation.RemoteException
+    [0m [90m 64 |[39m   it([32m'renders emergency quick dials'[39m[33m,[39m [36mfunction[39m () {
+     [90m 65 |[39m     render([33mReact[39m[33m.[39mcreateElement([33mSystemSidebar[39m))
+    [31m[1m>[22m[39m[90m 66 |[39m     expect(screen[33m.[39mgetByText([32m'112'[39m))[33m.[39mtoBeInTheDocument()
+     [90m    |[39m                   [31m[1m^[22m[39m
+     [90m 67 |[39m     expect(screen[33m.[39mgetByText([35m/Highway/[39m))[33m.[39mtoBeInTheDocument()
+     [90m 68 |[39m   })
+     [90m 69 |[39m[0m
+System.Management.Automation.RemoteException
+      at Object.getElementError (node_modules/@testing-library/dom/dist/config.js:37:19)
+      at node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+      at node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+      at node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+      at Object.getByText (components/dashboard/__tests__/SystemSidebar.test.tsx:66:19)
+System.Management.Automation.RemoteException
+Test Suites: 1 failed, 1 total
+Tests:       4 failed, 8 passed, 12 total
+Snapshots:   0 total
+Time:        25.615 s
+Ran all test suites matching components/dashboard/__tests__/SystemSidebar.test.tsx.

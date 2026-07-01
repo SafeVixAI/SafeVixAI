@@ -10,5 +10,5 @@ class LegalSearchTool:
     def __init__(self, retriever: Retriever) -> None:
         self.retriever = retriever
 
-    def search(self, query: str, *, top_k: int = 4) -> list[RetrievalResult]:
-        return self.retriever.retrieve(query, top_k=top_k, scopes={'legal'})
+    async def search(self, query: str, *, top_k: int = 4) -> list[RetrievalResult]:
+        return await self.retriever.retrieve(query, top_k=top_k, scopes={'legal'})

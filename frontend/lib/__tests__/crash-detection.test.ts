@@ -180,6 +180,32 @@ describe('crash-detection', function () {
     })
   })
 
+  it('handleDeviceMotion resets crash flag after debounce', function (done) {
+    jest.useFakeTimers()
+    jest.isolateModules(function () {
+      var origEventListener = window.addEventListener
+      var capturedHandler: any = null
+      window.addEventListener = function (type: string, handler: any, opts?: any) {
+        if (type === 'devicemotion') capturedHandler = handler
+      }
+      var mod = require('../crash-detection')
+      var cb = jest.fn()
+      mod.startCrashDetection(cb)
+      if (capturedHandler) {
+        capturedHandler({ accelerationIncludingGravity: { x: 0, y: 200, z: 0 } })
+      }
+      expect(cb).toHaveBeenCalledTimes(1)
+      jest.advanceTimersByTime(61000)
+      if (capturedHandler) {
+        capturedHandler({ accelerationIncludingGravity: { x: 0, y: 200, z: 0 } })
+      }
+      expect(cb).toHaveBeenCalledTimes(2)
+      window.addEventListener = origEventListener
+      done()
+    })
+    jest.useRealTimers()
+  })
+
   it('handleDeviceMotion ignores missing accelerationIncludingGravity', function (done) {
     jest.isolateModules(function () {
       var origEventListener = window.addEventListener

@@ -30,6 +30,7 @@ class Settings(BaseSettings):
     database_url: str = 'postgresql+asyncpg://postgres:postgres@localhost:5432/safevixai'
     database_replica_url: str | None = None
     redis_url: str | None = None
+    provider_encryption_key: str | None = Field(default=None, validation_alias='PROVIDER_ENCRYPTION_KEY')
     # P1-05: Increased pool size from 1 to 10 (audit H8) to prevent severe connection bottlenecks
     db_pool_size: int = 10
     db_max_overflow: int = 20

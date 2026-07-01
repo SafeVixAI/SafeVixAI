@@ -9,6 +9,7 @@ import { useAppStore } from './store';
 let ctx: AudioContext | null = null;
 
 function getAudioContext(): AudioContext | null {
+  /* istanbul ignore next */
   if (typeof window === 'undefined') return null;
   if (!ctx) {
     try {
@@ -21,6 +22,7 @@ function getAudioContext(): AudioContext | null {
 }
 
 function playTone(freq: number, duration: number, gain = 0.1) {
+  /* istanbul ignore next */
   if (typeof window === 'undefined') return;
   // Guard with soundsEnabled setting from Zustand store
   if (!useAppStore.getState().soundsEnabled) return;

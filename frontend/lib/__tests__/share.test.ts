@@ -70,4 +70,25 @@ describe('share', function () {
     var result = await mod.shareTrackingSession('session-1')
     expect(result).toBe(true)
   })
+
+  it('shareLink catches share error and falls through to clipboard', async function () {
+    var mod = await import('../share')
+    ;(navigator as any).share = jest.fn().mockRejectedValue(new Error('share failed'))
+    ;(navigator as any).clipboard = { writeText: jest.fn().mockRejectedValue(new Error('clipboard error')) }
+    var promptSpy = jest.spyOn(window, 'prompt').mockReturnValue('')
+    var result = await mod.shareLink('Title', 'https://example.com')
+    expect(promptSpy).toHaveBeenCalledWith('Copy this link:', 'https://example.com')
+    expect(result).toBe(false)
+    promptSpy.mockRestore()
+  })
+
+  it('shareLink falls back to window.prompt when clipboard fails', async function () {
+    var mod = await import('../share')
+    ;(navigator as any).clipboard = { writeText: jest.fn().mockRejectedValue(new Error('clipboard error')) }
+    var promptSpy = jest.spyOn(window, 'prompt').mockReturnValue('')
+    var result = await mod.shareLink('Title', 'https://example.com')
+    expect(promptSpy).toHaveBeenCalledWith('Copy this link:', 'https://example.com')
+    expect(result).toBe(false)
+    promptSpy.mockRestore()
+  })
 })

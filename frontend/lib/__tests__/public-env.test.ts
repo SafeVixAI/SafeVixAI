@@ -64,6 +64,39 @@ describe('public-env', function() {
       process.env.NEXT_PUBLIC_API_URL = OLD_API;
       process.env.NEXT_PUBLIC_CHATBOT_URL = OLD_CHAT;
     });
+
+    it('logs warning when env vars missing and not in test mode', function() {
+      var OLD_API = process.env.NEXT_PUBLIC_API_URL;
+      var OLD_CHAT = process.env.NEXT_PUBLIC_CHATBOT_URL;
+      var OLD_NODE_ENV = process.env.NODE_ENV;
+      delete process.env.NEXT_PUBLIC_API_URL;
+      delete process.env.NEXT_PUBLIC_CHATBOT_URL;
+      process.env.NODE_ENV = 'development';
+      var warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+      jest.isolateModules(() => {
+        require('../public-env');
+      });
+      expect(warnSpy).toHaveBeenCalled();
+      warnSpy.mockRestore();
+      process.env.NEXT_PUBLIC_API_URL = OLD_API;
+      process.env.NEXT_PUBLIC_CHATBOT_URL = OLD_CHAT;
+      process.env.NODE_ENV = OLD_NODE_ENV;
+    });
+
+    it('does not log warning in test mode when env vars missing', function() {
+      var OLD_API = process.env.NEXT_PUBLIC_API_URL;
+      var OLD_CHAT = process.env.NEXT_PUBLIC_CHATBOT_URL;
+      delete process.env.NEXT_PUBLIC_API_URL;
+      delete process.env.NEXT_PUBLIC_CHATBOT_URL;
+      var warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+      jest.isolateModules(() => {
+        require('../public-env');
+      });
+      expect(warnSpy).not.toHaveBeenCalled();
+      warnSpy.mockRestore();
+      process.env.NEXT_PUBLIC_API_URL = OLD_API;
+      process.env.NEXT_PUBLIC_CHATBOT_URL = OLD_CHAT;
+    });
   });
 });
 

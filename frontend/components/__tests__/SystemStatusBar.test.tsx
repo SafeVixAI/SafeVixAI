@@ -2,7 +2,7 @@
 // Copyright (c) 2026 SafeVixAI Team
 
 import React from 'react';
-import { render, screen, act } from '@testing-library/react';
+import { render, screen, act, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
 jest.mock('lucide-react', () => ({
@@ -10,13 +10,14 @@ jest.mock('lucide-react', () => ({
 }));
 
 jest.mock('@gsap/react', () => ({
-  useGSAP: () => null,
+  useGSAP: jest.fn(function(cb) { if (typeof cb === 'function') cb() }),
 }));
 
 jest.mock('@/lib/gsap', () => ({
   gsap: {
     fromTo: jest.fn(() => ({})),
     to: jest.fn(() => ({})),
+    globalTimeline: { timeScale: jest.fn() },
   },
 }));
 
@@ -62,6 +63,14 @@ describe('SystemStatusBar', function() {
     render(<SystemStatusBar />);
     await screen.findByRole('status');
     expect(screen.getByLabelText('Dismiss System Status')).toBeInTheDocument();
+  });
+
+  it('saves dismiss to sessionStorage on dismiss click', async function() {
+    global.fetch = jest.fn().mockRejectedValue(new Error('network error'));
+    render(<SystemStatusBar />);
+    await screen.findByRole('status');
+    fireEvent.click(screen.getByLabelText('Dismiss System Status'));
+    expect(sessionStorage.getItem('svai-status-dismissed')).toBe('true');
   });
 });
 

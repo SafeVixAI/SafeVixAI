@@ -74,6 +74,35 @@ describe('LanguageSelector', function() {
     var { container } = render(<LanguageSelector className="my-class" />);
     expect(container.firstChild).toHaveClass('my-class');
   });
+
+  it('navigates with locale prefix replacement when path has one', function() {
+    window.history.pushState({}, '', '/hi/challan')
+    render(<LanguageSelector />);
+    fireEvent.change(screen.getByLabelText('Select preferred language'), { target: { value: 'ta' } });
+    expect(mockPush).toHaveBeenCalledWith('/ta/challan');
+  });
+
+  it('inserts locale prefix when path has no locale', function() {
+    window.history.pushState({}, '', '/challan')
+    render(<LanguageSelector />);
+    fireEvent.change(screen.getByLabelText('Select preferred language'), { target: { value: 'ta' } });
+    expect(mockPush).toHaveBeenCalledWith('/ta/challan');
+  });
+
+  it('works without onChangeLanguage callback', function() {
+    window.history.pushState({}, '', '/')
+    render(<LanguageSelector />);
+    fireEvent.change(screen.getByLabelText('Select preferred language'), { target: { value: 'hi' } });
+    expect(mockSetUserProfile).toHaveBeenCalledWith({ preferredLanguage: 'hi' });
+  });
+
+  it('falls back to en when preferredLanguage is empty', function() {
+    mockStore.userProfile.preferredLanguage = '';
+    render(<LanguageSelector />);
+    var select = screen.getByLabelText('Select preferred language') as HTMLSelectElement;
+    expect(select.value).toBe('en');
+    mockStore.userProfile.preferredLanguage = 'en';
+  });
 });
 
 

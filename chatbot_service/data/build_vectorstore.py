@@ -14,12 +14,17 @@ from config import get_settings
 from rag.vectorstore import LocalVectorStore
 
 
-def main() -> None:
+import asyncio
+
+async def main() -> None:
     settings = get_settings()
-    vectorstore = LocalVectorStore(settings.chroma_persist_dir, settings.rag_data_dir)
-    vectorstore.build_index(force=True)
-    print(vectorstore.stats())
+    vectorstore = LocalVectorStore(
+        database_url=settings.database_url,
+        data_dir=settings.rag_data_dir
+    )
+    await vectorstore.build_index(force=True)
+    print(await vectorstore.stats())
 
 
 if __name__ == '__main__':
-    main()
+    asyncio.run(main())

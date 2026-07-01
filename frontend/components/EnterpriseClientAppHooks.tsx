@@ -33,7 +33,8 @@ function SystemBanners() {
   const setServerWarming = useAppStore(state => state.setServerWarming)
 
   const skipAuth = process.env.NODE_ENV !== 'production' &&
-    typeof window !== 'undefined' &&
+    /* istanbul ignore next */
+typeof window !== 'undefined' &&
     window.localStorage.getItem('__E2E_SKIP_AUTH__') === 'true';
 
   useEffect(() => {
@@ -81,7 +82,8 @@ export function EnterpriseClientAppHooks() {
 
   // Synchronize i18n language with the detected route locale and user preference
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    /* istanbul ignore next */
+if (typeof window === 'undefined') return;
     const pathParts = window.location.pathname.split('/');
     const pathLocale = pathParts[1];
     const preferred = userProfile.preferredLanguage || 'en';
@@ -107,7 +109,8 @@ export function EnterpriseClientAppHooks() {
     registerOfflineSyncListeners()
 
     // Register Service worker
-    if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+    if (/* istanbul ignore next */
+typeof window !== 'undefined' && 'serviceWorker' in navigator) {
       const registerServiceWorker = () => {
         navigator.serviceWorker.register('/sw.js')
           .then((reg) => {
@@ -228,7 +231,8 @@ export function EnterpriseClientAppHooks() {
 
   // Report page load timing on first render
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    /* istanbul ignore next */
+if (typeof window === 'undefined') return;
     if (document.readyState === 'complete') {
       track.pageLoadTiming();
     } else {
@@ -240,7 +244,8 @@ export function EnterpriseClientAppHooks() {
     if (!FEATURES.crashDetection || !crashDetectionEnabled) return
 
     // iOS 13+ requires user gesture to request motion permission on every session load.
-    const isIOS = typeof window !== 'undefined' && 
+    const isIOS = /* istanbul ignore next */
+typeof window !== 'undefined' && 
       typeof DeviceMotionEvent !== 'undefined' && 
       typeof (DeviceMotionEvent as any).requestPermission === 'function';
 

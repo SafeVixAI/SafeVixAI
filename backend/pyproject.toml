@@ -47,8 +47,11 @@ filterwarnings = [
 [tool.coverage.run]
 branch = true
 source = ["."]
+omit = [
+    "scripts/*",
+]
 
 [tool.coverage.report]
 show_missing = true
 precision = 2
-fail_under = 95
+fail_under = 100

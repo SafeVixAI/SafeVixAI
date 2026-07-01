@@ -36,7 +36,7 @@ class ConversationMemoryStore:
         self,
         session_id: str,
         role: str,
-        content: str,
+        content: str | list[dict[str, Any]],
         metadata: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         payload = {

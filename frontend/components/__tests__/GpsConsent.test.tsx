@@ -68,4 +68,11 @@ describe('GpsConsent', function() {
     expect(mockSetLocationTracking).toHaveBeenCalledWith(false)
     expect(localStorage.getItem(GPS_CONSENT_KEY)).toBe('denied')
   })
+
+  it('skips rendering when E2E bypass flag is set', function() {
+    localStorage.setItem('__E2E_SKIP_AUTH__', 'true')
+    var { container } = render(React.createElement(GpsConsent))
+    act(function() { jest.advanceTimersByTime(5000) })
+    expect(container.innerHTML).toBe('')
+  })
 })

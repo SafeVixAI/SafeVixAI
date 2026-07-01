@@ -221,6 +221,14 @@ frontend/public/models/yolov8n_pothole.onnx
 # AGENT / KNOWLEDGE GRAPH OUTPUTS
 # ============================================================
 .agents/
+.opencode/
+.claude/
+.factory/
+.junie/
+.kiro/
+.pi/
+.qoder/
+.windsurf/
 graphify-out/
 
 # Local security-tool config
@@ -258,7 +266,12 @@ backend/.hypothesis/
 
 # Coverage files
 *.coverage
+*.py,cover
 coverage.xml
+frontend/coverage-report.json
+frontend/coverage-summary.json
+frontend/coverage-text.txt
+frontend/full-test-output.json
 
 # Local runner logs/results
 check_runs.json

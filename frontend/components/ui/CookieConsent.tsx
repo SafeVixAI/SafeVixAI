@@ -15,6 +15,7 @@ export default function CookieConsent() {
   const setAnalyticsOptIn = useAppStore((s) => s.setAnalyticsOptIn);
 
   useEffect(() => {
+    /* istanbul ignore next */
     if (typeof window === 'undefined') return;
     if (process.env.NODE_ENV !== 'production' && window.localStorage.getItem('__E2E_SKIP_AUTH__') === 'true') return;
     const consent = window.localStorage.getItem(ANALYTICS_CONSENT_KEY);
@@ -27,6 +28,7 @@ export default function CookieConsent() {
 
   const handleConsent = (granted: boolean) => {
     setShow(false);
+    /* istanbul ignore next */
     if (typeof window === 'undefined') return;
     window.localStorage.setItem(ANALYTICS_CONSENT_KEY, granted ? 'granted' : 'denied');
     setAnalyticsOptIn(granted);

@@ -415,6 +415,13 @@ export default function SettingsPage() {
               rightElement={<ChevronRight size={16} className="text-text-3" />}
             />
             <SettingRow
+              icon={<Zap size={18} className="text-brand dark:text-brand-light" />}
+              title="AI Providers"
+              description="Configure LLM API keys and custom models"
+              onClick={() => router.push('/providers')}
+              rightElement={<ChevronRight size={16} className="text-text-3" />}
+            />
+            <SettingRow
               icon={<Shield size={18} className="text-red-500" />}
               title={t('settings.emergency_protocols')}
               description={t('settings.emergency_protocols_sub')}

@@ -1,6 +1,3 @@
-// SPDX-License-Identifier: MIT
-// Copyright (c) 2026 SafeVixAI Team
-
 jest.mock('@/components/ui/TerminalHeader', function() { return { TerminalHeader: function() { return null } } })
 jest.mock('@/components/ui/SurfaceCard', function() { return { SurfaceCard: function({ children }) { return children } } })
 jest.mock('@/lib/api', function() { return { client: { get: jest.fn().mockResolvedValue({ data: {} }), post: jest.fn().mockResolvedValue({ data: {} }) } } })
@@ -16,5 +13,26 @@ describe('CommandCenterPage', function() {
   it('renders Command Center heading', function() {
     render(React.createElement(CommandCenterPage))
     expect(screen.getByText('Command Center')).toBeTruthy()
+  })
+
+  it('renders outer container structure', function() {
+    var { container } = render(React.createElement(CommandCenterPage))
+    expect(container).toBeTruthy()
+    expect(container.querySelector('div[class]')).toBeTruthy()
+  })
+
+  it('renders surface card wrapper with content', function() {
+    var { container } = render(React.createElement(CommandCenterPage))
+    expect(container.textContent).toBeTruthy()
+  })
+
+  it('renders page structure', function() {
+    var { container } = render(React.createElement(CommandCenterPage))
+    expect(container.textContent).toContain('Command Center')
+  })
+
+  it('renders without crashing', function() {
+    var { container } = render(React.createElement(CommandCenterPage))
+    expect(container.querySelector('div')).toBeTruthy()
   })
 })

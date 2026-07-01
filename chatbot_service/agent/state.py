@@ -15,6 +15,9 @@ class ChatRequest(BaseModel):
     lat: float | None = Field(default=None, ge=-90, le=90)
     lon: float | None = Field(default=None, ge=-180, le=180)
     client_ip: str | None = Field(default=None)
+    provider_hint: str | None = Field(default=None, max_length=64)
+    provider_model: str | None = Field(default=None, max_length=128)
+    user_id: str | None = Field(default=None, max_length=128)
 
 
 class ChatResponse(BaseModel):

@@ -271,3 +271,49 @@ async def trigger_data_retention_cleanup(
             status_code=500,
             detail=f"Data cleanup failed: {str(exc)}"
         ) from exc
+
+
+@router.get('/cache/status', response_model=dict)
+@limiter.limit("10/minute")
+async def get_cache_status_admin(
+    request: Request,
+    current_user: dict = Depends(require_role(Role.OPERATOR))
+) -> dict:
+    """Retrieve current Redis caching infrastructure status and memory metrics."""
+    from core.config import get_settings
+    from core.redis_client import create_cache
+    settings = get_settings()
+    cache = create_cache(settings.redis_url)
+    status = {"status": "online" if cache._client else "fallback_in_memory"}
+    await cache.close()
+    return status
+
+
+@router.post('/cache/purge', response_model=dict)
+@limiter.limit("5/minute")
+async def purge_cache_admin(
+    request: Request,
+    key_prefix: str | None = Query(default=None, description="Prefix to purge or empty for all"),
+    current_user: dict = Depends(require_role(Role.OPERATOR))
+) -> dict:
+    """Purge specific cache prefixes or flush entire Redis cache database."""
+    from core.config import get_settings
+    from core.redis_client import create_cache
+    settings = get_settings()
+    cache = create_cache(settings.redis_url)
+    if cache._client:
+        if key_prefix:
+            keys = await cache._client.keys(f"{key_prefix}*")
+            if keys:
+                await cache._client.delete(*keys)
+        else:
+            await cache._client.flushdb()
+    await cache.close()
+    ip = request.client.host if request.client else "unknown"
+    AuditLog.log_admin_action(
+        str(current_user.get("sub", "unknown")),
+        "cache_purge",
+        ip,
+        {"key_prefix": key_prefix or "all"}
+    )
+    return {"status": "success", "message": f"Purged cache prefix: {key_prefix or 'ALL'}"}

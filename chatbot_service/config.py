@@ -52,11 +52,13 @@ class Settings(BaseSettings):
     cors_origins: str = "http://localhost:3000, http://127.0.0.1:3000"
     main_backend_base_url: str = "http://localhost:8000"
     main_backend_timeout_seconds: float = 20.0
+    database_url: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/safevixai"
     redis_url: str | None = None
     internal_api_key: str | None = Field(default=None, alias="CHATBOT_INTERNAL_API_KEY")
     chroma_persist_dir: Path = ROOT_DIR / "data" / "chroma_db"
     rag_data_dir: Path = ROOT_DIR / "data"
     embedding_model: str = "sentence-transformers/all-MiniLM-L6-v2"
+    rag_reranker: str | None = "cross-encoder/ms-marco-MiniLM-L-6-v2"
     rag_min_score: float = 0.55
     top_k_retrieval: int = 5
     default_llm_provider: str = "groq"
@@ -128,6 +130,24 @@ class Settings(BaseSettings):
     def cors_origins_list(self) -> list[str]:
         return [item.strip() for item in self.cors_origins.split(",") if item.strip()]
 
+    @computed_field
+    @property
+    def bootstrap_env_providers(self) -> list[str]:
+        import os
+        providers = []
+        if os.environ.get("GROQ_API_KEY"): providers.append("groq")
+        if os.environ.get("OPENAI_API_KEY"): providers.append("openai")
+        if os.environ.get("OLLAMA_BASE_URL"): providers.append("ollama")
+        if os.environ.get("VLLM_BASE_URL"): providers.append("vllm")
+        if os.environ.get("CEREBRAS_API_KEY"): providers.append("cerebras")
+        if os.environ.get("GEMINI_API_KEY"): providers.append("gemini")
+        if os.environ.get("GITHUB_TOKEN") or os.environ.get("GITHUB_API_KEY"): providers.append("github")
+        if os.environ.get("SARVAM_API_KEY"): providers.append("sarvam")
+        if os.environ.get("MISTRAL_API_KEY"): providers.append("mistral")
+        if os.environ.get("TOGETHER_API_KEY"): providers.append("together")
+        if os.environ.get("OPENROUTER_API_KEY"): providers.append("openrouter")
+        return providers
+
 
 @lru_cache
 def get_settings() -> Settings:
@@ -141,3 +161,4 @@ def get_settings() -> Settings:
 import logging as _logging
 
 _logging.getLogger(__name__).info(f"Module config loaded for environment={get_settings().environment}")
+_logging.getLogger(__name__).info(f"Contributor bootstrap providers detected: {get_settings().bootstrap_env_providers}")

@@ -21,11 +21,11 @@
 
 | Service | Command | Passing | Coverage |
 |---------|---------|---------|----------|
-| Backend | `pytest tests/ -q` from `backend/` | **1365/1365** | — |
-| Chatbot | `pytest tests/ -q` from `chatbot_service/` | **892/892** | **95%** |
-| Frontend | `npm test` | **572/572** | — |
-| E2E | `npx playwright test e2e/ --grep-invert="Visual Regression\|visual"` | **45/55** | 10 remaining |
-| **Total unit tests** | | **2829 total passing** | |
+| Backend | `pytest tests/ -q` from `backend/` | **2078/2078** | **96.30%** |
+| Chatbot | `pytest tests/ -q` from `chatbot_service/` | **1095/1095** | **96.35%** |
+| Frontend | `npm test` | **1648/1648** | **92.33% lines** |
+| E2E | `npx playwright test e2e/ --grep-invert="Visual Regression\|visual"` | **55/55** | **0 remaining** |
+| **Total unit tests** | | **4821 total passing** | |
 
 ---
 

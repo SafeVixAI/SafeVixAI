@@ -45,7 +45,7 @@ async def health(
     engine: ChatEngine = Depends(get_engine),
     memory_store: ConversationMemoryStore = Depends(get_memory),
 ) -> dict:
-    index = engine.stats()
+    index = await engine.stats()
     return {
         'status': 'ok',
         'chunks': index.get('chunks', 0),
@@ -72,7 +72,7 @@ async def rebuild_index(
             'job_id': job_id,
             'message': 'RAG index rebuild triggered in background. Poll /admin/jobs/{job_id} for progress.'
         }
-    stats = engine.rebuild_index()
+    stats = await engine.rebuild_index()
     return {'status': 'rebuilt', 'index': stats}
 
 
@@ -244,7 +244,7 @@ async def provider_health_dashboard(
 
 
 @task("rebuild_rag_index")
-def rebuild_rag_index_task(q: TaskQueue, job_id: str):
+async def rebuild_rag_index_task(q: TaskQueue, job_id: str):
     import logging
     from core.queue import get_global_chat_engine
     engine = get_global_chat_engine()
@@ -252,7 +252,7 @@ def rebuild_rag_index_task(q: TaskQueue, job_id: str):
         raise ValueError("ChatEngine is not initialized globally.")
     logger = logging.getLogger("safevixai.chatbot.tasks")
     logger.info("Starting background RAG index rebuild...")
-    stats = engine.rebuild_index()
+    stats = await engine.rebuild_index()
     logger.info("Background RAG index rebuild completed successfully.")
     return stats
 

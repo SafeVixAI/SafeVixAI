@@ -1,18 +1,13 @@
-// SPDX-License-Identifier: MIT
-// Copyright (c) 2026 SafeVixAI Team
-
 import '@testing-library/jest-dom'
 import { render, screen } from '@testing-library/react'
 import Page from '../app/page'
 
-// Mock the next/link component
 jest.mock('next/link', () => {
   return ({ children }: { children: React.ReactNode }) => {
     return children
   }
 })
 
-// Mock next/navigation
 jest.mock('next/navigation', () => ({
   useRouter: () => ({
     push: jest.fn(),
@@ -38,5 +33,9 @@ describe('Home Page structural verification', function() {
     expect(screen.getByText(/Emergency Protocols/i)).toBeInTheDocument()
     expect(screen.getAllByTitle(/Geolocation not supported/i).length).toBeGreaterThan(0)
   })
-})
 
+  it('renders with proper heading structure', function() {
+    render(<Page />)
+    expect(screen.getByRole('heading', { level: 1 })).toBeInTheDocument()
+  })
+})

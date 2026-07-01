@@ -18,6 +18,7 @@ from models.grievance import Grievance
 from models.etl_run_log import ETLRunLog
 from models.municipality import Municipality
 from models.streetlight_pole import StreetlightPole
+from models.provider_config import UserProviderConfig
 
 __all__ = [
     'Base',
@@ -39,5 +40,6 @@ __all__ = [
     'ETLRunLog',
     'Municipality',
     'StreetlightPole',
+    'UserProviderConfig',
 ]
 

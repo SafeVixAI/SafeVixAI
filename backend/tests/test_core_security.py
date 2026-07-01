@@ -21,6 +21,8 @@ from core.security import (
     _decode_app_token,
     _decode_bearer_token,
     get_current_user_optional,
+    get_current_user,
+    require_role,
     APP_JWT_AUDIENCE,
     APP_JWT_ISSUER,
     ALGORITHM,
@@ -242,6 +244,28 @@ class TestDecodeAppToken:
             _decode_app_token(token)
 
 
+    def test_jwks_import_error_path(self):
+        """When both app and supabase decode fail and JWKS import fails, hits ImportError handler."""
+        from datetime import datetime, timezone, timedelta
+        wrong_key = "completely-wrong-key-for-jwt"
+        token = jwt.encode(
+            {
+                "sub": "x",
+                "aud": APP_JWT_AUDIENCE,
+                "iss": APP_JWT_ISSUER,
+                "role": "user",
+                "jti": "test-jwks-jti",
+                "exp": datetime.now(timezone.utc) + timedelta(hours=1),
+                "iat": datetime.now(timezone.utc),
+            },
+            wrong_key, algorithm=ALGORITHM,
+        )
+        with patch.dict("sys.modules", {"core.jwks": None}):
+            with pytest.raises(HTTPException) as exc:
+                _decode_bearer_token(token)
+        assert exc.value.status_code == 401
+
+
 class TestDecodeBearerToken:
     def test_mock_token_rejected(self):
         with pytest.raises(HTTPException) as exc:
@@ -420,3 +444,131 @@ class TestGetCurrentUserOptional:
             result = await get_current_user_optional(request)
             assert result is not None
             assert result["sub"] == "chatbot-service"
+
+
+class TestRequireRole:
+    def test_valid_string_role_returns_callable(self):
+        result = require_role("admin")
+        assert callable(result)
+
+    def test_invalid_string_role_raises_value_error(self):
+        with pytest.raises(ValueError, match="Invalid required role"):
+            require_role("nonexistent_role")
+
+    def test_non_string_role_hits_else_branch(self):
+        """Pass a non-string, non-Role value to cover the else branch (line 201)."""
+        result = require_role(123)
+        assert callable(result)
+
+    def test_role_enum_passed_through(self):
+        from core.rbac import Role
+        result = require_role(Role.ADMIN)
+        assert callable(result)
+
+
+class TestGetCurrentUser:
+    @pytest.mark.asyncio
+    async def test_no_user_raises_401(self):
+        request = MagicMock()
+        request.headers = {}
+        request.cookies = {}
+        with pytest.raises(HTTPException) as exc:
+            await get_current_user(request)
+        assert exc.value.status_code == 401
+        assert "Authentication required" in exc.value.detail
+
+    @pytest.mark.asyncio
+    async def test_valid_token_returns_user(self):
+        token = create_access_token({"sub": "user-1"})
+        request = MagicMock()
+        request.headers = {"Authorization": f"Bearer {token}"}
+        request.cookies = {}
+        app_mock = MagicMock()
+        app_mock.state.cache = None
+        type(request).app = PropertyMock(return_value=app_mock)
+        result = await get_current_user(request)
+        assert result is not None
+        assert result["sub"] == "user-1"
+
+    @pytest.mark.asyncio
+    async def test_revoked_token_raises_401(self):
+        token = create_access_token({"sub": "user-1"})
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM], audience=APP_JWT_AUDIENCE, issuer=APP_JWT_ISSUER)
+        jti = payload["jti"]
+        await revoke_token(jti)
+        request = MagicMock()
+        request.headers = {"Authorization": f"Bearer {token}"}
+        request.cookies = {}
+        with pytest.raises(HTTPException) as exc:
+            await get_current_user(request)
+        assert exc.value.status_code == 401
+        assert "revoked" in exc.value.detail
+
+
+class TestGetCurrentUserOptionalEdgeCases:
+    @pytest.mark.asyncio
+    async def test_non_http_exception_caught_returns_none(self):
+        token = create_access_token({"sub": "user-1"})
+        request = MagicMock()
+        request.headers = {"Authorization": f"Bearer {token}"}
+        request.cookies = {}
+        with patch("core.security._decode_bearer_token", side_effect=RuntimeError("unexpected")):
+            result = await get_current_user_optional(request)
+        assert result is None
+
+    @pytest.mark.asyncio
+    async def test_redis_rate_limiter_success_path(self):
+        with patch("core.config.get_settings") as mock_get_settings:
+            settings = MagicMock()
+            settings.chatbot_internal_api_key = "redis-key"
+            settings.admin_secret = None
+            mock_get_settings.return_value = settings
+            cache = AsyncMock()
+            cache.increment.return_value = 1
+            request = MagicMock()
+            request.headers = {"X-Internal-Api-Key": "redis-key"}
+            request.cookies = {}
+            type(request).client = PropertyMock(return_value=MagicMock(host="10.0.0.10"))
+            request.app.state.cache = cache
+            result = await get_current_user_optional(request)
+        assert result is not None
+        cache.increment.assert_called_once()
+        cache.set_json.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_redis_rate_limiter_exceeded_falls_back_to_in_memory(self):
+        """When Redis returns >5 (HTTPException raised), it's caught by except Exception
+        and falls back to in-memory rate limiter. The first fallback request succeeds."""
+        with patch("core.config.get_settings") as mock_get_settings:
+            settings = MagicMock()
+            settings.chatbot_internal_api_key = "redis-key-2"
+            settings.admin_secret = None
+            mock_get_settings.return_value = settings
+            cache = AsyncMock()
+            cache.increment.return_value = 6
+            request = MagicMock()
+            request.headers = {"X-Internal-Api-Key": "redis-key-2"}
+            request.cookies = {}
+            type(request).client = PropertyMock(return_value=MagicMock(host="10.0.0.11"))
+            request.app.state.cache = cache
+            result = await get_current_user_optional(request)
+        assert result is not None
+        assert result["sub"] == "chatbot-service"
+
+    @pytest.mark.asyncio
+    async def test_redis_rate_limiter_fallback_on_exception(self):
+        with patch("core.config.get_settings") as mock_get_settings:
+            settings = MagicMock()
+            settings.chatbot_internal_api_key = "redis-key-3"
+            settings.admin_secret = None
+            mock_get_settings.return_value = settings
+            cache = AsyncMock()
+            cache.increment = AsyncMock(side_effect=ConnectionError("Redis down"))
+            request = MagicMock()
+            request.headers = {"X-Internal-Api-Key": "redis-key-3"}
+            request.cookies = {}
+            type(request).client = PropertyMock(return_value=MagicMock(host="10.0.0.12"))
+            request.app.state.cache = cache
+            result = await get_current_user_optional(request)
+        assert result is not None
+        assert result["sub"] == "chatbot-service"

@@ -10,6 +10,7 @@ import { createMapSlice } from './store/map-slice';
 import { createSettingsSlice } from './store/settings-slice';
 import { createUISlice } from './store/ui-slice';
 import { createDataSlice } from './store/data-slice';
+import { createProvidersSlice } from './store/providers-slice';
 import type { AppState } from './store/types';
 
 export const useAppStore = create<AppState>()(
@@ -20,6 +21,7 @@ export const useAppStore = create<AppState>()(
       ...createSettingsSlice(...a),
       ...createUISlice(...a),
       ...createDataSlice(...a),
+      ...createProvidersSlice(...a),
     }),
     {
       name: 'svai-storage',
@@ -64,6 +66,8 @@ export const useAppStore = create<AppState>()(
         isAuthenticated: state.isAuthenticated,
         operatorName: state.operatorName,
         authRole: state.authRole,
+        selectedProvider: state.selectedProvider,
+        activeFallbackChain: state.activeFallbackChain,
       }),
     }
   )
@@ -133,3 +137,8 @@ export const useIsAuthenticated = () => useAppStore((s) => s.isAuthenticated);
 export const useOperatorName = () => useAppStore((s) => s.operatorName);
 export const useAuthToken = () => useAppStore((s) => s.authToken);
 export const useAuthRole = () => useAppStore((s) => s.authRole);
+
+// Providers
+export const useSelectedProvider = () => useAppStore((s) => s.selectedProvider);
+export const useActiveFallbackChain = () => useAppStore((s) => s.activeFallbackChain);
+export const useProviderSyncStatus = () => useAppStore((s) => s.providerSyncStatus);

@@ -325,13 +325,28 @@ class TestCreateSOSIncident:
             side_effect=ExternalServiceError("Service down")
         )
         
-        response = test_client.post(
-            "/api/v1/emergency/sos",
-            params={"lat": 13.0827, "lon": 80.2707}
-        )
+        with patch("api.v1.emergency.get_alert_service"):
+            response = test_client.post(
+                "/api/v1/emergency/sos",
+                params={"lat": 13.0827, "lon": 80.2707}
+            )
         
         assert response.status_code == 503
 
+    def test_create_sos_incident_general_exception(self, test_client, mock_emergency_service, mock_db_session):
+        """Test SOS creation with a non-ExternalServiceError triggers general Exception handler (lines 203-212)."""
+        mock_emergency_service.build_sos_payload = AsyncMock(
+            side_effect=RuntimeError("Unexpected internal error")
+        )
+        
+        with patch("api.v1.emergency.get_alert_service"):
+            response = test_client.post(
+                "/api/v1/emergency/sos",
+                params={"lat": 13.0827, "lon": 80.2707}
+            )
+        
+        assert response.status_code == 503
+        mock_db_session.rollback.assert_called_once()
 
 # ── Get Emergency Numbers Tests ─────────────────────────────────────────────
 

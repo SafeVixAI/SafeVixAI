@@ -393,7 +393,7 @@ class TestGeocodingClient:
         client = GeocodingClient(opencage_key="valid-key")
         nom_resp = MagicMock()
         nom_resp.raise_for_status.side_effect = httpx.HTTPStatusError(
-            "error", request=MagicMock(), response=MagicMock(),
+            "error", request=MagicMock(), response=MagicMock(status_code=404),
         )
         oc_resp = MagicMock()
         oc_resp.json.return_value = {
@@ -420,11 +420,11 @@ class TestGeocodingClient:
         client = GeocodingClient(opencage_key="valid-key")
         nom_resp = MagicMock()
         nom_resp.raise_for_status.side_effect = httpx.HTTPStatusError(
-            "error", request=MagicMock(), response=MagicMock(),
+            "error", request=MagicMock(), response=MagicMock(status_code=404),
         )
         oc_resp = MagicMock()
         oc_resp.raise_for_status.side_effect = httpx.HTTPStatusError(
-            "error", request=MagicMock(), response=MagicMock(),
+            "error", request=MagicMock(), response=MagicMock(status_code=404),
         )
 
         with patch.object(client._client, "get", AsyncMock(side_effect=[nom_resp, oc_resp])):

@@ -1,6 +1,3 @@
-// SPDX-License-Identifier: MIT
-// Copyright (c) 2026 SafeVixAI Team
-
 jest.mock('@/hooks/usePageEntry', function() { return { usePageEntry: function() { return { current: null } } } })
 jest.mock('@/lib/api', function() { return { client: { get: jest.fn().mockResolvedValue({ data: {} }), post: jest.fn().mockResolvedValue({ data: {} }) }, RouteOption: undefined, RoutePreviewResponse: undefined } })
 jest.mock('@/components/dashboard/DashboardMapBootstrap', function() { return function() { return null } })
@@ -20,7 +17,7 @@ jest.mock('@/hooks/useLocatorSearch', function() {
         filtered: [],
         locating: false,
         serviceSearchMeta: {},
-        coverageSummary: '',
+        coverageSummary: '5 services within 2 km',
         activeFilter: 'All',
         setActiveFilter: function() {},
         activeRoute: null,
@@ -53,12 +50,28 @@ jest.mock('../app/locator/components/LocatorResults', function() { return { Desk
 jest.mock('../app/locator/locator-components', function() { return { EmptyState: function() { return null }, RouteStatusCard: function() { return null } } })
 jest.mock('../app/locator/locator-utils', function() { return {} })
 
-import { render, screen } from '@testing-library/react'
-import React from 'react'
-import Page from '../app/locator/page'
+var React = require('react')
+var { render, screen } = require('@testing-library/react')
+var Page = require('../app/locator/page').default
 
 describe('LocatorPage', function() {
   it('renders Emergency Locator sr-only heading', function() {
+    render(React.createElement(Page))
+    expect(screen.getByText('Emergency Locator')).toBeTruthy()
+  })
+
+  it('renders coverage summary from hook', function() {
+    render(React.createElement(Page))
+    expect(screen.getByText('5 services within 2 km')).toBeTruthy()
+  })
+
+  it('renders mobile locator container', function() {
+    var { container } = render(React.createElement(Page))
+    expect(container).toBeTruthy()
+    expect(container.querySelector('main') || container.querySelector('div[class*="locator"]')).toBeTruthy()
+  })
+
+  it('renders with translation context', function() {
     render(React.createElement(Page))
     expect(screen.getByText('Emergency Locator')).toBeTruthy()
   })

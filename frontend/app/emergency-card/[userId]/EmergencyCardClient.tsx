@@ -22,7 +22,7 @@ interface EmergencyCardClientProps {
   initialData: EmergencyCardData;
 }
 
-function decodeBase64Url(value: string): string {
+export function decodeBase64Url(value: string): string {
   const base64 = value.replace(/-/g, '+').replace(/_/g, '/');
   const padded = base64.padEnd(Math.ceil(base64.length / 4) * 4, '=');
   const binary = atob(padded);
@@ -30,7 +30,7 @@ function decodeBase64Url(value: string): string {
   return new TextDecoder().decode(bytes);
 }
 
-function parseHashPayload(): EmergencyCardData | null {
+export function parseHashPayload(): EmergencyCardData | null {
   const params = new URLSearchParams(window.location.hash.replace(/^#/, ''));
   const encoded = params.get('data');
   if (!encoded) return null;
@@ -51,7 +51,7 @@ function parseHashPayload(): EmergencyCardData | null {
   }
 }
 
-function dialablePhone(value: string): string {
+export function dialablePhone(value: string): string {
   return value.replace(/[^\d+]/g, '');
 }
 

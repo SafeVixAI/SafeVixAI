@@ -5,7 +5,7 @@ jest.mock('@/lib/gsap', function() {
   return { gsap: { fromTo: jest.fn(function() { return {} }), to: jest.fn() }, default: { fromTo: jest.fn(), to: jest.fn() } }
 })
 jest.mock('@gsap/react', function() {
-  return { useGSAP: function() {} }
+  return { useGSAP: function(cb) { if (typeof cb === 'function') cb() } }
 })
 
 import { render, screen, fireEvent } from '@testing-library/react'

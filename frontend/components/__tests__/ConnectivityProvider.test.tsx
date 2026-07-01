@@ -47,6 +47,17 @@ describe('ConnectivityProvider', function() {
     expect(container.children[0].textContent).toBe('foo');
     expect(container.children[1].textContent).toBe('bar');
   });
+
+  it('sets connectivity to offline when offline event fires', function() {
+    Object.defineProperty(navigator, 'onLine', { configurable: true, value: false });
+    render(
+      <ConnectivityProvider>
+        <div />
+      </ConnectivityProvider>
+    );
+    window.dispatchEvent(new Event('offline'));
+    expect(mockSetConnectivity).toHaveBeenCalledWith('offline');
+  });
 });
 
 

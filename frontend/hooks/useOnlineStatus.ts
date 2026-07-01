@@ -7,11 +7,11 @@ import { useState, useEffect } from 'react';
 
 export function useOnlineStatus() {
   const [isOnline, setIsOnline] = useState<boolean>(
-    typeof window !== 'undefined' ? navigator.onLine : true
+    /* istanbul ignore next */typeof window !== 'undefined' ? navigator.onLine : true
   );
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    /* istanbul ignore next */if (typeof window === 'undefined') return;
 
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);

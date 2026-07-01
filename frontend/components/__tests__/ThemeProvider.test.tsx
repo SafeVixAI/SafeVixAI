@@ -6,14 +6,19 @@ import { render, screen, act, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { ThemeProvider, useTheme } from '../ThemeProvider';
 
+var mqListeners: Function[] = [];
+var mqMatches = false;
+
 beforeEach(function() {
+  mqListeners = [];
+  mqMatches = false;
   Object.defineProperty(window, 'matchMedia', {
     writable: true,
     value: jest.fn().mockImplementation((query) => ({
-      matches: false,
+      matches: mqMatches,
       media: query,
       onchange: null,
-      addEventListener: jest.fn(),
+      addEventListener: function(_: string, fn: Function) { mqListeners.push(fn) },
       removeEventListener: jest.fn(),
       dispatchEvent: jest.fn(),
     })),
@@ -105,6 +110,30 @@ describe('ThemeProvider', function() {
     localStorage.setItem('svai-theme', 'light');
     renderWithTheme(<TestConsumer />);
     expect(screen.getByTestId('theme')).toHaveTextContent('light');
+  });
+
+  it('resolves to light when system prefers light and theme is system', function() {
+    mqMatches = true;
+    renderWithTheme(<TestConsumer />);
+    expect(screen.getByTestId('resolved')).toHaveTextContent('light');
+    expect(document.documentElement.getAttribute('data-theme')).toBe('light');
+  });
+
+  it('re-applies system theme when matchMedia change fires and theme is system', function() {
+    renderWithTheme(<TestConsumer />);
+    act(() => { fireEvent.click(screen.getByTestId('set-system')); });
+    expect(mqListeners.length).toBeGreaterThanOrEqual(1);
+    act(() => { mqListeners[mqListeners.length - 1](); });
+    expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
+  });
+
+  it('skips re-apply when matchMedia change fires but theme is not system', function() {
+    renderWithTheme(<TestConsumer />);
+    act(() => { fireEvent.click(screen.getByTestId('set-dark')); });
+    // Fire only the last (active) listener — it should have theme='dark' in its closure
+    var lastListener = mqListeners[mqListeners.length - 1];
+    act(() => { lastListener(); });
+    expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
   });
 });
 

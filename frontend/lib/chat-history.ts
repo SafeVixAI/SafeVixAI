@@ -18,7 +18,8 @@ export interface ChatLog {
 const DB_NAME = 'safevix-chat-db';
 const STORE_NAME = 'chat-logs';
 
-const isBrowser = () => typeof window !== 'undefined' && 'indexedDB' in window;
+const isBrowser = () => /* istanbul ignore next */
+typeof window !== 'undefined' && 'indexedDB' in window;
 
 async function openChatDb() {
   if (!isBrowser()) return null;

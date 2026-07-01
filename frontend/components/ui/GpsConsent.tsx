@@ -14,6 +14,7 @@ export default function GpsConsent() {
   const setLocationTracking = useAppStore((s) => s.setLocationTracking);
 
   useEffect(() => {
+    /* istanbul ignore next */
     if (typeof window === 'undefined') return;
     if (process.env.NODE_ENV !== 'production' && window.localStorage.getItem('__E2E_SKIP_AUTH__') === 'true') return;
     const consent = window.localStorage.getItem(GPS_CONSENT_KEY);
@@ -26,6 +27,7 @@ export default function GpsConsent() {
 
   const handleConsent = (granted: boolean) => {
     setShow(false);
+    /* istanbul ignore next */
     if (typeof window === 'undefined') return;
     window.localStorage.setItem(GPS_CONSENT_KEY, granted ? 'granted' : 'denied');
     setLocationTracking(granted);

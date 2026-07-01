@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, patch, AsyncMock
 
 import pytest
 
@@ -435,485 +435,147 @@ class TestLoadDocuments:
 # ═══════════════════════════════════════════════════════════════════════════════
 
 class TestLocalVectorStoreConstructor:
-    def test_stores_persist_dir_data_dir_and_embedding_model(self):
+    def test_stores_database_url_data_dir_and_embedding_model(self):
         store = LocalVectorStore(
-            persist_dir=Path('/fake/persist'),
+            database_url='postgresql://user:pass@localhost:5432/db',
             data_dir=Path('/fake/data'),
-            embedding_model='hash',
-            use_chroma=False,
+            embedding_model='hash'
         )
-        assert store.persist_dir == Path('/fake/persist')
+        assert store.database_url == 'postgresql://user:pass@localhost:5432/db'
         assert store.data_dir == Path('/fake/data')
         assert store.embedding_model == 'hash'
-        assert store.index_path == Path('/fake/persist/simple_index.json')
 
-    def test_use_chroma_defaults_to_true(self):
-        store = LocalVectorStore(
-            persist_dir=Path('/fake/persist'),
-            data_dir=Path('/fake/data'),
-            embedding_model='hash',
-        )
-        assert store.use_chroma is True
 
-    def test_use_chroma_true_still_works(self):
+class TestLocalVectorStoreInitDb:
+    @pytest.mark.asyncio
+    async def test_init_db_creates_table_and_index(self):
         store = LocalVectorStore(
-            persist_dir=Path('/fake/persist'),
+            database_url='postgresql://user:pass@localhost:5432/db',
             data_dir=Path('/fake/data'),
-            embedding_model='hash',
-            use_chroma=True,
+            embedding_model='hash'
         )
-        assert store.use_chroma is True
-        assert store._collection is None
+        mock_pool = MagicMock()
+        mock_conn = AsyncMock()
+        mock_pool.acquire.return_value.__aenter__.return_value = mock_conn
+        store._pool = mock_pool
+
+        await store.init_db()
+
+        assert mock_conn.execute.call_count >= 2
+        calls = [c.args[0] for c in mock_conn.execute.call_args_list]
+        assert any("CREATE TABLE IF NOT EXISTS safevixai_rag" in c for c in calls)
+        assert any("CREATE INDEX IF NOT EXISTS safevixai_rag_embedding_idx" in c for c in calls)
 
 
 class TestLocalVectorStoreEnsureIndex:
-    def test_already_loaded_returns_cached_chunks(self):
+    @pytest.mark.asyncio
+    async def test_already_loaded_returns_cached_chunks(self):
         store = LocalVectorStore(
-            persist_dir=Path('/fake/persist'),
+            database_url='postgresql://user:pass@localhost:5432/db',
             data_dir=Path('/fake/data'),
-            embedding_model='hash',
-            use_chroma=False,
+            embedding_model='hash'
         )
         cached = [DocumentChunk('a', 's', 't', 'c', 'x')]
         store._chunks = cached
-        result = store.ensure_index()
+        result = await store.ensure_index()
         assert result is cached
 
-    def test_chroma_available_and_loaded_loads_index_file(self):
+    @pytest.mark.asyncio
+    async def test_not_loaded_fetches_from_db(self):
         store = LocalVectorStore(
-            persist_dir=Path('/fake/persist'),
+            database_url='postgresql://user:pass@localhost:5432/db',
             data_dir=Path('/fake/data'),
-            embedding_model='hash',
-            use_chroma=True,
+            embedding_model='hash'
         )
-        mock_collection = MagicMock()
-        mock_collection.count.return_value = 5
-        store._collection = mock_collection
-        expected = [DocumentChunk('a', 's', 't', 'c', 'x')]
+        mock_pool = MagicMock()
+        mock_conn = AsyncMock()
+        mock_pool.acquire.return_value.__aenter__.return_value = mock_conn
+        mock_conn.fetchval.return_value = 1
+        
+        mock_row = {
+            "chunk_id": "a:1", "source": "a", "title": "t", "category": "c", "content": "x"
+        }
+        mock_conn.fetch.return_value = [mock_row]
+        store._pool = mock_pool
 
-        with (
-            patch.object(Path, 'exists', return_value=True),
-            patch.object(LocalVectorStore, '_load_index_file', return_value=expected),
-        ):
-            result = store.ensure_index()
-        assert result == expected
-
-    def test_no_chroma_index_file_exists_loads_index(self):
-        store = LocalVectorStore(
-            persist_dir=Path('/fake/persist'),
-            data_dir=Path('/fake/data'),
-            embedding_model='hash',
-            use_chroma=False,
-        )
-        expected = [DocumentChunk('a', 's', 't', 'c', 'x')]
-
-        with (
-            patch.object(Path, 'exists', return_value=True),
-            patch.object(LocalVectorStore, '_load_index_file', return_value=expected),
-        ):
-            result = store.ensure_index()
-        assert result == expected
-
-    def test_no_chroma_no_index_file_builds_index(self):
-        store = LocalVectorStore(
-            persist_dir=Path('/fake/persist'),
-            data_dir=Path('/fake/data'),
-            embedding_model='hash',
-            use_chroma=False,
-        )
-        built = [DocumentChunk('b', 'src', 'title', 'cat', 'cont')]
-
-        with (
-            patch.object(Path, 'exists', return_value=False),
-            patch.object(LocalVectorStore, 'build_index', return_value=built) as mock_build,
-        ):
-            result = store.ensure_index()
-        assert result == built
-        mock_build.assert_called_once_with(force=True)
+        result = await store.ensure_index()
+        assert len(result) == 1
+        assert result[0].chunk_id == "a:1"
+        assert store._chunks == result
 
 
 class TestLocalVectorStoreBuildIndex:
-    def test_loads_documents_chunks_filters_and_writes_index(self):
-        persist_dir = MagicMock(spec=Path)
-        persist_dir.__truediv__.return_value = MagicMock(spec=Path)
-        data_dir = MagicMock(spec=Path)
-
+    @pytest.mark.asyncio
+    async def test_build_index_processes_documents_and_upserts(self):
         store = LocalVectorStore(
-            persist_dir=persist_dir,
-            data_dir=data_dir,
-            embedding_model='hash',
-            use_chroma=False,
-        )
-
-        doc = LoadedDocument(source='test.txt', title='Test', category='legal', text='Some content about law')
-
-        with (
-            patch('rag.vectorstore.load_documents', return_value=[doc]),
-            patch.object(LocalVectorStore, '_chunk_document') as mock_chunk,
-            patch.object(LocalVectorStore, '_filter_chunks') as mock_filter,
-            patch.object(LocalVectorStore, '_write_index_file') as mock_write,
-        ):
-            mock_chunk.return_value = [
-                DocumentChunk('test.txt:1', 'test.txt', 'Test', 'legal', 'Some content about law'),
-            ]
-            mock_filter.return_value = [
-                DocumentChunk('test.txt:1', 'test.txt', 'Test', 'legal', 'Some content about law'),
-            ]
-            result = store.build_index()
-
-        assert len(result) == 1
-        assert result[0].source == 'test.txt'
-        mock_write.assert_called_once()
-
-    def test_force_true_rebuilds_even_if_loaded(self):
-        store = LocalVectorStore(
-            persist_dir=Path('/fake/persist'),
+            database_url='postgresql://user:pass@localhost:5432/db',
             data_dir=Path('/fake/data'),
-            embedding_model='hash',
-            use_chroma=False,
+            embedding_model='hash'
         )
-        store._chunks = [DocumentChunk('old', 's', 't', 'c', 'x')]
-        doc = LoadedDocument(source='new.txt', title='New', category='legal', text='New content')
-
-        with (
-            patch('rag.vectorstore.load_documents', return_value=[doc]),
-            patch.object(LocalVectorStore, '_chunk_document') as mock_chunk,
-            patch.object(LocalVectorStore, '_filter_chunks') as mock_filter,
-            patch.object(LocalVectorStore, '_write_index_file'),
-        ):
-            mock_chunk.return_value = [
-                DocumentChunk('new.txt:1', 'new.txt', 'New', 'legal', 'New content'),
-            ]
-            mock_filter.side_effect = lambda x: x
-            result = store.build_index(force=True)
-
-        assert result[0].source == 'new.txt'
-
-    def test_force_false_with_existing_returns_cached(self):
-        store = LocalVectorStore(
-            persist_dir=Path('/fake/persist'),
-            data_dir=Path('/fake/data'),
-            embedding_model='hash',
-            use_chroma=False,
-        )
-        cached = [DocumentChunk('cached', 's', 't', 'c', 'x')]
-        store._chunks = cached
-
-        with patch('rag.vectorstore.load_documents') as mock_load:
-            result = store.build_index(force=False)
-        mock_load.assert_not_called()
-        assert result is cached
-
-
-class TestLocalVectorStoreLoadIndexFile:
-    def test_loads_and_parses_json(self):
-        store = LocalVectorStore(
-            persist_dir=Path('/fake/persist'),
-            data_dir=Path('/fake/data'),
-            embedding_model='hash',
-            use_chroma=False,
-        )
-        raw_json = json.dumps([
-            {'chunk_id': 'a:1', 'source': 'a.txt', 'title': 'A', 'category': 'legal', 'content': 'xyz'},
-        ])
-
-        mock_index = MagicMock(spec=Path)
-        mock_index.read_text.return_value = raw_json
-        store.index_path = mock_index
-
-        with patch.object(LocalVectorStore, '_filter_chunks', side_effect=lambda x: x):
-            result = store._load_index_file()
-
-        assert len(result) == 1
-        assert result[0].chunk_id == 'a:1'
-        mock_index.read_text.assert_called_once_with(encoding='utf-8')
-
-    def test_filters_excluded_categories(self):
-        persist_dir = MagicMock(spec=Path)
-        index_path = MagicMock(spec=Path)
-        persist_dir.__truediv__.return_value = index_path
-
-        store = LocalVectorStore(
-            persist_dir=persist_dir,
-            data_dir=MagicMock(spec=Path),
-            embedding_model='hash',
-            use_chroma=False,
-        )
-        raw_json = json.dumps([
-            {'chunk_id': 'keep:1', 'source': 'keep.txt', 'title': 'Keep', 'category': 'legal', 'content': 'x'},
-            {'chunk_id': 'qa:1', 'source': 'qa.txt', 'title': 'QA', 'category': 'qa_pairs', 'content': 'y'},
-        ])
-
-        store.index_path = index_path
-        index_path.read_text.return_value = raw_json
-
-        result = store._load_index_file()
-        assert len(result) == 1
-        assert result[0].chunk_id == 'keep:1'
-
-
-class TestLocalVectorStoreWriteIndexFile:
-    def test_creates_persist_dir_and_writes_json(self):
-        persist_dir = MagicMock(spec=Path)
-        index_path = MagicMock(spec=Path)
-        persist_dir.__truediv__.return_value = index_path
-
-        store = LocalVectorStore(
-            persist_dir=persist_dir,
-            data_dir=Path('/fake/data'),
-            embedding_model='hash',
-            use_chroma=False,
-        )
-        store.index_path = index_path
-
-        chunks = [DocumentChunk('id:1', 'src', 'title', 'cat', 'cont')]
-        store._write_index_file(chunks)
-
-        persist_dir.mkdir.assert_called_once_with(parents=True, exist_ok=True)
-        index_path.write_text.assert_called_once()
-        written = index_path.write_text.call_args[0][0]
-        parsed = json.loads(written)
-        assert parsed[0]['chunk_id'] == 'id:1'
-        assert parsed[0]['source'] == 'src'
-
-
-class TestLocalVectorStoreFilterChunks:
-    def test_filters_out_excluded_categories(self):
-        included = DocumentChunk('a:1', 'a', 'A', 'legal', 'x')
-        excluded = DocumentChunk('b:1', 'b', 'B', 'qa_pairs', 'y')
-
-        result = LocalVectorStore._filter_chunks([included, excluded])
-        assert len(result) == 1
-        assert result[0] is included
-
-    def test_all_excluded_returns_empty(self):
-        chunks = [DocumentChunk('a:1', 'a', 'A', cat, 'x') for cat in EXCLUDED_INDEX_CATEGORIES]
-        result = LocalVectorStore._filter_chunks(chunks)
-        assert result == []
-
-    def test_none_excluded_returns_all(self):
-        chunks = [
-            DocumentChunk('a:1', 'a', 'A', 'legal', 'x'),
-            DocumentChunk('b:1', 'b', 'B', 'general', 'y'),
-        ]
-        result = LocalVectorStore._filter_chunks(chunks)
-        assert result == chunks
+        mock_docs = [LoadedDocument('a', 't', 'c', 'x')]
+        mock_chunks = [DocumentChunk('a:1', 'a', 't', 'c', 'x')]
+        
+        store.init_db = AsyncMock()
+        store._upsert_pg = AsyncMock()
+        
+        with patch('rag.vectorstore.load_documents', return_value=mock_docs):
+            with patch.object(LocalVectorStore, '_chunk_document', return_value=mock_chunks):
+                result = await store.build_index(force=True)
+                
+        store.init_db.assert_called_once()
+        store._upsert_pg.assert_called_once_with(mock_chunks)
+        assert result == mock_chunks
+        assert store._chunks == mock_chunks
 
 
 class TestLocalVectorStoreSearch:
-    def test_chroma_available_returns_results_from_chroma(self):
+    @pytest.mark.asyncio
+    async def test_search_returns_document_chunks_and_scores(self):
         store = LocalVectorStore(
-            persist_dir=Path('/fake/persist'),
+            database_url='postgresql://user:pass@localhost:5432/db',
             data_dir=Path('/fake/data'),
-            embedding_model='hash',
-            use_chroma=False,
+            embedding_model='hash'
         )
-        chunk = DocumentChunk('a:1', 'a.txt', 'A', 'legal', 'content')
-        store._chunks = [chunk]
+        mock_pool = MagicMock()
+        mock_conn = AsyncMock()
+        mock_pool.acquire.return_value.__aenter__.return_value = mock_conn
+        
+        mock_row = {
+            "chunk_id": "a:1", "source": "a", "title": "t", "category": "c", "content": "x", "score": 0.1
+        }
+        mock_conn.fetch.return_value = [mock_row]
+        store._pool = mock_pool
 
-        chroma_results = [(chunk, 0.95)]
-
-        with patch.object(LocalVectorStore, '_search_chroma', return_value=chroma_results):
-            results = store.search('query', top_k=5)
-        assert results == chroma_results
-
-    def test_chroma_fails_falls_back_to_lexical(self):
-        store = LocalVectorStore(
-            persist_dir=Path('/fake/persist'),
-            data_dir=Path('/fake/data'),
-            embedding_model='hash',
-            use_chroma=False,
-        )
-        chunk = DocumentChunk('a:1', 'a.txt', 'A', 'legal', 'helmet fine amount section')
-        store._chunks = [chunk]
-
-        with (
-            patch.object(LocalVectorStore, '_search_chroma', return_value=[]),
-            patch('rag.vectorstore.score_query', return_value=3.0),
-        ):
-            results = store.search('helmet fine', top_k=5)
+        results = await store.search("query text", top_k=5)
+        
         assert len(results) == 1
-        assert results[0][0] is chunk
-        assert results[0][1] > 0
-
-    def test_lexical_search_filters_by_scopes(self):
-        store = LocalVectorStore(
-            persist_dir=Path('/fake/persist'),
-            data_dir=Path('/fake/data'),
-            embedding_model='hash',
-            use_chroma=False,
-        )
-        legal = DocumentChunk('a:1', 'a.txt', 'A', 'legal', 'helmet fine')
-        general = DocumentChunk('b:1', 'b.txt', 'B', 'general', 'hello')
-        store._chunks = [legal, general]
-
-        with (
-            patch.object(LocalVectorStore, '_search_chroma', return_value=[]),
-            patch('rag.vectorstore.score_query', side_effect=lambda q, c: 1.0 if 'helmet' in c else 0.3),
-        ):
-            results = store.search('helmet fine', top_k=5, scopes={'legal'})
-        assert len(results) == 1
-        assert results[0][0].source == 'a.txt'
-
-    def test_lexical_search_returns_only_score_above_zero(self):
-        store = LocalVectorStore(
-            persist_dir=Path('/fake/persist'),
-            data_dir=Path('/fake/data'),
-            embedding_model='hash',
-            use_chroma=False,
-        )
-        chunk = DocumentChunk('a:1', 'a.txt', 'A', 'legal', 'helmet rules')
-        store._chunks = [chunk]
-
-        with (
-            patch.object(LocalVectorStore, '_search_chroma', return_value=[]),
-            patch('rag.vectorstore.score_query', return_value=0.0),
-        ):
-            results = store.search('unrelated query', top_k=5)
-        assert results == []
-
-    def test_lexical_search_returns_top_k_sorted_by_score(self):
-        store = LocalVectorStore(
-            persist_dir=Path('/fake/persist'),
-            data_dir=Path('/fake/data'),
-            embedding_model='hash',
-            use_chroma=False,
-        )
-        chunks = [
-            DocumentChunk(f'{i}:1', f'{i}.txt', f'T{i}', 'general', f'content {i}') for i in range(5)
-        ]
-        store._chunks = chunks
-
-        with (
-            patch.object(LocalVectorStore, '_search_chroma', return_value=[]),
-            patch('rag.vectorstore.score_query', side_effect=lambda q, c: float(c[-1])),
-        ):
-            results = store.search('query', top_k=3)
-        assert len(results) == 3
-        scores = [r[1] for r in results]
-        assert scores == sorted(scores, reverse=True)
-
-    def test_scopes_none_returns_all_matching(self):
-        store = LocalVectorStore(
-            persist_dir=Path('/fake/persist'),
-            data_dir=Path('/fake/data'),
-            embedding_model='hash',
-            use_chroma=False,
-        )
-        chunks = [
-            DocumentChunk('a:1', 'a.txt', 'A', 'legal', 'fine amount'),
-            DocumentChunk('b:1', 'b.txt', 'B', 'general', 'fine rules'),
-        ]
-        store._chunks = chunks
-
-        with (
-            patch.object(LocalVectorStore, '_search_chroma', return_value=[]),
-            patch('rag.vectorstore.score_query', return_value=1.0),
-        ):
-            results = store.search('fine', top_k=5, scopes=None)
-        assert len(results) == 2
+        chunk, score = results[0]
+        assert chunk.chunk_id == "a:1"
+        assert score == 0.1
 
 
 class TestLocalVectorStoreStats:
-    def test_returns_chunks_count_categories_chroma_chunks(self):
+    @pytest.mark.asyncio
+    async def test_stats_returns_metrics(self):
         store = LocalVectorStore(
-            persist_dir=Path('/fake/persist'),
+            database_url='postgresql://user:pass@localhost:5432/db',
             data_dir=Path('/fake/data'),
-            embedding_model='hash',
-            use_chroma=False,
+            embedding_model='hash'
         )
-        store._chunks = [
-            DocumentChunk('a:1', 'a.txt', 'A', 'legal', 'x'),
-            DocumentChunk('b:1', 'b.txt', 'B', 'legal', 'y'),
-            DocumentChunk('c:1', 'c.txt', 'C', 'general', 'z'),
-        ]
+        mock_pool = MagicMock()
+        mock_conn = AsyncMock()
+        mock_pool.acquire.return_value.__aenter__.return_value = mock_conn
+        
+        mock_conn.fetchval.side_effect = [100, 5]
+        store._pool = mock_pool
+        store._chunks = [1]*100
 
-        result = store.stats()
-        assert result['chunks'] == 3
-        assert result['categories'] == 2
-        assert result['chroma_chunks'] == 0
-        assert result['embedding_model'] == 'hash'
-
-    def test_chroma_collection_count_included(self):
-        store = LocalVectorStore(
-            persist_dir=Path('/fake/persist'),
-            data_dir=Path('/fake/data'),
-            embedding_model='hash',
-            use_chroma=True,
-        )
-        store._chunks = [DocumentChunk('a:1', 'a.txt', 'A', 'legal', 'x')]
-        mock_collection = MagicMock()
-        mock_collection.count.return_value = 7
-        store._collection = mock_collection
-
-        result = store.stats()
-        assert result['chroma_chunks'] == 7
-
-
-class TestLocalVectorStoreGetCollection:
-    def test_use_chroma_false_returns_none(self):
-        store = LocalVectorStore(
-            persist_dir=Path('/fake/persist'),
-            data_dir=Path('/fake/data'),
-            embedding_model='hash',
-            use_chroma=False,
-        )
-        assert store._get_collection() is None
-
-    def test_chromadb_unavailable_logs_warning_returns_none(self):
-        store = LocalVectorStore(
-            persist_dir=Path('/fake/persist'),
-            data_dir=Path('/fake/data'),
-            embedding_model='hash',
-            use_chroma=True,
-        )
-        store._collection = None
-
-        with (
-            patch.dict('sys.modules', {'chromadb': None}),
-            patch.object(Path, 'mkdir'),
-        ):
-            result = store._get_collection()
-        assert result is None
-
-    def test_creates_persistent_client_with_correct_params(self):
-        store = LocalVectorStore(
-            persist_dir=Path('/fake/persist'),
-            data_dir=Path('/fake/data'),
-            embedding_model='hash',
-            use_chroma=True,
-        )
-        store._collection = None
-
-        mock_chromadb = MagicMock()
-        mock_client = MagicMock()
-        mock_collection = MagicMock()
-        mock_chromadb.PersistentClient.return_value = mock_client
-        mock_client.get_or_create_collection.return_value = mock_collection
-
-        with (
-            patch.dict('sys.modules', {'chromadb': mock_chromadb}),
-            patch.object(Path, 'mkdir'),
-        ):
-            result = store._get_collection()
-        assert result is mock_collection
-        mock_chromadb.PersistentClient.assert_called_once_with(path=str(Path('/fake/persist')))
-        mock_client.get_or_create_collection.assert_called_once_with(
-            name='safevixai_rag',
-            embedding_function=store._embedding_function,
-            metadata={'hnsw:space': 'cosine'},
-        )
-
-    def test_cached_collection_returned(self):
-        store = LocalVectorStore(
-            persist_dir=Path('/fake/persist'),
-            data_dir=Path('/fake/data'),
-            embedding_model='hash',
-            use_chroma=True,
-        )
-        cached = MagicMock()
-        store._collection = cached
-        assert store._get_collection() is cached
+        stats = await store.stats()
+        
+        assert stats["chunks"] == 100
+        assert stats["categories"] == 5
+        assert stats["database"] == "pgvector"
+        assert stats["embedding_model"] == "hash"
 
 
 class TestLocalVectorStoreChunkDocument:
@@ -953,7 +615,3 @@ class TestLocalVectorStoreChunkDocument:
         for i, chunk in enumerate(chunks, start=1):
             assert chunk.chunk_id == f'multi.txt:{i}'
 
-    def test_metadata_returns_source_title_category(self):
-        chunk = DocumentChunk('a:1', 'src.txt', 'Title', 'legal', 'content')
-        meta = LocalVectorStore._metadata(chunk)
-        assert meta == {'source': 'src.txt', 'title': 'Title', 'category': 'legal'}

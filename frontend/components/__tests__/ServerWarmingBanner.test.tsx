@@ -27,7 +27,7 @@ jest.mock('@gsap/react', function() {
     useGSAP: function(cb: any, opts?: any) {
       React.useEffect(function() {
         if (typeof cb === 'function') cb();
-      }, opts?.dependencies || []);
+      }, [cb]);
     },
   };
 });

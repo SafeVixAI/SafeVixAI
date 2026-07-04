@@ -3,17 +3,6 @@
 
 from __future__ import annotations
 
-import sys
-from pathlib import Path
-
-# Add project root (containing alert_service.py) to sys.path
-for parent in Path(__file__).resolve().parents:
-    if (parent / 'alert_service.py').exists():
-        sys.path.insert(0, str(parent))
-        break
-
-from alert_service import get_alert_service
-
 import json
 import logging
 import re
@@ -35,6 +24,7 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from api.v1 import api_router
+from core.alert import get_alert_service
 from core.config import get_settings
 from core.database import check_database, check_replica_database
 from core.limiter import limiter

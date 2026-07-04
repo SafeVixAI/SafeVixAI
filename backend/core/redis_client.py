@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import json
 import time
+import warnings
 from typing import Any
 
 from redis.asyncio import Redis
@@ -12,6 +13,50 @@ from redis.asyncio import Redis
 
 # Max age for stale cache entries (24 hours) — served when live data unavailable
 STALE_CACHE_MAX_AGE_SECONDS = 86400
+
+
+# Shared Redis connection pool (avoids per-request TCP connection overhead)
+_redis_pool: redis.asyncio.ConnectionPool | None = None
+_redis_pool_url: str | None = None
+
+
+def get_redis_client(redis_url: str | None) -> Redis:
+    """Return a Redis client backed by a shared connection pool.
+
+    Reuses a single ConnectionPool across all callers, avoiding the
+    overhead of opening/closing a TCP socket per request.
+    """
+    global _redis_pool, _redis_pool_url
+    if not redis_url:
+        return None  # type: ignore[return-value]
+    if _redis_pool is None or redis_url != _redis_pool_url:
+        if _redis_pool is not None:
+            # URL changed — close old pool (best-effort)
+            try:
+                import asyncio
+                asyncio.ensure_future(_redis_pool.aclose())
+            except Exception:
+                pass
+        _redis_pool_url = redis_url
+        _redis_pool = redis.asyncio.ConnectionPool.from_url(
+            redis_url,
+            max_connections=20,
+            pool_timeout=5,
+            retry_on_timeout=True,
+        )
+    return Redis(connection_pool=_redis_pool)
+
+
+async def close_redis_pool() -> None:
+    """Close the shared Redis connection pool (called during app shutdown)."""
+    global _redis_pool, _redis_pool_url
+    if _redis_pool is not None:
+        try:
+            await _redis_pool.aclose()
+        except Exception:
+            pass
+        _redis_pool = None
+        _redis_pool_url = None
 
 
 class CacheHelper:
@@ -247,4 +292,7 @@ class CacheHelper:
 def create_cache(redis_url: str | None = None) -> CacheHelper:
     if not redis_url:
         return CacheHelper()
-    return CacheHelper(Redis.from_url(redis_url, encoding='utf-8', decode_responses=True))
+    client = get_redis_client(redis_url)
+    if client is None:
+        return CacheHelper()
+    return CacheHelper(client)

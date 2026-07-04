@@ -10,7 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.database import get_db
 from core.limiter import limiter
-from core.security import get_current_user_optional
+from core.security import get_current_user
 from models.provider_config import UserProviderConfig
 from services.provider_encrypt import encrypt_api_key, decrypt_api_key, mask_api_key
 
@@ -109,13 +109,14 @@ async def list_builtin_providers():
 
 
 @router.get("/", response_model=list[ProviderConfigResponse])
+@limiter.limit("20/minute")
 async def list_provider_configs(
     request: Request,
     db: AsyncSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user_optional),
+    current_user: dict = Depends(get_current_user),
 ):
     """List all configured providers for the current user."""
-    user_id = str(current_user.get("sub")) if current_user else "anonymous"
+    user_id = str(current_user.get("sub"))
     result = await db.execute(
         select(UserProviderConfig)
         .where(UserProviderConfig.user_id == user_id)
@@ -149,10 +150,10 @@ async def create_provider_config(
     request: Request,
     data: ProviderConfigCreate,
     db: AsyncSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user_optional),
+    current_user: dict = Depends(get_current_user),
 ):
     """Create a new provider configuration."""
-    user_id = str(current_user.get("sub")) if current_user else "anonymous"
+    user_id = str(current_user.get("sub"))
 
     existing = await db.execute(
         select(UserProviderConfig).where(
@@ -208,10 +209,10 @@ async def update_provider_config(
     config_id: uuid.UUID,
     data: ProviderConfigUpdate,
     db: AsyncSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user_optional),
+    current_user: dict = Depends(get_current_user),
 ):
     """Update an existing provider configuration."""
-    user_id = str(current_user.get("sub")) if current_user else "anonymous"
+    user_id = str(current_user.get("sub"))
 
     result = await db.execute(
         select(UserProviderConfig).where(
@@ -268,10 +269,10 @@ async def delete_provider_config(
     request: Request,
     config_id: uuid.UUID,
     db: AsyncSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user_optional),
+    current_user: dict = Depends(get_current_user),
 ):
     """Delete a provider configuration."""
-    user_id = str(current_user.get("sub")) if current_user else "anonymous"
+    user_id = str(current_user.get("sub"))
 
     result = await db.execute(
         select(UserProviderConfig).where(
@@ -341,10 +342,10 @@ async def test_provider_connection(
 async def sync_providers_to_chatbot(
     request: Request,
     db: AsyncSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user_optional),
+    current_user: dict = Depends(get_current_user),
 ):
     """Sync active provider configs to the chatbot service for the current session."""
-    user_id = str(current_user.get("sub")) if current_user else "anonymous"
+    user_id = str(current_user.get("sub"))
 
     from core.distributed_lock import distributed_lock
 

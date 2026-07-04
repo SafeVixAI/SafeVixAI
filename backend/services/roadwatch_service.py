@@ -31,7 +31,7 @@ from models.schemas import (
 from services.authority_router import ROAD_TYPE_LABELS, AuthorityRouter
 from services.exceptions import ExternalServiceError, ServiceValidationError
 from services.geocoding_service import GeocodingService
-from core.cqrs import Command, Query, CommandHandler, QueryHandler, cqrs_bus
+from core.cqrs import Command, Query, CommandHandler, QueryHandler
 from core.distributed_lock import distributed_lock
 
 

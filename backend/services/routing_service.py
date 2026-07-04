@@ -28,7 +28,7 @@ for parent in Path(__file__).resolve().parents:
         if str(parent) not in sys.path:
             sys.path.insert(0, str(parent))
         break
-from alert_service import get_alert_service
+from core.alert import get_alert_service
 
 logger = logging.getLogger("safevixai.backend.routing")
 

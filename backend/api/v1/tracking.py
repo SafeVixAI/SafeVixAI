@@ -21,8 +21,7 @@ MAX_TRACKING_GROUP_ID_LENGTH = 80
 HEARTBEAT_INTERVAL_SECONDS = 25
 STALE_CONNECTION_TIMEOUT_SECONDS = 60
 STALE_CLEANUP_INTERVAL_SECONDS = 30
-
-
+MAX_CONNECTIONS = 500
 
 from pydantic import BaseModel, Field, model_validator, ValidationError
 
@@ -123,7 +122,19 @@ class RedisConnectionManager:
     def set_redis(self, redis_client: Redis | None):
         self.redis = redis_client
 
+    def total_connections(self) -> int:
+        """Return total active WebSocket connections across all groups."""
+        total = 0
+        for group in self.active_connections.values():
+            total += len(group)
+        return total
+
     async def connect(self, websocket: WebSocket, group_id: str):
+        total = self.total_connections()
+        if total >= MAX_CONNECTIONS:
+            await websocket.close(code=1013, reason="Server at capacity — try again later")
+            logger.warning("Rejected WebSocket connection: %d active (max %d)", total, MAX_CONNECTIONS)
+            return
         await websocket.accept()
         connection_health.mark_activity(websocket)
         if group_id not in self.active_connections:

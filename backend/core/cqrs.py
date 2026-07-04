@@ -10,6 +10,8 @@ from __future__ import annotations
 import abc
 from typing import Any, Generic, TypeVar
 
+from fastapi import Request
+
 T = TypeVar("T")
 R = TypeVar("R")
 
@@ -68,4 +70,21 @@ class CQRSBus:
         return await handler.handle(query)
 
 
-cqrs_bus = CQRSBus()
+def get_cqrs_bus(request: Request) -> CQRSBus:
+    """FastAPI dependency — returns the per-app CQRSBus from request.app.state."""
+    bus: CQRSBus | None = getattr(request.app.state, 'cqrs_bus', None)
+    if bus is None:
+        raise RuntimeError("CQRSBus not initialized. Ensure lifespan calls init_cqrs_bus(app).")
+    return bus
+
+
+def init_cqrs_bus(app: FastAPI) -> CQRSBus:
+    """Factory: creates a CQRSBus, registers handlers, and stores it on app.state."""
+    from fastapi import FastAPI
+    from services.roadwatch_service import SubmitReportHandler, VerifyReportHandler, SubmitReportCommand, VerifyReportCommand
+
+    bus = CQRSBus()
+    bus.register_command_handler(SubmitReportCommand, SubmitReportHandler())
+    bus.register_command_handler(VerifyReportCommand, VerifyReportHandler())
+    app.state.cqrs_bus = bus
+    return bus

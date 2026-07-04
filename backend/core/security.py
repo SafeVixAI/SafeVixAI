@@ -6,6 +6,7 @@ from __future__ import annotations
 import os
 import secrets
 import time
+from collections import OrderedDict
 from datetime import datetime, timedelta, timezone
 import uuid
 from typing import Any
@@ -59,25 +60,36 @@ APP_JWT_ISSUER = os.environ.get("APP_JWT_ISSUER", "safevixai-auth-service")
 SUPABASE_JWT_SECRET = os.environ.get("SUPABASE_JWT_SECRET", "").strip()
 SUPABASE_JWT_AUDIENCE = os.environ.get("SUPABASE_JWT_AUDIENCE", "authenticated").strip()
 
-# Token revocation set (in-memory fallback, persisted to Redis when available)
-_revoked_token_jtis: set[str] = set()
+# Token revocation set (LRU-limited in-memory fallback, persisted to Redis when available)
+# OrderedDict used as LRU: max 10k entries prevents unbounded memory growth.
+_REVOKED_LRU_MAX = 10_000
+_revoked_token_jtis: OrderedDict[str, None] = OrderedDict()
 REFRESH_TOKEN_EXPIRE_DAYS = int(os.environ.get("REFRESH_TOKEN_EXPIRE_DAYS", "30"))
 
 def _get_revocation_cache_key(jti: str) -> str:
     return f"revoked_token:{jti}"
 
 async def revoke_token(jti: str, cache=None) -> None:
-    _revoked_token_jtis.add(jti)
+    # Move to end (most recently used) via pop + reassign
+    _revoked_token_jtis.pop(jti, None)
+    _revoked_token_jtis[jti] = None
+    # LRU eviction: remove oldest (first) entry when over capacity
+    if len(_revoked_token_jtis) > _REVOKED_LRU_MAX:
+        _revoked_token_jtis.popitem(last=False)
     if cache:
         await cache.set_json(_get_revocation_cache_key(jti), True, ttl_seconds=86400 * 30)
 
 async def is_token_revoked(jti: str, cache=None) -> bool:
     if jti in _revoked_token_jtis:
+        # Refresh LRU order on hit
+        _revoked_token_jtis.move_to_end(jti)
         return True
     if cache:
         result = await cache.get_json(_get_revocation_cache_key(jti))
         if result:
-            _revoked_token_jtis.add(jti)
+            _revoked_token_jtis[jti] = None
+            if len(_revoked_token_jtis) > _REVOKED_LRU_MAX:
+                _revoked_token_jtis.popitem(last=False)
             return True
     return False
 

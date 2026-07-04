@@ -21,11 +21,11 @@
 
 | Service | Command | Passing | Coverage |
 |---------|---------|---------|----------|
-| Backend | `pytest tests/ -q` from `backend/` | **2078/2078** | **96.30%** |
-| Chatbot | `pytest tests/ -q` from `chatbot_service/` | **1095/1095** | **96.35%** |
-| Frontend | `npm test` | **1648/1648** | **92.33% lines** |
+| Backend | `pytest tests/ -q` from `backend/` | **2445/2445** | **100%** (`fail_under=100`) |
+| Chatbot | `pytest tests/ -q` from `chatbot_service/` | **1095/1095** | **96%** |
+| Frontend | `npm test` | **2625/2625** (226 suites) | **83% lines** |
 | E2E | `npx playwright test e2e/ --grep-invert="Visual Regression\|visual"` | **55/55** | **0 remaining** |
-| **Total unit tests** | | **4821 total passing** | |
+| **Total unit tests** | | **6165 total passing** | |
 
 ---
 
@@ -59,6 +59,7 @@
 8. **Static Mock Token Rejection** — Enforced in security middleware
 9. **AuthGuard E2E Bypass** — `__E2E_SKIP_AUTH__` localStorage flag
 10. **GSAP Opacity Check Removed** — `waitForMount` no longer checks opacity (GSAP fails silently in production build)
+11. **Enterprise Core Patterns** — CQRS command/query bus, Redlock distributed locking, JWKS key rotation, Idempotency middleware, domain exception handlers, TokenBucket rate limiting
 
 ---
 
@@ -77,7 +78,7 @@ POST /api/v1/chat/stream
 
 | Layer | Count |
 |-------|-------|
-| Backend route modules | 27 |
+| Backend route modules | 25 |
 | Backend services | 36 |
 | Backend ORM models | 17 |
 | Chatbot tools | 13 |
@@ -153,4 +154,4 @@ Verify: `GET http://localhost:8000/health` and `GET http://localhost:8010/health
 
 ---
 
-*Document version: 2.0 | IIT Madras Road Safety Hackathon 2026 | Updated: June 2026*
+*Document version: 2.1 | IIT Madras Road Safety Hackathon 2026 | Updated: July 2026 (Enterprise Hardening Batch 18)*

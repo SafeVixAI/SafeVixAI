@@ -67,7 +67,7 @@ jobs:
           ENVIRONMENT: test
           ADMIN_SECRET: test-admin-secret
         run: |
-          pytest tests/ -v --cov=. --cov-branch --cov-report=xml --cov-report=term --cov-fail-under=95 -q
+          pytest tests/ -v --cov=. --cov-branch --cov-report=xml --cov-report=term --cov-fail-under=100 -q
 
       - name: Upload coverage
         uses: codecov/codecov-action@v4

@@ -22,9 +22,9 @@ SELECT PostGIS_version();
 
 ---
 
-## ORM Models (17 Python files in `backend/models/`)
+## ORM Models (18+ Python files in `backend/models/`)
 
-All 17 models are defined under `backend/models/` using SQLAlchemy ORM + GeoAlchemy2. The Alembic migration (`backend/migrations/001_initial_schema.py`) creates 6 core tables; remaining tables are created by subsequent migrations or auto-migration.
+All 18+ models are defined under `backend/models/` using SQLAlchemy ORM + GeoAlchemy2. The initial Alembic migration (`backend/migrations/001_initial_schema.py`) creates 6 core tables; subsequent migrations add the remaining tables with PostGIS indexes.
 
 ---
 
@@ -333,6 +333,10 @@ Creates 6 core tables with PostGIS support:
 
 All other tables are created via auto-migration or subsequent migration files.
 
+#### Subsequent Migration: `e7b9a1_indexes.py` (GiST + Covering Indexes)
+
+Adds GiST index on `road_issues.location` and covering indexes on `road_issues.status` and `road_issues.category` for query performance. Applied via `alembic upgrade head`.
+
 ---
 
 ## Violation Data (CSV — not in DB)
@@ -424,4 +428,4 @@ LIMIT 1;
 
 ---
 
-*Document version: 3.0 | IIT Madras Road Safety Hackathon 2026*
+*Document version: 3.1 | IIT Madras Road Safety Hackathon 2026 | July 2026 (Enterprise Hardening)*

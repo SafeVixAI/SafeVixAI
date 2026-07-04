@@ -82,7 +82,7 @@ graph TD
 
 ## Backend (FastAPI :8000)
 
-### 27 Route Modules
+### 25 Route Modules
 
 All routes live in `backend/api/v1/`:
 
@@ -113,8 +113,7 @@ All routes live in `backend/api/v1/`:
 | `user.py` | User profile management | JWT |
 | `wards.py` | Ward boundary and metadata management | JWT |
 | `waze_feed.py` | Waze community traffic/hazard data feed | JWT |
-| `__init__.py` | Router aggregation | — |
-| `deprecated/` | Deprecated endpoints (maintained for backward compat) | Varies |
+| `providers.py` | AI provider API key management (encrypt/decrypt) | JWT |
 
 ### Middleware Stack (applied in order)
 
@@ -136,7 +135,7 @@ Request
 Response
 ```
 
-### 36 Service Modules
+### 30+ Service Modules
 
 All services in `backend/services/`:
 
@@ -150,19 +149,19 @@ All services in `backend/services/`:
 | `safe_routing.py` | Safety-weighted route scoring |
 | `safe_spaces.py` | Safe space (well-lit, CCTV) identification |
 | `roadwatch_service.py` | Road issue lifecycle management |
+| `roadwatch_moderation_service.py` | AI text moderation + EXIF authenticity verification |
 | `authority_router.py` | ONDC-compliant authority routing matrix |
 | `llm_service.py` | LLM proxy for basic text generation |
 | `local_emergency_catalog.py` | Local emergency contact database |
 | `event_bus.py` | Internal pub/sub event bus |
 | `sla_monitor.py` | Service level agreement compliance tracking |
 | `escalation_predictor.py` | ML-based issue escalation prediction |
-| `fine_prediction.py` | Fine amount prediction model |
+| `fine_prediction_service.py` | Fine amount prediction model |
 | `fraud_detector.py` | Report/claim fraud detection |
 | `report_classifier.py` | Road issue severity classification |
 | `duplicate_detector.py` | Duplicate report deduplication |
 | `complaint_lifecycle.py` | Complaint state machine (filed → investigating → resolved) |
 | `garage_service.py` | Garage/vehicle CRUD + availability |
-| `notification_service.py` | Push/in-app/email notification dispatch |
 | `officer_route_optimizer.py` | Patrol route optimization |
 | `workload_balancer.py` | Officer workload distribution |
 | `ward_service.py` | Ward boundary and metadata operations |
@@ -171,12 +170,18 @@ All services in `backend/services/`:
 | `geo_verifier.py` | Geographic coordinate sanity checks |
 | `ai_verification.py` | ML-based photo/report authenticity verification |
 | `osm_contributor.py` | Automated OSM data contribution |
-| `civic_intel.py` | Civic intelligence data pipeline |
 | `exceptions.py` | Custom exception definitions |
-| `markdown_service.py` | Markdown rendering utilities |
-| `report_service.py` | Report aggregation and export |
-| `sos_service.py` | SOS alert broadcast |
-| `tracking_service.py` | Location tracking session management |
+| `civic_intel/` | **Civic intelligence directory (10 modules)** |
+| `civic_intel/base_ingestor.py` | Base class for all ETL ingestors |
+| `civic_intel/civic_analytics_service.py` | LGD/Admin/OSM/Grievances/Municipalities stats |
+| `civic_intel/osm_bulk_ingestor.py` | Streaming OSM data ingestor (iter_parse_elements) |
+| `civic_intel/etl_scheduler.py` | Background ETL pipeline scheduler (asyncio) |
+| `civic_intel/lgd_ingestor.py` | Local Government Directory ingestor |
+| `civic_intel/boundary_ingestor.py` | Administrative boundary ingestor |
+| `civic_intel/datagov_ingestor.py` | Government open data ingestor |
+| `civic_intel/municipal_ingestor.py` | Municipality data ingestor |
+| `civic_intel/grievance_ingestor.py` | Grievance data ingestor |
+| `civic_intel/data_exporter.py` | Civic data export utility |
 
 ### Core Config (pydantic-settings)
 
@@ -195,6 +200,25 @@ All services in `backend/services/`:
 | `OPENROUTESERVICE_API_KEY` | No | For routing; free tier available |
 | `DATA_GOV_API_KEY` | No | Government data endpoints |
 | `CORS_ORIGINS` | No | Comma-separated CORS allowed origins |
+| `MCP_ENABLED` | No | Enables MCP server (default: false) |
+| `ETL_ENABLED` | No | Enables background ETL scheduler (default: false) |
+| `CHATBOT_INTERNAL_API_KEY` | No | Service-to-service auth key for chatbot ↔ backend |
+| `JWKS_URL` | No | JWKS endpoint URL for RS256 JWT verification |
+
+---
+
+### Enterprise Patterns
+
+Enterprise-grade patterns added in Batch 16 hardening:
+
+| Module | Pattern | Purpose |
+|--------|---------|---------|
+| `core/cqrs.py` | CQRS | Command and Query message bus with middleware support |
+| `core/distributed_lock.py` | Redlock | Distributed locking with Redis + local asyncio lock fallback |
+| `core/exception_handlers.py` | Domain Exceptions | Global handlers: DomainError (400), ResourceNotFoundError (404), InvalidTransitionError (409), IntegrityError (409) |
+| `core/idempotency.py` | Idempotency Keys | Idempotency-Key header dedup with audit logging and distributed lock isolation |
+| `core/security.py` | RS256 JWT | RS256 JWT validation with atomic JWKS fetching and distributed caching |
+| `core/jwks.py` | JWKS Manager | Key rotation, caching (TTL-based), historical key fallback for gradual rotation |
 
 ---
 
@@ -544,12 +568,12 @@ sequenceDiagram
 SafeVixAI/
 ├── backend/                 FastAPI :8000
 │   ├── main.py              App factory (create_app → lifespan → services)
-│   ├── api/v1/              27 route modules
+│   ├── api/v1/              25 route modules
 │   ├── core/                Config, database, redis, security, rate limiter
-│   ├── services/            36 service modules
-│   ├── models/              SQLAlchemy ORM + Pydantic schemas (single schemas.py)
+│   ├── services/            30+ service modules
+│   ├── models/              SQLAlchemy ORM + Pydantic schemas (single schemas.py, 18+ models)
 │   ├── middleware/           Middleware stack (13 middleware classes)
-│   ├── migrations/          Alembic (initial schema, 6 tables + PostGIS)
+│   ├── migrations/          Alembic (2 migrations: initial schema + GiST covering indexes)
 │   ├── scripts/             DB seeders + data transforms
 │   └── data/                violations_seed.csv, state_overrides.csv, chroma_db/
 │
@@ -633,4 +657,4 @@ All services use free tiers or open-source self-hosted alternatives:
 
 ---
 
-*Document version: 2.0 | IIT Madras Road Safety Hackathon 2026 | ₹0 Infrastructure*
+*Document version: 3.0 | IIT Madras Road Safety Hackathon 2026 | ₹0 Infrastructure | Enterprise Hardening Batch 18*

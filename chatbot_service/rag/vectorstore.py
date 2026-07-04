@@ -69,10 +69,11 @@ class LocalVectorStore:
                     embedding vector({self.embedding_dim})
                 )
             ''')
-            # Create HNSW index for L2 distance
+            # Create HNSW index for L2 distance (tuned: m=32, ef_construction=200)
             await conn.execute(f'''
                 CREATE INDEX IF NOT EXISTS {self.collection_name}_embedding_idx
                 ON {self.collection_name} USING hnsw (embedding vector_l2_ops)
+                WITH (m = 32, ef_construction = 200)
             ''')
 
     async def ensure_index(self) -> list[DocumentChunk]:
@@ -170,10 +171,12 @@ class LocalVectorStore:
                 args.extend(list(scopes))
 
             try:
+                # Set ef_search for HNSW recall (200 = best balance for legal RAG)
+                await conn.execute('SET hnsw.ef_search = 200')
                 # Using L2 distance (<->) for similarity scoring
                 query_sql = f'''
                     SELECT chunk_id, source, title, category, content,
-                           1.0 / (1.0 + (embedding <-> $1::vector)) as score
+                            1.0 / (1.0 + (embedding <-> $1::vector)) as score
                     FROM {self.collection_name}
                     {where_clause}
                     ORDER BY embedding <-> $1::vector

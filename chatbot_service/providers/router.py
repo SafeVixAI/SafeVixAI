@@ -47,15 +47,7 @@ from providers.sarvam_provider import (
 from providers.together_provider import TogetherProvider
 from providers.openai_compat import OpenAICompatibleProvider
 
-import sys as _sys
-from pathlib import Path as _Path
-for parent in _Path(__file__).resolve().parents:
-    if (parent / 'alert_service.py').exists():
-        if str(parent) not in _sys.path:
-            _sys.path.insert(0, str(parent))
-        break
-from alert_service import get_alert_service
-
+from core.alert import get_alert_service
 from core.metrics import chatbot_circuit_breaker_trips_total, update_circuit_breaker_gauges
 
 
@@ -152,20 +144,17 @@ class ProviderRouter:
 
         # Fallback chain — tried in order when provider fails
         self._fallback_chain = [
-            'groq',
-            'cerebras',
-            'sarvam_30b',
-            'github',      # 1. Free with GitHub account (Student Pack)
-            'groq',        # 2. Fastest English — 300+ tok/s
-            'cerebras',    # 3. Speed overflow — 2000+ tok/s
-            'gemini',      # 4. Large context, 1M tok/day
-            'nvidia',      # 5. GPU-optimized
-            'openrouter',  # 6. Gateway to 20+ models
-            'mistral',     # 7. 1B tok/month free
-            'together',    # 8. $25 credit bank
-            'template',    # 9. Always works (deterministic fallback)
+            'groq',        # 1. Fastest English — 300+ tok/s
+            'cerebras',    # 2. Speed overflow — 2000+ tok/s
+            'sarvam_30b',  # 3. Indic language specialist
+            'github',      # 4. Free with GitHub account (Student Pack)
+            'gemini',      # 5. Large context, 1M tok/day
+            'nvidia',      # 6. GPU-optimized
+            'openrouter',  # 7. Gateway to 20+ models
+            'mistral',     # 8. 1B tok/month free
+            'together',    # 9. $25 credit bank
+            'template',    # 10. Always works (deterministic fallback)
         ]
-        self._fallback_chain = list(dict.fromkeys(self._fallback_chain))
 
         # ── User-configured providers (overrides env-var defaults) ─────────
         self._user_providers: dict[str, dict] = {}
@@ -631,34 +620,40 @@ class ProviderRouter:
 
     async def _stream_with_timeout(
         self,
-        provider,
+        provider: TemplateProvider,
         request: ProviderRequest,
-    ):
+        *,
+        timeout_override: float | None = None,
+    ) -> AsyncIterator[str]:
         """Wrapper around provider.stream() with timeout."""
+        timeout = timeout_override if timeout_override is not None else self.provider_timeout_seconds
         try:
             async for token in asyncio.wait_for(
                 provider.stream(request),
-                timeout=self.provider_timeout_seconds,
+                timeout=timeout,
             ):
                 yield token
         except asyncio.TimeoutError:
             raise TimeoutError(
-                f"{provider.name} streaming timed out after {self.provider_timeout_seconds:.1f}s"
+                f"{provider.name} streaming timed out after {timeout:.1f}s"
             )
 
     async def _generate_with_timeout(
         self,
         provider: TemplateProvider,
         request: ProviderRequest,
+        *,
+        timeout_override: float | None = None,
     ) -> ProviderResult:
+        timeout = timeout_override if timeout_override is not None else self.provider_timeout_seconds
         try:
             return await asyncio.wait_for(
                 provider.generate(request),
-                timeout=self.provider_timeout_seconds,
+                timeout=timeout,
             )
         except TimeoutError as exc:
             raise TimeoutError(
-                f"{provider.name} timed out after {self.provider_timeout_seconds:.1f}s"
+                f"{provider.name} timed out after {timeout:.1f}s"
             ) from exc
 
     def _provider_unavailable(self, provider_name: str) -> bool:

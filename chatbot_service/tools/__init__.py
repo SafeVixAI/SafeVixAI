@@ -17,20 +17,23 @@ for parent in Path(__file__).resolve().parents:
         if str(parent) not in sys.path:
             sys.path.insert(0, str(parent))
         break
-from alert_service import get_alert_service
+from core.alert import get_alert_service
 
 logger = logging.getLogger("safevixai.chatbot.tools")
 
 
 class BackendToolClient:
     def __init__(self, settings: Settings) -> None:
+        headers = {
+            'Accept': 'application/json',
+            'User-Agent': settings.http_user_agent,
+        }
+        if settings.internal_api_key:
+            headers['X-Internal-Api-Key'] = settings.internal_api_key
         self._client = httpx.AsyncClient(
             base_url=settings.main_backend_base_url,
             timeout=settings.main_backend_timeout_seconds,
-            headers={
-                'Accept': 'application/json',
-                'User-Agent': settings.http_user_agent,
-            },
+            headers=headers,
         )
 
     async def get(self, path: str, *, params: dict | None = None) -> dict | None:

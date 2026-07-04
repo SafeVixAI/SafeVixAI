@@ -44,8 +44,9 @@ asyncio_default_fixture_loop_scope = "function"
 [tool.coverage.run]
 branch = true
 source = ["."]
+omit = ["tests/*", "fix.py", "recover.py"]
 
 [tool.coverage.report]
 show_missing = true
 precision = 2
-fail_under = 95
+fail_under = 96

@@ -3,6 +3,7 @@
 
 import type { AsyncDuckDB } from '@duckdb/duckdb-wasm';
 import { OFFLINE_CHALLAN_LOOKUP_DELAY_MS } from './safety-constants';
+import { logClientError, logClientWarning } from './client-logger';
 
 let dbInstance: AsyncDuckDB | null = null;
 
@@ -205,7 +206,7 @@ export async function calculateOfflineChallan(
     const result = await calculateWithDuckDB(violationCode, vehicleClass, isRepeat, stateCode);
     if (result) return result;
   } catch (err) {
-    console.warn('SafeVixAI: DuckDB Wasm run failed. Falling back to client-side CSV parser.', err);
+    logClientWarning('SafeVixAI: DuckDB Wasm run failed. Falling back to client-side CSV parser.', { error: String(err) });
   }
 
   // 2. Fetch and parse offline CSVs directly
@@ -271,7 +272,7 @@ export async function calculateOfflineChallan(
       description,
     };
   } catch (err) {
-    console.error('SafeVixAI: Fallback CSV parsing failed. Defaulting to in-memory dictionary.', err);
+    logClientError('SafeVixAI: Fallback CSV parsing failed. Defaulting to in-memory dictionary.', { error: String(err) });
     
     // 3. Last-resort in-memory lookup dictionary (zero network / zero parser dependency)
     const db = {

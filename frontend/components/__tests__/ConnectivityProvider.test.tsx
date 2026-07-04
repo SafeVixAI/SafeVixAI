@@ -58,6 +58,16 @@ describe('ConnectivityProvider', function() {
     window.dispatchEvent(new Event('offline'));
     expect(mockSetConnectivity).toHaveBeenCalledWith('offline');
   });
+
+  it('sets connectivity to online when online event fires', function() {
+    render(
+      <ConnectivityProvider>
+        <div />
+      </ConnectivityProvider>
+    );
+    window.dispatchEvent(new Event('online'));
+    expect(mockSetConnectivity).toHaveBeenCalledWith('online');
+  });
 });
 
 

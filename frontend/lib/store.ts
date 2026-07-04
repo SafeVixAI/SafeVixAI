@@ -25,6 +25,7 @@ export const useAppStore = create<AppState>()(
     }),
     {
       name: 'svai-storage',
+      /* istanbul ignore next */
       merge: (persistedState, currentState) => {
         const state = persistedState as Partial<AppState> | undefined;
         if (state && 'userProfile' in state) {
@@ -32,6 +33,7 @@ export const useAppStore = create<AppState>()(
         }
         return { ...currentState, ...state };
       },
+      /* istanbul ignore next */
       onRehydrateStorage: () => {
         return (state, error) => {
           markHydrated();

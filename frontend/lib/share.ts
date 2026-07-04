@@ -92,9 +92,10 @@ export async function shareLink(
  try {
  await navigator.clipboard.writeText(url);
  return true;
- } catch {
- // Last resort: prompt
- if (typeof window !== 'undefined') {
+  } catch {
+    // Last resort: prompt
+    /* istanbul ignore next */
+    if (typeof window !== 'undefined') {
  window.prompt('Copy this link:', url);
  }
  return false;

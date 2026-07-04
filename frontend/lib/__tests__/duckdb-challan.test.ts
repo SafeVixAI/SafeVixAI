@@ -1,5 +1,7 @@
 var mockDuckDBModule = { selectBundle: jest.fn(), ConsoleLogger: jest.fn(), AsyncDuckDB: jest.fn() };
 
+jest.mock('../client-logger', function() { return { logClientError: jest.fn(), logClientWarning: jest.fn() } })
+
 // Helper to create fresh mock instances — prevents once-queue pollution across tests
 function createFreshMocks() {
   return {

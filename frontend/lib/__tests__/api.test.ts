@@ -71,21 +71,21 @@ describe('api', function () {
       ok: true,
       json: async function () { return { csrf_token: 'token-abc' } },
     })
-    var _mod = await import('../api')
+    var mod = await import('../api')
     var result = await mod.fetchCsrfToken()
     expect(result).toBe('token-abc')
   })
 
   it('fetchCsrfToken returns null on non-ok', async function () {
     global.fetch = jest.fn().mockResolvedValueOnce({ ok: false })
-    var _mod = await import('../api')
+    var mod = await import('../api')
     var result = await mod.fetchCsrfToken()
     expect(result).toBeNull()
   })
 
   it('fetchCsrfToken returns null on error', async function () {
     global.fetch = jest.fn().mockRejectedValueOnce(new Error('network'))
-    var _mod = await import('../api')
+    var mod = await import('../api')
     var result = await mod.fetchCsrfToken()
     expect(result).toBeNull()
   })
@@ -93,7 +93,7 @@ describe('api', function () {
   // ── setCsrfToken ──
 
   it('setCsrfToken sets the token', function () {
-    var _mod = require('../api')
+    var mod = require('../api')
     expect(function () { mod.setCsrfToken('new-token') }).not.toThrow()
     expect(function () { mod.setCsrfToken(null) }).not.toThrow()
   })
@@ -101,7 +101,7 @@ describe('api', function () {
   // ── extractApiError ──
 
   it('extractApiError extracts axios error message', function () {
-    var _mod = require('../api')
+    var mod = require('../api')
     var err = {
       isAxiosError: true,
       message: 'Request failed',
@@ -113,7 +113,7 @@ describe('api', function () {
   })
 
   it('extractApiError handles array detail', function () {
-    var _mod = require('../api')
+    var mod = require('../api')
     var err = {
       isAxiosError: true,
       message: 'Request failed',
@@ -127,14 +127,14 @@ describe('api', function () {
   })
 
   it('extractApiError handles non-axios error', function () {
-    var _mod = require('../api')
+    var mod = require('../api')
     var err = new Error('generic error')
     var result = mod.extractApiError(err)
     expect(result.message).toBe('generic error')
   })
 
   it('extractApiError handles unknown error', function () {
-    var _mod = require('../api')
+    var mod = require('../api')
     var result = mod.extractApiError('string error')
     expect(result.message).toBe('An unexpected error occurred')
   })
@@ -154,7 +154,7 @@ describe('api', function () {
         count: 1, radius_used: 5000, source: 'api',
       },
     })
-    var _mod = await import('../api')
+    var mod = await import('../api')
     var result = await mod.fetchNearbyServices({ lat: 13, lon: 80 })
     expect(result.services).toHaveLength(1)
     expect(result.services[0].name).toBe('Test Hospital')
@@ -166,7 +166,7 @@ describe('api', function () {
 
   it('fetchNearbyServices handles comma-separated categories', async function () {
     mockClient.get.mockResolvedValueOnce({ data: { services: [], count: 0, radius_used: 0, source: 'api' } })
-    var _mod = await import('../api')
+    var mod = await import('../api')
     await mod.fetchNearbyServices({ lat: 13, lon: 80, categories: ['hospital', 'police'] })
     expect(mockClient.get).toHaveBeenCalledWith('/api/v1/emergency/nearby', expect.objectContaining({
       params: expect.objectContaining({ categories: 'hospital,police' }),
@@ -182,7 +182,7 @@ describe('api', function () {
         numbers: { '112': { service: 'Police', coverage: 'All', notes: null } },
       },
     })
-    var _mod = await import('../api')
+    var mod = await import('../api')
     var result = await mod.fetchSosPayload({ lat: 13, lon: 80 })
     expect(result.numbers['112'].service).toBe('Police')
     expect(mockClient.get).toHaveBeenCalledWith('/api/v1/emergency/sos', expect.any(Object))
@@ -197,7 +197,7 @@ describe('api', function () {
         numbers: {},
       },
     })
-    var _mod = await import('../api')
+    var mod = await import('../api')
     var result = await mod.triggerSos({ lat: 13, lon: 80 })
     expect(result.services).toEqual([])
     expect(mockClient.post).toHaveBeenCalledWith('/api/v1/emergency/sos', null, expect.any(Object))
@@ -207,7 +207,7 @@ describe('api', function () {
 
   it('fetchEmergencyNumbers returns numbers', async function () {
     mockClient.get.mockResolvedValueOnce({ data: { '112': { service: 'Police' } } })
-    var _mod = await import('../api')
+    var mod = await import('../api')
     var result = await mod.fetchEmergencyNumbers()
     expect(result['112'].service).toBe('Police')
   })
@@ -225,7 +225,7 @@ describe('api', function () {
         }
       },
     })
-    var _mod = await import('../api')
+    var mod = await import('../api')
     var result = await mod.reverseGeocode({ lat: 13.08, lon: 80.27 })
     expect(result.displayName).toBeDefined()
   })
@@ -238,7 +238,7 @@ describe('api', function () {
         results: [{ display_name: 'Chennai, India', city: 'Chennai', state: 'Tamil Nadu' }],
       },
     })
-    var _mod = await import('../api')
+    var mod = await import('../api')
     var result = await mod.searchGeocode('Chennai')
     expect(result.results).toHaveLength(1)
     expect(result.results[0].displayName).toBe('Chennai, India')
@@ -257,7 +257,7 @@ describe('api', function () {
         count: 1, radius_used: 500,
       },
     })
-    var _mod = await import('../api')
+    var mod = await import('../api')
     var result = await mod.fetchRoadIssues({ lat: 13, lon: 80 })
     expect(result.issues).toHaveLength(1)
     expect(result.issues[0].issueType).toBe('pothole')
@@ -275,7 +275,7 @@ describe('api', function () {
         source: 'api',
       },
     })
-    var _mod = await import('../api')
+    var mod = await import('../api')
     var result = await mod.fetchAuthorityPreview({ lat: 13, lon: 80 })
     expect(result.roadType).toBe('NH')
     expect(result.authorityName).toBe('NHAI')
@@ -284,7 +284,7 @@ describe('api', function () {
   // ── submitReport ──
 
   it('submitReport throws without issue_type', async function () {
-    var _mod = await import('../api')
+    var mod = await import('../api')
     await expect(mod.submitReport({
       lat: 13, lon: 80, severity: 3,
     } as any)).rejects.toThrow('submitReport requires either "issue_type" or "type".')
@@ -298,7 +298,7 @@ describe('api', function () {
         road_type_code: 'NH48', status: 'open',
       },
     })
-    var _mod = await import('../api')
+    var mod = await import('../api')
     var result = await mod.submitReport({
       lat: 13, lon: 80, severity: 3, issue_type: 'pothole',
       description: 'Big pothole', citizen_phone: '9999999999',
@@ -320,7 +320,7 @@ describe('api', function () {
         road_type_code: 'NH48', status: 'open',
       },
     })
-    var _mod = await import('../api')
+    var mod = await import('../api')
     var photo = new File(['test'], 'photo.jpg', { type: 'image/jpeg' })
     var result = await mod.submitReport({
       lat: 13, lon: 80, severity: 3, issue_type: 'pothole',
@@ -332,7 +332,7 @@ describe('api', function () {
   // ── sendChatMessage ──
 
   it('sendChatMessage sends to chatbot', async function () {
-    var _mod = await import('../api')
+    var mod = await import('../api')
     // We need the chatbotClient. But it's not exported.
     // Instead verify that the function structure is correct
     expect(typeof mod.sendChatMessage).toBe('function')
@@ -349,7 +349,7 @@ describe('api', function () {
         section: '185', description: 'Drunk driving',
       },
     })
-    var _mod = await import('../api')
+    var mod = await import('../api')
     var result = await mod.calculateChallan({
       violation_code: 'MVA_185', vehicle_class: 'motorcycle',
       state_code: 'TN', is_repeat: false,
@@ -360,7 +360,7 @@ describe('api', function () {
 
   it('calculateChallan falls back to offline on API error', async function () {
     mockClient.post.mockRejectedValueOnce(new Error('Network error'))
-    var _mod = await import('../api')
+    var mod = await import('../api')
     var result = await mod.calculateChallan({
       violation_code: 'MVA_185', vehicle_class: 'motorcycle',
       state_code: 'TN', is_repeat: false,
@@ -375,7 +375,7 @@ describe('api', function () {
     var duckdb = require('../duckdb-challan')
     duckdb.calculateOfflineChallan.mockRejectedValueOnce(new Error('Offline error'))
     try {
-      var _mod = require('../api')
+      var mod = require('../api')
       await expect(mod.calculateChallan({
         violation_code: 'MVA_185', vehicle_class: 'motorcycle',
         state_code: 'TN', is_repeat: false,
@@ -389,13 +389,13 @@ describe('api', function () {
   // ── Client instance ──
 
   it('client has interceptors configured', function () {
-    var _mod = require('../api')
+    var mod = require('../api')
     expect(mod.client).toBeDefined()
     expect(mod.client.interceptors).toBeDefined()
   })
 
   it('extractApiError handles error with error_code', function () {
-    var _mod = require('../api')
+    var mod = require('../api')
     var err = {
       isAxiosError: true,
       message: 'Forbidden',
@@ -411,7 +411,7 @@ describe('api', function () {
     mockClient.get.mockResolvedValueOnce({
       data: { municipalities: [{ slug: 'chennai', name: 'Chennai', city: 'Chennai', state_code: 'TN', municipality_type: 'Corporation', centroid_lat: 13, centroid_lon: 80 }], total: 1, page: 1, page_size: 50 },
     })
-    var _mod = await import('../api')
+    var mod = await import('../api')
     var result = await mod.fetchMunicipalities()
     expect(result.municipalities).toHaveLength(1)
     expect(result.municipalities[0].name).toBe('Chennai')
@@ -421,7 +421,7 @@ describe('api', function () {
     mockClient.get.mockResolvedValueOnce({
       data: { items: [{ slug: 'mumbai', name: 'Mumbai', city: 'Mumbai', state_code: 'MH', municipality_type: 'Corporation', centroid_lat: 19, centroid_lon: 72 }], total: 1, page: 1, page_size: 50 },
     })
-    var _mod = await import('../api')
+    var mod = await import('../api')
     var result = await mod.fetchMunicipalities()
     expect(result.municipalities).toHaveLength(1)
   })
@@ -430,7 +430,7 @@ describe('api', function () {
     mockClient.get.mockResolvedValueOnce({
       data: { municipalities: [], total: 0, page: 1, page_size: 10 },
     })
-    var _mod = await import('../api')
+    var mod = await import('../api')
     await mod.fetchMunicipalities({ q: 'chennai', stateCode: 'TN', municipalityType: 'Corporation', page: 1, pageSize: 10 })
     expect(mockClient.get).toHaveBeenCalledWith('/api/v1/civic/municipalities', expect.objectContaining({
       params: expect.objectContaining({ state_code: 'TN', municipality_type: 'Corporation' }),
@@ -443,7 +443,7 @@ describe('api', function () {
     mockClient.get.mockResolvedValueOnce({
       data: { slug: 'chennai', name: 'Chennai', city: 'Chennai', state_code: 'TN', municipality_type: 'Corporation', centroid_lat: 13, centroid_lon: 80, headquarters_address: 'Ripon Building', email: 'gc@chennai.in', website_url: 'https://chennai.in' },
     })
-    var _mod = await import('../api')
+    var mod = await import('../api')
     var result = await mod.fetchMunicipalityBySlug('chennai')
     expect(result.headquartersAddress).toBe('Ripon Building')
     expect(result.email).toBe('gc@chennai.in')
@@ -455,7 +455,7 @@ describe('api', function () {
     mockClient.get.mockResolvedValueOnce({
       data: { municipalities: [{ slug: 'chennai', name: 'Chennai', city: 'Chennai', state_code: 'TN', municipality_type: 'Corporation', centroid_lat: 13, centroid_lon: 80 }] },
     })
-    var _mod = await import('../api')
+    var mod = await import('../api')
     var result = await mod.fetchNearbyMunicipalities(13, 80, 5)
     expect(result).toHaveLength(1)
   })
@@ -464,98 +464,98 @@ describe('api', function () {
 
   it('authorityAcceptComplaint posts to accept', async function () {
     mockClient.post.mockResolvedValueOnce({ data: { status: 'accepted' } })
-    var _mod = await import('../api')
+    var mod = await import('../api')
     var result = await mod.authorityAcceptComplaint('uuid-1')
     expect(result.status).toBe('accepted')
   })
 
   it('authorityRejectComplaint posts with reason', async function () {
     mockClient.post.mockResolvedValueOnce({ data: { status: 'rejected' } })
-    var _mod = await import('../api')
+    var mod = await import('../api')
     var result = await mod.authorityRejectComplaint('uuid-1', 'invalid')
     expect(result.status).toBe('rejected')
   })
 
   it('citizenConfirmResolution posts with rating', async function () {
     mockClient.post.mockResolvedValueOnce({ data: { status: 'confirmed' } })
-    var _mod = await import('../api')
+    var mod = await import('../api')
     var result = await mod.citizenConfirmResolution('ref-1', 4, 'Good work')
     expect(result.status).toBe('confirmed')
   })
 
   it('citizenRejectResolution posts with reason', async function () {
     mockClient.post.mockResolvedValueOnce({ data: { status: 'rejected' } })
-    var _mod = await import('../api')
+    var mod = await import('../api')
     var result = await mod.citizenRejectResolution('ref-1', 'not fixed')
     expect(result.status).toBe('rejected')
   })
 
   it('syncGarage posts vehicle', async function () {
     mockClient.post.mockResolvedValueOnce({ data: { vehicles: [], sync_status: 'ok', last_synced_at: '2026-01-01' } })
-    var _mod = await import('../api')
+    var mod = await import('../api')
     var result = await mod.syncGarage('TN01AB1234')
     expect(result.sync_status).toBe('ok')
   })
 
   it('syncGarage posts without vehicle', async function () {
     mockClient.post.mockResolvedValueOnce({ data: { vehicles: [], sync_status: 'ok', last_synced_at: '2026-01-01' } })
-    var _mod = await import('../api')
+    var mod = await import('../api')
     var result = await mod.syncGarage()
     expect(result.sync_status).toBe('ok')
   })
 
   it('draftDisputeAppeal posts dispute', async function () {
     mockClient.post.mockResolvedValueOnce({ data: { dispute_ref: 'd-1', appeal_letter: 'test', cited_mva_sections: ['185'], confidence_score: 0.8, instructions: [] } })
-    var _mod = await import('../api')
+    var mod = await import('../api')
     var result = await mod.draftDisputeAppeal({ challan_ref: 'c-1', violation_code: 'MVA_185', fine_amount: 500, mitigating_factors: 'none' })
     expect(result.dispute_ref).toBe('d-1')
   })
 
   it('predictFineLiability posts prediction request', async function () {
     mockClient.post.mockResolvedValueOnce({ data: { predicted_violations_count: 2, estimated_annual_liability: 1000, risk_score: 0.3, risk_level: 'low', recommendations: [] } })
-    var _mod = await import('../api')
+    var mod = await import('../api')
     var result = await mod.predictFineLiability({ vehicle_number: 'TN01AB1234', state_code: 'TN', telemetry: { speeding_events: 5, harsh_braking_events: 3, night_driving_minutes: 120, total_km_driven: 1000 } })
     expect(result.risk_level).toBe('low')
   })
 
   it('fetchPublicStats fetches stats', async function () {
     mockClient.get.mockResolvedValueOnce({ data: { total_issues: 100 } })
-    var _mod = await import('../api')
+    var mod = await import('../api')
     var result = await mod.fetchPublicStats()
     expect(result.total_issues).toBe(100)
   })
 
   it('fetchPublicWardRankings fetches rankings', async function () {
     mockClient.get.mockResolvedValueOnce({ data: [{ ward: '1', score: 85 }] })
-    var _mod = await import('../api')
+    var mod = await import('../api')
     var result = await mod.fetchPublicWardRankings()
     expect(result).toHaveLength(1)
   })
 
   it('fieldStartWork posts start-work', async function () {
     mockClient.post.mockResolvedValueOnce({ data: { status: 'in_progress' } })
-    var _mod = await import('../api')
+    var mod = await import('../api')
     var result = await mod.fieldStartWork('uuid-1', 13, 80)
     expect(result.status).toBe('in_progress')
   })
 
   it('fieldCompleteWork posts complete with photo', async function () {
     mockClient.post.mockResolvedValueOnce({ data: { status: 'completed' } })
-    var _mod = await import('../api')
+    var mod = await import('../api')
     var result = await mod.fieldCompleteWork('uuid-1', 'photo.jpg', 'Done', 13, 80)
     expect(result.status).toBe('completed')
   })
 
   it('fieldCompleteWork posts complete without photo', async function () {
     mockClient.post.mockResolvedValueOnce({ data: { status: 'completed' } })
-    var _mod = await import('../api')
+    var mod = await import('../api')
     var result = await mod.fieldCompleteWork('uuid-1', null, null, 13, 80)
     expect(result.status).toBe('completed')
   })
 
   it('fieldUploadEvidence posts FormData', async function () {
     mockClient.post.mockResolvedValueOnce({ data: { status: 'uploaded' } })
-    var _mod = await import('../api')
+    var mod = await import('../api')
     var fd = new FormData()
     fd.append('photo', new Blob(['test']), 'img.jpg')
     var result = await mod.fieldUploadEvidence('uuid-1', fd)
@@ -568,7 +568,7 @@ describe('api', function () {
     mockClient.get.mockResolvedValueOnce({
       data: { road_type: 'NH', road_type_code: 'NH48', authority_name: 'NHAI', source: 'api' },
     })
-    var _mod = await import('../api')
+    var mod = await import('../api')
     var result = await mod.fetchRoadInfrastructure({ lat: 13, lon: 80 })
     expect(result.roadType).toBe('NH')
   })
@@ -588,7 +588,7 @@ describe('api', function () {
         }],
       },
     })
-    var _mod = await import('../api')
+    var mod = await import('../api')
     var result = await mod.fetchRoutePreview({ originLat: 13, originLon: 80, destinationLat: 13.1, destinationLon: 80.1 })
     expect(result.provider).toBe('ors')
     expect(result.routes).toHaveLength(1)
@@ -600,7 +600,7 @@ describe('api', function () {
 
   it('sendChatMessage sends message via chatbotClient', async function () {
     mockClient.post.mockResolvedValueOnce({ data: { response: 'hello', session_id: 's1' } })
-    var _mod = await import('../api')
+    var mod = await import('../api')
     var result = await mod.sendChatMessage({ message: 'hi', session_id: 's1' })
     expect(result.response).toBe('hello')
     expect(result.session_id).toBe('s1')
@@ -608,7 +608,7 @@ describe('api', function () {
 
   it('sendChatMessage sends without session_id', async function () {
     mockClient.post.mockResolvedValueOnce({ data: { response: 'hello', session_id: 's-new' } })
-    var _mod = await import('../api')
+    var mod = await import('../api')
     var result = await mod.sendChatMessage({ message: 'hi' })
     expect(result.response).toBe('hello')
     expect(mockClient.post).toHaveBeenCalledWith('/api/v1/chat/', { message: 'hi' })
@@ -618,7 +618,7 @@ describe('api', function () {
 
   it('request interceptor adds auth and language headers', function () {
     setMockToken('test-token')
-    var _mod = require('../api')
+    var mod = require('../api')
     mod.setCsrfToken('csrf-abc')
     var handlers = (require('axios') as any)._requestHandlers
     expect(handlers.length).toBeGreaterThan(0)
@@ -632,7 +632,7 @@ describe('api', function () {
 
   it('request interceptor omits Authorization when no token', function () {
     setMockToken(null)
-    var _mod = require('../api')
+    var mod = require('../api')
     mod.setCsrfToken(null)
     var handlers = (require('axios') as any)._requestHandlers
     var handler = handlers[0].fulfilled
@@ -645,7 +645,7 @@ describe('api', function () {
 
   it('warming interceptor sets and clears timers via request/response', function () {
     jest.useFakeTimers()
-    var _mod = require('../api')
+    require('../api')
     var handlers = (require('axios') as any)._requestHandlers
     var respHandlers = (require('axios') as any)._responseHandlers
 
@@ -692,7 +692,7 @@ describe('api', function () {
     var config: any = { _warmingTimer: setTimeout(function () {}, 1000) }
     var error = { config: config, isAxiosError: true, message: 'fail' }
     expect(function () {
-      warmingErr(error).catch(function () {})
+      _warmingErr(error).catch(function () {})
     }).not.toThrow()
 
     jest.useRealTimers()

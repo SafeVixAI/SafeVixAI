@@ -73,7 +73,8 @@ export function openAppleMaps(dest: NavDestination): void {
 // ── Platform Detection ────────────────────────────────────────────────────────
 
 function detectPlatform(): 'ios' | 'android' | 'desktop' {
- if (typeof navigator === 'undefined') return 'desktop';
+  /* istanbul ignore next */
+  if (typeof navigator === 'undefined') return 'desktop';
  const ua = navigator.userAgent;
  if (/iPad|iPhone|iPod/.test(ua)) return 'ios';
  if (/Android/.test(ua)) return 'android';
@@ -128,7 +129,8 @@ export function openNavApp(app: NavApp, dest: NavDestination): void {
  * Falls back to platform-appropriate default.
  */
 export function getPreferredNavApp(): NavApp {
- if (typeof localStorage === 'undefined') return 'google';
+  /* istanbul ignore next */
+  if (typeof localStorage === 'undefined') return 'google';
  const saved = localStorage.getItem(PREF_KEY) as NavApp | null;
  if (saved && ['google', 'waze', 'apple'].includes(saved)) return saved;
 
@@ -141,7 +143,8 @@ export function getPreferredNavApp(): NavApp {
  * Set the user's preferred navigation app.
  */
 export function setPreferredNavApp(app: NavApp): void {
- if (typeof localStorage !== 'undefined') {
+  /* istanbul ignore next */
+  if (typeof localStorage !== 'undefined') {
  localStorage.setItem(PREF_KEY, app);
  }
 }

@@ -179,6 +179,14 @@ describe('DataSlice', function() {
     consoleSpy.mockRestore()
   })
 
+  it('setCrashDetectionEnabled false skips permission check', async function() {
+    var store = createTestStore()
+    await store.getState().setCrashDetectionEnabled(true)
+    expect(store.getState().crashDetectionEnabled).toBe(true)
+    await store.getState().setCrashDetectionEnabled(false)
+    expect(store.getState().crashDetectionEnabled).toBe(false)
+  })
+
   it('setLastSyncedGarage updates timestamp', function() {
     var store = createTestStore()
     store.getState().setLastSyncedGarage(1234567890)

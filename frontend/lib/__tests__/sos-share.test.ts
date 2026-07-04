@@ -77,5 +77,30 @@ describe('sos-share', function () {
       var link = await mod.generateSosWhatsAppLink(mockProfile, mockLocation)
       expect(link).toContain('Chennai')
     })
+
+    it('handles w3w non-ok response', async function () {
+      var reverseGeocode = require('../reverse-geocode')
+      reverseGeocode.getAddressFromGPS.mockResolvedValue({ displayAddress: 'Chennai' })
+      mockFetch.mockResolvedValueOnce({ ok: false })
+      var mod = await import('../sos-share')
+      var link = await mod.generateSosWhatsAppLink(mockProfile, mockLocation)
+      expect(link).toContain('Chennai')
+    })
+
+    it('handles w3w non-string words', async function () {
+      var reverseGeocode = require('../reverse-geocode')
+      reverseGeocode.getAddressFromGPS.mockResolvedValue({ displayAddress: 'Chennai' })
+      mockFetch.mockResolvedValueOnce({ ok: true, json: async function () { return { words: 12345 } } })
+      var mod = await import('../sos-share')
+      var link = await mod.generateSosWhatsAppLink(mockProfile, mockLocation)
+      expect(link).toContain('Chennai')
+    })
+
+    it('handles null profile in async link', async function () {
+      var mod = await import('../sos-share')
+      var link = await mod.generateSosWhatsAppLink(null, mockLocation)
+      var decoded = decodeUri(link)
+      expect(decoded).toContain('Anonymous User')
+    })
   })
 })

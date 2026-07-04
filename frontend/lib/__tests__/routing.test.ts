@@ -37,6 +37,15 @@ describe('routing', function () {
       var result = await mod.getRoute(13, 80, 13.1, 80.1)
       expect(result).toBeNull()
     })
+
+    it('handles route without distance or duration gracefully', async function () {
+      mockFetch.mockResolvedValueOnce({ ok: true, json: async function () { return { routes: [{ geometry: { type: 'LineString', coordinates: [] } }] } } })
+      var mod = await import('../routing')
+      var result = await mod.getRoute(13, 80, 13.1, 80.1)
+      expect(result).not.toBeNull()
+      expect(result!.distanceMeters).toBe(0)
+      expect(result!.durationSeconds).toBe(0)
+    })
   })
 
   describe('addRouteToMap', function () {
@@ -64,6 +73,14 @@ describe('routing', function () {
       mod.removeRouteFromMap(map)
       expect(map.removeLayer).toHaveBeenCalledWith('route-layer')
       expect(map.removeSource).toHaveBeenCalledWith('route-source')
+    })
+
+    it('skips removal when layer and source do not exist', function () {
+      var map = { getLayer: jest.fn().mockReturnValue(null), removeLayer: jest.fn(), getSource: jest.fn().mockReturnValue(null), removeSource: jest.fn() }
+      var mod = require('../routing')
+      mod.removeRouteFromMap(map)
+      expect(map.removeLayer).not.toHaveBeenCalled()
+      expect(map.removeSource).not.toHaveBeenCalled()
     })
   })
 

@@ -221,6 +221,36 @@ describe('validate-upload', function () {
     document.createElement = origCreateElement
   })
 
+  it('compressImageFile handles tall image (height > width)', async function () {
+    var createCanvas = function () {
+      var ctx = { drawImage: jest.fn() }
+      return { width: 0, height: 0, getContext: function () { return ctx }, toBlob: function (cb: Function) { setTimeout(function () { cb(new Blob(['tall'])) }, 0) } }
+    }
+    var origCreateElement = document.createElement
+    document.createElement = function (tag: string) {
+      if (tag === 'canvas') return createCanvas()
+      return origCreateElement.call(document, tag)
+    }
+    var origFileReader = globalThis.FileReader
+    globalThis.FileReader = jest.fn(function () {
+      var reader = { onload: null, onerror: null, readAsDataURL: jest.fn(function () { setTimeout(function () { if (reader.onload) reader.onload({ target: { result: 'data:image/jpeg;base64,/9j/' } }) }, 0) }) }
+      return reader
+    }) as any
+    var origImage = globalThis.Image
+    globalThis.Image = jest.fn(function () {
+      var img = { width: 1080, height: 1920, onload: null, onerror: null, src: '' }
+      setTimeout(function () { if (img.onload) img.onload(new Event('load')) }, 0)
+      return img
+    }) as any
+    var mod = await import('../validate-upload')
+    var file = new File(['x'.repeat(2 * 1024 * 1024)], 'test.jpg', { type: 'image/jpeg' })
+    var result = await mod.compressImageFile(file, 100)
+    expect(result).not.toBe(file)
+    globalThis.FileReader = origFileReader
+    globalThis.Image = origImage
+    document.createElement = origCreateElement
+  })
+
   // ── Export constants ──
 
   it('exports constants', async function () {

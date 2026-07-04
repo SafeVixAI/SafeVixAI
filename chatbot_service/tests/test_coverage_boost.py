@@ -56,7 +56,7 @@ class FakeVectorStore:
         return {"chunks": 1, "categories": 1, "chroma_chunks": 1, "embedding_model": "test"}
 
 class FakeRetriever:
-    def __init__(self, vectorstore, *args, **kwargs):
+    def __init__(self, vectorstore=None, *args, **kwargs):
         self.vectorstore = vectorstore
 
     async def retrieve(self, query, *, top_k=None, scopes=None):
@@ -85,7 +85,7 @@ class FakeChallanTool:
 class FakeLegalSearchTool:
     def __init__(self, retriever):
         self.retriever = retriever
-    def search(self, message):
+    async def search(self, message):
         return []
 
 class FakeFirstAidTool:
@@ -297,15 +297,17 @@ class TestAdminCoverage:
         assert "SafeVixAI" in resp.text
         assert "Healthy" in resp.text
 
-    def test_rebuild_rag_index_task_direct(self):
+    @pytest.mark.asyncio
+    async def test_rebuild_rag_index_task_direct(self):
         """Call rebuild_rag_index_task without global engine → ValueError."""
+        import api.admin
         from core.queue import _TASK_REGISTRY, set_global_chat_engine
         set_global_chat_engine(None)
         assert "rebuild_rag_index" in _TASK_REGISTRY
         func = _TASK_REGISTRY["rebuild_rag_index"]
         assert callable(func)
         with pytest.raises(ValueError, match="ChatEngine is not initialized"):
-            func(MagicMock(), "j1")
+            await func(MagicMock(), "j1")
 
 
 # ============================================================ #

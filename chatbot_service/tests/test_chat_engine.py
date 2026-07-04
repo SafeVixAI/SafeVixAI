@@ -65,7 +65,7 @@ class FakeIntentDetector:
 
 
 class FakeRetriever:
-    def __init__(self, vectorstore, *args, **kwargs):
+    def __init__(self, vectorstore=None, *args, **kwargs):
         self.vectorstore = vectorstore
 
     async def retrieve(self, query, *, top_k=None, scopes=None):
@@ -96,7 +96,7 @@ class FakeLegalSearchTool:
     def __init__(self, retriever):
         self.retriever = retriever
 
-    def search(self, message):
+    async def search(self, message):
         return [
             SimpleNamespace(
                 source="kb:legal",
@@ -153,7 +153,7 @@ class FakeContextAssembler:
             history=history or [],
         )
 
-        results = self.retriever.retrieve(message)
+        results = await self.retriever.retrieve(message)
         for item in results[:3]:
             context.retrieved.append(
                 RetrievedContext(

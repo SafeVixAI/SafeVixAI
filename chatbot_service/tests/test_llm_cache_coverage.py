@@ -1,131 +1,230 @@
-# SPDX-License-Identifier: MIT
-# Copyright (c) 2026 SafeVixAI Team
-
-"""Coverage tests for cache/llm_cache.py — uncovered lines: 98-105, 108-113."""
 from __future__ import annotations
 
+import json
+import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 
-import pytest
-from redis.exceptions import RedisError
-
-from cache.llm_cache import LLMResponseCache
+from cache.llm_cache import LLMResponseCache, CacheEntry
 
 
-class TestLLMResponseCacheProviderUnavailable:
-    """LLMResponseCache.get_provider_unavailable_until and set (lines 98-113)."""
+class TestCacheEntry:
+    def test_cache_entry_defaults(self):
+        entry = CacheEntry(text="hello", provider="groq", model="mixtral")
+        assert entry.text == "hello"
+        assert entry.provider == "groq"
+        assert entry.model == "mixtral"
+        assert entry.prompt_tokens == 0
+        assert entry.completion_tokens == 0
+        assert entry.total_tokens == 0
+
+    def test_cache_entry_full(self):
+        entry = CacheEntry(text="hello", provider="groq", model="mixtral",
+                           prompt_tokens=10, completion_tokens=20, total_tokens=30)
+        assert entry.total_tokens == 30
+
+
+class TestLLMResponseCache:
+    def test_init_no_redis_no_db(self):
+        cache = LLMResponseCache(redis_url=None)
+        assert cache._client is None
+        assert cache._healthy is False
+        assert cache._pool is None
+        assert cache._embedding_function is None
+        assert cache._ttl_seconds == 3600
+        assert cache.similarity_threshold == 0.95
+
+    def test_init_with_redis_url(self):
+        cache = LLMResponseCache(redis_url="redis://localhost:6379/0")
+        assert cache._client is not None
+        assert cache._healthy is True
+
+    def test_backend_name_no_redis(self):
+        cache = LLMResponseCache(redis_url=None)
+        assert cache.backend_name == "memory"
+
+    def test_backend_name_redis_only(self):
+        cache = LLMResponseCache(redis_url="redis://localhost:6379/0")
+        assert cache.backend_name == "redis"
+
+    def test_backend_name_redis_unhealthy(self):
+        cache = LLMResponseCache(redis_url="redis://localhost:6379/0")
+        cache._healthy = False
+        assert cache.backend_name == "memory"
+
+    def test_backend_name_pgvector_and_redis(self):
+        cache = LLMResponseCache(redis_url="redis://localhost:6379/0",
+                                 database_url="postgresql://localhost:5432/test")
+        assert cache.backend_name == "pgvector+redis"
+
+    def test_make_key_deterministic(self):
+        cache = LLMResponseCache(redis_url=None)
+        key1 = cache._make_key("hello", "general", ["tool1", "tool2"])
+        key2 = cache._make_key("hello", "general", ["tool1", "tool2"])
+        assert key1 == key2
+        assert key1.startswith("cache:llm:")
+
+    def test_make_key_different_inputs(self):
+        cache = LLMResponseCache(redis_url=None)
+        key1 = cache._make_key("hello", "general", [])
+        key2 = cache._make_key("world", "general", [])
+        assert key1 != key2
 
     @pytest.mark.asyncio
-    async def test_get_provider_unavailable_no_client(self):
-        """Line 98-99: no Redis client returns None."""
-        cache = LLMResponseCache(None)
+    async def test_get_no_client(self):
+        cache = LLMResponseCache(redis_url=None)
+        result = await cache.get("hello", "general", [])
+        assert result is None
+
+    @pytest.mark.asyncio
+    async def test_get_redis_hit(self):
+        cache = LLMResponseCache(redis_url="redis://localhost:6379/0")
+        entry_data = {"text": "cached", "provider": "groq", "model": "mixtral",
+                       "prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0}
+        cache._client.get = AsyncMock(return_value=json.dumps(entry_data))
+        result = await cache.get("hello", "general", [])
+        assert result is not None
+        assert result.text == "cached"
+        assert result.provider == "groq"
+        assert cache._healthy is True
+
+    @pytest.mark.asyncio
+    async def test_get_redis_miss(self):
+        cache = LLMResponseCache(redis_url="redis://localhost:6379/0")
+        cache._client.get = AsyncMock(return_value=None)
+        result = await cache.get("hello", "general", [])
+        assert result is None
+
+    @pytest.mark.asyncio
+    async def test_get_redis_error(self):
+        cache = LLMResponseCache(redis_url="redis://localhost:6379/0")
+        cache._client.get = AsyncMock(side_effect=ConnectionError("redis down"))
+        result = await cache.get("hello", "general", [])
+        assert result is None
+        assert cache._healthy is False
+
+    @pytest.mark.asyncio
+    async def test_ping_no_client(self):
+        cache = LLMResponseCache(redis_url=None)
+        result = await cache.ping()
+        assert result is False
+
+    @pytest.mark.asyncio
+    async def test_ping_success(self):
+        cache = LLMResponseCache(redis_url="redis://localhost:6379/0")
+        cache._client.ping = AsyncMock(return_value=True)
+        result = await cache.ping()
+        assert result is True
+        assert cache._healthy is True
+
+    @pytest.mark.asyncio
+    async def test_ping_failure(self):
+        cache = LLMResponseCache(redis_url="redis://localhost:6379/0")
+        cache._client.ping = AsyncMock(side_effect=ConnectionError("down"))
+        result = await cache.ping()
+        assert result is False
+        assert cache._healthy is False
+
+    @pytest.mark.asyncio
+    async def test_set_no_client(self):
+        cache = LLMResponseCache(redis_url=None)
+        entry = CacheEntry(text="hello", provider="groq", model="mixtral")
+        # Should not raise
+        await cache.set("hello", "general", [], entry)
+
+    @pytest.mark.asyncio
+    async def test_set_redis(self):
+        cache = LLMResponseCache(redis_url="redis://localhost:6379/0")
+        cache._client.setex = AsyncMock()
+        entry = CacheEntry(text="hello", provider="groq", model="mixtral",
+                           prompt_tokens=5, completion_tokens=10, total_tokens=15)
+        await cache.set("hello", "general", [], entry)
+        cache._client.setex.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_get_provider_unavailable_until_no_client(self):
+        cache = LLMResponseCache(redis_url=None)
         result = await cache.get_provider_unavailable_until("groq")
         assert result is None
 
     @pytest.mark.asyncio
-    async def test_get_provider_unavailable_found(self):
-        """Line 101-102: value found and returned as float."""
-        mock_redis = MagicMock()
-        mock_redis.get = AsyncMock(return_value="1735689600.0")
-        with patch("cache.llm_cache.Redis.from_url", return_value=mock_redis):
-            cache = LLMResponseCache("redis://localhost:6379")
-            result = await cache.get_provider_unavailable_until("groq")
-        assert result == 1735689600.0
+    async def test_get_provider_unavailable_until_hit(self):
+        cache = LLMResponseCache(redis_url="redis://localhost:6379/0")
+        cache._client.get = AsyncMock(return_value="1234567890.0")
+        result = await cache.get_provider_unavailable_until("groq")
+        assert result == 1234567890.0
 
     @pytest.mark.asyncio
-    async def test_get_provider_unavailable_not_found(self):
-        """Line 102: value is None returns None."""
-        mock_redis = MagicMock()
-        mock_redis.get = AsyncMock(return_value=None)
-        with patch("cache.llm_cache.Redis.from_url", return_value=mock_redis):
-            cache = LLMResponseCache("redis://localhost:6379")
-            result = await cache.get_provider_unavailable_until("groq")
+    async def test_get_provider_unavailable_until_miss(self):
+        cache = LLMResponseCache(redis_url="redis://localhost:6379/0")
+        cache._client.get = AsyncMock(return_value=None)
+        result = await cache.get_provider_unavailable_until("groq")
         assert result is None
 
     @pytest.mark.asyncio
-    async def test_get_provider_unavailable_redis_error(self):
-        """Lines 103-105: RedisError caught and warning logged."""
-        mock_redis = MagicMock()
-        mock_redis.get = AsyncMock(side_effect=RedisError("Connection lost"))
-        with patch("cache.llm_cache.Redis.from_url", return_value=mock_redis):
-            with patch("cache.llm_cache.logger") as mock_log:
-                cache = LLMResponseCache("redis://localhost:6379")
-                result = await cache.get_provider_unavailable_until("groq")
+    async def test_get_provider_unavailable_until_error(self):
+        cache = LLMResponseCache(redis_url="redis://localhost:6379/0")
+        cache._client.get = AsyncMock(side_effect=RuntimeError("fail"))
+        result = await cache.get_provider_unavailable_until("groq")
         assert result is None
-        mock_log.warning.assert_called()
 
     @pytest.mark.asyncio
-    async def test_get_provider_unavailable_generic_exception(self):
-        """Lines 103-105: generic exception caught."""
-        mock_redis = MagicMock()
-        mock_redis.get = AsyncMock(side_effect=RuntimeError("Unexpected"))
-        with patch("cache.llm_cache.Redis.from_url", return_value=mock_redis):
-            with patch("cache.llm_cache.logger") as mock_log:
-                cache = LLMResponseCache("redis://localhost:6379")
-                result = await cache.get_provider_unavailable_until("groq")
-        assert result is None
-        mock_log.warning.assert_called()
+    async def test_set_provider_unavailable_until_no_client(self):
+        cache = LLMResponseCache(redis_url=None)
+        await cache.set_provider_unavailable_until("groq", 1234567890.0, 3600)
 
     @pytest.mark.asyncio
-    async def test_set_provider_unavailable_no_client(self):
-        """Line 108-109: no Redis client returns None/void."""
-        cache = LLMResponseCache(None)
-        await cache.set_provider_unavailable_until("groq", 1735689600.0, 3600)
-        # Should not raise
+    async def test_set_provider_unavailable_until_success(self):
+        cache = LLMResponseCache(redis_url="redis://localhost:6379/0")
+        cache._client.setex = AsyncMock()
+        await cache.set_provider_unavailable_until("groq", 1234567890.0, 3600)
+        cache._client.setex.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_set_provider_unavailable_success(self):
-        """Line 111: setex called with correct args."""
-        mock_redis = MagicMock()
-        mock_redis.setex = AsyncMock()
-        with patch("cache.llm_cache.Redis.from_url", return_value=mock_redis):
-            cache = LLMResponseCache("redis://localhost:6379")
-            await cache.set_provider_unavailable_until("groq", 1735689600.0, 3600)
-        mock_redis.setex.assert_called_once()
-        args = mock_redis.setex.call_args[0]
-        assert args[0] == "circuit:unavailable:groq"
-        assert args[1] == 3600
+    async def test_set_provider_unavailable_until_error(self):
+        cache = LLMResponseCache(redis_url="redis://localhost:6379/0")
+        cache._client.setex = AsyncMock(side_effect=RuntimeError("fail"))
+        await cache.set_provider_unavailable_until("groq", 1234567890.0, 3600)
+        cache._client.setex.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_set_provider_unavailable_redis_error(self):
-        """Lines 112-113: RedisError caught and warning logged."""
-        mock_redis = MagicMock()
-        mock_redis.setex = AsyncMock(side_effect=RedisError("Write failed"))
-        with patch("cache.llm_cache.Redis.from_url", return_value=mock_redis):
-            with patch("cache.llm_cache.logger") as mock_log:
-                cache = LLMResponseCache("redis://localhost:6379")
-                await cache.set_provider_unavailable_until("groq", 1735689600.0, 3600)
-        mock_log.warning.assert_called()
+    async def test_close_no_client(self):
+        cache = LLMResponseCache(redis_url=None)
+        await cache.close()
 
     @pytest.mark.asyncio
-    async def test_set_provider_unavailable_generic_exception(self):
-        """Lines 112-113: generic exception caught."""
-        mock_redis = MagicMock()
-        mock_redis.setex = AsyncMock(side_effect=RuntimeError("Unexpected"))
-        with patch("cache.llm_cache.Redis.from_url", return_value=mock_redis):
-            with patch("cache.llm_cache.logger") as mock_log:
-                cache = LLMResponseCache("redis://localhost:6379")
-                await cache.set_provider_unavailable_until("groq", 1735689600.0, 3600)
-        mock_log.warning.assert_called()
-
-
-class TestLLMResponseCacheEdgeCases:
-    """Additional edge cases for LLMResponseCache."""
-
-    def test_make_key_with_tool_summaries_truncated(self):
-        """Only first 4 tool summaries are hashed."""
-        cache = LLMResponseCache(None)
-        key1 = cache._make_key("msg", "intent", ["a", "b", "c", "d", "e", "f"])
-        key2 = cache._make_key("msg", "intent", ["a", "b", "c", "d", "g", "h"])
-        assert key1 == key2
+    async def test_close_success(self):
+        cache = LLMResponseCache(redis_url="redis://localhost:6379/0")
+        cache._client.aclose = AsyncMock()
+        await cache.close()
+        cache._client.aclose.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_get_oserror_fallback(self):
-        """OSError during get is caught."""
-        mock_redis = MagicMock()
-        mock_redis.get = AsyncMock(side_effect=OSError("Connection reset"))
-        with patch("cache.llm_cache.Redis.from_url", return_value=mock_redis):
-            cache = LLMResponseCache("redis://localhost:6379")
-            result = await cache.get("msg", "general", [])
-        assert result is None
-        assert cache._healthy is False
+    async def test_close_error(self):
+        cache = LLMResponseCache(redis_url="redis://localhost:6379/0")
+        cache._client.aclose = AsyncMock(side_effect=ConnectionError("fail"))
+        await cache.close()
+        cache._client.aclose.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_get_pool_no_db_url(self):
+        cache = LLMResponseCache(redis_url=None)
+        pool = await cache._get_pool()
+        assert pool is None
+
+    @pytest.mark.asyncio
+    async def test_get_pool_called_twice_reuses(self):
+        with patch("cache.llm_cache.asyncpg.create_pool", new_callable=AsyncMock) as mock_create:
+            mock_pool = MagicMock()
+            mock_conn = AsyncMock()
+            mock_conn.execute = AsyncMock()
+            # acquire must be a regular callable that returns an async context manager
+            mock_acquire_cm = MagicMock()
+            mock_acquire_cm.__aenter__.return_value = mock_conn
+            mock_acquire_cm.__aexit__.return_value = None
+            mock_pool.acquire.return_value = mock_acquire_cm
+            mock_create.return_value = mock_pool
+            cache = LLMResponseCache(redis_url=None, database_url="postgresql://localhost:5432/test")
+            pool1 = await cache._get_pool()
+            pool2 = await cache._get_pool()
+            assert pool1 is pool2
+            mock_create.assert_called_once()

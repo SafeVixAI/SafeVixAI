@@ -56,7 +56,7 @@ class FakeVectorStore:
         return {"chunks": 1, "categories": 1, "chroma_chunks": 1, "embedding_model": "test"}
 
 class FakeRetriever:
-    def __init__(self, vectorstore, *args, **kwargs):
+    def __init__(self, vectorstore=None, *args, **kwargs):
         self.vectorstore = vectorstore
 
     async def retrieve(self, query, *, top_k=None, scopes=None):
@@ -85,7 +85,7 @@ class FakeChallanTool:
 class FakeLegalSearchTool:
     def __init__(self, retriever):
         self.retriever = retriever
-    def search(self, message):
+    async def search(self, message):
         return []
 
 class FakeFirstAidTool:

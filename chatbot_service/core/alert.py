@@ -182,6 +182,23 @@ class AlertService:
             ],
         )
 
+    def alert_wiki_generation_failed(self, module_name: str, consecutive_fails: int, error_msg: str):
+        """Alert when automated Wiki generation fails persistently via LLM chain."""
+        self._send(
+            alert_type="wiki_generation_failure",
+            subject=f"Wiki Documentation Update Stopped: {module_name}",
+            details=(
+                f"Module: {module_name}\n"
+                f"Consecutive Failures: {consecutive_fails}\n"
+                f"Error/Status: {error_msg}"
+            ),
+            solutions=[
+                "CHECK RATE LIMITS — Multi-LLM fallback chain may have exhausted free-tier tokens:",
+                "CHECK PROVIDER STATUS — Primary or secondary LLMs may be experiencing downtime:",
+                "FALLBACK STUBS ACTIVATED — The platform automatically defaults to AST stubs:",
+            ],
+        )
+
     def _send(
         self,
         alert_type: str,

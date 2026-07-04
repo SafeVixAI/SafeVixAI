@@ -16,7 +16,6 @@ from __future__ import annotations
 
 import asyncio
 import logging
-import re
 import time
 
 from cache.llm_cache import LLMResponseCache, CacheEntry
@@ -31,20 +30,16 @@ from providers.base import (
     RateLimitError,
     TemplateProvider,
 )
-from providers.cerebras_provider import CerebrasProvider
-from providers.gemini_provider import GeminiProvider
-from providers.github_models_provider import GitHubModelsProvider
-from providers.groq_provider import GroqProvider
-from providers.mistral_provider import MistralProvider
-from providers.nvidia_nim_provider import NvidiaNimProvider
-from providers.openrouter_provider import OpenRouterProvider
+from providers.lang_detection import detect_lang
+from providers.provider_registry import (
+    create_default_providers,
+    DEFAULT_FALLBACK_CHAIN,
+    get_provider_configs,
+)
 from providers.sarvam_provider import (
     INDIAN_LANGUAGE_CODES,
     HIGH_STAKES_INTENTS,
-    Sarvam105BProvider,
-    SarvamProvider,
 )
-from providers.together_provider import TogetherProvider
 from providers.openai_compat import OpenAICompatibleProvider
 
 from core.alert import get_alert_service
@@ -53,45 +48,10 @@ from core.metrics import chatbot_circuit_breaker_trips_total, update_circuit_bre
 
 logger = logging.getLogger("safevixai.chatbot.providers")
 
-# ── Language detection (lightweight — no NLTK dependency) ─────────────────
-# Script ranges for Indian languages
-_DEVANAGARI = re.compile(r'[\u0900-\u097f]')   # Hindi, Marathi, Sanskrit, etc.
-_TAMIL = re.compile(r'[\u0b80-\u0bff]')
-_TELUGU = re.compile(r'[\u0c00-\u0c7f]')
-_KANNADA = re.compile(r'[\u0c80-\u0cff]')
-_MALAYALAM = re.compile(r'[\u0d00-\u0d7f]')
-_BENGALI = re.compile(r'[\u0980-\u09ff]')
-_GUJARATI = re.compile(r'[\u0a80-\u0aff]')
-_PUNJABI = re.compile(r'[\u0a00-\u0a7f]')
-_ODIA = re.compile(r'[\u0b00-\u0b7f]')
-_URDU = re.compile(r'[\u0600-\u06ff]')  # Arabic script — includes Urdu
-
-
-def detect_lang(text: str) -> str | None:
-    """Detect if the text contains Indian language script.
-    Returns ISO 639-1 code or None (English/unknown).
-    """
-    if _DEVANAGARI.search(text):
-        return 'hi'  # Default Devanagari → Hindi
-    if _TAMIL.search(text):
-        return 'ta'
-    if _TELUGU.search(text):
-        return 'te'
-    if _KANNADA.search(text):
-        return 'kn'
-    if _MALAYALAM.search(text):
-        return 'ml'
-    if _BENGALI.search(text):
-        return 'bn'
-    if _GUJARATI.search(text):
-        return 'gu'
-    if _PUNJABI.search(text):
-        return 'pa'
-    if _ODIA.search(text):
-        return 'or'
-    if _URDU.search(text):
-        return 'ur'
-    return None
+# Backward-compatible re-export for tests that import from providers.router
+from providers.lang_detection import detect_lang as _detect_lang  # noqa: E402
+detect_lang = _detect_lang
+del _detect_lang
 
 
 class ProviderRouter:
@@ -109,27 +69,7 @@ class ProviderRouter:
         self.cache = cache
 
         # All 11 providers + Sarvam variants
-        self.providers: dict[str, TemplateProvider] = {
-            # Tier 1 — Critical
-            'groq': GroqProvider(),
-            'cerebras': CerebrasProvider(),
-            'gemini': GeminiProvider(),
-            # Indian language routing
-            'sarvam': SarvamProvider(),
-            'sarvam_30b': SarvamProvider(),
-            'sarvam_105b': Sarvam105BProvider(),
-            # Tier 2 — High
-            'github': GitHubModelsProvider(),
-            'github_models': GitHubModelsProvider(),
-            'nvidia': NvidiaNimProvider(),
-            'nvidia_nim': NvidiaNimProvider(),
-            # Tier 3 — Medium
-            'openrouter': OpenRouterProvider(),
-            'mistral': MistralProvider(),
-            'together': TogetherProvider(),
-            # Template / testing
-            'template': TemplateProvider(),
-        }
+        self.providers: dict[str, TemplateProvider] = create_default_providers()
         self.default_provider = settings.default_llm_provider
         self.provider_timeout_seconds = max(0.001, float(settings.http_timeout_seconds))
         self._unavailable_until: dict[str, float] = {}
@@ -143,18 +83,7 @@ class ProviderRouter:
         self._confidence_threshold = 0.3
 
         # Fallback chain — tried in order when provider fails
-        self._fallback_chain = [
-            'groq',        # 1. Fastest English — 300+ tok/s
-            'cerebras',    # 2. Speed overflow — 2000+ tok/s
-            'sarvam_30b',  # 3. Indic language specialist
-            'github',      # 4. Free with GitHub account (Student Pack)
-            'gemini',      # 5. Large context, 1M tok/day
-            'nvidia',      # 6. GPU-optimized
-            'openrouter',  # 7. Gateway to 20+ models
-            'mistral',     # 8. 1B tok/month free
-            'together',    # 9. $25 credit bank
-            'template',    # 10. Always works (deterministic fallback)
-        ]
+        self._fallback_chain = list(DEFAULT_FALLBACK_CHAIN)
 
         # ── User-configured providers (overrides env-var defaults) ─────────
         self._user_providers: dict[str, dict] = {}
@@ -252,24 +181,8 @@ class ProviderRouter:
         self._user_providers.clear()
         self._user_providers_configured = False
 
-        self.providers.update({
-            'groq': GroqProvider(),
-            'cerebras': CerebrasProvider(),
-            'gemini': GeminiProvider(),
-            'sarvam': SarvamProvider(),
-            'sarvam_30b': SarvamProvider(),
-            'sarvam_105b': Sarvam105BProvider(),
-            'github': GitHubModelsProvider(),
-            'nvidia': NvidiaNimProvider(),
-            'openrouter': OpenRouterProvider(),
-            'mistral': MistralProvider(),
-            'together': TogetherProvider(),
-        })
-        self._fallback_chain = list(dict.fromkeys([
-            'groq', 'cerebras', 'sarvam_30b', 'github',
-            'groq', 'cerebras', 'gemini', 'nvidia',
-            'openrouter', 'mistral', 'together', 'template',
-        ]))
+        self.providers = create_default_providers()
+        self._fallback_chain = list(DEFAULT_FALLBACK_CHAIN)
         logger.info("ProviderRouter reset to default env-var providers")
 
     def get_active_provider_info(self) -> list[dict]:

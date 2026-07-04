@@ -70,16 +70,21 @@ class CQRSBus:
         return await handler.handle(query)
 
 
+# Module-level default bus (backward compatible).
+# For per-app-state isolation, use init_cqrs_bus(app) + get_cqrs_bus(request) instead.
+cqrs_bus = CQRSBus()
+
+
 def get_cqrs_bus(request: Request) -> CQRSBus:
     """FastAPI dependency — returns the per-app CQRSBus from request.app.state."""
     bus: CQRSBus | None = getattr(request.app.state, 'cqrs_bus', None)
     if bus is None:
-        raise RuntimeError("CQRSBus not initialized. Ensure lifespan calls init_cqrs_bus(app).")
+        return cqrs_bus
     return bus
 
 
 def init_cqrs_bus(app: FastAPI) -> CQRSBus:
-    """Factory: creates a CQRSBus, registers handlers, and stores it on app.state."""
+    """Factory: creates a per-app CQRSBus, registers handlers, stores on app.state."""
     from fastapi import FastAPI
     from services.roadwatch_service import SubmitReportHandler, VerifyReportHandler, SubmitReportCommand, VerifyReportCommand
 

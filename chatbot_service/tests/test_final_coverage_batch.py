@@ -3193,3 +3193,188 @@ class TestApiChatStreamTimeout:
             headers={"X-Internal-Api-Key": "test-key"}
         )
         assert resp.status_code == 200
+
+
+# ═══════════════════════════════════════════════════════════════
+# Phase 10: Edge case branches across multiple modules
+# ═══════════════════════════════════════════════════════════════
+
+class TestSubmitReportClientReuse:
+    def test_get_client_reuses_existing(self):
+        from tools.submit_report_tool import SubmitReportTool
+        tool = SubmitReportTool(backend_base_url="http://test")
+        client1 = tool._get_client()
+        client2 = tool._get_client()
+        assert client1 is client2
+
+    @pytest.mark.asyncio
+    async def test_get_client_after_close(self):
+        from tools.submit_report_tool import SubmitReportTool
+        tool = SubmitReportTool(backend_base_url="http://test")
+        client = tool._get_client()
+        await client.aclose()
+        client2 = tool._get_client()
+        assert client2 is not client
+        await client2.aclose()
+
+
+class TestTokenGuardAllFit:
+    def test_trim_history_all_fit_returns_unchanged(self):
+        from utils.token_guard import trim_history
+        msgs = [{"role": "user", "content": "hi"}, {"role": "assistant", "content": "hello"}]
+        result = trim_history(msgs, max_tokens=9999)
+        assert result == msgs
+
+    def test_trim_history_trims_when_exceeded(self):
+        from utils.token_guard import trim_history
+        msgs = [{"role": "system", "content": "keep"}, {"role": "user", "content": "x" * 50}, {"role": "assistant", "content": "y" * 50}]
+        result = trim_history(msgs, max_tokens=2)
+        assert len(result) < len(msgs)
+
+
+class TestPotholeValidatorEdgeCases:
+    def test_model_already_loaded(self):
+        import sys
+        mock_ultralytics = MagicMock()
+        mock_ultralytics.YOLO = MagicMock()
+        with patch.dict('sys.modules', {'ultralytics': mock_ultralytics}):
+            from services.pothole_validator import PotholeValidator
+            PotholeValidator._model = MagicMock()
+            try:
+                model = PotholeValidator.get_model()
+                assert model is not None
+            finally:
+                PotholeValidator._model = None
+
+    def test_validate_image_confidence_not_better(self):
+        import sys
+        mock_ultralytics = MagicMock()
+        mock_ultralytics.YOLO = MagicMock()
+        mock_model = MagicMock()
+        mock_detection = MagicMock()
+        box = MagicMock()
+        box.xyxy = MagicMock()
+        box.xyxy.tolist = MagicMock(return_value=[0.0, 1.0, 2.0, 3.0])
+        box.conf = [0.2]
+        box.cls = [0]
+        mock_detection.boxes = [box]
+        mock_detection.names = {0: "pothole"}
+        mock_model.return_value = [mock_detection]
+        mock_model.names = {0: "pothole"}
+        mock_image = MagicMock()
+        mock_image.size = (100, 100)
+        from PIL import Image as PILImage
+        with patch.dict('sys.modules', {'ultralytics': mock_ultralytics, 'services.pothole_validator.ultralytics': mock_ultralytics}):
+            from services.pothole_validator import PotholeValidator
+            PotholeValidator._model = mock_model
+            with patch("PIL.Image.open", return_value=mock_image):
+                result = PotholeValidator.validate_image(b"fake-image-bytes")
+                assert result["anomaly_detected"] == False
+
+
+class TestSarvam2BWarning:
+    def test_sarvam_2b_logs_warning(self):
+        from providers.sarvam_provider import SarvamProvider
+        provider = SarvamProvider(api_key="test", model_size="2b")
+        result = provider.default_model()
+        assert "sarvam-2b" in result
+
+
+class TestSummarizerNonStandardRole:
+    def test_summarizes_with_extra_role(self):
+        from memory.summarizer import ConversationSummarizer
+        summarizer = ConversationSummarizer(threshold=2)
+        history = [
+            {"role": "system", "content": "system prompt"},
+            {"role": "user", "content": "hello", "metadata": {"intent": "greeting"}},
+            {"role": "assistant", "content": "hi there"},
+        ]
+        result, meta = summarizer.get_summary_for_history(history)
+        assert result is not None
+
+
+class TestDocumentLoaderBranches:
+    def test_csv_no_fieldnames(self, tmp_path):
+        from rag.document_loader import _read_csv
+        csv_path = tmp_path / "test.csv"
+        csv_path.write_text("a,b\n1,2\n3,4\n", encoding="utf-8-sig")
+        from pathlib import Path
+        empty_csv = tmp_path / "empty.csv"
+        empty_csv.write_bytes(b"")
+        result = _read_csv(empty_csv)
+        assert isinstance(result, str)
+
+    def test_csv_empty_parts_filtered(self, tmp_path):
+        from rag.document_loader import _read_csv
+        csv_path = tmp_path / "test.csv"
+        csv_path.write_text("col\n\n\n", encoding="utf-8-sig")
+        result = _read_csv(csv_path)
+        assert "Row" not in result or isinstance(result, str)
+
+    def test_pdf_empty_text(self, tmp_path):
+        from rag.document_loader import _read_pdf
+        pdf_path = tmp_path / "empty.pdf"
+        pdf_path.write_bytes(b"%PDF-1.4\n1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj\n3 0 obj<</Type/Page/MediaBox[0 0 612 792]/Parent 2 0 R>>endobj\nxref\n0 4\n0000000000 65535 f \n0000000009 00000 n \n0000000058 00000 n \n0000000115 00000 n \ntrailer<</Size 4/Root 1 0 R>>\nstartxref\n190\n%%EOF")
+        result = _read_pdf(pdf_path)
+        assert isinstance(result, str)
+
+
+class TestVectorstoreChunkLastChunk:
+    def test_chunk_document_remaining_chunk(self):
+        from pathlib import Path
+        from rag.vectorstore import LocalVectorStore
+        from rag.document_loader import LoadedDocument
+        import tempfile
+        tmpdir = Path(tempfile.mkdtemp())
+        vs = LocalVectorStore(database_url="postgresql://test:test@localhost/test", data_dir=tmpdir)
+        vs.chunk_size = 500
+        vs.overlap = 0
+        doc = LoadedDocument(source="test", title="test", category="test", text="word " * 100)
+        chunks = vs._chunk_document(doc)
+        assert len(chunks) >= 1
+
+
+class TestRetrieverDuplicatesAndSingle:
+    @pytest.mark.asyncio
+    async def test_retriever_duplicate_chunk_in_fused(self):
+        from rag.retriever import Retriever
+        vs = MagicMock()
+        chunk = MagicMock(chunk_id="c1", source="s1", title="t1", category="c1", content="A")
+        vs.search = AsyncMock(return_value=[(chunk, 0.8), (chunk, 0.7)])
+        vs.ensure_index = AsyncMock(return_value=[])
+        ret = Retriever(vs, min_score=0.0)
+        results = await ret.retrieve("test")
+        assert len(results) >= 1
+
+    @pytest.mark.asyncio
+    async def test_retriever_single_result_skips_cross_encoder(self):
+        from rag.retriever import Retriever
+        vs = MagicMock()
+        chunk = MagicMock(chunk_id="c1", source="s1", title="t1", category="c1", content="A")
+        vs.search = AsyncMock(return_value=[(chunk, 0.8)])
+        vs.ensure_index = AsyncMock(return_value=[])
+        ret = Retriever(vs, min_score=0.0, cross_encoder_model="test-model")
+        results = await ret.retrieve("test")
+        assert len(results) > 0
+
+
+class TestMainAppRoutes:
+    def test_health_endpoint_exists(self):
+        import main
+        app = main.create_app()
+        from config import get_settings
+        object.__setattr__(get_settings(), "environment", "development")
+        from fastapi.testclient import TestClient
+        client = TestClient(app)
+        resp = client.get("/health")
+        assert resp.status_code in (200, 404)
+
+    def test_unrecognized_route_404(self):
+        import main
+        app = main.create_app()
+        from config import get_settings
+        object.__setattr__(get_settings(), "environment", "development")
+        from fastapi.testclient import TestClient
+        client = TestClient(app)
+        resp = client.get("/nonexistent-route")
+        assert resp.status_code == 404

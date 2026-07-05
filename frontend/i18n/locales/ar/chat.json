@@ -5,7 +5,7 @@
     "online": "متصل",
     "offline": "غير متصل",
     "audio_enabled": "تم تمكين الصوت",
-    "audio_disabled": "تم تعطيل الصوت",
+    "audio_disabled": "الصوت معطل",
     "stop_reading": "توقف عن القراءة",
     "auto_read_enable": "تمكين القراءة التلقائية",
     "auto_read_disable": "تعطيل القراءة التلقائية",

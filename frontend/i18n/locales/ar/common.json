@@ -49,7 +49,7 @@
     "tts_gps_success": "تم التقاط الموقع. اتبع الخطوات التي تظهر على الشاشة. يوجد زر استدعاء سيارة الإسعاف في الأسفل.",
     "tts_gps_fail": "الموقع غير متاح. يرجى الاتصال بالرقم 112 ووصف محيطك.",
     "report_description": "[وضع المتفرج] شهد حادث طريق وتم الإبلاغ عنه تلقائيًا عبر SafeVixAI",
-    "report_failed": "لا يمكن الإبلاغ عن الحادث تلقائيا. لا يزال نظام تحديد المواقع العالمي (GPS) الخاص بك ملتقطًا - اتصل بخدمات الطوارئ أدناه.",
+    "report_failed": "تعذر الإبلاغ التلقائي عن الحادث. لا يزال نظام تحديد المواقع العالمي (GPS) الخاص بك ملتقطًا - اتصل بخدمات الطوارئ أدناه.",
     "tts_calling_ambulance": "الاتصال بالرقم 1-0-8. الإسعاف في حالات الطوارئ.",
     "whatsapp_message": "حادث طريق شهده:\nنظام تحديد المواقع العالمي: https://maps.google.com/?q= {{lat}} , {{lon}} \nأقرب مستشفى: {{hospital}} \nالرجاء إرسال سيارة الإسعاف على الفور.",
     "steps": {
@@ -58,7 +58,7 @@
       "step_3": "اتصل بالرقم 108 (سيارة الإسعاف) الآن. ستتم مشاركة موقع GPS تلقائيًا.",
       "step_4": "تحقق مما إذا كان الضحية يتنفس — قم بإمالة رأسه إلى الخلف، وارفع ذقنه، وراقب ارتفاع صدره.",
       "step_5": "إذا لم يكن هناك تنفس: ابدأ الإنعاش القلبي الرئوي – 30 ضغطة قوية على الصدر، ثم نفسين. يكرر.",
-      "step_6": "للنزيف الشديد: اضغط بقطعة قماش نظيفة بقوة على الجرح. لا تقم بإزالته.",
+      "step_6": "في حالة النزيف الشديد: اضغط بقطعة قماش نظيفة بقوة على الجرح. لا تقم بإزالته.",
       "step_7": "حافظ على دفء الضحية باستخدام أي سترة أو قطعة قماش متاحة.",
       "step_8": "ابق معهم وتحدث معهم حتى وصول سيارة الإسعاف."
     }
@@ -156,7 +156,7 @@
       "zebra_crossing": "معبر زيبرا",
       "zebra_crossing_desc": "ممرات المشاة الخطرة أو الباهتة التي تحتاج إلى إصلاح",
       "speed_bump": "عثرة السرعة",
-      "speed_bump_desc": "فقدان خطوط التحذير أو مهدئات السرعة المكسورة",
+      "speed_bump_desc": "فقدان خطوط التحذير أو مهدئات السرعة المعطلة",
       "encroachment": "العرقلة",
       "encroachment_desc": "الباعة، أو مواقف السيارات غير القانونية، أو الكتل الهيكلية",
       "dark_street": "شارع الظلام",
@@ -241,32 +241,5 @@
   "validation": {
     "required_field": "هذه الخانة مطلوبه",
     "invalid_email": "عنوان البريد الإلكتروني غير صالح"
-  },
-  "guide": {
-    "title": "Municipality Guide",
-    "subtitle": "{{count}} municipalities across India",
-    "search_placeholder": "Search municipality...",
-    "search_aria_label": "Search municipalities",
-    "find_nearby": "Find Nearby",
-    "filter": "Filter",
-    "state": "State",
-    "type": "Type",
-    "all": "All",
-    "corporation": "Corporation",
-    "municipality": "Municipality",
-    "sorted_by_distance": "Sorted by distance from your location",
-    "reset": "Reset",
-    "results_count": "{{filteredCount}} of {{totalCount}} municipalities",
-    "clear_filters": "Clear filters",
-    "loading_municipalities": "Loading municipalities...",
-    "no_municipalities_found": "No municipalities found",
-    "try_different_search": "Try a different search term or filter",
-    "how_to_use": "How to Use This Guide",
-    "how_to_use_search_title": "Search",
-    "how_to_use_search_desc": "Find any municipality by name, city, or state code",
-    "how_to_use_nearby_title": "Find Nearby",
-    "how_to_use_nearby_desc": "Use GPS to find the nearest municipal offices to you",
-    "how_to_use_details_title": "View Details",
-    "how_to_use_details_desc": "Click any card for contact info, leadership, and services"
   }
 }

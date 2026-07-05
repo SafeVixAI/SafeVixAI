@@ -241,32 +241,5 @@
   "validation": {
     "required_field": "This field is required",
     "invalid_email": "Invalid email address"
-  },
-  "guide": {
-    "title": "Municipality Guide",
-    "subtitle": "{{count}} municipalities across India",
-    "search_placeholder": "Search municipality...",
-    "search_aria_label": "Search municipalities",
-    "find_nearby": "Find Nearby",
-    "filter": "Filter",
-    "state": "State",
-    "type": "Type",
-    "all": "All",
-    "corporation": "Corporation",
-    "municipality": "Municipality",
-    "sorted_by_distance": "Sorted by distance from your location",
-    "reset": "Reset",
-    "results_count": "{{filteredCount}} of {{totalCount}} municipalities",
-    "clear_filters": "Clear filters",
-    "loading_municipalities": "Loading municipalities...",
-    "no_municipalities_found": "No municipalities found",
-    "try_different_search": "Try a different search term or filter",
-    "how_to_use": "How to Use This Guide",
-    "how_to_use_search_title": "Search",
-    "how_to_use_search_desc": "Find any municipality by name, city, or state code",
-    "how_to_use_nearby_title": "Find Nearby",
-    "how_to_use_nearby_desc": "Use GPS to find the nearest municipal offices to you",
-    "how_to_use_details_title": "View Details",
-    "how_to_use_details_desc": "Click any card for contact info, leadership, and services"
   }
 }

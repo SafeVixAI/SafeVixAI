@@ -3,9 +3,9 @@
 
 # --- Heavy ML / Speech (OPTIONAL — speech translation only, graceful fallback if missing)
 # Render deployment uses requirements-render.txt without these for 512MB RAM
-torch==2.12.0
+torch==2.12.1
 torchaudio==2.11.0
-transformers==5.5.4
+transformers==5.13.0
 datasets==4.8.4
 
 # --- Web Framework ---

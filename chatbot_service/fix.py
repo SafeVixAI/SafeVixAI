@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 SafeVixAI Team
 import glob
 for f in glob.glob('tests/*.py'):
     with open(f, 'r', encoding='utf-8') as file:

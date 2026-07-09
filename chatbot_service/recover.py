@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 SafeVixAI Team
 import json
 
 transcript_path = r"C:\Users\Dell\.gemini\antigravity\brain\23643f0f-aff8-44f9-b2c6-d6c31d24d827\.system_generated\logs\transcript_full.jsonl"

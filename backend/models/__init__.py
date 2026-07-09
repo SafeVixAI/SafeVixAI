@@ -2,6 +2,7 @@
 # Copyright (c) 2026 SafeVixAI Team
 
 from core.database import Base
+from models.city_center import CityCenter
 from models.emergency import EmergencyService
 from models.road_issue import RoadInfrastructure, RoadIssue
 from models.sos_incident import SosIncident
@@ -19,9 +20,14 @@ from models.etl_run_log import ETLRunLog
 from models.municipality import Municipality
 from models.streetlight_pole import StreetlightPole
 from models.provider_config import UserProviderConfig
+from models.values import Coordinates, Severity, Distance
 
 __all__ = [
     'Base',
+    'CityCenter',
+    'Coordinates',
+    'Distance',
+    'Severity',
     'EmergencyService',
     'RoadIssue',
     'RoadInfrastructure',

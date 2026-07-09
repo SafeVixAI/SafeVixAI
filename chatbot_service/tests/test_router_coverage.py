@@ -111,9 +111,9 @@ class TestConstructor:
 
     def test_creates_all_providers(self):
         r = ProviderRouter(_settings())
-        expected = {"groq", "cerebras", "gemini", "sarvam", "sarvam_30b",
-                    "sarvam_105b", "github", "github_models", "nvidia",
-                    "nvidia_nim", "openrouter", "mistral", "together", "template"}
+        expected = {"groq", "cerebras", "gemini", "sarvam_30b",
+                    "sarvam_105b", "github", "nvidia",
+                    "openrouter", "mistral", "together", "template"}
         assert expected.issubset(r.providers.keys())
         assert isinstance(r.providers["template"], TemplateProvider)
 
@@ -585,7 +585,7 @@ class TestDetectLang:
 
 class TestSarvamIdentity:
     def test_name(self):
-        assert SarvamProvider().name == "sarvam"
+        assert SarvamProvider().name == "sarvam_30b"
     def test_105b_name(self):
         assert Sarvam105BProvider().name == "sarvam_105b"
     def test_105b_subclass(self):
@@ -670,7 +670,7 @@ class TestSarvamGenerate:
         p._client = _mk_client()
         res = await p.generate(_REQUEST)
         assert res.text == "Mocked response"
-        assert res.provider == "sarvam"
+        assert res.provider == "sarvam_30b"
         assert res.model == "sarvamai/sarvam-30b"
         assert res.india_badge is True
 
@@ -681,7 +681,7 @@ class TestSarvamGenerate:
         p = SarvamProvider()
         p._client = _mk_client()
         res = await p.generate(_REQUEST)
-        assert res.provider == "sarvam"
+        assert res.provider == "sarvam_30b"
         hdrs = p._client.post.call_args.kwargs["headers"]
         assert "Bearer" in hdrs["Authorization"]
         assert hdrs.get("x-use-cache") == "false"

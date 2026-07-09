@@ -2,33 +2,88 @@ jest.mock('@/hooks/usePageEntry', function() { return { usePageEntry: function()
 jest.mock('@/lib/store', function() { return { useAppStore: Object.assign(function(sel) { var state = { gpsLocation: null, userProfile: {}, authToken: null }; return typeof sel === 'function' ? sel(state) : state }, { getState: function() { return {} }, setState: jest.fn(), subscribe: jest.fn() }) } })
 jest.mock('@/lib/public-env', function() { return { publicApiWebSocketUrl: 'ws://localhost:8000' } })
 jest.mock('@/lib/safety-constants', function() { return { GROUP_TRACKING_BROADCAST_INTERVAL_MS: 5000 } })
-jest.mock('@/lib/useWebSocket', function() { return { useWebSocket: function() { return { status: 'idle', send: jest.fn(), wsRef: null } } } })
+
+var mockWsStatus = 'idle'
+var mockWsSend = jest.fn()
+var mockWsConnect = jest.fn()
+var mockWsDisconnect = jest.fn()
+jest.mock('@/lib/useWebSocket', function() {
+  return { useWebSocket: function() { return { status: mockWsStatus, send: mockWsSend, connect: mockWsConnect, disconnect: mockWsDisconnect, reconnectAttempt: 3 } } }
+})
 jest.mock('@/components/EmergencyMap', function() { return { EmergencyMap: function() { return null } } })
 jest.mock('@/components/dashboard/SystemHeader', function() { return function() { return null } })
 jest.mock('lucide-react', function() { return new Proxy({}, { get: function() { return function() { return null } } }) })
 
-import { render, screen } from '@testing-library/react'
-import React from 'react'
-import TrackingPage from '../app/tracking/page'
+var { render, screen, fireEvent, act } = require('@testing-library/react')
+var React = require('react')
+var TrackingPage = require('../app/tracking/page').default
+
+beforeEach(function() {
+  mockWsStatus = 'idle'
+  mockWsSend.mockClear()
+  mockWsConnect.mockClear()
+  mockWsDisconnect.mockClear()
+})
 
 describe('TrackingPage', function() {
-  it('renders without error', function() {
+  it('renders Join Tracking Group heading when idle', function() {
     var { container } = render(React.createElement(TrackingPage))
-    expect(container).toBeTruthy()
+    expect(screen.getByText('Join Tracking Group')).toBeTruthy()
   })
 
-  it('renders group tracking UI shell', function() {
-    var { container } = render(React.createElement(TrackingPage))
-    expect(container.querySelector('h1') || container.querySelector('h2') || container.querySelector('[class]')).toBeTruthy()
+  it('renders group code input when idle', function() {
+    render(React.createElement(TrackingPage))
+    expect(screen.getByPlaceholderText('e.g. SMITH-FAMILY-24')).toBeTruthy()
   })
 
-  it('renders input section', function() {
-    var { container } = render(React.createElement(TrackingPage))
-    expect(container).toBeTruthy()
+  it('renders display name input when idle', function() {
+    render(React.createElement(TrackingPage))
+    expect(screen.getByPlaceholderText('e.g. John')).toBeTruthy()
   })
 
-  it('renders with page entry ref', function() {
+  it('renders Start Tracking button when idle', function() {
+    render(React.createElement(TrackingPage))
+    expect(screen.getByText('Start Tracking')).toBeTruthy()
+  })
+
+  it('shows Live status badge when connected', function() {
+    mockWsStatus = 'connected'
     var { container } = render(React.createElement(TrackingPage))
-    expect(container.querySelector('div')).toBeTruthy()
+    expect(screen.getByText('Live')).toBeTruthy()
+  })
+
+  it('shows Connecting badge when connecting', function() {
+    mockWsStatus = 'connecting'
+    var { container } = render(React.createElement(TrackingPage))
+    expect(screen.getByText('Connecting...')).toBeTruthy()
+  })
+
+  it('shows join form when disconnected', function() {
+    mockWsStatus = 'disconnected'
+    var { container } = render(React.createElement(TrackingPage))
+    expect(screen.getByText('Join Tracking Group')).toBeTruthy()
+  })
+
+  it('shows Reconnecting badge with attempt count', function() {
+    mockWsStatus = 'reconnecting'
+    var { container } = render(React.createElement(TrackingPage))
+    expect(screen.getByText(/Reconnecting \(3\/50\)/)).toBeTruthy()
+  })
+
+  it('shows Leave button when connected', function() {
+    mockWsStatus = 'connected'
+    var { container } = render(React.createElement(TrackingPage))
+    expect(screen.getByText('Leave')).toBeTruthy()
+  })
+
+  it('shows Active Group heading when connected', function() {
+    mockWsStatus = 'connected'
+    var { container } = render(React.createElement(TrackingPage))
+    expect(screen.getByText('Active Group')).toBeTruthy()
+  })
+
+  it('renders sr-only heading', function() {
+    var { container } = render(React.createElement(TrackingPage))
+    expect(screen.getByText('Live Family Tracking')).toBeTruthy()
   })
 })

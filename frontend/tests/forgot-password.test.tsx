@@ -7,6 +7,8 @@ jest.mock('@/lib/store', function() {
   return { useAppStore: Object.assign(function(sel) { return typeof sel === 'function' ? sel(state) : state }, { getState: function() { return state }, setState: jest.fn(), subscribe: jest.fn() }) }
 })
 jest.mock('@/lib/public-env', function() { return { PUBLIC_API_BASE_URL: 'http://localhost:8000' } })
+jest.mock('@/lib/validation-schemas', function() { return { RESET_RULES: {} } })
+jest.mock('@/lib/use-form-validation', function() { return { useFormValidation: function() { return { errors: {}, handleChange: jest.fn(), handleBlur: jest.fn(), handleSubmit: function(values, cb) { return cb() } } } } })
 jest.mock('@/components/ui/Logo', function() { return { Logo: function() { return null } } })
 jest.mock('lucide-react', function() { return new Proxy({}, { get: function() { return function() { return null } } }) })
 
@@ -38,5 +40,20 @@ describe('Forgot Password Page', function() {
   it('renders back to login link', function() {
     render(React.createElement(ForgotPasswordPage))
     expect(screen.getByText('Back to Login')).toBeTruthy()
+  })
+
+  it('renders description text', function() {
+    render(React.createElement(ForgotPasswordPage))
+    expect(screen.getByText(/operator email/)).toBeTruthy()
+  })
+
+  it('renders email label', function() {
+    render(React.createElement(ForgotPasswordPage))
+    expect(screen.getByText('Operator Email')).toBeTruthy()
+  })
+
+  it('renders LoadingMunicipalities heading', function() {
+    render(React.createElement(ForgotPasswordPage))
+    expect(screen.getByText('Password Recovery')).toBeTruthy()
   })
 })

@@ -32,4 +32,29 @@ describe('PrivacyPolicyPage', function() {
     render(React.createElement(Page))
     expect(screen.getByText(/Effective Date/)).toBeTruthy()
   })
+
+  it('renders DPDP Act 2023 Compliance section', function() {
+    render(React.createElement(Page))
+    expect(screen.getByText(/DPDP Act 2023 Compliance/)).toBeTruthy()
+  })
+
+  it('renders Right to Erasure section', function() {
+    render(React.createElement(Page))
+    expect(screen.getByText(/Right to Erasure/)).toBeTruthy()
+  })
+
+  it('renders AI Vector & LLM Privacy section', function() {
+    render(React.createElement(Page))
+    expect(screen.getByText(/AI Vector/)).toBeTruthy()
+  })
+
+  it('renders Data Protection Officer contact', function() {
+    render(React.createElement(Page))
+    expect(screen.getAllByText(/Data Protection Officer/).length).toBeGreaterThanOrEqual(1)
+  })
+
+  it('renders DPO email address', function() {
+    render(React.createElement(Page))
+    expect(screen.getAllByText(/dpo@safevixai.gov.in/).length).toBeGreaterThanOrEqual(1)
+  })
 })

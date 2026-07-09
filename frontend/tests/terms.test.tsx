@@ -23,7 +23,7 @@ describe('TermsOfServicePage', function() {
     expect(screen.getByText(/Citizen SLA/)).toBeTruthy()
   })
 
-  it('renders Scope section heading', function() {
+  it('renders Scope & Acceptable Use section heading', function() {
     render(React.createElement(Page))
     expect(screen.getByText(/Scope & Acceptable Use/)).toBeTruthy()
   })
@@ -31,5 +31,35 @@ describe('TermsOfServicePage', function() {
   it('renders effective date', function() {
     render(React.createElement(Page))
     expect(screen.getByText(/Effective Date/)).toBeTruthy()
+  })
+
+  it('renders SLA & Emergency Disclaimer section', function() {
+    render(React.createElement(Page))
+    expect(screen.getByText(/SLA & Emergency Disclaimer/)).toBeTruthy()
+  })
+
+  it('renders critical warning for emergencies', function() {
+    render(React.createElement(Page))
+    expect(screen.getByText(/CRITICAL WARNING FOR EMERGENCIES/)).toBeTruthy()
+  })
+
+  it('renders Challan Calculator Disclaimer section', function() {
+    render(React.createElement(Page))
+    expect(screen.getByText(/Challan Calculator Disclaimer/)).toBeTruthy()
+  })
+
+  it('renders Limit of Liability section', function() {
+    render(React.createElement(Page))
+    expect(screen.getByText(/Limit of Liability/)).toBeTruthy()
+  })
+
+  it('renders Governing Law section', function() {
+    render(React.createElement(Page))
+    expect(screen.getByText(/Governing Law/)).toBeTruthy()
+  })
+
+  it('renders emergency number 112 in disclaimer', function() {
+    render(React.createElement(Page))
+    expect(screen.getByText(/112/)).toBeTruthy()
   })
 })

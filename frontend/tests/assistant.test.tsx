@@ -68,4 +68,20 @@ describe('Assistant Page', function() {
     render(React.createElement(ChatPage))
     expect(screen.getByText('AI Assistant')).toBeTruthy()
   })
+
+  it('renders session encrypted system message', async function() {
+    render(React.createElement(ChatPage))
+    expect(await screen.findByText('Session encrypted with SafeVixAI Protocol v2.4')).toBeTruthy()
+  })
+
+  it('renders welcome message from AI', async function() {
+    render(React.createElement(ChatPage))
+    expect(await screen.findByText(/SafeVixAI assistant online/)).toBeTruthy()
+  })
+
+  it('renders suggested inquiries section', function() {
+    render(React.createElement(ChatPage))
+    expect(screen.getByText('Suggested Inquiries')).toBeTruthy()
+  })
+
 })

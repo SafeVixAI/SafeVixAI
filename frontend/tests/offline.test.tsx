@@ -43,4 +43,37 @@ describe('Offline Page', function() {
     render(React.createElement(OfflinePage))
     expect(screen.getByText('Open Cached Locator')).toBeTruthy()
   })
+
+  it('renders offline description text', function() {
+    render(React.createElement(OfflinePage))
+    expect(screen.getByText('Network services are unavailable right now. SOS, first aid, emergency numbers, and queued reports remain available.')).toBeTruthy()
+  })
+
+  it('renders Police emergency number', function() {
+    render(React.createElement(OfflinePage))
+    expect(screen.getByText('Police')).toBeTruthy()
+    expect(screen.getByText('100')).toBeTruthy()
+  })
+
+  it('renders Fire emergency number', function() {
+    render(React.createElement(OfflinePage))
+    expect(screen.getByText('101')).toBeTruthy()
+  })
+
+  it('renders Ambulance emergency number', function() {
+    render(React.createElement(OfflinePage))
+    expect(screen.getByText('102')).toBeTruthy()
+  })
+
+  it('renders SOS link with correct href', function() {
+    render(React.createElement(OfflinePage))
+    var sosLink = screen.getByText('Open Emergency SOS').closest('a')
+    expect(sosLink.getAttribute('href')).toBe('/sos')
+  })
+
+  it('renders First Aid link with correct href', function() {
+    render(React.createElement(OfflinePage))
+    var firstAidLink = screen.getByText('Open First Aid Guides').closest('a')
+    expect(firstAidLink.getAttribute('href')).toBe('/first-aid')
+  })
 })

@@ -60,4 +60,36 @@ describe('Login Page', function() {
     render(React.createElement(LoginPage))
     expect(screen.getByText('Secure')).toBeTruthy()
   })
+
+  it('renders JWT Secured badge', function() {
+    render(React.createElement(LoginPage))
+    expect(screen.getByText('JWT Secured')).toBeTruthy()
+  })
+
+  it('renders version footer text', function() {
+    render(React.createElement(LoginPage))
+    expect(screen.getByText(/SafeVixAI v2\.4/)).toBeTruthy()
+  })
+
+  it('renders password visibility toggle button', function() {
+    render(React.createElement(LoginPage))
+    expect(screen.getByLabelText('Show password')).toBeTruthy()
+  })
+
+  it('renders account prompt text', function() {
+    render(React.createElement(LoginPage))
+    expect(screen.getByText("Don't have an account?")).toBeTruthy()
+  })
+
+  it('renders operator_email label', function() {
+    render(React.createElement(LoginPage))
+    expect(screen.getByText('operator_email')).toBeTruthy()
+  })
+
+  it('toggles password visibility', function() {
+    render(React.createElement(LoginPage))
+    var toggle = screen.getByLabelText('Show password')
+    fireEvent.click(toggle)
+    expect(screen.getByLabelText('Hide password')).toBeTruthy()
+  })
 })

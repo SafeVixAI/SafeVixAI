@@ -61,4 +61,19 @@ describe('Settings Page', function() {
     render(React.createElement(SettingsPage))
     expect(screen.getByText('settings.active_user')).toBeTruthy()
   })
+
+  it('renders sign out button when authenticated', function() {
+    render(React.createElement(SettingsPage))
+    expect(screen.getByText(/profile.sign_out/)).toBeTruthy()
+  })
+
+  it('renders purge cache button', function() {
+    render(React.createElement(SettingsPage))
+    expect(screen.getByText('settings.purge')).toBeTruthy()
+  })
+
+  it('renders export profile button', function() {
+    render(React.createElement(SettingsPage))
+    expect(screen.getByText('settings.export')).toBeTruthy()
+  })
 })

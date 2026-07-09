@@ -11,7 +11,7 @@ jest.mock('@/components/ui/Logo', function() { return { Logo: function() { retur
 jest.mock('lucide-react', function() { return new Proxy({}, { get: function() { return function() { return null } } }) })
 
 var React = require('react')
-var { render, screen } = require('@testing-library/react')
+var { render, screen, fireEvent, waitFor } = require('@testing-library/react')
 var ResetPasswordPage = require('../app/reset-password/page').default
 
 describe('ResetPassword Page', function() {
@@ -35,8 +35,36 @@ describe('ResetPassword Page', function() {
     expect(screen.getByPlaceholderText('Min 8 characters')).toBeTruthy()
   })
 
+  it('renders confirm password input', function() {
+    render(React.createElement(ResetPasswordPage))
+    expect(screen.getByPlaceholderText('Re-enter access key')).toBeTruthy()
+  })
+
+  it('renders Confirm Access Key label', function() {
+    render(React.createElement(ResetPasswordPage))
+    expect(screen.getByText('Confirm Access Key')).toBeTruthy()
+  })
+
   it('renders submit button', function() {
     render(React.createElement(ResetPasswordPage))
     expect(screen.getByText('Update Password')).toBeTruthy()
+  })
+
+  it('shows error when password is too short', function() {
+    render(React.createElement(ResetPasswordPage))
+    var input = screen.getByPlaceholderText('Min 8 characters')
+    fireEvent.change(input, { target: { value: '123' } })
+    fireEvent.click(screen.getByText('Update Password'))
+    expect(screen.getByText(/at least 8 characters/)).toBeTruthy()
+  })
+
+  it('shows mismatch error when passwords differ', function() {
+    render(React.createElement(ResetPasswordPage))
+    var pwd = screen.getByPlaceholderText('Min 8 characters')
+    var confirm = screen.getByPlaceholderText('Re-enter access key')
+    fireEvent.change(pwd, { target: { value: 'password123' } })
+    fireEvent.change(confirm, { target: { value: 'different' } })
+    fireEvent.click(screen.getByText('Update Password'))
+    expect(screen.getByText(/do not match/)).toBeTruthy()
   })
 })

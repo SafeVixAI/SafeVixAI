@@ -9,7 +9,7 @@ jest.mock('@/lib/store', function() {
     setChallanState: jest.fn(),
     garageVehicles: [],
     lastSyncedGarage: null,
-    riskAnalysis: { estimatedLiability: null, riskScore: null, riskLevel: null, predictedViolationsCount: null },
+    riskAnalysis: { estimatedLiability: null, riskScore: null, riskLevel: null, predictedViolationsCount: null, recommendations: [] },
     setGarageVehicles: jest.fn(),
     setLastSyncedGarage: jest.fn(),
     setRiskAnalysis: jest.fn()
@@ -26,7 +26,7 @@ jest.mock('react-i18next', function() { return { useTranslation: function() { re
 jest.mock('lucide-react', function() { return new Proxy({}, { get: function() { return function() { return null } } }) })
 
 var React = require('react')
-var { render, screen } = require('@testing-library/react')
+var { render, screen, fireEvent, act } = require('@testing-library/react')
 var ChallanPage = require('../app/challan/page').default
 
 describe('Challan Page', function() {
@@ -77,5 +77,53 @@ describe('Challan Page', function() {
     expect(screen.getByText('Uttar Pradesh (UP)')).toBeTruthy()
     expect(screen.getByText('West Bengal (WB)')).toBeTruthy()
     expect(screen.getByText('Karnataka (KA)')).toBeTruthy()
+  })
+
+  it('renders Garage tab text', function() {
+    render(React.createElement(ChallanPage))
+    expect(screen.getByText('Garage')).toBeTruthy()
+  })
+
+  it('renders Risk tab text', function() {
+    render(React.createElement(ChallanPage))
+    expect(screen.getByText('Risk')).toBeTruthy()
+  })
+
+  it('renders Dispute tab text', function() {
+    render(React.createElement(ChallanPage))
+    expect(screen.getByText('Dispute')).toBeTruthy()
+  })
+
+  it('switches to Garage tab on click', function() {
+    render(React.createElement(ChallanPage))
+    act(function() { fireEvent.click(screen.getByText('Garage')) })
+    expect(screen.getByText('Garage Inventory')).toBeTruthy()
+    expect(screen.getByText('{{count}} Vehicles')).toBeTruthy()
+  })
+
+  it('switches to Risk tab on click', function() {
+    render(React.createElement(ChallanPage))
+    act(function() { fireEvent.click(screen.getByText('Risk')) })
+    expect(screen.getByText('Estimated Annual Fine')).toBeTruthy()
+    expect(screen.getByText('Rs. --')).toBeTruthy()
+  })
+
+  it('switches to Dispute tab on click', function() {
+    render(React.createElement(ChallanPage))
+    act(function() { fireEvent.click(screen.getByText('Dispute')) })
+    expect(screen.getByText('Dispute Assistant')).toBeTruthy()
+    expect(screen.getByText('No Petition')).toBeTruthy()
+  })
+
+  it('shows Detailed Report button', function() {
+    render(React.createElement(ChallanPage))
+    expect(screen.getByText('DETAILED REPORT')).toBeTruthy()
+  })
+
+  it('switches back to Calculator tab from Garage tab', function() {
+    render(React.createElement(ChallanPage))
+    act(function() { fireEvent.click(screen.getByText('Garage')) })
+    act(function() { fireEvent.click(screen.getByText('Calc')) })
+    expect(screen.getByText('Total Liability')).toBeTruthy()
   })
 })

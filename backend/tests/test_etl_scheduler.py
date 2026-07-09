@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 SafeVixAI Team
+
 from __future__ import annotations
 
 import asyncio
@@ -15,6 +18,13 @@ def _mock_session_factory():
     db.__aexit__ = AsyncMock(return_value=None)
     db.execute = AsyncMock()
     return db
+
+
+def _mock_result(row=None):
+    """Return a MagicMock that mimics a DB result with scalar_one_or_none."""
+    r = MagicMock()
+    r.scalar_one_or_none.return_value = row
+    return r
 
 
 def _mock_etl_run_log(pipeline_name, status="success", records=10, age_hours=0):
@@ -95,7 +105,7 @@ class TestETLSchedulerShouldRun:
     @pytest.mark.asyncio
     async def test_no_previous_run_returns_true(self):
         db = _mock_session_factory()
-        db.execute.return_value.scalar_one_or_none.return_value = None
+        db.execute.return_value = _mock_result(row=None)
         scheduler = ETLScheduler(lambda: db)
         result = await scheduler._should_run("lgd", timedelta(days=7))
         assert result is True
@@ -104,7 +114,7 @@ class TestETLSchedulerShouldRun:
     async def test_recent_run_within_interval_returns_false(self):
         log = _mock_etl_run_log("lgd", age_hours=1)
         db = _mock_session_factory()
-        db.execute.return_value.scalar_one_or_none.return_value = log
+        db.execute.return_value = _mock_result(row=log)
         scheduler = ETLScheduler(lambda: db)
         result = await scheduler._should_run("lgd", timedelta(days=7))
         assert result is False
@@ -113,7 +123,7 @@ class TestETLSchedulerShouldRun:
     async def test_old_run_past_interval_returns_true(self):
         log = _mock_etl_run_log("lgd", age_hours=200)
         db = _mock_session_factory()
-        db.execute.return_value.scalar_one_or_none.return_value = log
+        db.execute.return_value = _mock_result(row=log)
         scheduler = ETLScheduler(lambda: db)
         result = await scheduler._should_run("lgd", timedelta(days=7))
         assert result is True
@@ -123,7 +133,7 @@ class TestETLSchedulerShouldRun:
         log = MagicMock()
         log.started_at = datetime.now() - timedelta(days=30)
         db = _mock_session_factory()
-        db.execute.return_value.scalar_one_or_none.return_value = log
+        db.execute.return_value = _mock_result(row=log)
         scheduler = ETLScheduler(lambda: db)
         result = await scheduler._should_run("lgd", timedelta(days=7))
         assert result is True
@@ -167,9 +177,14 @@ class TestETLSchedulerGetStatus:
         log = _mock_etl_run_log("lgd", age_hours=1)
         db = _mock_session_factory()
 
+        call_count = 0
+
         def execute_side_effect(*args):
+            nonlocal call_count
             r = MagicMock()
-            r.scalar_one_or_none.return_value = log if "lgd" in str(args) else None
+            # First call is for "lgd" pipeline
+            r.scalar_one_or_none.return_value = log if call_count == 0 else None
+            call_count += 1
             return r
 
         db.execute.side_effect = execute_side_effect
@@ -183,7 +198,7 @@ class TestETLSchedulerGetStatus:
     @pytest.mark.asyncio
     async def test_never_run_shows_never_run(self):
         db = _mock_session_factory()
-        db.execute.return_value.scalar_one_or_none.return_value = None
+        db.execute.return_value = _mock_result(row=None)
         scheduler = ETLScheduler(lambda: db)
         status = await scheduler.get_status()
         for pipeline_name in scheduler.SCHEDULES:

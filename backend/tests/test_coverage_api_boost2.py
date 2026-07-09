@@ -228,7 +228,7 @@ class TestAuthCoverage:
             "iss": APP_JWT_ISSUER,
         }, SECRET_KEY, algorithm=ALGORITHM)
 
-        _revoked_token_jtis.add(jti)
+        _revoked_token_jtis[jti] = None
         try:
             resp = TestClient(app).post(
                 "/api/v1/auth/refresh",
@@ -237,7 +237,7 @@ class TestAuthCoverage:
             assert resp.status_code == 401
             assert resp.json()["detail"] == "Refresh token has been revoked"
         finally:
-            _revoked_token_jtis.discard(jti)
+            _revoked_token_jtis.pop(jti, None)
 
     def test_refresh_expired_token(self):
         from api.v1.auth import router
@@ -362,7 +362,7 @@ class TestAuthCoverage:
 
         from api.v1.auth import router
         # Do NOT override get_current_user — let the real dependency run
-        _revoked_token_jtis.add(jti)
+        _revoked_token_jtis[jti] = None
         try:
             resp = TestClient(_mkapp(router)).get(
                 "/api/v1/auth/verify",
@@ -370,7 +370,7 @@ class TestAuthCoverage:
             )
             assert resp.status_code == 401
         finally:
-            _revoked_token_jtis.discard(jti)
+            _revoked_token_jtis.pop(jti, None)
 
     def test_revoke_token(self):
         from api.v1.auth import router

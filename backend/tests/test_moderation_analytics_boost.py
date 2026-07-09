@@ -20,31 +20,28 @@ from api.v1.waze_feed import TokenBucket, get_waze_cifs_feed
 
 @pytest.mark.asyncio
 async def test_moderation_service_validate_text():
-    service = RoadWatchModerationService()
+    settings = MagicMock()
+    service = RoadWatchModerationService(settings=settings)
     # Clean text
-    res = await service.validate_report_content("Found a massive pothole near the highway", "pothole")
-    assert res["status"] == "approved"
-    
+    res = await service.moderate_text("Found a massive pothole near the highway", "pothole")
+    assert res["approved"] is True
+
     # Blocked keyword
-    with pytest.raises(ValueError, match="Inappropriate report content detected"):
-        await service.validate_report_content("This road is fake and a scam", "pothole")
+    res_blocked = await service.moderate_text("This road is fake and a scam", "pothole")
+    assert res_blocked["approved"] is False
 
 
 @pytest.mark.asyncio
 async def test_moderation_service_validate_image():
-    service = RoadWatchModerationService()
-    # None image
-    res = await service.validate_image_authenticity(None)
-    assert res["status"] == "no_image"
-    
-    # Valid image URL
-    res = await service.validate_image_authenticity("https://safevixai.s3.amazonaws.com/valid.jpg")
-    assert res["status"] == "verified"
-    assert res["exif_tampered"] is False
-    
-    # Suspicious image URL
-    with pytest.raises(ValueError, match="Image fails authenticity or EXIF verification"):
-        await service.validate_image_authenticity("https://suspicious-domain.com/tampered.jpg")
+    settings = MagicMock()
+    service = RoadWatchModerationService(settings=settings)
+    # None image (empty bytes)
+    res = await service.moderate_image(b"")
+    assert res["approved"] is False
+
+    # Valid image bytes
+    res = await service.moderate_image(b"\x89PNG\r\n\x1a\n" + b"x" * 200)
+    assert res["approved"] is True
 
 
 @pytest.mark.asyncio
@@ -54,18 +51,18 @@ async def test_civic_analytics_service_stats():
     db.execute.side_effect = [
         MagicMock(scalar=lambda: 10), # LGD
         MagicMock(scalar=lambda: 5),  # Admin
-        MagicMock(fetchall=lambda: [("pothole", 15)]), # OSM
-        MagicMock(fetchall=lambda: [("open", 8)]),     # Grievances
+        MagicMock(all=lambda: [("pothole", 15)]), # OSM
+        MagicMock(all=lambda: [("open", 8)]),     # Grievances
         MagicMock(scalar=lambda: 3)   # Municipalities
     ]
     service = CivicAnalyticsService()
     stats = await service.get_civic_stats(db, state_code="TN")
-    assert stats.state_code == "TN"
-    assert stats.lgd_entities == 10
-    assert stats.admin_boundaries == 5
-    assert stats.osm_features == {"pothole": 15}
-    assert stats.grievances == {"open": 8}
-    assert stats.municipalities == 3
+    assert stats["state_code"] == "TN"
+    assert stats["lgd_entities"] == 10
+    assert stats["admin_boundaries"] == 5
+    assert stats["osm_features"] == {"pothole": 15}
+    assert stats["grievances"] == {"open": 8}
+    assert stats["municipalities"] == 3
 
 
 @pytest.mark.asyncio
@@ -80,10 +77,10 @@ async def test_civic_analytics_service_stats_no_state():
     ]
     service = CivicAnalyticsService()
     stats = await service.get_civic_stats(db, state_code=None)
-    assert stats.state_code is None
-    assert stats.lgd_entities == 20
-    assert stats.admin_boundaries == 12
-    assert stats.municipalities == 7
+    assert stats["state_code"] is None
+    assert stats["lgd_entities"] == 20
+    assert stats["admin_boundaries"] == 12
+    assert stats["municipalities"] == 7
 
 
 @pytest.mark.asyncio

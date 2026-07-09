@@ -1,10 +1,17 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2026 SafeVixAI Team
 
+"""Global test configuration and fixtures for SafeVixAI backend."""
 from __future__ import annotations
 
+import os
 import sys
-from pathlib import Path
+from pathlib import Path, PosixPath, WindowsPath
+
+# Python 3.11.9 removed Path._flavour which some libraries (PIL) depend on.
+# Monkey-patch it back so Path() calls work without AttributeError.
+if not hasattr(Path, '_flavour'):
+    Path._flavour = PosixPath._flavour if os.name != 'nt' else WindowsPath._flavour
 
 import pytest
 

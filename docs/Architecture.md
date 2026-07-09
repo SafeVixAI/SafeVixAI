@@ -1,4 +1,4 @@
-﻿# SafeVixAI — Architecture v2.0
+﻿# SafeVixAI — Architecture v3.1
 
 > **IIT Madras Road Safety Hackathon 2026** | Free & open-source (₹0 infra cost)
 
@@ -21,7 +21,8 @@
 │  DuckDB (challan SQL)  │  │  13 agent tools                 │
 │  Overpass/Nominatim    │  │  Redis conversation memory      │
 │  WebSocket /tracking   │  │  Prompt injection defense       │
-│  27 API route modules  │  │  IndicSeamless speech           │
+│  28 API route modules  │  │  IndicSeamless speech           │
+│  CQRS bus + Redlock    │  │  Lang detection + provider reg  │
 └────────────────────────┘  └────────────────────────────────┘
 ```
 
@@ -82,7 +83,7 @@ graph TD
 
 ## Backend (FastAPI :8000)
 
-### 25 Route Modules
+### 25 Route Modules (registered in `api/v1/__init__.py`) + 1 MCP Server
 
 All routes live in `backend/api/v1/`:
 
@@ -97,6 +98,8 @@ All routes live in `backend/api/v1/`:
 | `circuit_breaker_api.py` | Circuit breaker status and reset | JWT |
 | `citizen.py` | Citizen dashboard and service history | JWT |
 | `civic_intel.py` | LGD codes, municipality info, administrative boundaries | Public |
+| `civic_intel_municipalities.py` | Municipality CRUD, stats, rankings | Public |
+| `civic_intel_streetlights.py` | Streetlight QR/nearby/outage/maintenance | Public / JWT |
 | `command_center.py` | Emergency command center coordination | JWT |
 | `emergency.py` | Emergency locator, SOS triggers, nearby services | JWT / Public |
 | `field_workflow.py` | Field worker task management | JWT |
@@ -106,6 +109,7 @@ All routes live in `backend/api/v1/`:
 | `mcp_server.py` | MCP protocol server (SSE + messages) for external agents | JWT |
 | `officers.py` | Police/traffic officer management | JWT |
 | `offline.py` | Offline data sync bundles | JWT |
+| `providers.py` | AI provider API key management (encrypt/decrypt) | JWT |
 | `public.py` | Unauthenticated public endpoints | None |
 | `roadwatch.py` | Road issue reporting, photo uploads, status tracking | JWT Optional |
 | `routing.py` | Route calculation, safe routing suggestions | JWT |
@@ -113,7 +117,6 @@ All routes live in `backend/api/v1/`:
 | `user.py` | User profile management | JWT |
 | `wards.py` | Ward boundary and metadata management | JWT |
 | `waze_feed.py` | Waze community traffic/hazard data feed | JWT |
-| `providers.py` | AI provider API key management (encrypt/decrypt) | JWT |
 
 ### Middleware Stack (applied in order)
 
@@ -135,7 +138,7 @@ Request
 Response
 ```
 
-### 30+ Service Modules
+### 18+ Service Modules
 
 All services in `backend/services/`:
 
@@ -149,7 +152,9 @@ All services in `backend/services/`:
 | `safe_routing.py` | Safety-weighted route scoring |
 | `safe_spaces.py` | Safe space (well-lit, CCTV) identification |
 | `roadwatch_service.py` | Road issue lifecycle management |
+| `roadwatch_photos.py` | Photo validation, EXIF stripping, Supabase upload |
 | `roadwatch_moderation_service.py` | AI text moderation + EXIF authenticity verification |
+| `city_center_repo.py` | DB-backed Indian metro city centers with hardcoded fallback |
 | `authority_router.py` | ONDC-compliant authority routing matrix |
 | `llm_service.py` | LLM proxy for basic text generation |
 | `local_emergency_catalog.py` | Local emergency contact database |
@@ -204,12 +209,14 @@ All services in `backend/services/`:
 | `ETL_ENABLED` | No | Enables background ETL scheduler (default: false) |
 | `CHATBOT_INTERNAL_API_KEY` | No | Service-to-service auth key for chatbot ↔ backend |
 | `JWKS_URL` | No | JWKS endpoint URL for RS256 JWT verification |
+| `REDIS_TLS_ENABLED` | No | Enables `rediss://` TLS connection to Redis |
+| `REDIS_PASSWORD` | No | Redis AUTH password |
 
 ---
 
 ### Enterprise Patterns
 
-Enterprise-grade patterns added in Batch 16 hardening:
+Enterprise-grade patterns added in Batch 16-22 hardening:
 
 | Module | Pattern | Purpose |
 |--------|---------|---------|
@@ -219,6 +226,10 @@ Enterprise-grade patterns added in Batch 16 hardening:
 | `core/idempotency.py` | Idempotency Keys | Idempotency-Key header dedup with audit logging and distributed lock isolation |
 | `core/security.py` | RS256 JWT | RS256 JWT validation with atomic JWKS fetching and distributed caching |
 | `core/jwks.py` | JWKS Manager | Key rotation, caching (TTL-based), historical key fallback for gradual rotation |
+| `core/alert.py` | Email Alerts | When all 9 LLM providers fail, sends email with 3 diagnostic solutions. 5-min cooldown. |
+| `core/redis_client.py` | Stampede Protection | `get_json_with_stampede_protection()` — Redis SET NX EX mutex + stale-while-revalidate + retry |
+| `models/values.py` | Value Objects | `Coordinates(lat, lon)` with haversine `distance_to()`, `Severity(level)` with `from_risk_score()`, `Distance(meters)` |
+| `models/schemas_*.py` | Domain Schemas | 9 supplementary domain-specific Pydantic schema files alongside monolithic `schemas.py` |
 
 ---
 
@@ -568,12 +579,12 @@ sequenceDiagram
 SafeVixAI/
 ├── backend/                 FastAPI :8000
 │   ├── main.py              App factory (create_app → lifespan → services)
-│   ├── api/v1/              25 route modules
-│   ├── core/                Config, database, redis, security, rate limiter
-│   ├── services/            30+ service modules
-│   ├── models/              SQLAlchemy ORM + Pydantic schemas (single schemas.py, 18+ models)
-│   ├── middleware/           Middleware stack (13 middleware classes)
-│   ├── migrations/          Alembic (2 migrations: initial schema + GiST covering indexes)
+│   ├── api/v1/              28 route modules (registered) + 1 MCP server
+│   ├── core/                Config, database, redis, security, rate limiter, circuit_breaker, cqrs, alert
+│   ├── services/            47 service modules (37 core + 10 civic_intel) — 17 wired in app.state
+│   ├── models/              SQLAlchemy ORM (30) + Pydantic schemas + value objects
+│   ├── middleware/           Middleware stack (3 registered + 7 inline decorators)
+│   ├── migrations/          Alembic (25 versions: initial + GiST + city_centers + 22 autogenerated)
 │   ├── scripts/             DB seeders + data transforms
 │   └── data/                violations_seed.csv, state_overrides.csv, chroma_db/
 │
@@ -657,4 +668,4 @@ All services use free tiers or open-source self-hosted alternatives:
 
 ---
 
-*Document version: 3.0 | IIT Madras Road Safety Hackathon 2026 | ₹0 Infrastructure | Enterprise Hardening Batch 18*
+*Document version: 3.2 | IIT Madras Road Safety Hackathon 2026 | ₹0 Infrastructure | Enterprise Hardening Batch 26*

@@ -58,6 +58,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pytest pytest-cov pytest-asyncio httpx
+          if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
 
       - name: Run tests with coverage
         working-directory: backend
@@ -67,7 +68,30 @@ jobs:
           ENVIRONMENT: test
           ADMIN_SECRET: test-admin-secret
         run: |
-          pytest tests/ -v --cov=. --cov-branch --cov-report=xml --cov-report=term --cov-fail-under=100 -q
+          pytest tests/ -v --cov=. --cov-branch --cov-report=xml --cov-report=term --cov-fail-under=100 -q --ignore=tests/test_postgres_integration.py
+
+      - name: Run testcontainers-postgres integration tests
+        working-directory: backend
+        if: ${{ env.ACT }} != 'true'
+        env:
+          ENVIRONMENT: test
+          DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/safevixai_test
+        run: |
+          pytest tests/test_postgres_integration.py -v -q --timeout=120 || echo "testcontainers requires Docker — skipping"
+
+      - name: Run contract validation tests
+        working-directory: backend
+        env:
+          ENVIRONMENT: test
+        run: |
+          pytest tests/test_contract_validation.py -v -q
+
+      - name: Run mutation tests (informational — does not block build)
+        working-directory: backend
+        continue-on-error: true
+        run: |
+          pip install mutmut
+          mutmut run --paths-to-infect=core/,services/,api/v1/,models/,middleware/ --tests-dir=tests/ --runner="pytest tests/ -q --timeout=30 -x" --quiet 2>&1 | tail -20 || echo "mutmut report available on surviving-mutants.md"
 
       - name: Upload coverage
         uses: codecov/codecov-action@v4

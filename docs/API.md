@@ -127,6 +127,14 @@ Cache status — returns `{"status": "online"}` if Redis is available, `{"status
 
 Purge cache entries. Optional `key_prefix` query param to filter keys (e.g., `?key_prefix=waze`). Without prefix, flushes entire cache (`flushdb`).
 
+#### `GET /api/v1/admin/cache/status`
+
+Cache status — returns `{"status": "online"}` if Redis is available, `{"status": "fallback_in_memory"}` if not.
+
+#### `POST /api/v1/admin/cache/purge?key_prefix=...`
+
+Purge cache entries. Optional `key_prefix` query param to filter keys (e.g., `?key_prefix=waze`). Without prefix, flushes entire cache (`flushdb`).
+
 ---
 
 ## Analytics (`/api/v1/analytics`)
@@ -704,4 +712,4 @@ Speech service health and available language pairs.
 
 ---
 
-*Document version: 3.1 | IIT Madras Road Safety Hackathon 2026 | 25 backend route modules + 1 chatbot service*
+*Document version: 3.4 | IIT Madras Road Safety Hackathon 2026 | 28 backend route modules + chatbot + MCP*

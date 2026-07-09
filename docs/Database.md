@@ -22,9 +22,16 @@ SELECT PostGIS_version();
 
 ---
 
-## ORM Models (18+ Python files in `backend/models/`)
+## ORM Models (30 Python files in `backend/models/`)
 
-All 18+ models are defined under `backend/models/` using SQLAlchemy ORM + GeoAlchemy2. The initial Alembic migration (`backend/migrations/001_initial_schema.py`) creates 6 core tables; subsequent migrations add the remaining tables with PostGIS indexes.
+All 30 models are defined under `backend/models/` using SQLAlchemy ORM + GeoAlchemy2. The initial Alembic migration (`backend/migrations/001_initial_schema.py`) creates 7 core tables; subsequent migrations add the remaining tables with PostGIS indexes.
+
+**Migrations:**
+| Migration | Tables Added |
+|-----------|-------------|
+| `001_initial_schema.py` | 7 core tables (users, emergency_services, road_issues, sos_incidents, officers, wards, challan_records) |
+| `e7b9a1_indexes.py` | GiST index on `road_issues.location`, covering indexes on `status`, `category` |
+| `10016_city_centers.py` | `city_centers` table for DB-backed metro center coordinates |
 
 ---
 
@@ -261,7 +268,23 @@ Violation code definitions and state overrides are sourced from CSV files:
 
 ---
 
-### 14. `lgd_entities` (`lgd_entity.py`) — Local Government Directory
+### 14. `city_centers` (`city_center.py`) — Indian metro city centers
+
+| Column | Type | Constraints |
+|--------|------|-------------|
+| id | BIGSERIAL | PK |
+| city | VARCHAR | NOT NULL, UNIQUE |
+| state | VARCHAR | NOT NULL |
+| lat | FLOAT | NOT NULL |
+| lon | FLOAT | NOT NULL |
+| is_active | BOOLEAN | DEFAULT true |
+| created_at | TIMESTAMP | DEFAULT NOW() |
+
+Seeded by `scripts/data/seed_city_centers.py` with 9 Indian metros (Delhi, Mumbai, Bangalore, Chennai, Hyderabad, Kolkata, Pune, Ahmedabad, Jaipur).
+
+---
+
+### 15. `lgd_entities` (`lgd_entity.py`) — Local Government Directory
 
 | Column | Type | Constraints |
 |---|---|---|
@@ -276,7 +299,7 @@ Violation code definitions and state overrides are sourced from CSV files:
 
 ---
 
-### 15. `osm_civic_features` (`osm_civic_feature.py`) — OSM civic features
+### 16. `osm_civic_features` (`osm_civic_feature.py`) — OSM civic features
 
 | Column | Type | Constraints |
 |---|---|---|
@@ -292,7 +315,7 @@ Violation code definitions and state overrides are sourced from CSV files:
 
 ---
 
-### 16. `gov_datasets` (`gov_dataset.py`) — Government data records
+### 17. `gov_datasets` (`gov_dataset.py`) — Government data records
 
 | Column | Type | Constraints |
 |---|---|---|
@@ -304,7 +327,7 @@ Violation code definitions and state overrides are sourced from CSV files:
 
 ---
 
-### 17. `etl_run_logs` (`etl_run_log.py`) — ETL pipeline logs
+### 18. `etl_run_logs` (`etl_run_log.py`) — ETL pipeline logs
 
 | Column | Type | Constraints |
 |---|---|---|
@@ -320,7 +343,7 @@ Violation code definitions and state overrides are sourced from CSV files:
 
 ## Alembic Migration: `001_initial_schema.py`
 
-Creates 6 core tables with PostGIS support:
+Creates 7 core tables with PostGIS support:
 
 | Table | Key Spatial Column | Notes |
 |---|---|---|
@@ -336,6 +359,10 @@ All other tables are created via auto-migration or subsequent migration files.
 #### Subsequent Migration: `e7b9a1_indexes.py` (GiST + Covering Indexes)
 
 Adds GiST index on `road_issues.location` and covering indexes on `road_issues.status` and `road_issues.category` for query performance. Applied via `alembic upgrade head`.
+
+#### Subsequent Migration: `10016_city_centers.py` (City Centers Table)
+
+Creates `city_centers` table for DB-backed Indian metro coordinates. Seeds 9 cities via `scripts/data/seed_city_centers.py`. Depends on `eb59ee6949aa`.
 
 ---
 
@@ -375,6 +402,10 @@ These files are consumed at runtime by DuckDB (server) and DuckDB-Wasm (client):
 | `rate_limit:{ip}:{endpoint}` | — | Rate limit counters (sliding window) |
 | `chat_session:{session_id}` | 86400s | Conversation memory |
 | `sos_broadcast:{incident_id}` | — | SOS broadcast subscribers |
+
+**Stampede Protection:** `get_json_with_stampede_protection()` uses `SET NX EX` mutex with 50ms retry + stale-while-revalidate fallback. Available for any cache key that recalculates from source data.
+
+**Redis TLS:** Enabled via `REDIS_TLS_ENABLED=true` + `REDIS_PASSWORD=...` env vars. `get_redis_client()` auto-upgrades to `rediss://` when TLS is enabled.
 
 ---
 
@@ -428,4 +459,4 @@ LIMIT 1;
 
 ---
 
-*Document version: 3.1 | IIT Madras Road Safety Hackathon 2026 | July 2026 (Enterprise Hardening)*
+*Document version: 3.3 | IIT Madras Road Safety Hackathon 2026 | July 2026 (Enterprise Hardening Batch 26)*

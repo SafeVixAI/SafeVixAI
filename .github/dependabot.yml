@@ -1,5 +1,4 @@
-# SPDX-License-Identifier: MIT
-# Copyright (c) 2026 SafeVixAI Team
+# Dependabot — automated dependency updates (enterprise: pip + npm + actions)
 version: 2
 updates:
   - package-ecosystem: "pip"
@@ -7,96 +6,29 @@ updates:
     schedule:
       interval: "weekly"
       day: "monday"
-      time: "06:00"
-      timezone: "Asia/Kolkata"
+    labels: ["dependencies", "python"]
     open-pull-requests-limit: 10
-    labels:
-      - "dependencies"
-      - "backend"
-    reviewers:
-      - "team-backend"
-    groups:
-      backend-prod:
-        applies-to: "version-updates"
-        patterns:
-          - "fastapi*"
-          - "uvicorn*"
-          - "sqlalchemy*"
-          - "pydantic*"
-        update-types:
-          - "patch"
-          - "minor"
-      backend-dev:
-        applies-to: "version-updates"
-        patterns:
-          - "pytest*"
-          - "ruff*"
-        dependency-type: "development"
 
   - package-ecosystem: "pip"
     directory: "/chatbot_service"
     schedule:
       interval: "weekly"
       day: "monday"
-      time: "06:00"
-      timezone: "Asia/Kolkata"
+    labels: ["dependencies", "python"]
     open-pull-requests-limit: 10
-    labels:
-      - "dependencies"
-      - "chatbot"
-    reviewers:
-      - "team-ai"
-    groups:
-      chatbot-core:
-        applies-to: "version-updates"
-        patterns:
-          - "transformers*"
-          - "torch*"
-          - "chromadb*"
-        update-types:
-          - "patch"
-          - "minor"
 
   - package-ecosystem: "npm"
     directory: "/frontend"
     schedule:
       interval: "weekly"
       day: "monday"
-      time: "06:00"
-      timezone: "Asia/Kolkata"
+    labels: ["dependencies", "javascript"]
     open-pull-requests-limit: 10
-    labels:
-      - "dependencies"
-      - "frontend"
-    reviewers:
-      - "team-frontend"
-    groups:
-      nextjs:
-        applies-to: "version-updates"
-        patterns:
-          - "next*"
-          - "react*"
-          - "react-dom*"
-        update-types:
-          - "patch"
-          - "minor"
-      testing:
-        applies-to: "version-updates"
-        patterns:
-          - "jest*"
-          - "@playwright*"
-          - "@testing-library*"
-        dependency-type: "development"
 
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
       day: "monday"
-    labels:
-      - "dependencies"
-      - "ci"
-    groups:
-      actions:
-        patterns:
-          - "*"
+    labels: ["dependencies", "ci"]
+    open-pull-requests-limit: 5

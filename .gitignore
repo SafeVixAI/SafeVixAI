@@ -267,6 +267,7 @@ backend/.hypothesis/
 # Coverage files
 *.coverage
 *.py,cover
+*.lcov
 coverage.xml
 frontend/coverage-report.json
 frontend/coverage-summary.json
@@ -276,6 +277,10 @@ frontend/full-test-output.json
 # Local runner logs/results
 check_runs.json
 run_error.json
+test_output.txt
+
+# Alternative package manager lockfiles
+backend/uv.lock
 
 # --- Local Scraping & Raw ETL Datasets ---
 backend/data/civic_intel/

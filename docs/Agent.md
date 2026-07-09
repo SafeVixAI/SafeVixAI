@@ -13,6 +13,47 @@
 3. **Challan Calculator** — Exact traffic fines under MVA 2019 with state-specific overrides. Deterministic SQL — never hallucinates.
 4. **RoadWatch Reporter** — Citizens report potholes, flooding, broken roads. Auto-routes complaint to correct government authority.
 
+## Architecture
+
+| Layer | Count | Notes |
+|-------|-------|-------|
+| API Route Modules | **28** registered in `api/v1/__init__.py` + 1 standalone MCP server |
+| Core Infrastructure | **25** files (config, database, security, redis, circuit_breaker, cqrs, etc.) |
+| Service Modules | **47** files (37 core + 10 civic_intel), **17 wired into app.state** |
+| Domain Models | **30** SQLAlchemy ORM + Pydantic schemas + value objects |
+| Database Migrations | **25** versions |
+| Middleware Layers | **6 registered** + 3 inline `@app.middleware("http")` decorators |
+| Test Files | **113** files targeting 100% branch+line coverage (`fail_under=100`) |
+
+### Middleware Stack (actual, not aspirational)
+
+1. CORSMiddleware (FastAPI built-in)
+2. TrustedHostMiddleware (FastAPI built-in)
+3. IdempotencyMiddleware (core/idempotency.py)
+4. APIVersioningMiddleware (core/versioning.py)
+5. ApiResponseMiddleware (core/response_wrapper.py)
+6. AllowedHostsMiddleware (middleware/allowed_hosts.py)
+7. i18n middleware (core/i18n_middleware.py via decorator)
+8. Security headers middleware (main.py inline)
+9. Request ID middleware (main.py inline)
+10. Prometheus metrics middleware (main.py inline)
+11. CSRF middleware (main.py inline)
+12. Tenant isolation middleware (main.py inline)
+13. Deprecation headers middleware (main.py inline)
+
+### Circuit Breaker Coverage
+
+| External Service | Circuit Breaker | Status |
+|-----------------|----------------|--------|
+| Overpass API | `overpass` | ✅ Wired in `overpass_service.py` |
+| Nominatim | `nominatim` | ✅ Wired in `geocoding_service.py` |
+| Photon | `photon` | ✅ Wired in `geocoding_service.py` |
+| OpenRouteService (routing) | `ors_routing` | ✅ Wired in `routing_service.py` |
+| OSRM (routing) | `osrm_routing` | ✅ Wired in `routing_service.py` |
+| ORS (safe routing) | `ors_safe` | ✅ Wired in `safe_routing.py` |
+| OSRM (safe routing) | `osrm_safe` | ✅ Wired in `safe_routing.py` |
+| Safe Spaces | `safe_spaces` | ✅ Wired in `safe_spaces.py` |
+
 **Total infra cost: ₹0.** Every tool is free/open-source.
 
 ---
@@ -22,10 +63,20 @@
 | Service | Command | Passing | Coverage |
 |---------|---------|---------|----------|
 | Backend | `pytest tests/ -q` from `backend/` | **2445/2445** | **100%** (`fail_under=100`) |
-| Chatbot | `pytest tests/ -q` from `chatbot_service/` | **1095/1095** | **96%** |
-| Frontend | `npm test` | **2625/2625** (226 suites) | **83% lines** |
+| Chatbot | `pytest tests/ -q` from `chatbot_service/` | **1452/1452** | **97%** |
+| Frontend | `npm test` | **2757/2757** (236 suites) | **85% lines** |
 | E2E | `npx playwright test e2e/ --grep-invert="Visual Regression\|visual"` | **55/55** | **0 remaining** |
-| **Total unit tests** | | **6165 total passing** | |
+| **Total unit tests** | | **~6654 total passing** | |
+
+**Enterprise Hardening: All Phases Complete (Batch 26)**
+| Phase | Focus | Status |
+|-------|-------|--------|
+| Phase 6 | Testing Hardening — testcontainers, hypothesis, contract, ChromaDB, httpx, mutmut, a11y, SW, all CI integrated | ✅ **100%** |
+| Phase 7 | DDD & Ubiquitous Language — value objects, dead code, provider aliases, docstrings | ✅ **100%** |
+| Phase 8 | Monitoring & Observability — stampede protection, TTL strategy, pool size, streaming, memo/shallow | ✅ **100%** |
+| Phase 9 | Final Hardening — dependabot, secrets, Redis TLS, schema split, hooks, pkg mgr, edge cases | ✅ **100%** |
+| Phase 9a | Frontend Coverage Sweep — failing suites fixed, landing tests, coverage scope, branch gaps closed | ✅ **100%** |
+| Phase 9b | Backend Enterprise Lock — circuit breaker all external calls, services wired, orphaned modules deprecated, metrics connected, docs synced | ✅ **100%** |
 
 ---
 
@@ -60,6 +111,12 @@
 9. **AuthGuard E2E Bypass** — `__E2E_SKIP_AUTH__` localStorage flag
 10. **GSAP Opacity Check Removed** — `waitForMount` no longer checks opacity (GSAP fails silently in production build)
 11. **Enterprise Core Patterns** — CQRS command/query bus, Redlock distributed locking, JWKS key rotation, Idempotency middleware, domain exception handlers, TokenBucket rate limiting
+12. **Cache Stampede Protection** — `get_json_with_stampede_protection()` with SET NX EX mutex + stale-while-revalidate
+13. **Redis TLS Support** — `rediss://` URI via `REDIS_TLS_ENABLED` + `REDIS_PASSWORD` env vars
+14. **Domain Schema Split** — 9 supplementary `models/schemas_*.py` files alongside monolithic `schemas.py`
+15. **Value Objects** — `Coordinates`, `Severity`, `Distance` in `models/values.py`
+16. **Email Alerts** — `core/alert.py` in both backend and chatbot_service for LLM-outage notification
+17. **Custom Hooks Extraction** — 7 extracted hooks from `EnterpriseClientAppHooks.tsx`: `useI18nClientSync`, `useClientServiceWorker`, `useProfileHydration`, `useSupabaseSession`, `useKeepAlivePing`, `usePageLoadTiming`, `useEnhancedCrashDetection`
 
 ---
 
@@ -78,9 +135,9 @@ POST /api/v1/chat/stream
 
 | Layer | Count |
 |-------|-------|
-| Backend route modules | 25 |
-| Backend services | 36 |
-| Backend ORM models | 17 |
+| Backend route modules | 28 |
+| Backend services | 47 |
+| Backend ORM models | 30 |
 | Chatbot tools | 13 |
 | Chatbot providers | 9 (Groq, Cerebras, Gemini, GitHub Models, NVIDIA NIM, OpenRouter, Mistral, Together, Sarvam AI + Template fallback) |
 | Chatbot agent modules | 8 |
@@ -154,4 +211,4 @@ Verify: `GET http://localhost:8000/health` and `GET http://localhost:8010/health
 
 ---
 
-*Document version: 2.1 | IIT Madras Road Safety Hackathon 2026 | Updated: July 2026 (Enterprise Hardening Batch 18)*
+*Document version: 3.2 | IIT Madras Road Safety Hackathon 2026 | Updated: July 2026 (Enterprise Hardening Batch 26)*

@@ -412,7 +412,7 @@ Backed by IndicSeamlessService (SeamlessM4T for ASR + translation).
 | **Total Unit Tests** | **2829** |
 | Frontend Components | 91 |
 | Frontend Routes | 28 |
-| API Route Modules | 27 |
+| API Route Modules | 28 |
 | CI/CD Workflows | 19 |
 
 ---
@@ -504,4 +504,4 @@ When a request takes >5 seconds (cold start signal), a "Connecting..." banner ap
 
 ---
 
-*Document version: 2.0 | IIT Madras Road Safety Hackathon 2026 | Updated: June 2026*
+*Document version: 2.1 | IIT Madras Road Safety Hackathon 2026 | Updated: July 2026*

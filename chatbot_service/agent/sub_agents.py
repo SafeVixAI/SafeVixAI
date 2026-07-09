@@ -4,6 +4,13 @@
 class SubAgentManager:
     @staticmethod
     def get_system_prompt_for_intent(intent: str) -> str | None:
+        try:
+            from prompts import get_sub_agent_prompt
+            yaml_prompt = get_sub_agent_prompt(intent)
+            if yaml_prompt:
+                return yaml_prompt
+        except ImportError:
+            pass
         prompts = {
             'legal': "You are the SafeVixAI Legal Advisor sub-agent. You provide precise, factual legal information based on the Motor Vehicles Act and other relevant statutes. Do not give binding legal counsel.",
             'first_aid': "You are the SafeVixAI Medical Response sub-agent. You provide calm, accurate, and step-by-step first aid guidance. Always recommend seeking professional medical help.",

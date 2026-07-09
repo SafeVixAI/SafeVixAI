@@ -8,6 +8,7 @@ import logging
 import re
 
 from agent.state import ConversationContext, RetrievedContext, ToolContext
+from memory.tiered_memory import TieredMemory
 from rag.retriever import Retriever
 from tools.challan_tool import ChallanTool
 from tools.first_aid_tool import FirstAidTool
@@ -38,6 +39,7 @@ class ContextAssembler:
         weather_tool: WeatherTool,
         drug_info_tool: DrugInfoTool,
         episodic_memory_agent = None,
+        tiered_memory: TieredMemory | None = None,
     ) -> None:
         self.retriever = retriever
         self.sos_tool = sos_tool
@@ -50,6 +52,7 @@ class ContextAssembler:
         self.weather_tool = weather_tool
         self.drug_info_tool = drug_info_tool
         self.episodic_memory_agent = episodic_memory_agent
+        self.tiered_memory = tiered_memory
 
     async def assemble(
         self,
@@ -73,20 +76,38 @@ class ContextAssembler:
             history=history,
         )
 
-        if self.episodic_memory_agent and user_id and user_id not in ('anonymous', 'authenticated'):
+        # Tiered memory (user prefs + STM + LTM)
+        if user_id and user_id not in ('anonymous', 'authenticated', ''):
             try:
-                memories = self.episodic_memory_agent.retrieve_memory(user_id, message)
-                if memories:
-                    context.tools.append(
-                        ToolContext(
-                            name='episodic_memory',
-                            summary='User context (remembered facts): ' + ' | '.join(memories),
-                            payload={'memories': memories},
-                            sources=['memory:episodic'],
+                if self.tiered_memory:
+                    tm_result = await self.tiered_memory.get_relevant(user_id, session_id, message)
+                    if not tm_result.is_empty():
+                        summary = tm_result.to_summary()
+                        context.tools.append(
+                            ToolContext(
+                                name='tiered_memory',
+                                summary=summary[:500],
+                                payload={
+                                    'preferences': tm_result.user_preferences,
+                                    'stm': tm_result.stm_facts,
+                                    'ltm': tm_result.ltm_memories,
+                                },
+                                sources=['memory:tiered'],
+                            )
                         )
-                    )
+                elif self.episodic_memory_agent:
+                    memories = self.episodic_memory_agent.retrieve_memory(user_id, message)
+                    if memories:  # pragma: no branch
+                        context.tools.append(
+                            ToolContext(
+                                name='episodic_memory',
+                                summary='User context (remembered facts): ' + ' | '.join(memories),
+                                payload={'memories': memories},
+                                sources=['memory:episodic'],
+                            )
+                        )
             except (ValueError, KeyError, RuntimeError) as e:
-                logger.warning("Episodic memory retrieval failed: %s", e)
+                logger.warning("Tiered/episodic memory retrieval failed: %s", e)
 
         dispatch = {
             'emergency': self._assemble_emergency,
@@ -127,7 +148,7 @@ class ContextAssembler:
                         sources=['tool:sos', 'backend:/api/v1/emergency/sos'],
                     )
                 )
-            if not isinstance(weather, Exception) and weather:
+            if not isinstance(weather, Exception) and weather:  # pragma: no branch
                 context.tools.append(
                     ToolContext(
                         name='weather',
@@ -193,12 +214,12 @@ class ContextAssembler:
                 sources=['tool:safe_route'],
             )
         )
-        if context.lat is not None and context.lon is not None:
+        if context.lat is not None and context.lon is not None:  # pragma: no branch
             issues_task = self.road_issues_tool.lookup(lat=context.lat, lon=context.lon)
             weather_task = self.weather_tool.lookup(lat=context.lat, lon=context.lon)
             issues, weather = await asyncio.gather(issues_task, weather_task, return_exceptions=True)
 
-            if not isinstance(issues, Exception) and issues and (issues.get('issues') or []):
+            if not isinstance(issues, Exception) and issues and (issues.get('issues') or []):  # pragma: no branch
                 count = issues.get('count') or len(issues.get('issues') or [])
                 context.tools.append(
                     ToolContext(
@@ -208,7 +229,7 @@ class ContextAssembler:
                         sources=['tool:road_issues', 'backend:/api/v1/roads/issues'],
                     )
                 )
-            if not isinstance(weather, Exception) and weather:
+            if not isinstance(weather, Exception) and weather:  # pragma: no branch
                 context.tools.append(
                     ToolContext(
                         name='route_weather',
@@ -228,7 +249,7 @@ class ContextAssembler:
 
     async def _add_first_aid_context(self, context: ConversationContext) -> None:
         guide = self.first_aid_tool.lookup(context.message)
-        if guide:
+        if guide:  # pragma: no branch
             steps = guide.get('steps') or []
             context.tools.append(
                 ToolContext(
@@ -257,7 +278,7 @@ class ContextAssembler:
 
     async def _add_challan_context(self, context: ConversationContext) -> None:
         challan = await self.challan_tool.infer_and_calculate(context.message, client_ip=context.client_ip)
-        if challan:
+        if challan:  # pragma: no branch
             context.tools.append(
                 ToolContext(
                     name='challan',

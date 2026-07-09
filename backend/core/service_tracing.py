@@ -1,7 +1,11 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2026 SafeVixAI Team
 
-"""Custom tracing helpers for SafeVixAI backend services."""
+"""Custom tracing helpers for SafeVixAI backend services.
+
+DEPRECATED: Use core.tracing.setup_tracing() and core.tracing.get_tracer() instead.
+Will be removed in v4.0.
+"""
 from __future__ import annotations
 
 import asyncio

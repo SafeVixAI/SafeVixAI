@@ -67,7 +67,7 @@ class AlertService:
             subject="ALL LLM Providers Failed",
             details=(
                 f"Primary provider: {primary_provider}\n"
-                f"Failed chain: {' \u2192 '.join(failed_providers)}\n"
+                f"Failed chain: {' → '.join(failed_providers)}\n"
                 f"Error: {error_msg}\n"
                 f"User query: {user_message[:100]}..."
             ),

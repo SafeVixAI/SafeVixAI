@@ -44,13 +44,15 @@ def register_exception_handlers(app: FastAPI) -> None:
         )
 
     try:
-        from sqlalchemy.exc import IntegrityError
-        @app.exception_handler(IntegrityError)
-        async def sqlalchemy_integrity_error_handler(request: Request, exc: IntegrityError) -> JSONResponse:
+        from sqlalchemy.exc import IntegrityError as SAIntegrityError
+    except ImportError:
+        SAIntegrityError = None
+
+    if SAIntegrityError is not None:
+        @app.exception_handler(SAIntegrityError)
+        async def sqlalchemy_integrity_error_handler(request: Request, exc: SAIntegrityError) -> JSONResponse:
             logger.error("Database integrity error on %s: %s", request.url.path, str(exc))
             return JSONResponse(
                 status_code=409,
                 content={"error": {"code": "DatabaseIntegrityError", "message": "A conflict occurred with existing database records."}},
             )
-    except ImportError:
-        pass

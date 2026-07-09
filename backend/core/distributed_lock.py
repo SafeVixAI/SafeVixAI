@@ -31,10 +31,11 @@ class Redlock:
         self._has_lock = False
 
     async def acquire(self) -> bool:
-        if self.cache._client:
+        cache_client = getattr(self.cache, '_client', None)
+        if cache_client:
             try:
                 # Use Redis SETNX with EX (set if not exists with TTL)
-                result = await self.cache._client.set(
+                result = await cache_client.set(
                     self.name, self.lock_value, ex=self.ttl_seconds, nx=True
                 )
                 if result:
@@ -59,7 +60,8 @@ class Redlock:
         if not self._has_lock:
             return
 
-        if self.cache._client:
+        release_client = getattr(self.cache, '_client', None)
+        if release_client:
             try:
                 # Lua script to release lock only if value matches
                 lua_script = """
@@ -69,7 +71,7 @@ class Redlock:
                     return 0
                 end
                 """
-                await self.cache._client.eval(lua_script, 1, self.name, self.lock_value)
+                await release_client.eval(lua_script, 1, self.name, self.lock_value)
                 self._has_lock = False
                 return
             except Exception as e:

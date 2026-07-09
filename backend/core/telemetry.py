@@ -1,6 +1,8 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2026 SafeVixAI Team
 
+# DEPRECATED: Use core.tracing.setup_tracing() instead. Will be removed in v4.0.
+
 import logging
 from fastapi import FastAPI
 from opentelemetry import trace

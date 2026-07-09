@@ -3,8 +3,11 @@
 
 from __future__ import annotations
 
+import asyncio
+import collections
 import json
 import time
+import uuid
 import warnings
 from typing import Any
 
@@ -20,7 +23,12 @@ _redis_pool: redis.asyncio.ConnectionPool | None = None
 _redis_pool_url: str | None = None
 
 
-def get_redis_client(redis_url: str | None) -> Redis:
+def get_redis_client(
+    redis_url: str | None,
+    *,
+    tls_enabled: bool = False,
+    password: str | None = None,
+) -> Redis:
     """Return a Redis client backed by a shared connection pool.
 
     Reuses a single ConnectionPool across all callers, avoiding the
@@ -31,18 +39,22 @@ def get_redis_client(redis_url: str | None) -> Redis:
         return None  # type: ignore[return-value]
     if _redis_pool is None or redis_url != _redis_pool_url:
         if _redis_pool is not None:
-            # URL changed — close old pool (best-effort)
             try:
                 import asyncio
                 asyncio.ensure_future(_redis_pool.aclose())
             except Exception:
                 pass
         _redis_pool_url = redis_url
+        url = redis_url
+        if tls_enabled and url.startswith("redis://"):
+            url = url.replace("redis://", "rediss://", 1)
         _redis_pool = redis.asyncio.ConnectionPool.from_url(
-            redis_url,
+            url,
             max_connections=20,
             pool_timeout=5,
             retry_on_timeout=True,
+            password=password,
+            ssl=tls_enabled or None,
         )
     return Redis(connection_pool=_redis_pool)
 
@@ -122,6 +134,59 @@ class CacheHelper:
         if isinstance(payload, bytes):
             payload = payload.decode('utf-8')
         return json.loads(payload)
+
+    async def get_json_with_stampede_protection(
+        self,
+        key: str,
+        recompute: collections.abc.Callable[[], collections.abc.Awaitable[Any]],
+        ttl_seconds: int,
+        *,
+        mutex_timeout: float = 1.0,
+        stale_ttl: int | None = None,
+    ) -> Any:
+        """Get cached JSON value with stampede protection via Redis mutex.
+
+        On cache miss, acquires a distributed lock to prevent multiple concurrent
+        recomputations. Supports stale-while-revalidate when ``stale_ttl`` is set.
+        """
+        result = await self.get_json(key)
+        if result is not None:
+            return result
+
+        if stale_ttl is not None:
+            stale = await self.get_json_stale(key, max_age_seconds=stale_ttl)
+            if stale is not None:
+                return stale
+
+        lock_key = f"{key}:lock"
+        lock_value = str(uuid.uuid4())
+        acquired = False
+        try:
+            if self._client:
+                try:
+                    acquired = await self._client.set(lock_key, lock_value, nx=True, ex=int(mutex_timeout * 2))
+                    self._redis_healthy = True
+                except Exception:
+                    self._redis_healthy = False
+
+            if not acquired:
+                await asyncio.sleep(0.05)
+                retry = await self.get_json(key)
+                if retry is not None:
+                    return retry
+                if stale_ttl is not None:
+                    return await self.get_json_stale(key, max_age_seconds=stale_ttl)
+                return None
+
+            value = await recompute()
+            await self.set_json(key, value, ttl_seconds)
+            return value
+        finally:
+            if acquired and self._client:
+                try:
+                    await self._client.delete(lock_key)
+                except Exception:
+                    pass
 
     async def get_json_stale(self, key: str, max_age_seconds: int = STALE_CACHE_MAX_AGE_SECONDS) -> Any | None:
         """Get cached value even if expired (stale-while-revalidate).
@@ -289,10 +354,15 @@ class CacheHelper:
             return
 
 
-def create_cache(redis_url: str | None = None) -> CacheHelper:
+def create_cache(
+    redis_url: str | None = None,
+    *,
+    tls_enabled: bool = False,
+    password: str | None = None,
+) -> CacheHelper:
     if not redis_url:
         return CacheHelper()
-    client = get_redis_client(redis_url)
+    client = get_redis_client(redis_url, tls_enabled=tls_enabled, password=password)
     if client is None:
         return CacheHelper()
     return CacheHelper(client)

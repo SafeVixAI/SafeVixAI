@@ -3,6 +3,8 @@
 
 """Response caching middleware for SafeVixAI backend.
 
+DEPRECATED: Use core.redis_client.CacheHelper instead. Will be removed in v4.0.
+
 Provides:
 - In-memory cache with TTL for frequently accessed endpoints
 - Cache invalidation helpers

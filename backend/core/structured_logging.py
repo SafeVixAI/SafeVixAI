@@ -3,6 +3,10 @@
 
 """Structured logging with correlation IDs for SafeVixAI backend.
 
+DEPRECATED: Logging is configured inline in main.py._configure_logging().
+The correlation ID pattern is handled by _request_id_middleware.
+Will be removed in v4.0.
+
 Provides:
 - Request correlation ID tracking
 - Structured JSON logging

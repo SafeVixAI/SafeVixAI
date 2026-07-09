@@ -145,6 +145,8 @@ class FakeProviderRouter:
         yield {"type": "token", "text": "mock stream"}
 
 class FakeIntentDetector:
+    def __init__(self, **kwargs):
+        pass
     def detect(self, message):
         return "general"
     def refine_intent(self, initial_intent, message, history):
@@ -722,11 +724,13 @@ class TestAiImageTooLarge:
     """Cover line 32 in api/ai.py."""
 
     def test_validate_image_too_large_413(self, monkeypatch):
-        """Image size > 5MB returns 413."""
+        """Image size > MAX_IMAGE_BYTES returns 413."""
+        import api.ai
+        monkeypatch.setattr(api.ai, "MAX_IMAGE_BYTES", 10)
         app = _build_app(monkeypatch)
         app.dependency_overrides[verify_internal_auth] = lambda: None
-        big_data = b"x" * (5 * 1024 * 1024 + 1)
-        with TestClient(app) as client:
+        big_data = b"x" * 100
+        with TestClient(app, raise_server_exceptions=False) as client:
             resp = client.post(
                 "/api/v1/ai/validate-image",
                 files={"file": ("big.jpg", big_data, "image/jpeg")},

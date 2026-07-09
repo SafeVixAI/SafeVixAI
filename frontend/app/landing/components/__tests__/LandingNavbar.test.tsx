@@ -4,7 +4,7 @@ jest.mock('next/link', function() { return function({ children, href, ...rest })
 jest.mock('lucide-react', function() { return { Menu: function() { return null }, X: function() { return null } } })
 
 var React = require('react')
-var { render, screen, fireEvent } = require('@testing-library/react')
+var { render, screen } = require('@testing-library/react')
 var LandingNavbar = require('../LandingNavbar').default
 
 describe('LandingNavbar', function() {

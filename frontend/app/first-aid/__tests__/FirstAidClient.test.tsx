@@ -53,4 +53,32 @@ describe('FirstAidClient', function() {
     expect(screen.getAllByText('Call 112').length).toBeGreaterThanOrEqual(1)
     fireEvent.click(screen.getAllByText('CPR')[0])
   })
+
+  it('filters guides by search query', function() {
+    render(React.createElement(FirstAidClient, { guides: mockGuides }))
+    var input = screen.getByPlaceholderText(/Search/)
+    fireEvent.change(input, { target: { value: 'Burn' } })
+    expect(screen.getByText('Burns')).toBeTruthy()
+    expect(screen.queryByText('CPR')).toBeNull()
+  })
+
+  it('shows empty state when search has no matches', function() {
+    render(React.createElement(FirstAidClient, { guides: mockGuides }))
+    var input = screen.getByPlaceholderText(/Search/)
+    fireEvent.change(input, { target: { value: 'zzzznonexistent' } })
+    expect(screen.getByText(/No protocols match/)).toBeTruthy()
+  })
+
+  it('toggles step completion in guide detail', function() {
+    render(React.createElement(FirstAidClient, { guides: mockGuides }))
+    fireEvent.click(screen.getByText('CPR'))
+    var steps = screen.getAllByText('Call 112')
+    fireEvent.click(steps[0])
+    expect(screen.getByText('first_aid.complete_count')).toBeTruthy()
+  })
+
+  it('renders Invoke Full Scan button', function() {
+    render(React.createElement(FirstAidClient, { guides: mockGuides }))
+    expect(screen.getByText(/Invoke Full Scan/)).toBeTruthy()
+  })
 })

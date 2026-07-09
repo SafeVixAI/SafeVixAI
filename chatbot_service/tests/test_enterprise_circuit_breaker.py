@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 SafeVixAI Team
 import time
 import pytest
 from providers.circuit_breaker import CircuitBreaker, TokenBucket

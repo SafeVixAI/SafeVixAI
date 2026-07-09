@@ -156,6 +156,8 @@ class FakeProviderRouter:
 
 
 class FakeIntentDetector:
+    def __init__(self, **kwargs):
+        pass
     def detect(self, message):
         return "general"
 

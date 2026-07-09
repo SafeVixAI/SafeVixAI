@@ -50,6 +50,8 @@ class FakeVectorStore:
 
 
 class FakeIntentDetector:
+    def __init__(self, **kwargs):
+        pass
     def detect(self, message):
         msg_lower = message.lower()
         if any(w in msg_lower for w in ("ambulance", "hospital", "accident", "emergency", "sos")):

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 SafeVixAI Team
 import pytest
 from fastapi.testclient import TestClient
 from unittest.mock import patch, AsyncMock

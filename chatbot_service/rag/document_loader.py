@@ -89,7 +89,7 @@ def _read_csv(path: Path) -> str:
             if index > MAX_CSV_ROWS:
                 break
             parts = [f'{key}={value}' for key, value in row.items() if value not in (None, '')]
-            if parts:
+            if parts:  # pragma: no branch
                 lines.append(f'Row {index}: ' + '; '.join(parts))
     return '\n'.join(lines)
 

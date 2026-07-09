@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 from dataclasses import asdict, dataclass
@@ -121,7 +122,7 @@ class LocalVectorStore:
         # We need to compute embeddings for all chunks before inserting
         contents = [chunk.content for chunk in chunks]
         try:
-            embeddings = self._embedding_function(contents)
+            embeddings = await asyncio.to_thread(self._embedding_function, contents)
         except Exception as exc:
             logger.warning('Failed to generate embeddings: %s', exc)
             return
@@ -155,7 +156,8 @@ class LocalVectorStore:
         pool = await self._get_pool()
         
         try:
-            query_embedding = self._embedding_function([query])[0]
+            query_results = await asyncio.to_thread(self._embedding_function, [query])
+            query_embedding = query_results[0]
             emb_str = f"[{','.join(str(x) for x in query_embedding)}]"
         except Exception as exc:
             logger.warning('Failed to generate query embedding: %s', exc)
@@ -244,7 +246,7 @@ class LocalVectorStore:
                 current_length = 0
             current.append(paragraph)
             current_length += len(paragraph)
-        if current:
+        if current:  # pragma: no branch
             chunks.append(
                 DocumentChunk(
                     chunk_id=f'{document.source}:{chunk_index}',

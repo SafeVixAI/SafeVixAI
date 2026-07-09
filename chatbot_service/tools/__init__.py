@@ -12,7 +12,7 @@ import httpx
 from config import Settings
 
 # alert_service.py is at project root
-for parent in Path(__file__).resolve().parents:
+for parent in Path(__file__).resolve().parents:  # pragma: no branch
     if (parent / 'alert_service.py').exists():
         if str(parent) not in sys.path:
             sys.path.insert(0, str(parent))

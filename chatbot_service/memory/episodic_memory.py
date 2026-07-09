@@ -26,15 +26,19 @@ class EpisodicMemoryAgent:
         if not history or len(history) < 2:
             return
 
-        # Prepare prompt for extraction
+        # Prepare prompt for extraction (load from versioned YAML if available)
         history_text = "\n".join([f"{msg.get('role')}: {msg.get('content')}" for msg in history])
-        prompt = (
-            "You are a memory extraction agent. Read the following conversation history and extract key "
-            "user preferences, context, or facts that should be remembered for future sessions "
-            "(e.g., user's location, vehicle type, medical condition, frequent problems). "
-            "Output ONLY a concise bulleted list of facts. If there is nothing worth remembering, output exactly 'NO_FACTS'.\n\n"
-            f"Conversation History:\n{history_text}"
-        )
+        try:
+            from prompts import get_episodic_memory_prompt
+            prompt = get_episodic_memory_prompt(history_text)
+        except ImportError:
+            prompt = (
+                "You are a memory extraction agent. Read the following conversation history and extract key "
+                "user preferences, context, or facts that should be remembered for future sessions "
+                "(e.g., user's location, vehicle type, medical condition, frequent problems). "
+                "Output ONLY a concise bulleted list of facts. If there is nothing worth remembering, output exactly 'NO_FACTS'.\n\n"
+                f"Conversation History:\n{history_text}"
+            )
 
         request = ProviderRequest(
             message=prompt,

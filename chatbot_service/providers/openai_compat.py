@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 SafeVixAI Team
 """OpenAI-compatible provider — for custom/local endpoints (Ollama, vLLM, LocalAI, etc.)
 
 This provider accepts runtime configuration: base_url, api_key, model.

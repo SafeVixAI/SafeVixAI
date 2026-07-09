@@ -27,24 +27,16 @@ def _build_config() -> dict[str, type[TemplateProvider]]:
     from providers.base import TemplateProvider
 
     return {
-        # Tier 1 — Critical
         'groq': GroqProvider,
         'cerebras': CerebrasProvider,
         'gemini': GeminiProvider,
-        # Indian language routing
-        'sarvam': SarvamProvider,
         'sarvam_30b': SarvamProvider,
         'sarvam_105b': Sarvam105BProvider,
-        # Tier 2 — High
         'github': GitHubModelsProvider,
-        'github_models': GitHubModelsProvider,
         'nvidia': NvidiaNimProvider,
-        'nvidia_nim': NvidiaNimProvider,
-        # Tier 3 — Medium
         'openrouter': OpenRouterProvider,
         'mistral': MistralProvider,
         'together': TogetherProvider,
-        # Template / testing
         'template': TemplateProvider,
     }
 

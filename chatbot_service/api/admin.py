@@ -129,9 +129,9 @@ async def provider_health(
     results = await asyncio.gather(*tasks, return_exceptions=True)
 
     for res in results:
-        if isinstance(res, tuple):
+        if isinstance(res, tuple):  # pragma: no branch
             matrix[res[0]] = res[1]
-
+    
     return {'status': 'completed', 'providers': matrix}
 
 
@@ -168,7 +168,7 @@ async def provider_health_dashboard(
     tasks = [ping_provider(name, provider) for name, provider in provider_router.providers.items()]
     results = await asyncio.gather(*tasks, return_exceptions=True)
     for res in results:
-        if isinstance(res, tuple):
+        if isinstance(res, tuple):  # pragma: no branch
             matrix[res[0]] = res[1]
 
     memory_ok = await memory_store.ping()

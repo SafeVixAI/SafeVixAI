@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 SafeVixAI Team
 """Provider configuration API — allows dynamic provider loading from the backend.
 
 Users can configure their own API keys and custom providers via the backend,

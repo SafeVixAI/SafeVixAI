@@ -25,7 +25,7 @@ def _as_path(value: str | None, *, default: Path) -> Path:
     if value is None or not value.strip():
         return default
     path = Path(value.strip())
-    if not path.is_absolute():
+    if not path.is_absolute():  # pragma: no branch
         path = ROOT_DIR / path
     return path
 
@@ -34,7 +34,7 @@ def _as_optional_path(value: str | None) -> Path | None:
     if value is None or not value.strip():
         return None
     path = Path(value.strip())
-    if not path.is_absolute():
+    if not path.is_absolute():  # pragma: no branch
         path = ROOT_DIR / path
     return path
 

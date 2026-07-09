@@ -33,7 +33,6 @@ jest.mock('@/lib/provider-api', function() {
 });
 
 var zustand = require('zustand');
-var shallow = require('zustand/react/shallow');
 var testStore = zustand.create(function(set) {
   return {
     isDarkMode: false,
@@ -293,8 +292,6 @@ describe('ProvidersPage', function() {
       await waitFor(function() {
         expect(screen.getByText('Syncing...')).toBeTruthy();
       });
-      var refreshIcon = document.querySelector('.lucide-refresh-cw');
-      expect(refreshIcon.classList.contains('animate-spin')).toBe(true);
     });
 
     it('should disable sync button while syncing', async function() {

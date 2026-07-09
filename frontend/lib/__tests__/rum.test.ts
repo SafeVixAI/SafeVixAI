@@ -1,24 +1,26 @@
-// SPDX-License-Identifier: MIT
-// Copyright (c) 2026 SafeVixAI Team
 describe('rum', function () {
-  var originalEnv: any
-  var originalPerfObserver: any
+  var originalEnv
+  var originalPerfObserver
+  var originalWindow
 
   beforeEach(function () {
     originalEnv = process.env.NODE_ENV
-    originalPerfObserver = (global as any).PerformanceObserver
-    ;(global as any).PerformanceObserver = jest.fn(function () { return { observe: jest.fn() } }) as any
-    ;(global as any).performance = { getEntriesByType: jest.fn().mockReturnValue([]) } as any
+    originalPerfObserver = global.PerformanceObserver
+    originalWindow = global.window
+    global.PerformanceObserver = jest.fn(function () { return { observe: jest.fn() } })
+    global.performance = { getEntriesByType: jest.fn().mockReturnValue([]) }
   })
 
   afterEach(function () {
     process.env.NODE_ENV = originalEnv
-    ;(global as any).PerformanceObserver = originalPerfObserver
+    global.PerformanceObserver = originalPerfObserver
+    global.window = originalWindow
   })
 
   it('does nothing on server side', async function () {
+    delete global.window
     var mod = await import('../rum')
-    expect(typeof mod.initRUM).toBe('function')
+    expect(function () { mod.initRUM() }).not.toThrow()
   })
 
   it('creates observers for LCP, FID, CLS', async function () {
@@ -30,29 +32,28 @@ describe('rum', function () {
   it('logs metrics in dev mode', async function () {
     process.env.NODE_ENV = 'development'
     var consoleSpy = jest.spyOn(console, 'log').mockImplementation()
-    ;(global as any).PerformanceObserver = jest.fn(function (cb: any) {
+    global.PerformanceObserver = jest.fn(function (cb) {
       return {
         observe: function () {
           var list = { getEntries: function () { return [{ startTime: 100 }] } }
           cb(list)
         }
       }
-    }) as any
+    })
     var mod = await import('../rum')
     mod.initRUM()
     expect(consoleSpy).toHaveBeenCalled()
     consoleSpy.mockRestore()
   })
 
-  it('handles errors gracefully', async function () {
-    (global as any).PerformanceObserver = jest.fn(function () { throw new Error('no perf') })
+  it('handles errors gracefully when PerformanceObserver throws', async function () {
+    global.PerformanceObserver = jest.fn(function () { throw new Error('no perf') })
     var mod = await import('../rum')
     expect(function () { mod.initRUM() }).not.toThrow()
   })
 
   it('reports navigation timing when available', async function () {
-    var originalGetEntriesByType = (global as any).performance.getEntriesByType
-    ;(global as any).performance.getEntriesByType = jest.fn(function (type: string) {
+    global.performance.getEntriesByType = jest.fn(function (type) {
       if (type === 'navigation') return [{ responseStart: 200, requestStart: 100, domContentLoadedEventEnd: 500, fetchStart: 50, loadEventEnd: 800 }]
       return []
     })
@@ -64,8 +65,22 @@ describe('rum', function () {
     expect(consoleSpy).toHaveBeenCalledWith('[RUM] DOM_LOAD: 450.00ms')
     expect(consoleSpy).toHaveBeenCalledWith('[RUM] FULL_LOAD: 750.00ms')
     consoleSpy.mockRestore()
-    ;(global as any).performance.getEntriesByType = originalGetEntriesByType
-    process.env.NODE_ENV = 'development'
+  })
+
+  it('calls observers in test mode but does not log', async function () {
+    var consoleSpy = jest.spyOn(console, 'log').mockImplementation()
+    global.PerformanceObserver = jest.fn(function (cb) {
+      return {
+        observe: function () {
+          var list = { getEntries: function () { return [{ startTime: 42 }] } }
+          cb(list)
+        }
+      }
+    })
+    var mod = await import('../rum')
+    mod.initRUM()
+    expect(consoleSpy).not.toHaveBeenCalled()
+    consoleSpy.mockRestore()
   })
 
   it('does not log in production', async function () {
@@ -75,6 +90,35 @@ describe('rum', function () {
     mod.initRUM()
     expect(consoleSpy).not.toHaveBeenCalled()
     consoleSpy.mockRestore()
+  })
+
+  it('skips CLS entry when hadRecentInput is true', async function () {
     process.env.NODE_ENV = 'development'
+    var consoleSpy = jest.spyOn(console, 'log').mockImplementation()
+    var capturedCb
+    global.PerformanceObserver = jest.fn(function (cb) {
+      capturedCb = cb
+      return { observe: jest.fn() }
+    })
+    var mod = await import('../rum')
+    mod.initRUM()
+    capturedCb({ getEntries: function () { return [{ hadRecentInput: true, value: 0.5 }] } })
+    expect(consoleSpy).not.toHaveBeenCalledWith('[RUM] CLS: 0.50ms')
+    consoleSpy.mockRestore()
+  })
+
+  it('reports CLS when hadRecentInput is false', async function () {
+    process.env.NODE_ENV = 'development'
+    var consoleSpy = jest.spyOn(console, 'log').mockImplementation()
+    var capturedCb
+    global.PerformanceObserver = jest.fn(function (cb) {
+      capturedCb = cb
+      return { observe: jest.fn() }
+    })
+    var mod = await import('../rum')
+    mod.initRUM()
+    capturedCb({ getEntries: function () { return [{ hadRecentInput: false, value: 0.3 }] } })
+    expect(consoleSpy).toHaveBeenCalledWith('[RUM] CLS: 0.30ms')
+    consoleSpy.mockRestore()
   })
 })

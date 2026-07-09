@@ -28,9 +28,6 @@ jest.mock('../../lib/client-logger', () => ({
   logClientError: jest.fn(),
 }));
 
-var mockGetState = jest.fn()
-var mockUseAppStore: jest.Mock & { getState?: typeof mockGetState }
-
 jest.mock('../../lib/store', function () {
   var storeFn: any = jest.fn(function (selector: unknown) {
     if (typeof selector === 'function') return selector(mockChatStore)
@@ -117,7 +114,7 @@ describe('ChatInterface', function () {
 
   it('sends message in online mode and displays streaming tokens', async function () {
     var { ChatInterface } = require('../ChatInterface')
-    var { reader, addEvent, addDone } = createMockStreamReader()
+    var { reader, addEvent } = createMockStreamReader()
 
     mockFetch.mockResolvedValue({
       ok: true,
@@ -341,7 +338,6 @@ describe('ChatInterface', function () {
     fireEvent.change(input, { target: { value: 'Hello' } })
 
     // Shift+Enter should NOT submit
-    var preventDefault = jest.fn()
     fireEvent.keyDown(input, { key: 'Enter', shiftKey: true })
 
     // No user message added

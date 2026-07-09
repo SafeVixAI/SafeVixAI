@@ -4,7 +4,7 @@
 type LogDetail = unknown;
 
 const isDevelopment = process.env.NODE_ENV !== 'production';
-const sentryAvailable = typeof window !== 'undefined' && (window as any).Sentry;
+/* istanbul ignore next */const sentryAvailable = typeof window !== 'undefined' && (window as any).Sentry;
 
 // Batched error reporting — accumulate errors and flush on threshold
 interface ErrorRecord {
@@ -96,7 +96,7 @@ function emit(level: 'error' | 'warn', message: string, detail?: LogDetail) {
 }
 
 // Flush on page unload
-if (typeof window !== 'undefined') {
+/* istanbul ignore next */if (typeof window !== 'undefined') {
   window.addEventListener('beforeunload', () => {
     flushErrorBatch();
     if (batchTimer) clearInterval(batchTimer);

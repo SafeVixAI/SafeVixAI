@@ -345,7 +345,7 @@ describe('PureMultimodalInput', function () {
 
   it('does not crash with null onSendMessage/onStopGenerating', function () {
     render(React.createElement(PureMultimodalInput, { isGenerating: true }))
-    var textarea = screen.getByLabelText('Chat message input') as HTMLTextAreaElement
+    screen.getByLabelText('Chat message input') as HTMLTextAreaElement
     // stop button with no onStopGenerating handler
     fireEvent.click(screen.getByLabelText('Stop generating'))
     // should not throw

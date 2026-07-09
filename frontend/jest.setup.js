@@ -11,6 +11,22 @@ if (!globalThis.fetch) {
   globalThis.fetch = jest.fn().mockResolvedValue({ json: jest.fn() })
 }
 
+Object.defineProperty(window, 'matchMedia', {
+  writable: true,
+  value: jest.fn().mockImplementation(function(query) {
+    return {
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: jest.fn(),
+      removeListener: jest.fn(),
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
+      dispatchEvent: jest.fn(),
+    }
+  }),
+})
+
 // ── Mock heavy WebGL / WASM / ML dependencies ──────────────────────
 
 jest.mock('maplibre-gl', () => ({
@@ -253,6 +269,58 @@ jest.mock('react-i18next', () => ({
   },
   initReactI18next: { type: '3rdParty', init: function() {} },
 }))
+
+// ── Service Worker / Fetch API polyfills for JSDOM ───────────
+
+if (typeof globalThis.Response === 'undefined') {
+  globalThis.Response = function(body, init) {
+    init = init || {}
+    this.body = body
+    this.status = init.status || 200
+    this.ok = this.status >= 200 && this.status < 300
+    this.headers = init.headers || {}
+    this._bodyText = typeof body === 'string' ? body : ''
+  }
+  globalThis.Response.prototype.clone = function() {
+    return new globalThis.Response(this._bodyText, { status: this.status, headers: this.headers })
+  }
+  globalThis.Response.prototype.text = function() {
+    return Promise.resolve(this._bodyText)
+  }
+  globalThis.Response.prototype.json = function() {
+    return Promise.resolve(JSON.parse(this._bodyText))
+  }
+}
+
+if (typeof globalThis.Request === 'undefined') {
+  globalThis.Request = function(input, init) {
+    init = init || {}
+    this.url = typeof input === 'string' ? input : input.url || ''
+    this.method = (init.method || 'GET').toUpperCase()
+    this.headers = init.headers || {}
+    this.mode = init.mode || 'cors'
+  }
+  globalThis.Request.prototype.clone = function() {
+    return new globalThis.Request(this.url, { method: this.method, headers: this.headers })
+  }
+}
+
+if (typeof globalThis.Headers === 'undefined') {
+  globalThis.Headers = function(init) {
+    this._map = {}
+    if (init) { Object.assign(this._map, init) }
+  }
+  globalThis.Headers.prototype.get = function(k) { return this._map[k] || null }
+  globalThis.Headers.prototype.set = function(k, v) { this._map[k] = v }
+  globalThis.Headers.prototype.has = function(k) { return k in this._map }
+}
+
+if (typeof globalThis.PushEvent === 'undefined') {
+  globalThis.PushEvent = function(type, init) {
+    this.type = type
+    this.data = (init && init.data) ? init.data : null
+  }
+}
 
 // ── Polyfills for test environment ────────────────────────────
 

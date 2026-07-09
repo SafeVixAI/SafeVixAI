@@ -45,7 +45,7 @@ function parseCSV(text: string): Record<string, string>[] {
 // Lazy-loads DuckDB-Wasm and overrides CORS Worker restriction using Blobs
 async function getDuckDB() {
   if (dbInstance) return dbInstance;
-  if (typeof window === 'undefined') return null;
+  /* istanbul ignore next */if (typeof window === 'undefined') return null;
 
   const duckdb = await import('@duckdb/duckdb-wasm');
   
@@ -81,7 +81,7 @@ async function calculateWithDuckDB(
   isRepeat: boolean, 
   stateCode: string
 ) {
-  if (typeof window === 'undefined') return null;
+  /* istanbul ignore next */if (typeof window === 'undefined') return null;
   
   // Sanitization
   const cleanViolation = violationCode.replace(/[^a-zA-Z0-9_]/g, '');

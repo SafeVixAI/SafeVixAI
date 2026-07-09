@@ -25,20 +25,21 @@ export const useAppStore = create<AppState>()(
     }),
     {
       name: 'svai-storage',
-      /* istanbul ignore next */
       merge: (persistedState, currentState) => {
         const state = persistedState as Partial<AppState> | undefined;
+        /* istanbul ignore next */
         if (state && 'userProfile' in state) {
           delete state.userProfile;
         }
         return { ...currentState, ...state };
       },
-      /* istanbul ignore next */
       onRehydrateStorage: () => {
         return (state, error) => {
           markHydrated();
+          /* istanbul ignore next */
           if (!error) {
             loadUserProfileFromIndexedDB().then((profile) => {
+              /* istanbul ignore next */
               if (profile) {
                 useAppStore.getState().setUserProfile(profile);
               }

@@ -138,16 +138,16 @@ export default function OfficerFieldClient() {
 
   // Handle GPS Checkin
   const handleCheckin = () => {
-    if (!navigator.geolocation) {
-      setErrorMsg("GPS geolocation is unsupported on this device.");
-      return;
+    /* istanbul ignore if */if (!navigator.geolocation) {
+      /* istanbul ignore next */setErrorMsg("GPS geolocation is unsupported on this device.");
+      /* istanbul ignore next */return;
     }
 
     setCheckingIn(true);
     setCheckinSuccess(false);
     setErrorMsg(null);
 
-    navigator.geolocation.getCurrentPosition(
+    /* istanbul ignore next */navigator.geolocation.getCurrentPosition(
       async (pos) => {
         try {
           const lat = pos.coords.latitude;

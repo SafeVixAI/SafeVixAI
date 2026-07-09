@@ -1,5 +1,4 @@
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
 import React from 'react'
 
 jest.mock('next/image', function() {
@@ -41,7 +40,7 @@ beforeEach(function() {
 
   mockStream = { getTracks: jest.fn().mockReturnValue([{ stop: jest.fn() }]) }
 
-  try { navigator.mediaDevices = { getUserMedia: jest.fn().mockResolvedValue(mockStream) } } catch (e) {
+  try { navigator.mediaDevices = { getUserMedia: jest.fn().mockResolvedValue(mockStream) } } catch {
     Object.defineProperty(navigator, 'mediaDevices', { value: { getUserMedia: jest.fn().mockResolvedValue(mockStream) }, writable: true, configurable: true })
   }
 
@@ -55,7 +54,7 @@ beforeEach(function() {
   global.URL.revokeObjectURL = jest.fn()
 
   global.fetch = jest.fn()
-  try { navigator.vibrate = jest.fn() } catch (e) { Object.defineProperty(navigator, 'vibrate', { value: jest.fn(), writable: true, configurable: true }) }
+  try { navigator.vibrate = jest.fn() } catch { Object.defineProperty(navigator, 'vibrate', { value: jest.fn(), writable: true, configurable: true }) }
 
   if (!window.visualViewport) {
     Object.defineProperty(window, 'visualViewport', { value: { height: window.innerHeight, addEventListener: jest.fn(), removeEventListener: jest.fn() }, writable: true, configurable: true })
@@ -251,6 +250,8 @@ describe('PureMultimodalInput', function () {
     renderInput()
     var attachBtn = screen.getByTestId('attachments-button')
     fireEvent.click(attachBtn)
+    // fileInputRef is used by the component internally
+    expect(fileInputRef.current.click).not.toHaveBeenCalled() // click is managed by component
   })
 
   // ── Preview Attachment ───────────────────────────────────────
@@ -336,7 +337,7 @@ describe('PureMultimodalInput', function () {
     var fileInput = screen.getByLabelText('Upload attachment files')
     var smallFile = new File(['a'], 'small.txt', { type: 'text/plain' })
     Object.defineProperty(smallFile, 'size', { value: 100 })
-    var bigFile = new File(['x'.repeat(30 * 1024 * 1024)], 'big.txt', { type: 'text/plain' })
+    var bigFile = new File(['x'], 'big.txt', { type: 'text/plain' })
     Object.defineProperty(bigFile, 'size', { value: 30 * 1024 * 1024 })
     fireEvent.change(fileInput, { target: { files: [smallFile, bigFile] } })
     await act(async function() { jest.advanceTimersByTime(700) })
@@ -473,7 +474,6 @@ describe('PureMultimodalInput', function () {
     fireEvent.click(micBtn)
     await waitFor(function() { expect(mockMediaRecorder.start).toHaveBeenCalled() })
     await act(async function() { await mockMediaRecorder.onstop() })
-    var textarea = screen.getByPlaceholderText('Ask AI anything...')
     expect(global.fetch).toHaveBeenCalled()
   })
 

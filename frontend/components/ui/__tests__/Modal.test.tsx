@@ -85,7 +85,7 @@ describe('Modal', function () {
   })
 
   it('traps focus with Tab', function () {
-    var firstBtn: HTMLElement
+    var firstBtn: HTMLElement // eslint-disable-line @typescript-eslint/no-unused-vars
     render(React.createElement(Modal, { open: true, onClose: jest.fn(), title: 'Focus Test' },
       React.createElement('button', { ref: function(el) { if (el) firstBtn = el } }, 'First'),
       React.createElement('button', null, 'Last'),

@@ -171,6 +171,16 @@ describe('intl-formatters', function() {
     it('formats exact lakh boundary', function() {
       expect(formatCompactNumber(100000)).toMatch(/ L$/);
     });
+
+    it('formats non-round lakh value', function() {
+      var result = formatCompactNumber(250500);
+      expect(result).toMatch(/ L$/);
+    });
+
+    it('formats non-round thousand value', function() {
+      var result = formatCompactNumber(2500);
+      expect(result).toMatch(/ K$/);
+    });
   });
 
   // ── formatDistance ──
@@ -386,6 +396,27 @@ describe('intl-formatters', function() {
       var past = new Date(Date.now() - 60000);
       var result = formatRelativeTime(past);
       expect(result).toMatch(/min ago|just now/);
+    });
+
+    it('formatRelativeTime catch block returns hr ago for 2-hour gap', function() {
+      jest.spyOn(Intl, 'RelativeTimeFormat').mockImplementation(function() { throw new Error('mock'); });
+      var past = new Date(Date.now() - 7200000);
+      var result = formatRelativeTime(past);
+      expect(result).toMatch(/hr ago/);
+    });
+
+    it('formatRelativeTime catch block returns toLocaleDateString for 3-day gap', function() {
+      jest.spyOn(Intl, 'RelativeTimeFormat').mockImplementation(function() { throw new Error('mock'); });
+      var past = new Date(Date.now() - 259200000);
+      var result = formatRelativeTime(past);
+      expect(result.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('getLocale', function() {
+    it('falls back to en when language is falsy', function() {
+      mockLanguage = null;
+      expect(getLocale()).toBe('en-IN');
     });
   });
 });

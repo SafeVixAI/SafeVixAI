@@ -93,6 +93,26 @@ describe('provider-api', function() {
         expect.objectContaining({ method: 'POST' }),
       );
     });
+
+    it('should POST provider config without API key', async function() {
+      var newConfig = {
+        providerName: 'test-groq',
+        displayName: 'Test Groq',
+        apiKey: '',
+        isActive: true,
+        priority: 0,
+        isCustom: false,
+      };
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: true,
+        status: 201,
+        json: function() { return Promise.resolve({ id: '4', ...newConfig, apiKeyMasked: '' }); },
+      });
+      var result = await providerApi.createProviderConfig(newConfig);
+      var callBody = JSON.parse((fetch as any).mock.calls[0][1].body);
+      expect(callBody.api_key).toBeUndefined()
+      expect(result.providerName).toBe('test-groq');
+    });
   });
 
   describe('updateProviderConfig', function() {

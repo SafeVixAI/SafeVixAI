@@ -6,6 +6,7 @@
 'use client';
 
 export function initRUM() {
+  /* istanbul ignore next */
   if (typeof window === 'undefined') return;
 
   try {

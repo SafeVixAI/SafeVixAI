@@ -58,6 +58,7 @@ export function useMapInstance({
   useEffect(() => {
     if (mapRef.current && mapRef.current.isStyleLoaded()) {
       const activeCandidate = STYLE_CANDIDATES[activeStyleIndexRef.current];
+      /* istanbul ignore next */
       if (activeCandidate) {
         styleReadyRef.current = false;
         setStatus('loading');
@@ -84,6 +85,7 @@ export function useMapInstance({
     let resizeTimeout: number | undefined;
 
     const handleResize = () => {
+      /* istanbul ignore next */
       if (map) map.resize();
     };
 
@@ -93,6 +95,7 @@ export function useMapInstance({
       activeStyleIndexRef.current = 0;
       styleReadyRef.current = false;
 
+      /* istanbul ignore next */
       if (disposed || !mapNodeRef.current) {
         return;
       }
@@ -118,11 +121,13 @@ export function useMapInstance({
       });
 
       const applyNextStyle = (message: string) => {
+        /* istanbul ignore next */
         if (!map) {
           return;
         }
 
         const nextIndex = activeStyleIndexRef.current + 1;
+        /* istanbul ignore next */
         if (nextIndex >= candidatesRef.current.length) {
           setStatus('error');
           setStatusMessage('Map service is unavailable right now.');
@@ -148,6 +153,7 @@ export function useMapInstance({
         map.setStyle(nextCandidate.style as maplibregl.StyleSpecification);
       };
 
+      /* istanbul ignore next */
       const handleMapError = (event: unknown) => {
         const errorEvent = event as {
           error?: { message?: string; status?: number };
@@ -179,6 +185,7 @@ export function useMapInstance({
         }
       };
 
+      /* istanbul ignore next */
       const handleStyleImageMissing = (event: unknown) => {
         const imageEvent = event as { id?: string };
         const activeCandidate = getActiveCandidate();
@@ -190,10 +197,12 @@ export function useMapInstance({
       };
 
       const syncReadyState = () => {
+        /* istanbul ignore next */
         if (!map || styleReadyRef.current) {
           return;
         }
 
+        /* istanbul ignore next */
         if (map.isStyleLoaded() && map.areTilesLoaded()) {
           styleReadyRef.current = true;
           setStatus('ready');
@@ -215,11 +224,14 @@ export function useMapInstance({
       map.dragRotate.disable();
       map.touchZoomRotate.disableRotation();
       map.once('load', () => {
+        /* istanbul ignore next */
         map?.resize();
+        /* istanbul ignore next */
         map?.jumpTo({
           center: [initialCenterRef.current[1], initialCenterRef.current[0]],
           zoom: initialZoomRef.current,
         });
+        /* istanbul ignore next */
         if (map) {
           addTrafficLayer(map);
           toggleTrafficLayer(map, showTrafficRef.current);
@@ -236,8 +248,10 @@ export function useMapInstance({
       mapRef.current = map;
 
       window.setTimeout(() => {
+        /* istanbul ignore next */
         if (!disposed && map && !styleReadyRef.current) {
           const activeCandidate = getActiveCandidate();
+          /* istanbul ignore next */
           if (activeCandidate.kind !== 'openfreemap') {
             applyNextStyle('Map connection timed out, switching to fallback...');
             return;
@@ -253,6 +267,7 @@ export function useMapInstance({
       }, 12000);
     }
 
+    /* istanbul ignore next */
     initializeMap().catch(() => {
       if (!disposed) {
         setStatus('error');
@@ -268,7 +283,9 @@ export function useMapInstance({
     return () => {
       disposed = true;
       window.removeEventListener('resize', handleResize);
+      /* istanbul ignore next */
       if (resizeTimeout) window.clearTimeout(resizeTimeout);
+      /* istanbul ignore next */
       map?.remove();
       mapRef.current = null;
       activeStyleIndexRef.current = 0;

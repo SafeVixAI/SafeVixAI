@@ -6,6 +6,7 @@ from __future__ import annotations
 import json
 import logging
 import re
+import sys
 from datetime import datetime, timezone
 import logging.config
 import time
@@ -129,7 +130,11 @@ def create_app() -> FastAPI:
         except (NotImplementedError, ValueError, RuntimeError):
             logger.warning("Signal handlers not supported on this platform")
 
-        cache = create_cache(settings.redis_url)
+        cache = create_cache(
+            settings.redis_url,
+            tls_enabled=settings.redis_tls_enabled,
+            password=settings.redis_password,
+        )
         jwks_manager = JWKSManager(jwks_url=settings.jwks_url if hasattr(settings, 'jwks_url') else None)
         await jwks_manager.start()
         
@@ -195,6 +200,44 @@ def create_app() -> FastAPI:
         app.state.data_retention = data_retention
         retention_interval = 3600 if settings.environment == "development" else 86400  # 1 hour dev, 24 hours prod
         await data_retention.start(interval_seconds=retention_interval)
+
+        # ── Wire remaining domain services into app.state ────────────────────
+        from services.roadwatch_photos import PhotoService
+        from services.roadwatch_moderation_service import RoadWatchModerationService
+        from services.ai_verification import AIVerificationPipeline
+        from services.complaint_lifecycle import ComplaintLifecycle
+        from services.complaint_state_machine import ComplaintStateMachine
+        from services.complaint_cluster import ComplaintClusterService
+        from services.ward_service import WardService
+        from services.workload_balancer import WorkloadBalancer
+        from services.officer_route_optimizer import OfficerRouteOptimizer
+        from services.sla_notification import SLANotificationService
+        from services.geo_verifier import GeoVerifier
+        from services.report_classifier import ReportClassifier
+        from services.duplicate_detector import DuplicateDetector
+        from services.fraud_detector import FraudDetector
+        from services.escalation_predictor import EscalationPredictor
+        from services.fine_prediction_service import FinePredictionService
+        from services.challan_dispute_service import ChallanDisputeService
+
+        app.state.roadwatch_moderation = RoadWatchModerationService(settings=settings)
+        app.state.photo_service = PhotoService()
+        app.state.ai_verification = AIVerificationPipeline()
+        app.state.complaint_lifecycle = ComplaintLifecycle()
+        app.state.complaint_state_machine = ComplaintStateMachine()
+        app.state.complaint_cluster = ComplaintClusterService()
+        app.state.ward_service = WardService()
+        app.state.workload_balancer = WorkloadBalancer()
+        app.state.officer_route_optimizer = OfficerRouteOptimizer()
+        app.state.sla_notification = SLANotificationService()
+        app.state.geo_verifier = GeoVerifier()
+        app.state.report_classifier = ReportClassifier()
+        app.state.duplicate_detector = DuplicateDetector()
+        app.state.fraud_detector = FraudDetector()
+        app.state.escalation_predictor = EscalationPredictor()
+        app.state.fine_prediction = FinePredictionService()
+        app.state.challan_dispute = ChallanDisputeService()
+        logger.info("All domain services initialized and wired into app.state")
 
         # Initialize and start background task queue and worker daemon
         from core.queue import TaskQueue, BackgroundWorker

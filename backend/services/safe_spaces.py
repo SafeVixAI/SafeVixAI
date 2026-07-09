@@ -8,7 +8,8 @@ import logging
 
 import httpx
 
-from services.exceptions import ServiceValidationError
+from core.circuit_breaker import CircuitBreakerRegistry, CircuitBreakerOpenError
+from services.exceptions import ExternalServiceError, ServiceValidationError
 
 logger = logging.getLogger(__name__)
 
@@ -22,6 +23,10 @@ async def close_safe_spaces_client() -> None:
     if _CLIENT is not None and not _CLIENT.is_closed:
         await _CLIENT.aclose()
         _CLIENT = None
+
+
+async def _do_safe_spaces_request(endpoint: str, query: str) -> httpx.Response:
+    return await _CLIENT.post(endpoint, data={'data': query})
 
 
 async def get_safe_spaces(lat: float, lon: float, radius_m: int = 1000) -> dict:
@@ -55,9 +60,10 @@ out body;
         'https://overpass.private.coffee/api/interpreter',
     ]
 
+    cb = CircuitBreakerRegistry.get("safe_spaces", failure_threshold=5, recovery_timeout=60.0)
     for endpoint in endpoints:
         try:
-            r = await _CLIENT.post(endpoint, data={'data': query})
+            r = await cb.call(_do_safe_spaces_request, endpoint, query)
 
             # Rate limit — try next mirror
             if r.status_code in (406, 429, 503):
@@ -87,6 +93,9 @@ out body;
                 'source': 'openstreetmap',
             }
 
+        except CircuitBreakerOpenError:
+            logger.warning("Safe spaces circuit breaker OPEN — skipping remaining endpoints", extra={"service": "safe_spaces"})
+            break
         except (httpx.HTTPError, httpx.TimeoutException) as exc:
             logger.warning('Overpass API request failed: %s', exc, extra={"service": "safe_spaces"})
             continue

@@ -1,6 +1,11 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2026 SafeVixAI Team
 
+"""Issue lifecycle management.
+
+Domain language: "issue" (RoadIssue) = road condition report, "complaint" (ComplaintEvent) = lifecycle event.
+This service manages RoadIssue lifecycle using ComplaintEvent auditing.
+"""
 from __future__ import annotations
 
 import logging

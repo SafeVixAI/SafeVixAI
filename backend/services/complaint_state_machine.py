@@ -1,10 +1,10 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2026 SafeVixAI Team
 
-"""Complaint State Machine for SafeVixAI.
+"""Issue state machine for SafeVixAI.
 
-Formal state machine with validated transitions, actor tracking, and event emission.
-Prevents invalid state changes and maintains full audit trail.
+Domain language: "issue" (RoadIssue) = road condition report.
+State machine manages RoadIssue lifecycle transitions with full audit trail.
 
 State Diagram:
     open ──→ pending_review (low AI confidence)

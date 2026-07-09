@@ -10,10 +10,26 @@ from datetime import datetime
 
 import httpx
 
+from core.circuit_breaker import CircuitBreakerRegistry, CircuitBreakerOpenError
 from services.exceptions import ExternalServiceError, ServiceValidationError
 
 
 logger = logging.getLogger("safevixai.backend.safe_routing")
+
+
+class Clock:
+    """Abstraction over datetime for testability."""
+    def now(self) -> datetime:
+        return datetime.now()
+
+
+_clock: Clock = Clock()
+
+
+def set_clock(clock: Clock) -> None:
+    """Override the clock for testing. Pass a custom Clock to control time."""
+    global _clock
+    _clock = clock
 
 
 def _validate_coords(origin: tuple[float, float], dest: tuple[float, float]) -> None:
@@ -27,7 +43,7 @@ def _validate_coords(origin: tuple[float, float], dest: tuple[float, float]) -> 
 
 def is_nighttime() -> bool:
     """Returns True between 8pm and 6am."""
-    hour = datetime.now().hour
+    hour = _clock.now().hour
     return hour >= 20 or hour <= 6
 
 
@@ -46,29 +62,14 @@ async def get_safe_route(
     safety_mode = prefer_safety or is_nighttime()
 
     if ors_key:
-        url = 'https://api.openrouteservice.org/v2/directions/driving-car/json'
-        body: dict = {
-            'coordinates': [[origin[1], origin[0]], [dest[1], dest[0]]],
-            'preference': 'recommended',
-            'extra_info': ['waycategory', 'waytype'],
-        }
-        if safety_mode:
-            body['options'] = {'avoid_features': ['tracks', 'fords']}
-
+        cb = CircuitBreakerRegistry.get("ors_safe", failure_threshold=3, recovery_timeout=30.0)
         try:
-            async with httpx.AsyncClient(timeout=15.0) as client:
-                r = await client.post(
-                    url,
-                    json=body,
-                    headers={'Authorization': ors_key, 'Content-Type': 'application/json'},
-                )
-                r.raise_for_status()
-                data = r.json()
-        except httpx.TimeoutException:
-            logger.warning("ORS safe routing timed out, falling back to OSRM", extra={"service": "safe_routing"})
+            data = await cb.call(_do_ors_safe_request, ors_key, origin, dest, safety_mode)
+        except CircuitBreakerOpenError:
+            logger.warning("ORS safe routing circuit breaker OPEN, falling back to OSRM", extra={"service": "safe_routing"})
             return await _osrm_fallback(origin, dest, safety_mode)
-        except httpx.HTTPError as exc:
-            logger.error("ORS safe routing HTTP error: %s", exc, extra={"service": "safe_routing"})
+        except (httpx.TimeoutException, httpx.HTTPError) as exc:
+            logger.warning("ORS safe routing failed: %s, falling back to OSRM", exc, extra={"service": "safe_routing"})
             return await _osrm_fallback(origin, dest, safety_mode)
 
         try:
@@ -91,30 +92,54 @@ async def get_safe_route(
     return await _osrm_fallback(origin, dest, safety_mode)
 
 
+async def _do_ors_safe_request(ors_key: str, origin: tuple[float, float], dest: tuple[float, float], safety_mode: bool) -> dict:
+    url = 'https://api.openrouteservice.org/v2/directions/driving-car/json'
+    body: dict = {
+        'coordinates': [[origin[1], origin[0]], [dest[1], dest[0]]],
+        'preference': 'recommended',
+        'extra_info': ['waycategory', 'waytype'],
+    }
+    if safety_mode:
+        body['options'] = {'avoid_features': ['tracks', 'fords']}
+    async with httpx.AsyncClient(timeout=15.0) as client:
+        r = await client.post(
+            url,
+            json=body,
+            headers={'Authorization': ors_key, 'Content-Type': 'application/json'},
+        )
+        r.raise_for_status()
+        return r.json()
+
+
+async def _do_osrm_safe_request(origin: tuple[float, float], dest: tuple[float, float]) -> dict:
+    osrm_url = (
+        f'https://router.project-osrm.org/route/v1/driving/'
+        f'{origin[1]},{origin[0]};{dest[1]},{dest[0]}'
+    )
+    async with httpx.AsyncClient(timeout=15.0) as client:
+        r = await client.get(
+            osrm_url,
+            params={'overview': 'full', 'geometries': 'geojson', 'steps': 'false'},
+        )
+        r.raise_for_status()
+        return r.json()
+
+
 async def _osrm_fallback(
     origin: tuple[float, float],
     dest: tuple[float, float],
     safety_mode: bool,
 ) -> dict:
     """Free OSRM fallback when no ORS key is configured or ORS fails."""
-    osrm_url = (
-        f'https://router.project-osrm.org/route/v1/driving/'
-        f'{origin[1]},{origin[0]};{dest[1]},{dest[0]}'
-    )
+    cb = CircuitBreakerRegistry.get("osrm_safe", failure_threshold=3, recovery_timeout=30.0)
     try:
-        async with httpx.AsyncClient(timeout=15.0) as client:
-            r = await client.get(
-                osrm_url,
-                params={'overview': 'full', 'geometries': 'geojson', 'steps': 'false'},
-            )
-            r.raise_for_status()
-            data = r.json()
-    except httpx.TimeoutException:
-        logger.error("OSRM fallback timed out for coords %s, %s", origin, dest, extra={"service": "safe_routing"})
-        raise ExternalServiceError("Routing service timed out — try again later")
-    except httpx.HTTPError as exc:
-        logger.error("OSRM fallback HTTP error: %s", exc, extra={"service": "safe_routing"})
+        data = await cb.call(_do_osrm_safe_request, origin, dest)
+    except CircuitBreakerOpenError:
+        logger.error("OSRM fallback circuit breaker OPEN for coords %s, %s", origin, dest, extra={"service": "safe_routing"})
         raise ExternalServiceError("Routing service unavailable — try again later")
+    except (httpx.TimeoutException, httpx.HTTPError) as exc:
+        logger.error("OSRM fallback HTTP error: %s", exc, extra={"service": "safe_routing"})
+        raise ExternalServiceError("Routing service unavailable — try again later") from exc
 
     routes = data.get('routes') or []
     if not routes:

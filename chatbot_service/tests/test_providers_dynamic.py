@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 SafeVixAI Team
 """Tests for dynamic user-provider integration in the chatbot service."""
 
 from __future__ import annotations

@@ -191,3 +191,89 @@ def _async_text_iter(text: str):
     async def gen():
         yield text
     return gen()
+
+
+class TestGeminiGenerate:
+    """GeminiProvider.generate() — remaining edge cases."""
+
+    @pytest.mark.asyncio
+    async def test_generate_assistant_role_mapping(self):
+        """Line 131-132: assistant role maps to 'model' in generate()."""
+        provider = GeminiProvider(api_key="test-key")
+        req = ProviderRequest(
+            message="ping",
+            intent="general",
+            history=[{"role": "assistant", "content": "previous bot reply"}],
+        )
+        resp_data = {
+            "candidates": [{
+                "content": {"parts": [{"text": "gemini reply"}]},
+                "finishReason": "STOP",
+            }]
+        }
+        resp = MagicMock()
+        resp.status_code = 200
+        resp.headers = {}
+        resp.json.return_value = resp_data
+        client = MagicMock()
+        client.is_closed = False
+        client.post = AsyncMock(return_value=resp)
+        with patch.object(provider, "_get_client", return_value=client):
+            result = await provider.generate(req)
+        assert result.text == "gemini reply"
+        assert result.provider == "gemini"
+
+    @pytest.mark.asyncio
+    async def test_generate_with_system_text(self):
+        """Lines 142-145: system instruction in generate()."""
+        provider = GeminiProvider(api_key="test-key")
+        req = ProviderRequest(
+            message="user msg",
+            intent="general",
+            history=[],
+            tool_summaries=["tool result summary"],
+        )
+        resp_data = {
+            "candidates": [{
+                "content": {"parts": [{"text": "reply with tool context"}]},
+                "finishReason": "STOP",
+            }]
+        }
+        resp = MagicMock()
+        resp.status_code = 200
+        resp.headers = {}
+        resp.json.return_value = resp_data
+        client = MagicMock()
+        client.is_closed = False
+        client.post = AsyncMock(return_value=resp)
+        with patch.object(provider, "_get_client", return_value=client):
+            result = await provider.generate(req)
+        assert "tool" in result.text.lower()
+
+    @pytest.mark.asyncio
+    async def test_stream_system_text_parts(self):
+        """Line 76-79: system instruction in stream()."""
+        provider = GeminiProvider(api_key="test-key")
+        req = ProviderRequest(
+            message="user msg",
+            intent="general",
+            history=[],
+            tool_summaries=["injected context"],
+        )
+        stream_text = (
+            'data: {"candidates":[{"content":{"parts":[{"text":"ok"}]}}]}\n\n'
+            'data: [DONE]\n\n'
+        )
+        resp = MagicMock()
+        resp.status_code = 200
+        resp.headers = {}
+        resp.aiter_text = lambda: _async_text_iter(stream_text)
+        client = MagicMock()
+        client.is_closed = False
+        cm = MagicMock()
+        cm.__aenter__ = AsyncMock(return_value=resp)
+        cm.__aexit__ = AsyncMock(return_value=False)
+        client.stream = MagicMock(return_value=cm)
+        with patch.object(provider, "_get_client", return_value=client):
+            chunks = [c async for c in provider.stream(req)]
+        assert chunks == ["ok"]

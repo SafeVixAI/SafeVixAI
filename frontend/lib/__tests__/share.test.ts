@@ -82,6 +82,15 @@ describe('share', function () {
     promptSpy.mockRestore()
   })
 
+  it('shareLink error not AbortError falls through to clipboard', async function () {
+    var mod = await import('../share')
+    ;(navigator as any).share = jest.fn().mockRejectedValue(new Error('network error'))
+    ;(navigator as any).clipboard = { writeText: jest.fn().mockResolvedValue(undefined) }
+    var result = await mod.shareLink('Title', 'https://example.com')
+    expect(result).toBe(true)
+    expect(navigator.clipboard.writeText).toHaveBeenCalledWith('https://example.com')
+  })
+
   it('shareLink returns false on AbortError without clipboard fallback', async function () {
     var mod = await import('../share')
     ;(navigator as any).share = jest.fn().mockRejectedValue(Object.assign(new Error('abort'), { name: 'AbortError' }))

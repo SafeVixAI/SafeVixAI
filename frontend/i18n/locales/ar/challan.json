@@ -38,8 +38,6 @@
     "first_occurrence": "الحادثة الأولى",
     "repeat_offence": "كرر المخالفة",
     "ai_guidance_default": "استنادًا إلى تعديلات MVA الأخيرة، فإن الجرائم عالية الخطورة مثل وثيقة الهوية الوحيدة ( {{mva}} ) لها بروتوكولات إلغاء أهلية الترخيص الفوري النشطة في {{state}} .",
-    "rupees_symbol": "روبية.",
-    "swipe_indicator": "Swipe ↔",
-    "ai_tactical_insight": "AI Tactical Insight"
+    "rupees_symbol": "روبية."
   }
 }

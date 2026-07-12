@@ -38,8 +38,6 @@
     "first_occurrence": "Première occurrence",
     "repeat_offence": "Récidive",
     "ai_guidance_default": "Sur la base des récentes modifications du MVA, les infractions à haut risque telles que DUI ( {{mva}} ) ont des protocoles de disqualification immédiate du permis actifs dans {{state}} .",
-    "rupees_symbol": "Rs.",
-    "swipe_indicator": "Swipe ↔",
-    "ai_tactical_insight": "AI Tactical Insight"
+    "rupees_symbol": "Rs."
   }
 }

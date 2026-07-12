@@ -9,7 +9,7 @@
     "high_risk_area": "High Risk Area",
     "high_risk_area_one": "High Risk Area",
     "high_risk_area_sub_one": "1 danger non résolu détecté – SOS prêt",
-    "high_risk_area_sub_other": "{{count}} dangers non résolus détectés – SOS prêt"
+    "high_risk_area_sub_other": "{{count}} dangers non résolus détectés – SOS prêt"
   },
   "map_layers": {
     "title": "Couches de carte",

@@ -11,7 +11,7 @@ describe('gsap', function () {
     jest.resetModules()
     var registerSpy = jest.spyOn(require('gsap').gsap, 'registerPlugin').mockImplementation(function () {})
     var defaultsSpy = jest.spyOn(require('gsap').gsap, 'defaults').mockImplementation(function () {})
-    var mod = await import('../gsap')
+    await import('../gsap')
     expect(registerSpy).toHaveBeenCalled()
     expect(defaultsSpy).toHaveBeenCalled()
     registerSpy.mockRestore()

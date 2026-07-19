@@ -38,8 +38,6 @@
     "first_occurrence": "First Occurrence",
     "repeat_offence": "Repeat Offence",
     "ai_guidance_default": "Based on recent MVA amendments, high-risk offences like DUI ({{mva}}) have immediate license disqualification protocols active in {{state}}.",
-    "rupees_symbol": "Rs. ",
-    "swipe_indicator": "Swipe ↔",
-    "ai_tactical_insight": "AI Tactical Insight"
+    "rupees_symbol": "Rs. "
   }
 }

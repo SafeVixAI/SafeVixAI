@@ -67,7 +67,7 @@ var BUILTIN_RESP = [
 
 var React = require('react');
 var rtl = require('@testing-library/react');
-var screen = rtl.screen;
+var rtlScreen = rtl.screen;
 var waitFor = rtl.waitFor;
 var fireEvent = rtl.fireEvent;
 var ProvidersPage = require('@/app/providers/page').default;
@@ -89,13 +89,13 @@ function renderPage() {
 /** Wait for loading to finish and provider cards to render */
 async function waitForLoad() {
   await waitFor(function() {
-    expect(screen.getAllByText(/Default endpoint|llama-3.1/).length).toBeGreaterThanOrEqual(1);
+    expect(rtlScreen.getAllByText(/Default endpoint|llama-3.1/).length).toBeGreaterThanOrEqual(1);
   });
 }
 
 /** Find the "Sync to Chat" / "Synced" / "Failed" button and click it */
 function clickSyncBtn() {
-  var buttons = screen.getAllByRole('button');
+  var buttons = rtlScreen.getAllByRole('button');
   var btn = buttons.find(function(b) {
     return b.textContent.includes('Sync') || b.textContent === 'Synced' || b.textContent === 'Failed';
   });
@@ -120,7 +120,7 @@ describe('ProvidersPage', function() {
       setupMocks({});
       renderPage();
       await waitFor(function() {
-        expect(screen.getByText(/providers configured/)).toBeTruthy();
+        expect(rtlScreen.getByText(/providers configured/)).toBeTruthy();
       });
     });
 
@@ -128,8 +128,8 @@ describe('ProvidersPage', function() {
       setupMocks({});
       renderPage();
       await waitFor(function() {
-        expect(screen.getByText('Groq')).toBeTruthy();
-        expect(screen.getByText('OpenAI')).toBeTruthy();
+        expect(rtlScreen.getByText('Groq')).toBeTruthy();
+        expect(rtlScreen.getByText('OpenAI')).toBeTruthy();
       });
     });
 
@@ -137,8 +137,8 @@ describe('ProvidersPage', function() {
       setupMocks({});
       renderPage();
       await waitFor(function() {
-        expect(screen.getAllByText('My Groq').length).toBeGreaterThanOrEqual(1);
-        expect(screen.getAllByText('Local Ollama').length).toBeGreaterThanOrEqual(1);
+        expect(rtlScreen.getAllByText('My Groq').length).toBeGreaterThanOrEqual(1);
+        expect(rtlScreen.getAllByText('Local Ollama').length).toBeGreaterThanOrEqual(1);
       });
     });
 
@@ -146,9 +146,9 @@ describe('ProvidersPage', function() {
       setupMocks({});
       renderPage();
       await waitFor(function() {
-        expect(screen.getByText('Fallback Chain')).toBeTruthy();
-        expect(screen.getByText('Primary')).toBeTruthy();
-        expect(screen.getByText('Template (Fallback)')).toBeTruthy();
+        expect(rtlScreen.getByText('Fallback Chain')).toBeTruthy();
+        expect(rtlScreen.getByText('Primary')).toBeTruthy();
+        expect(rtlScreen.getByText('Template (Fallback)')).toBeTruthy();
       });
     });
 
@@ -156,8 +156,8 @@ describe('ProvidersPage', function() {
       setupMocks({});
       renderPage();
       await waitFor(function() {
-        expect(screen.getByText('Add Custom Provider')).toBeTruthy();
-        expect(screen.getByText('Quick Add (Ollama/LocalAI)')).toBeTruthy();
+        expect(rtlScreen.getByText('Add Custom Provider')).toBeTruthy();
+        expect(rtlScreen.getByText('Quick Add (Ollama/LocalAI)')).toBeTruthy();
       });
     });
 
@@ -165,7 +165,7 @@ describe('ProvidersPage', function() {
       setupMocks({});
       renderPage();
       await waitFor(function() {
-        expect(screen.getByText('Disabled')).toBeTruthy();
+        expect(rtlScreen.getByText('Disabled')).toBeTruthy();
       });
     });
 
@@ -173,7 +173,7 @@ describe('ProvidersPage', function() {
       setupMocks({});
       renderPage();
       await waitFor(function() {
-        expect(screen.getByText('gsk_****')).toBeTruthy();
+        expect(rtlScreen.getByText('gsk_****')).toBeTruthy();
       });
     });
 
@@ -181,7 +181,7 @@ describe('ProvidersPage', function() {
       setupMocks({});
       renderPage();
       await waitFor(function() {
-        var customLabels = screen.getAllByText('Custom');
+        var customLabels = rtlScreen.getAllByText('Custom');
         expect(customLabels.length).toBeGreaterThanOrEqual(1);
       });
     });
@@ -190,7 +190,7 @@ describe('ProvidersPage', function() {
       setupMocks({});
       renderPage();
       await waitFor(function() {
-        expect(screen.getAllByText('groq').length).toBeGreaterThanOrEqual(1);
+        expect(rtlScreen.getAllByText('groq').length).toBeGreaterThanOrEqual(1);
       });
     });
   });
@@ -202,7 +202,7 @@ describe('ProvidersPage', function() {
       setupMocks({ configs: [] });
       renderPage();
       await waitFor(function() {
-        expect(screen.getByText('No providers configured')).toBeTruthy();
+        expect(rtlScreen.getByText('No providers configured')).toBeTruthy();
       });
     });
 
@@ -210,7 +210,7 @@ describe('ProvidersPage', function() {
       setupMocks({ configs: [] });
       renderPage();
       await waitFor(function() {
-        expect(screen.getByText('Add your API keys below to enable AI providers')).toBeTruthy();
+        expect(rtlScreen.getByText('Add your API keys below to enable AI providers')).toBeTruthy();
       });
     });
   });
@@ -225,7 +225,7 @@ describe('ProvidersPage', function() {
       renderPage();
       // Each fetch has .catch(() => []) so Promise.all resolves with [[], []]
       await waitFor(function() {
-        expect(screen.getByText('No providers configured')).toBeTruthy();
+        expect(rtlScreen.getByText('No providers configured')).toBeTruthy();
       });
     });
 
@@ -258,7 +258,7 @@ describe('ProvidersPage', function() {
       await waitForLoad();
       clickSyncBtn();
       await waitFor(function() {
-        expect(screen.getByText('Synced')).toBeTruthy();
+        expect(rtlScreen.getByText('Synced')).toBeTruthy();
       });
     });
 
@@ -269,7 +269,7 @@ describe('ProvidersPage', function() {
       await waitForLoad();
       clickSyncBtn();
       await waitFor(function() {
-        expect(screen.getByText('Failed')).toBeTruthy();
+        expect(rtlScreen.getByText('Failed')).toBeTruthy();
       });
     });
 
@@ -290,7 +290,7 @@ describe('ProvidersPage', function() {
       await waitForLoad();
       clickSyncBtn();
       await waitFor(function() {
-        expect(screen.getByText('Syncing...')).toBeTruthy();
+        expect(rtlScreen.getByText('Syncing...')).toBeTruthy();
       });
     });
 
@@ -300,7 +300,7 @@ describe('ProvidersPage', function() {
       renderPage();
       await waitForLoad();
       // Find the sync button (contains Sync text)
-      var syncBtn = screen.getAllByRole('button').find(function(b) { return b.textContent.includes('Sync'); });
+      var syncBtn = rtlScreen.getAllByRole('button').find(function(b) { return b.textContent.includes('Sync'); });
       expect(syncBtn).toBeTruthy();
       expect(syncBtn.hasAttribute('disabled')).toBe(false);
       fireEvent.click(syncBtn);
@@ -317,37 +317,37 @@ describe('ProvidersPage', function() {
       setupMocks({});
       renderPage();
       await waitForLoad();
-      fireEvent.click(screen.getByText('Add Custom Provider'));
-      expect(await screen.findByText('Cancel')).toBeTruthy();
-      expect((await screen.findAllByText('Add Provider')).length).toBeGreaterThanOrEqual(1);
+      fireEvent.click(rtlScreen.getByText('Add Custom Provider'));
+      expect(await rtlScreen.findByText('Cancel')).toBeTruthy();
+      expect((await rtlScreen.findAllByText('Add Provider')).length).toBeGreaterThanOrEqual(1);
     });
 
     it('should show form field labels', async function() {
       setupMocks({});
       renderPage();
       await waitForLoad();
-      fireEvent.click(screen.getByText('Add Custom Provider'));
-      expect(await screen.findByText('Provider Name')).toBeTruthy();
-      expect(await screen.findByText('Display Name')).toBeTruthy();
-      expect(await screen.findByText('API Key')).toBeTruthy();
-      expect(await screen.findByText('Base URL')).toBeTruthy();
+      fireEvent.click(rtlScreen.getByText('Add Custom Provider'));
+      expect(await rtlScreen.findByText('Provider Name')).toBeTruthy();
+      expect(await rtlScreen.findByText('Display Name')).toBeTruthy();
+      expect(await rtlScreen.findByText('API Key')).toBeTruthy();
+      expect(await rtlScreen.findByText('Base URL')).toBeTruthy();
     });
 
     it('should open form on Quick Add click', async function() {
       setupMocks({});
       renderPage();
       await waitForLoad();
-      fireEvent.click(screen.getByText('Quick Add (Ollama/LocalAI)'));
-      expect(await screen.findByText('Cancel')).toBeTruthy();
+      fireEvent.click(rtlScreen.getByText('Quick Add (Ollama/LocalAI)'));
+      expect(await rtlScreen.findByText('Cancel')).toBeTruthy();
     });
 
     it('should hide add buttons when form is open', async function() {
       setupMocks({});
       renderPage();
       await waitForLoad();
-      fireEvent.click(screen.getByText('Add Custom Provider'));
+      fireEvent.click(rtlScreen.getByText('Add Custom Provider'));
       await waitFor(function() {
-        expect(screen.queryByText('Add Custom Provider')).toBeNull();
+        expect(rtlScreen.queryByText('Add Custom Provider')).toBeNull();
       });
     });
 
@@ -355,28 +355,28 @@ describe('ProvidersPage', function() {
       setupMocks({});
       renderPage();
       await waitForLoad();
-      fireEvent.click(screen.getByText('Add Custom Provider'));
-      expect(await screen.findByText('Cancel')).toBeTruthy();
-      fireEvent.click(screen.getByText('Cancel'));
+      fireEvent.click(rtlScreen.getByText('Add Custom Provider'));
+      expect(await rtlScreen.findByText('Cancel')).toBeTruthy();
+      fireEvent.click(rtlScreen.getByText('Cancel'));
       await waitFor(function() {
-        expect(screen.queryByText('Test Connection')).toBeNull();
+        expect(rtlScreen.queryByText('Test Connection')).toBeNull();
       });
-      expect(await screen.findByText('Add Custom Provider')).toBeTruthy();
+      expect(await rtlScreen.findByText('Add Custom Provider')).toBeTruthy();
     });
 
     it('should call createProviderConfig on save', async function() {
       setupMocks({});
       renderPage();
       await waitForLoad();
-      fireEvent.click(screen.getByText('Add Custom Provider'));
-      expect(await screen.findByDisplayValue(/^custom-/)).toBeTruthy();
+      fireEvent.click(rtlScreen.getByText('Add Custom Provider'));
+      expect(await rtlScreen.findByDisplayValue(/^custom-/)).toBeTruthy();
       // Fill required fields
-      var nameInput = screen.getByDisplayValue(/^custom-/);
+      var nameInput = rtlScreen.getByDisplayValue(/^custom-/);
       fireEvent.change(nameInput, { target: { value: 'my-provider' } });
-      var displayInput = screen.getByPlaceholderText('My Groq Key');
+      var displayInput = rtlScreen.getByPlaceholderText('My Groq Key');
       fireEvent.change(displayInput, { target: { value: 'My Provider' } });
       // "Add Provider" appears in both h3 title and save button — use getAllByText to click the button
-      var saveBtns = screen.getAllByText('Add Provider');
+      var saveBtns = rtlScreen.getAllByText('Add Provider');
       fireEvent.click(saveBtns[1]);
       await waitFor(function() {
         expect(mockApi.createProviderConfig).toHaveBeenCalled();
@@ -387,11 +387,11 @@ describe('ProvidersPage', function() {
       setupMocks({ configs: ACTIVE });
       renderPage();
       await waitForLoad();
-      fireEvent.click(screen.getByText('Add Custom Provider'));
+      fireEvent.click(rtlScreen.getByText('Add Custom Provider'));
       await waitFor(function() {
-        expect(screen.queryByDisplayValue('llama3.2')).toBeTruthy();
+        expect(rtlScreen.queryByDisplayValue('llama3.2')).toBeTruthy();
       });
-      var modelInput = screen.getByDisplayValue('llama3.2');
+      var modelInput = rtlScreen.getByDisplayValue('llama3.2');
       fireEvent.change(modelInput, { target: { value: 'custom-model-v2' } });
       expect((modelInput as HTMLInputElement).value).toBe('custom-model-v2');
     });
@@ -400,11 +400,11 @@ describe('ProvidersPage', function() {
       setupMocks({ configs: ACTIVE });
       renderPage();
       await waitForLoad();
-      fireEvent.click(screen.getByText('Add Custom Provider'));
+      fireEvent.click(rtlScreen.getByText('Add Custom Provider'));
       await waitFor(function() {
-        expect(screen.queryByDisplayValue('http://localhost:11434/v1/chat/completions')).toBeTruthy();
+        expect(rtlScreen.queryByDisplayValue('http://localhost:11434/v1/chat/completions')).toBeTruthy();
       });
-      var urlInput = screen.getByDisplayValue('http://localhost:11434/v1/chat/completions');
+      var urlInput = rtlScreen.getByDisplayValue('http://localhost:11434/v1/chat/completions');
       fireEvent.change(urlInput, { target: { value: 'https://custom.api.url/v1' } });
       expect((urlInput as HTMLInputElement).value).toBe('https://custom.api.url/v1');
     });
@@ -414,13 +414,13 @@ describe('ProvidersPage', function() {
       renderPage();
       await waitForLoad();
       // Quick Add fills providerName and displayName
-      fireEvent.click(screen.getByText('Quick Add (Ollama/LocalAI)'));
-      expect(await screen.findByText('Cancel')).toBeTruthy();
-      var saveBtns = screen.getAllByText('Add Provider');
+      fireEvent.click(rtlScreen.getByText('Quick Add (Ollama/LocalAI)'));
+      expect(await rtlScreen.findByText('Cancel')).toBeTruthy();
+      var saveBtns = rtlScreen.getAllByText('Add Provider');
       // Initially both fields filled — save not disabled
       expect(saveBtns[1].hasAttribute('disabled')).toBe(false);
       // Clear provider name
-      var nameInput = screen.getByDisplayValue(/^custom-/);
+      var nameInput = rtlScreen.getByDisplayValue(/^custom-/);
       fireEvent.change(nameInput, { target: { value: '' } });
       await waitFor(function() {
         expect(saveBtns[1].hasAttribute('disabled')).toBe(true);
@@ -439,11 +439,11 @@ describe('ProvidersPage', function() {
       renderPage();
       await waitForLoad();
       // Find the edit button inside the provider card.
-      var card = screen.getByText('My Groq').closest('.sv-card');
+      var card = rtlScreen.getByText('My Groq').closest('.sv-card');
       var editBtn = card.querySelector('button');
       fireEvent.click(editBtn);
       await waitFor(function() {
-        expect(screen.getByText('Edit Provider')).toBeTruthy();
+        expect(rtlScreen.getByText('Edit Provider')).toBeTruthy();
       });
     });
   });
@@ -454,19 +454,19 @@ describe('ProvidersPage', function() {
     async function openFormAndFillKey() {
       renderPage();
       await waitForLoad();
-      fireEvent.click(screen.getByText('Add Custom Provider'));
+      fireEvent.click(rtlScreen.getByText('Add Custom Provider'));
       await waitFor(function() {
-        expect(screen.getByPlaceholderText('sk-...')).toBeTruthy();
+        expect(rtlScreen.getByPlaceholderText('sk-...')).toBeTruthy();
       });
-      fireEvent.change(screen.getByPlaceholderText('sk-...'), { target: { value: 'sk-test-key' } });
+      fireEvent.change(rtlScreen.getByPlaceholderText('sk-...'), { target: { value: 'sk-test-key' } });
     }
 
     async function openForm() {
       renderPage();
       await waitForLoad();
-      fireEvent.click(screen.getByText('Add Custom Provider'));
+      fireEvent.click(rtlScreen.getByText('Add Custom Provider'));
       await waitFor(function() {
-        expect(screen.getByText('Cancel')).toBeTruthy();
+        expect(rtlScreen.getByText('Cancel')).toBeTruthy();
       });
     }
 
@@ -474,7 +474,7 @@ describe('ProvidersPage', function() {
       setupMocks({});
       await openForm();
       // API key input starts empty
-      var testBtn = screen.getByText('Test Connection');
+      var testBtn = rtlScreen.getByText('Test Connection');
       expect(testBtn.hasAttribute('disabled')).toBe(true);
     });
 
@@ -482,10 +482,10 @@ describe('ProvidersPage', function() {
       setupMocks({});
       mockApi.testProviderConnection.mockResolvedValue({ status: 'ok', message: 'Connected!' });
       await openFormAndFillKey();
-      expect(await screen.findByText('Test Connection')).toBeTruthy();
-      fireEvent.click(screen.getByText('Test Connection'));
+      expect(await rtlScreen.findByText('Test Connection')).toBeTruthy();
+      fireEvent.click(rtlScreen.getByText('Test Connection'));
       await waitFor(function() {
-        expect(screen.getByText('Connected!')).toBeTruthy();
+        expect(rtlScreen.getByText('Connected!')).toBeTruthy();
       });
     });
 
@@ -493,9 +493,9 @@ describe('ProvidersPage', function() {
       setupMocks({});
       mockApi.testProviderConnection.mockResolvedValue({ status: 'error', message: 'Invalid API key' });
       await openFormAndFillKey();
-      fireEvent.click(screen.getByText('Test Connection'));
+      fireEvent.click(rtlScreen.getByText('Test Connection'));
       await waitFor(function() {
-        expect(screen.getByText('Invalid API key')).toBeTruthy();
+        expect(rtlScreen.getByText('Invalid API key')).toBeTruthy();
       });
     });
   });
@@ -540,7 +540,7 @@ describe('ProvidersPage', function() {
         expect(mockApi.deleteProviderConfig).toHaveBeenCalled();
       });
       await waitFor(function() {
-        expect(screen.getByText('Delete failed')).toBeTruthy();
+        expect(rtlScreen.getByText('Delete failed')).toBeTruthy();
       }, { timeout: 3000 });
     });
   });
@@ -561,7 +561,7 @@ describe('ProvidersPage', function() {
       ]) });
       renderPage();
       await waitFor(function() {
-        expect(screen.getByText('Fallback Chain')).toBeTruthy();
+        expect(rtlScreen.getByText('Fallback Chain')).toBeTruthy();
       });
       var items = document.querySelectorAll('[draggable="true"]');
       expect(items.length).toBe(2);
@@ -582,7 +582,7 @@ describe('ProvidersPage', function() {
       ]) });
       renderPage();
       await waitFor(function() {
-        expect(screen.getByText('Fallback Chain')).toBeTruthy();
+        expect(rtlScreen.getByText('Fallback Chain')).toBeTruthy();
       });
       var items = document.querySelectorAll('[draggable="true"]');
       // Drag with non-existent ID
@@ -597,7 +597,7 @@ describe('ProvidersPage', function() {
       ]) });
       renderPage();
       await waitFor(function() {
-        expect(screen.getByText('Fallback Chain')).toBeTruthy();
+        expect(rtlScreen.getByText('Fallback Chain')).toBeTruthy();
       });
       var items = document.querySelectorAll('[draggable="true"]');
       var dt = makeDataTransfer({});
@@ -616,7 +616,7 @@ describe('ProvidersPage', function() {
       ]) });
       renderPage();
       await waitFor(function() {
-        expect(screen.getByText('Fallback Chain')).toBeTruthy();
+        expect(rtlScreen.getByText('Fallback Chain')).toBeTruthy();
       });
       var items = document.querySelectorAll('[draggable="true"]');
       expect(items.length).toBeGreaterThanOrEqual(2);
@@ -636,11 +636,11 @@ describe('ProvidersPage', function() {
       setupMocks({});
       renderPage();
       await waitFor(function() {
-        expect(screen.getByText('Groq')).toBeTruthy();
+        expect(rtlScreen.getByText('Groq')).toBeTruthy();
       });
-      fireEvent.click(screen.getByText('Provider Templates'));
+      fireEvent.click(rtlScreen.getByText('Provider Templates'));
       await waitFor(function() {
-        expect(screen.queryByText('Groq')).toBeNull();
+        expect(rtlScreen.queryByText('Groq')).toBeNull();
       });
     });
 
@@ -648,8 +648,8 @@ describe('ProvidersPage', function() {
       setupMocks({});
       renderPage();
       await waitFor(function() {
-        expect(screen.getByText('Groq')).toBeTruthy();
-        expect(screen.getByText('OpenAI')).toBeTruthy();
+        expect(rtlScreen.getByText('Groq')).toBeTruthy();
+        expect(rtlScreen.getByText('OpenAI')).toBeTruthy();
       });
     });
 
@@ -657,12 +657,12 @@ describe('ProvidersPage', function() {
       setupMocks({ configs: [] });
       renderPage();
       await waitFor(function() {
-        expect(screen.getByText('OpenAI')).toBeTruthy();
+        expect(rtlScreen.getByText('OpenAI')).toBeTruthy();
       });
-      fireEvent.click(screen.getByText('OpenAI'));
+      fireEvent.click(rtlScreen.getByText('OpenAI'));
       await waitFor(function() {
         // "Add Provider" appears in both h3 title and save button — check for at least one
-        expect(screen.getAllByText('Add Provider').length).toBeGreaterThanOrEqual(1);
+        expect(rtlScreen.getAllByText('Add Provider').length).toBeGreaterThanOrEqual(1);
       });
     });
 
@@ -670,11 +670,11 @@ describe('ProvidersPage', function() {
       setupMocks({ configs: [{ id: 'e1', providerName: 'groq', displayName: 'My Groq', apiKeyMasked: 'gsk_****', baseUrl: 'https://custom.groq.url', defaultModel: 'mixtral-8x7b', isActive: true, priority: 2, isCustom: false }] });
       renderPage();
       await waitFor(function() {
-        expect(screen.getByText('Groq')).toBeTruthy();
+        expect(rtlScreen.getByText('Groq')).toBeTruthy();
       });
-      fireEvent.click(screen.getByText('Groq'));
+      fireEvent.click(rtlScreen.getByText('Groq'));
       await waitFor(function() {
-        expect(screen.getByText('Edit Provider')).toBeTruthy();
+        expect(rtlScreen.getByText('Edit Provider')).toBeTruthy();
       });
     });
   });

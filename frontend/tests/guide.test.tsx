@@ -16,70 +16,70 @@ jest.mock('react-i18next', function() { return { useTranslation: function() { re
 jest.mock('lucide-react', function() { return new Proxy({}, { get: function() { return function() { return null } } }) })
 
 var React = require('react')
-var { render, screen, fireEvent, waitFor } = require('@testing-library/react')
+var { render, screen: rtlScreen, fireEvent, waitFor } = require('@testing-library/react')
 var Page = require('../app/guide/page').default
 
 describe('GuidePage', function() {
   it('renders Municipality Guide sr-only heading', function() {
     render(React.createElement(Page))
-    expect(screen.getByText('Municipality Guide')).toBeTruthy()
+    expect(rtlScreen.getByText('Municipality Guide')).toBeTruthy()
   })
 
   it('renders search input', function() {
     render(React.createElement(Page))
-    expect(screen.getByPlaceholderText('Search municipality...')).toBeTruthy()
+    expect(rtlScreen.getByPlaceholderText('Search municipality...')).toBeTruthy()
   })
 
   it('renders Find Nearby button', function() {
     render(React.createElement(Page))
-    expect(screen.getByText('Find Nearby')).toBeTruthy()
+    expect(rtlScreen.getByText('Find Nearby')).toBeTruthy()
   })
 
   it('renders Filter button', function() {
     render(React.createElement(Page))
-    expect(screen.getByText('Filter')).toBeTruthy()
+    expect(rtlScreen.getByText('Filter')).toBeTruthy()
   })
 
   it('renders municipality cards after loading', async function() {
     render(React.createElement(Page))
-    var cards = await screen.findAllByTestId('municipality-card', {}, { timeout: 5000 })
+    var cards = await rtlScreen.findAllByTestId('municipality-card', {}, { timeout: 5000 })
     expect(cards.length).toBeGreaterThanOrEqual(3)
   })
 
   it('filters municipalities by search query', async function() {
     render(React.createElement(Page))
-    await screen.findByText('Chennai', {}, { timeout: 5000 })
-    var input = screen.getByPlaceholderText('Search municipality...')
+    await rtlScreen.findByText('Chennai', {}, { timeout: 5000 })
+    var input = rtlScreen.getByPlaceholderText('Search municipality...')
     fireEvent.change(input, { target: { value: 'Kanchi' } })
-    expect(screen.getByText('Kanchipuram')).toBeTruthy()
-    expect(screen.queryByText('Chennai')).toBeFalsy()
+    expect(rtlScreen.getByText('Kanchipuram')).toBeTruthy()
+    expect(rtlScreen.queryByText('Chennai')).toBeFalsy()
   })
 
   it('shows filters when Filter button clicked', async function() {
     render(React.createElement(Page))
-    var cards = await screen.findAllByTestId('municipality-card', {}, { timeout: 5000 })
+    var cards = await rtlScreen.findAllByTestId('municipality-card', {}, { timeout: 5000 })
     expect(cards.length).toBeGreaterThanOrEqual(1)
-    fireEvent.click(screen.getByText('Filter'))
-    expect(screen.getByText('State')).toBeTruthy()
-    expect(screen.getByText('Type')).toBeTruthy()
+    fireEvent.click(rtlScreen.getByText('Filter'))
+    expect(rtlScreen.getByText('State')).toBeTruthy()
+    expect(rtlScreen.getByText('Type')).toBeTruthy()
   })
 
   it('filters by state chip when active', async function() {
     render(React.createElement(Page))
-    await screen.findByText('Mumbai', {}, { timeout: 5000 })
-    fireEvent.click(screen.getByText('Filter'))
-    fireEvent.click(screen.getByText('MH'))
-    expect(screen.getByText('Mumbai')).toBeTruthy()
-    expect(screen.queryByText('Chennai')).toBeFalsy()
+    await rtlScreen.findByText('Mumbai', {}, { timeout: 5000 })
+    fireEvent.click(rtlScreen.getByText('Filter'))
+    fireEvent.click(rtlScreen.getByText('MH'))
+    expect(rtlScreen.getByText('Mumbai')).toBeTruthy()
+    expect(rtlScreen.queryByText('Chennai')).toBeFalsy()
   })
 
   it('shows all state chips in filter panel', async function() {
     render(React.createElement(Page))
-    var cards = await screen.findAllByTestId('municipality-card', {}, { timeout: 5000 })
+    var cards = await rtlScreen.findAllByTestId('municipality-card', {}, { timeout: 5000 })
     expect(cards.length).toBeGreaterThanOrEqual(1)
-    fireEvent.click(screen.getByText('Filter'))
-    expect(screen.getByText('TN')).toBeTruthy()
-    expect(screen.getByText('KA')).toBeTruthy()
+    fireEvent.click(rtlScreen.getByText('Filter'))
+    expect(rtlScreen.getByText('TN')).toBeTruthy()
+    expect(rtlScreen.getByText('KA')).toBeTruthy()
   })
 })
 

@@ -8,52 +8,52 @@ jest.mock('../../hooks/useLandingGSAP', function() {
 })
 
 var React = require('react')
-var { render, screen } = require('@testing-library/react')
+var { render, screen: rtlScreen } = require('@testing-library/react')
 var TechStack = require('../TechStack').default
 
 describe('TechStack', function() {
   it('renders the technology label', function() {
     render(React.createElement(TechStack))
-    expect(screen.getByText('TECHNOLOGY')).toBeTruthy()
+    expect(rtlScreen.getByText('TECHNOLOGY')).toBeTruthy()
   })
 
   it('renders the heading', function() {
     render(React.createElement(TechStack))
-    expect(screen.getByText('Built for Scale')).toBeTruthy()
+    expect(rtlScreen.getByText('Built for Scale')).toBeTruthy()
   })
 
   it('renders inner ring tech names', function() {
     render(React.createElement(TechStack))
-    var nextJsNodes = screen.getAllByText('Next.js')
+    var nextJsNodes = rtlScreen.getAllByText('Next.js')
     expect(nextJsNodes.length).toBeGreaterThanOrEqual(1)
-    var fastApiNodes = screen.getAllByText('FastAPI')
+    var fastApiNodes = rtlScreen.getAllByText('FastAPI')
     expect(fastApiNodes.length).toBeGreaterThanOrEqual(1)
-    var supabaseNodes = screen.getAllByText('Supabase')
+    var supabaseNodes = rtlScreen.getAllByText('Supabase')
     expect(supabaseNodes.length).toBeGreaterThanOrEqual(1)
   })
 
   it('renders middle ring tech names', function() {
     render(React.createElement(TechStack))
-    var geminiNodes = screen.getAllByText('Gemini AI')
+    var geminiNodes = rtlScreen.getAllByText('Gemini AI')
     expect(geminiNodes.length).toBeGreaterThanOrEqual(1)
-    var mapboxNodes = screen.getAllByText('Mapbox')
+    var mapboxNodes = rtlScreen.getAllByText('Mapbox')
     expect(mapboxNodes.length).toBeGreaterThanOrEqual(1)
-    var threeNodes = screen.getAllByText('Three.js')
+    var threeNodes = rtlScreen.getAllByText('Three.js')
     expect(threeNodes.length).toBeGreaterThanOrEqual(1)
   })
 
   it('renders outer ring tech names', function() {
     render(React.createElement(TechStack))
-    var gsapNodes = screen.getAllByText('GSAP')
+    var gsapNodes = rtlScreen.getAllByText('GSAP')
     expect(gsapNodes.length).toBeGreaterThanOrEqual(1)
-    var tfNodes = screen.getAllByText('TensorFlow')
+    var tfNodes = rtlScreen.getAllByText('TensorFlow')
     expect(tfNodes.length).toBeGreaterThanOrEqual(1)
-    var dockerNodes = screen.getAllByText('Docker')
+    var dockerNodes = rtlScreen.getAllByText('Docker')
     expect(dockerNodes.length).toBeGreaterThanOrEqual(1)
   })
 
   it('renders the shield SVG logo', function() {
     render(React.createElement(TechStack))
-    expect(screen.getByText('SVA')).toBeTruthy()
+    expect(rtlScreen.getByText('SVA')).toBeTruthy()
   })
 })

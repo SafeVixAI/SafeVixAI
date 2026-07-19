@@ -13,47 +13,47 @@ jest.mock('@/components/ui/Logo', function() { return { Logo: function() { retur
 jest.mock('lucide-react', function() { return new Proxy({}, { get: function() { return function() { return null } } }) })
 
 var React = require('react')
-var { render, screen } = require('@testing-library/react')
+var { render, screen: rtlScreen } = require('@testing-library/react')
 var ForgotPasswordPage = require('../app/forgot-password/page').default
 
 describe('Forgot Password Page', function() {
   it('renders Password Recovery heading', function() {
     render(React.createElement(ForgotPasswordPage))
-    expect(screen.getByText('Password Recovery')).toBeTruthy()
+    expect(rtlScreen.getByText('Password Recovery')).toBeTruthy()
   })
 
   it('renders SafeVixAI heading', function() {
     render(React.createElement(ForgotPasswordPage))
-    expect(screen.getByText('SafeVixAI')).toBeTruthy()
+    expect(rtlScreen.getByText('SafeVixAI')).toBeTruthy()
   })
 
   it('renders email input', function() {
     render(React.createElement(ForgotPasswordPage))
-    expect(screen.getByPlaceholderText(/operator@/)).toBeTruthy()
+    expect(rtlScreen.getByPlaceholderText(/operator@/)).toBeTruthy()
   })
 
   it('renders submit button', function() {
     render(React.createElement(ForgotPasswordPage))
-    expect(screen.getByText('Send Reset Link')).toBeTruthy()
+    expect(rtlScreen.getByText('Send Reset Link')).toBeTruthy()
   })
 
   it('renders back to login link', function() {
     render(React.createElement(ForgotPasswordPage))
-    expect(screen.getByText('Back to Login')).toBeTruthy()
+    expect(rtlScreen.getByText('Back to Login')).toBeTruthy()
   })
 
   it('renders description text', function() {
     render(React.createElement(ForgotPasswordPage))
-    expect(screen.getByText(/operator email/)).toBeTruthy()
+    expect(rtlScreen.getByText(/operator email/)).toBeTruthy()
   })
 
   it('renders email label', function() {
     render(React.createElement(ForgotPasswordPage))
-    expect(screen.getByText('Operator Email')).toBeTruthy()
+    expect(rtlScreen.getByText('Operator Email')).toBeTruthy()
   })
 
   it('renders LoadingMunicipalities heading', function() {
     render(React.createElement(ForgotPasswordPage))
-    expect(screen.getByText('Password Recovery')).toBeTruthy()
+    expect(rtlScreen.getByText('Password Recovery')).toBeTruthy()
   })
 })

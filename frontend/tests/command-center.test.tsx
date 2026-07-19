@@ -6,7 +6,7 @@ jest.mock('next/dynamic', function() { return function() { return function() { r
 jest.mock('lucide-react', function() { return new Proxy({}, { get: function() { return function() { return null } } }) })
 
 var React = require('react')
-var { render, screen, fireEvent, waitFor } = require('@testing-library/react')
+var { render, screen: rtlScreen, fireEvent, waitFor } = require('@testing-library/react')
 var { client } = require('@/lib/api')
 var CommandCenterPage = require('../app/command-center/page').default
 
@@ -55,168 +55,168 @@ describe('CommandCenterPage', function() {
   it('shows loading state initially', function() {
     mockSuccess()
     render(React.createElement(CommandCenterPage))
-    expect(screen.getByText(/DISPATCHING SENSORS/i)).toBeTruthy()
+    expect(rtlScreen.getByText(/DISPATCHING SENSORS/i)).toBeTruthy()
   })
 
   it('renders Command Center heading after load', async function() {
     mockSuccess()
     render(React.createElement(CommandCenterPage))
-    await waitFor(function() { expect(screen.getByText('Command Center')).toBeTruthy() })
+    await waitFor(function() { expect(rtlScreen.getByText('Command Center')).toBeTruthy() })
   })
 
   it('renders KPI cards with data', async function() {
     mockSuccess()
     render(React.createElement(CommandCenterPage))
-    await waitFor(function() { expect(screen.getByText('12')).toBeTruthy() })
-    expect(screen.getByText('45')).toBeTruthy()
-    expect(screen.getByText(/75%/)).toBeTruthy()
+    await waitFor(function() { expect(rtlScreen.getByText('12')).toBeTruthy() })
+    expect(rtlScreen.getByText('45')).toBeTruthy()
+    expect(rtlScreen.getByText(/75%/)).toBeTruthy()
   })
 
   it('shows error state when API fails', async function() {
     mockError()
     render(React.createElement(CommandCenterPage))
-    await waitFor(function() { expect(screen.getByText('API failure')).toBeTruthy() })
+    await waitFor(function() { expect(rtlScreen.getByText('API failure')).toBeTruthy() })
   })
 
   it('retry button reloads data after error', async function() {
     client.get.mockRejectedValueOnce(new Error('API failure'))
     mockSuccess()
     render(React.createElement(CommandCenterPage))
-    await waitFor(function() { expect(screen.getByText('API failure')).toBeTruthy() })
-    fireEvent.click(screen.getByText('Retry'))
-    await waitFor(function() { expect(screen.getByText('12')).toBeTruthy() })
+    await waitFor(function() { expect(rtlScreen.getByText('API failure')).toBeTruthy() })
+    fireEvent.click(rtlScreen.getByText('Retry'))
+    await waitFor(function() { expect(rtlScreen.getByText('12')).toBeTruthy() })
   })
 
   it('renders category breakdown with labels', async function() {
     mockSuccess()
     render(React.createElement(CommandCenterPage))
-    await waitFor(function() { expect(screen.getByText('Roads & Bridges')).toBeTruthy() })
-    expect(screen.getByText('Traffic & Signage')).toBeTruthy()
-    expect(screen.getByText('Public Streetlighting')).toBeTruthy()
+    await waitFor(function() { expect(rtlScreen.getByText('Roads & Bridges')).toBeTruthy() })
+    expect(rtlScreen.getByText('Traffic & Signage')).toBeTruthy()
+    expect(rtlScreen.getByText('Public Streetlighting')).toBeTruthy()
   })
 
   it('renders complaint table with data', async function() {
     mockSuccess()
     render(React.createElement(CommandCenterPage))
-    await waitFor(function() { expect(screen.getByText('CC-001')).toBeTruthy() })
-    expect(screen.getByText('CC-002')).toBeTruthy()
+    await waitFor(function() { expect(rtlScreen.getByText('CC-001')).toBeTruthy() })
+    expect(rtlScreen.getByText('CC-002')).toBeTruthy()
   })
 
   it('shows empty state when no complaints', async function() {
     mockEmpty()
     render(React.createElement(CommandCenterPage))
-    await waitFor(function() { expect(screen.getByText(/No complaints match filters/i)).toBeTruthy() })
+    await waitFor(function() { expect(rtlScreen.getByText(/No complaints match filters/i)).toBeTruthy() })
   })
 
   it('shows Sev 5 badge for severity >= 4', async function() {
     mockSuccess()
     render(React.createElement(CommandCenterPage))
-    await waitFor(function() { expect(screen.getByText('Sev 5')).toBeTruthy() })
+    await waitFor(function() { expect(rtlScreen.getByText('Sev 5')).toBeTruthy() })
   })
 
   it('shows Sev 3 badge for severity < 4', async function() {
     mockSuccess()
     render(React.createElement(CommandCenterPage))
-    await waitFor(function() { expect(screen.getByText('Sev 3')).toBeTruthy() })
+    await waitFor(function() { expect(rtlScreen.getByText('Sev 3')).toBeTruthy() })
   })
 
   it('shows Assign Squad button for unassigned complaint', async function() {
     mockSuccess()
     render(React.createElement(CommandCenterPage))
-    await waitFor(function() { expect(screen.getByText('Assign Squad')).toBeTruthy() })
+    await waitFor(function() { expect(rtlScreen.getByText('Assign Squad')).toBeTruthy() })
   })
 
   it('renders all table column headers', async function() {
     mockSuccess()
     render(React.createElement(CommandCenterPage))
-    await waitFor(function() { expect(screen.queryByText('CC-002')).toBeTruthy() })
-    expect(screen.getByText('REF / TYPE')).toBeTruthy()
-    expect(screen.getByText('LOCATION')).toBeTruthy()
-    expect(screen.getByText('SEVERITY')).toBeTruthy()
-    expect(screen.getByText('TIME')).toBeTruthy()
+    await waitFor(function() { expect(rtlScreen.queryByText('CC-002')).toBeTruthy() })
+    expect(rtlScreen.getByText('REF / TYPE')).toBeTruthy()
+    expect(rtlScreen.getByText('LOCATION')).toBeTruthy()
+    expect(rtlScreen.getByText('SEVERITY')).toBeTruthy()
+    expect(rtlScreen.getByText('TIME')).toBeTruthy()
   })
 
   it('renders complaint reference and location', async function() {
     mockSuccess()
     render(React.createElement(CommandCenterPage))
-    await waitFor(function() { expect(screen.queryByText('CC-002')).toBeTruthy() })
-    expect(screen.getByText('CC-001')).toBeTruthy()
-    expect(screen.getByText('Anna Salai')).toBeTruthy()
-    expect(screen.getByText('Mount Road')).toBeTruthy()
+    await waitFor(function() { expect(rtlScreen.queryByText('CC-002')).toBeTruthy() })
+    expect(rtlScreen.getByText('CC-001')).toBeTruthy()
+    expect(rtlScreen.getByText('Anna Salai')).toBeTruthy()
+    expect(rtlScreen.getByText('Mount Road')).toBeTruthy()
   })
 
   it('renders severity badges with Sev prefix', async function() {
     mockSuccess()
     render(React.createElement(CommandCenterPage))
-    await waitFor(function() { expect(screen.queryByText('CC-002')).toBeTruthy() })
-    expect(screen.getByText('Sev 5')).toBeTruthy()
-    expect(screen.getByText('Sev 3')).toBeTruthy()
+    await waitFor(function() { expect(rtlScreen.queryByText('CC-002')).toBeTruthy() })
+    expect(rtlScreen.getByText('Sev 5')).toBeTruthy()
+    expect(rtlScreen.getByText('Sev 3')).toBeTruthy()
   })
 
   it('renders issue type and category', async function() {
     mockSuccess()
     render(React.createElement(CommandCenterPage))
-    await waitFor(function() { expect(screen.queryByText('CC-002')).toBeTruthy() })
-    expect(screen.getByText('roads - pothole')).toBeTruthy()
-    expect(screen.getByText('streetlight - streetlight')).toBeTruthy()
+    await waitFor(function() { expect(rtlScreen.queryByText('CC-002')).toBeTruthy() })
+    expect(rtlScreen.getByText('roads - pothole')).toBeTruthy()
+    expect(rtlScreen.getByText('streetlight - streetlight')).toBeTruthy()
   })
 
   it('renders ward names', async function() {
     mockSuccess()
     render(React.createElement(CommandCenterPage))
-    await waitFor(function() { expect(screen.queryByText('CC-002')).toBeTruthy() })
-    expect(screen.getAllByText('Ward 10').length).toBeGreaterThanOrEqual(1)
-    expect(screen.getByText('Ward 5')).toBeTruthy()
+    await waitFor(function() { expect(rtlScreen.queryByText('CC-002')).toBeTruthy() })
+    expect(rtlScreen.getAllByText('Ward 10').length).toBeGreaterThanOrEqual(1)
+    expect(rtlScreen.getByText('Ward 5')).toBeTruthy()
   })
 
   it('status filter tabs render with counts', async function() {
     mockSuccess()
     render(React.createElement(CommandCenterPage))
-    await waitFor(function() { expect(screen.queryByText('CC-002')).toBeTruthy() })
-    expect(screen.getByText('All')).toBeTruthy()
-    expect(screen.getByText('Open')).toBeTruthy()
-    expect(screen.getByText('In Progress')).toBeTruthy()
+    await waitFor(function() { expect(rtlScreen.queryByText('CC-002')).toBeTruthy() })
+    expect(rtlScreen.getByText('All')).toBeTruthy()
+    expect(rtlScreen.getByText('Open')).toBeTruthy()
+    expect(rtlScreen.getByText('In Progress')).toBeTruthy()
   })
 
   it('renders ward leaderboard', async function() {
     mockSuccess()
     render(React.createElement(CommandCenterPage))
-    await waitFor(function() { expect(screen.getByText(/Deserving Immediate Patrol/)).toBeTruthy() })
-    expect(screen.getByText(/80/)).toBeTruthy()
+    await waitFor(function() { expect(rtlScreen.getByText(/Deserving Immediate Patrol/)).toBeTruthy() })
+    expect(rtlScreen.getByText(/80/)).toBeTruthy()
   })
 
   it('renders SLA breaches list', async function() {
     mockSuccess()
     render(React.createElement(CommandCenterPage))
-    await waitFor(function() { expect(screen.getByText('OVERDUE')).toBeTruthy() })
+    await waitFor(function() { expect(rtlScreen.getByText('OVERDUE')).toBeTruthy() })
   })
 
   it('shows no SLA breaches message when empty', async function() {
     mockEmpty()
     render(React.createElement(CommandCenterPage))
-    await waitFor(function() { expect(screen.getByText(/No active SLA breaches/i)).toBeTruthy() })
+    await waitFor(function() { expect(rtlScreen.getByText(/No active SLA breaches/i)).toBeTruthy() })
   })
 
   it('renders search input', async function() {
     mockSuccess()
     render(React.createElement(CommandCenterPage))
-    await waitFor(function() { expect(screen.getByPlaceholderText('Search complaints...')).toBeTruthy() })
+    await waitFor(function() { expect(rtlScreen.getByPlaceholderText('Search complaints...')).toBeTruthy() })
   })
 
   it('filters by status tab', async function() {
     mockSuccess()
     render(React.createElement(CommandCenterPage))
-    await waitFor(function() { expect(screen.getByText('Open')).toBeTruthy() })
-    fireEvent.click(screen.getByText('In Progress'))
-    await waitFor(function() { expect(screen.getByText('CC-002')).toBeTruthy() })
+    await waitFor(function() { expect(rtlScreen.getByText('Open')).toBeTruthy() })
+    fireEvent.click(rtlScreen.getByText('In Progress'))
+    await waitFor(function() { expect(rtlScreen.getByText('CC-002')).toBeTruthy() })
   })
 
   it('detail panel shows timeline for assigned complaint', async function() {
     mockSuccess()
     render(React.createElement(CommandCenterPage))
-    await waitFor(function() { expect(screen.getByText('CC-002')).toBeTruthy() })
-    fireEvent.click(screen.getByText('CC-002'))
-    await waitFor(function() { expect(screen.getByText('Officer Assigned')).toBeTruthy() })
+    await waitFor(function() { expect(rtlScreen.getByText('CC-002')).toBeTruthy() })
+    fireEvent.click(rtlScreen.getByText('CC-002'))
+    await waitFor(function() { expect(rtlScreen.getByText('Officer Assigned')).toBeTruthy() })
   })
 
   it('timeAgo returns Just now for very recent', async function() {
@@ -230,7 +230,7 @@ describe('CommandCenterPage', function() {
       return Promise.resolve({ data: {} })
     })
     render(React.createElement(CommandCenterPage))
-    await waitFor(function() { expect(screen.getByText('Just now')).toBeTruthy() })
+    await waitFor(function() { expect(rtlScreen.getByText('Just now')).toBeTruthy() })
   })
 
   it('shows sev5 alert sound on severity 5 incident', async function() {

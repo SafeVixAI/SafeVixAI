@@ -20,60 +20,60 @@ jest.mock('react-i18next', function() { return { useTranslation: function() { re
 jest.mock('lucide-react', function() { return new Proxy({}, { get: function() { return function() { return null } } }) })
 
 var React = require('react')
-var { render, screen } = require('@testing-library/react')
+var { render, screen: rtlScreen } = require('@testing-library/react')
 var SettingsPage = require('../app/settings/page').default
 
 describe('Settings Page', function() {
   it('renders sr-only Settings heading', function() {
     render(React.createElement(SettingsPage))
-    expect(screen.getByText('Settings')).toBeTruthy()
+    expect(rtlScreen.getByText('Settings')).toBeTruthy()
   })
 
   it('renders setting rows', function() {
     render(React.createElement(SettingsPage))
-    var rows = screen.getAllByTestId('setting-row')
+    var rows = rtlScreen.getAllByTestId('setting-row')
     expect(rows.length).toBeGreaterThan(0)
   })
 
   it('renders theme buttons', function() {
     render(React.createElement(SettingsPage))
-    expect(screen.getByText('settings.light')).toBeTruthy()
-    expect(screen.getByText('settings.dark')).toBeTruthy()
-    expect(screen.getByText('settings.system')).toBeTruthy()
+    expect(rtlScreen.getByText('settings.light')).toBeTruthy()
+    expect(rtlScreen.getByText('settings.dark')).toBeTruthy()
+    expect(rtlScreen.getByText('settings.system')).toBeTruthy()
   })
 
   it('renders signed in status when authenticated', function() {
     render(React.createElement(SettingsPage))
-    expect(screen.getByText('settings.signed_in')).toBeTruthy()
+    expect(rtlScreen.getByText('settings.signed_in')).toBeTruthy()
   })
 
   it('renders operator name', function() {
     render(React.createElement(SettingsPage))
-    expect(screen.getByText('TestOp')).toBeTruthy()
+    expect(rtlScreen.getByText('TestOp')).toBeTruthy()
   })
 
   it('renders JWT badge when authenticated', function() {
     render(React.createElement(SettingsPage))
-    expect(screen.getByText('JWT')).toBeTruthy()
+    expect(rtlScreen.getByText('JWT')).toBeTruthy()
   })
 
   it('renders active user badge', function() {
     render(React.createElement(SettingsPage))
-    expect(screen.getByText('settings.active_user')).toBeTruthy()
+    expect(rtlScreen.getByText('settings.active_user')).toBeTruthy()
   })
 
   it('renders sign out button when authenticated', function() {
     render(React.createElement(SettingsPage))
-    expect(screen.getByText(/profile.sign_out/)).toBeTruthy()
+    expect(rtlScreen.getByText(/profile.sign_out/)).toBeTruthy()
   })
 
   it('renders purge cache button', function() {
     render(React.createElement(SettingsPage))
-    expect(screen.getByText('settings.purge')).toBeTruthy()
+    expect(rtlScreen.getByText('settings.purge')).toBeTruthy()
   })
 
   it('renders export profile button', function() {
     render(React.createElement(SettingsPage))
-    expect(screen.getByText('settings.export')).toBeTruthy()
+    expect(rtlScreen.getByText('settings.export')).toBeTruthy()
   })
 })

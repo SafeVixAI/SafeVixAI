@@ -12,84 +12,84 @@ jest.mock('@/components/ui/Logo', function() { return { Logo: function() { retur
 jest.mock('lucide-react', function() { return new Proxy({}, { get: function() { return function() { return null } } }) })
 
 var React = require('react')
-var { render, screen, fireEvent } = require('@testing-library/react')
+var { render, screen: rtlScreen, fireEvent } = require('@testing-library/react')
 var LoginPage = require('../app/login/page').default
 
 describe('Login Page', function() {
   it('renders SafeVixAI heading', function() {
     render(React.createElement(LoginPage))
-    expect(screen.getByText('SafeVixAI')).toBeTruthy()
+    expect(rtlScreen.getByText('SafeVixAI')).toBeTruthy()
   })
 
   it('renders operator_authentication heading', function() {
     render(React.createElement(LoginPage))
-    expect(screen.getByText('operator_authentication')).toBeTruthy()
+    expect(rtlScreen.getByText('operator_authentication')).toBeTruthy()
   })
 
   it('renders email input', function() {
     render(React.createElement(LoginPage))
-    expect(screen.getByPlaceholderText(/operator@/)).toBeTruthy()
+    expect(rtlScreen.getByPlaceholderText(/operator@/)).toBeTruthy()
   })
 
   it('renders password input with placeholder', function() {
     render(React.createElement(LoginPage))
-    expect(screen.getByPlaceholderText('••••••••••••')).toBeTruthy()
+    expect(rtlScreen.getByPlaceholderText('••••••••••••')).toBeTruthy()
   })
 
   it('renders submit button', function() {
     render(React.createElement(LoginPage))
-    expect(screen.getByText('Enter Command Center')).toBeTruthy()
+    expect(rtlScreen.getByText('Enter Command Center')).toBeTruthy()
   })
 
   it('renders Create one link', function() {
     render(React.createElement(LoginPage))
-    expect(screen.getByText('Create one')).toBeTruthy()
+    expect(rtlScreen.getByText('Create one')).toBeTruthy()
   })
 
   it('renders forgot password link', function() {
     render(React.createElement(LoginPage))
-    expect(screen.getByText('Forgot password?')).toBeTruthy()
+    expect(rtlScreen.getByText('Forgot password?')).toBeTruthy()
   })
 
   it('renders Sentinel Online badge', function() {
     render(React.createElement(LoginPage))
-    expect(screen.getByText('Sentinel Online')).toBeTruthy()
+    expect(rtlScreen.getByText('Sentinel Online')).toBeTruthy()
   })
 
   it('renders Secure badge', function() {
     render(React.createElement(LoginPage))
-    expect(screen.getByText('Secure')).toBeTruthy()
+    expect(rtlScreen.getByText('Secure')).toBeTruthy()
   })
 
   it('renders JWT Secured badge', function() {
     render(React.createElement(LoginPage))
-    expect(screen.getByText('JWT Secured')).toBeTruthy()
+    expect(rtlScreen.getByText('JWT Secured')).toBeTruthy()
   })
 
   it('renders version footer text', function() {
     render(React.createElement(LoginPage))
-    expect(screen.getByText(/SafeVixAI v2\.4/)).toBeTruthy()
+    expect(rtlScreen.getByText(/SafeVixAI v2\.4/)).toBeTruthy()
   })
 
   it('renders password visibility toggle button', function() {
     render(React.createElement(LoginPage))
-    expect(screen.getByLabelText('Show password')).toBeTruthy()
+    expect(rtlScreen.getByLabelText('Show password')).toBeTruthy()
   })
 
   it('renders account prompt text', function() {
     render(React.createElement(LoginPage))
-    expect(screen.getByText("Don't have an account?")).toBeTruthy()
+    expect(rtlScreen.getByText("Don't have an account?")).toBeTruthy()
   })
 
   it('renders operator_email label', function() {
     render(React.createElement(LoginPage))
-    expect(screen.getByText('operator_email')).toBeTruthy()
+    expect(rtlScreen.getByText('operator_email')).toBeTruthy()
   })
 
   it('toggles password visibility', function() {
     render(React.createElement(LoginPage))
-    var toggle = screen.getByLabelText('Show password')
+    var toggle = rtlScreen.getByLabelText('Show password')
     fireEvent.click(toggle)
-    expect(screen.getByLabelText('Hide password')).toBeTruthy()
+    expect(rtlScreen.getByLabelText('Hide password')).toBeTruthy()
   })
 })

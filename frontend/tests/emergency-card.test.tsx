@@ -15,7 +15,7 @@ jest.mock('../app/emergency-card/[userId]/page', function() {
 })
 
 var React = require('react')
-var { render, screen } = require('@testing-library/react')
+var { render, screen: rtlScreen } = require('@testing-library/react')
 var Page = require('../app/emergency-card/[userId]/page').default
 
 describe('EmergencyCardPage', function() {
@@ -30,7 +30,7 @@ describe('EmergencyCardPage', function() {
     var params = { then: function() {}, status: 'fulfilled', value: { userId: 'user-42' } }
     var searchParams = { then: function() {}, status: 'fulfilled', value: {} }
     render(React.createElement(Page, { params: params, searchParams: searchParams }))
-    expect(screen.getByText('Emergency Card for user-42')).toBeTruthy()
+    expect(rtlScreen.getByText('Emergency Card for user-42')).toBeTruthy()
   })
 
   it('renders with displayId from searchParams', function() {

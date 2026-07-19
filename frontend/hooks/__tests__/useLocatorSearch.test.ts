@@ -29,7 +29,7 @@ jest.mock('@/lib/store', () => {
       }
       return storeState
     },
-    __setStoreState: function(k, v) { storeState[k] = v; if (typeof v === 'object') { Object.assign(storeState, v) }; storeListeners.forEach(function(fn) { fn() }) },
+    __setStoreState: function(k, v) { storeState[k] = v; if (typeof v === 'object') { Object.assign(storeState, v) } storeListeners.forEach(function(fn) { fn() }) },
     __resetStore: function() {
       storeState.gpsError = null
       storeState.gpsLocation = { lat: 13.0827, lon: 80.2707, accuracy: 50, timestamp: Date.now(), city: 'Chennai', state: 'Tamil Nadu' }

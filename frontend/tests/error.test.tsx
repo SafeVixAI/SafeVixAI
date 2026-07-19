@@ -5,7 +5,7 @@ jest.mock('react-i18next', function() { return { useTranslation: function() { re
 jest.mock('lucide-react', function() { return new Proxy({}, { get: function() { return function() { return null } } }) })
 
 var React = require('react')
-var { render, screen } = require('@testing-library/react')
+var { render } = require('@testing-library/react')
 var GlobalError = require('../app/error').default
 
 describe('Error Page', function() {

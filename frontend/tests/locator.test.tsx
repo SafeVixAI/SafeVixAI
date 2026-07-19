@@ -51,18 +51,18 @@ jest.mock('../app/locator/locator-components', function() { return { EmptyState:
 jest.mock('../app/locator/locator-utils', function() { return {} })
 
 var React = require('react')
-var { render, screen } = require('@testing-library/react')
+var { render, screen: rtlScreen } = require('@testing-library/react')
 var Page = require('../app/locator/page').default
 
 describe('LocatorPage', function() {
   it('renders Emergency Locator sr-only heading', function() {
     render(React.createElement(Page))
-    expect(screen.getByText('Emergency Locator')).toBeTruthy()
+    expect(rtlScreen.getByText('Emergency Locator')).toBeTruthy()
   })
 
   it('renders coverage summary from hook', function() {
     render(React.createElement(Page))
-    expect(screen.getByText('5 services within 2 km')).toBeTruthy()
+    expect(rtlScreen.getByText('5 services within 2 km')).toBeTruthy()
   })
 
   it('renders mobile locator container', function() {
@@ -73,6 +73,6 @@ describe('LocatorPage', function() {
 
   it('renders with translation context', function() {
     render(React.createElement(Page))
-    expect(screen.getByText('Emergency Locator')).toBeTruthy()
+    expect(rtlScreen.getByText('Emergency Locator')).toBeTruthy()
   })
 })

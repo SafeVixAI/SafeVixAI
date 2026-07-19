@@ -16,13 +16,13 @@ jest.mock('../app/landing/components/CTASection', function() { return function()
 jest.mock('../app/landing/components/LandingFooter', function() { return function() { return null } })
 
 var React = require('react')
-var { render, screen } = require('@testing-library/react')
+var { render, screen: rtlScreen } = require('@testing-library/react')
 var LandingPage = require('../app/landing/page').default
 
 describe('Landing Page', function() {
   it('renders sr-only heading', function() {
     render(React.createElement(LandingPage))
-    expect(screen.getByText('SafeVixAI - Road Safety Platform')).toBeTruthy()
+    expect(rtlScreen.getByText('SafeVixAI - Road Safety Platform')).toBeTruthy()
   })
 
   it('renders main element', function() {

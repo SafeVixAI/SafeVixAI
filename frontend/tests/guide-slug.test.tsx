@@ -5,7 +5,7 @@ jest.mock('@/components/guide/LeadershipCard', function() { return { LeadershipC
 jest.mock('lucide-react', function() { return new Proxy({}, { get: function() { return function() { return null } } }) })
 
 var React = require('react')
-var { render, screen, act } = require('@testing-library/react')
+var { render, screen: rtlScreen, act } = require('@testing-library/react')
 var Page = require('../app/guide/[slug]/page').default
 var api = require('@/lib/api')
 
@@ -14,57 +14,57 @@ var mockData = { slug: 'chennai', name: 'Chennai Corporation', shortName: 'Chenn
 describe('MunicipalityDetailPage', function() {
   it('shows loading state initially', function() {
     render(React.createElement(Page))
-    expect(screen.getByText('Loading municipality...')).toBeTruthy()
+    expect(rtlScreen.getByText('Loading municipality...')).toBeTruthy()
   })
 
   it('renders municipality name after load', async function() {
     api.fetchMunicipalityBySlug.mockResolvedValue(mockData)
     render(React.createElement(Page))
     await act(function() { return new Promise(function(r) { return setTimeout(r, 100) }) })
-    expect(screen.getAllByText('Chennai Corporation').length).toBe(2)
+    expect(rtlScreen.getAllByText('Chennai Corporation').length).toBe(2)
   })
 
   it('renders stat cards', async function() {
     api.fetchMunicipalityBySlug.mockResolvedValue(mockData)
     render(React.createElement(Page))
     await act(function() { return new Promise(function(r) { return setTimeout(r, 100) }) })
-    expect(screen.getByText('Population')).toBeTruthy()
-    expect(screen.getByText('200')).toBeTruthy()
+    expect(rtlScreen.getByText('Population')).toBeTruthy()
+    expect(rtlScreen.getByText('200')).toBeTruthy()
   })
 
   it('renders city and state in hero', async function() {
     api.fetchMunicipalityBySlug.mockResolvedValue(mockData)
     render(React.createElement(Page))
     await act(function() { return new Promise(function(r) { return setTimeout(r, 100) }) })
-    expect(screen.getByText(/Chennai, TN/)).toBeTruthy()
+    expect(rtlScreen.getByText(/Chennai, TN/)).toBeTruthy()
   })
 
   it('renders about description', async function() {
     api.fetchMunicipalityBySlug.mockResolvedValue(mockData)
     render(React.createElement(Page))
     await act(function() { return new Promise(function(r) { return setTimeout(r, 100) }) })
-    expect(screen.getByText('Capital of Tamil Nadu')).toBeTruthy()
+    expect(rtlScreen.getByText('Capital of Tamil Nadu')).toBeTruthy()
   })
 
   it('renders service tags', async function() {
     api.fetchMunicipalityBySlug.mockResolvedValue(mockData)
     render(React.createElement(Page))
     await act(function() { return new Promise(function(r) { return setTimeout(r, 100) }) })
-    expect(screen.getByText('Water')).toBeTruthy()
-    expect(screen.getByText('Roads')).toBeTruthy()
+    expect(rtlScreen.getByText('Water')).toBeTruthy()
+    expect(rtlScreen.getByText('Roads')).toBeTruthy()
   })
 
   it('shows error state when API fails', async function() {
     api.fetchMunicipalityBySlug.mockRejectedValue(new Error('Network error'))
     render(React.createElement(Page))
     await act(function() { return new Promise(function(r) { return setTimeout(r, 100) }) })
-    expect(screen.getByText('Failed to load municipality details')).toBeTruthy()
+    expect(rtlScreen.getByText('Failed to load municipality details')).toBeTruthy()
   })
 
   it('shows fallback error and back link when municipality not found', async function() {
     api.fetchMunicipalityBySlug.mockRejectedValue(new Error('Not found'))
     render(React.createElement(Page))
     await act(function() { return new Promise(function(r) { return setTimeout(r, 100) }) })
-    expect(screen.getByText(/Back to Guide/)).toBeTruthy()
+    expect(rtlScreen.getByText(/Back to Guide/)).toBeTruthy()
   })
 })

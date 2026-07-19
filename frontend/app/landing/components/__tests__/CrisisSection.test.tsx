@@ -9,36 +9,36 @@ jest.mock('../../hooks/useLandingGSAP', function() {
 })
 
 var React = require('react')
-var { render, screen } = require('@testing-library/react')
+var { render, screen: rtlScreen } = require('@testing-library/react')
 var CrisisSection = require('../CrisisSection').default
 
 describe('CrisisSection', function() {
   it('renders the crisis overline', function() {
     render(React.createElement(CrisisSection))
-    expect(screen.getByText('The Crisis')).toBeTruthy()
+    expect(rtlScreen.getByText('The Crisis')).toBeTruthy()
   })
 
   it('renders the subtitle about deadliest roads', function() {
     render(React.createElement(CrisisSection))
-    expect(screen.getByText(/deadliest in the world/)).toBeTruthy()
+    expect(rtlScreen.getByText(/deadliest in the world/)).toBeTruthy()
   })
 
   it('renders all 4 metric cards', function() {
     render(React.createElement(CrisisSection))
-    expect(screen.getByText('Road Accidents Annually')).toBeTruthy()
-    expect(screen.getByText('Lives Lost Every Year')).toBeTruthy()
-    expect(screen.getByText('Die Within First Hour')).toBeTruthy()
-    expect(screen.getByText('Hazard Reports Unresolved')).toBeTruthy()
+    expect(rtlScreen.getByText('Road Accidents Annually')).toBeTruthy()
+    expect(rtlScreen.getByText('Lives Lost Every Year')).toBeTruthy()
+    expect(rtlScreen.getByText('Die Within First Hour')).toBeTruthy()
+    expect(rtlScreen.getByText('Hazard Reports Unresolved')).toBeTruthy()
   })
 
   it('renders the closing statement about 4 minutes', function() {
     render(React.createElement(CrisisSection))
-    expect(screen.getByText(/4 minutes/)).toBeTruthy()
+    expect(rtlScreen.getByText(/4 minutes/)).toBeTruthy()
   })
 
   it('renders the metric countdown numbers', function() {
     render(React.createElement(CrisisSection))
-    var zeros = screen.getAllByText('0')
+    var zeros = rtlScreen.getAllByText('0')
     expect(zeros.length).toBeGreaterThanOrEqual(4)
   })
 })

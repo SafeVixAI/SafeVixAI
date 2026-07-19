@@ -14,7 +14,7 @@ jest.mock('@/components/EmergencyMap', function() { return { EmergencyMap: funct
 jest.mock('@/components/dashboard/SystemHeader', function() { return function() { return null } })
 jest.mock('lucide-react', function() { return new Proxy({}, { get: function() { return function() { return null } } }) })
 
-var { render, screen, fireEvent, act } = require('@testing-library/react')
+var { render, screen: rtlScreen, fireEvent, act } = require('@testing-library/react')
 var React = require('react')
 var TrackingPage = require('../app/tracking/page').default
 
@@ -28,62 +28,62 @@ beforeEach(function() {
 describe('TrackingPage', function() {
   it('renders Join Tracking Group heading when idle', function() {
     var { container } = render(React.createElement(TrackingPage))
-    expect(screen.getByText('Join Tracking Group')).toBeTruthy()
+    expect(rtlScreen.getByText('Join Tracking Group')).toBeTruthy()
   })
 
   it('renders group code input when idle', function() {
     render(React.createElement(TrackingPage))
-    expect(screen.getByPlaceholderText('e.g. SMITH-FAMILY-24')).toBeTruthy()
+    expect(rtlScreen.getByPlaceholderText('e.g. SMITH-FAMILY-24')).toBeTruthy()
   })
 
   it('renders display name input when idle', function() {
     render(React.createElement(TrackingPage))
-    expect(screen.getByPlaceholderText('e.g. John')).toBeTruthy()
+    expect(rtlScreen.getByPlaceholderText('e.g. John')).toBeTruthy()
   })
 
   it('renders Start Tracking button when idle', function() {
     render(React.createElement(TrackingPage))
-    expect(screen.getByText('Start Tracking')).toBeTruthy()
+    expect(rtlScreen.getByText('Start Tracking')).toBeTruthy()
   })
 
   it('shows Live status badge when connected', function() {
     mockWsStatus = 'connected'
     var { container } = render(React.createElement(TrackingPage))
-    expect(screen.getByText('Live')).toBeTruthy()
+    expect(rtlScreen.getByText('Live')).toBeTruthy()
   })
 
   it('shows Connecting badge when connecting', function() {
     mockWsStatus = 'connecting'
     var { container } = render(React.createElement(TrackingPage))
-    expect(screen.getByText('Connecting...')).toBeTruthy()
+    expect(rtlScreen.getByText('Connecting...')).toBeTruthy()
   })
 
   it('shows join form when disconnected', function() {
     mockWsStatus = 'disconnected'
     var { container } = render(React.createElement(TrackingPage))
-    expect(screen.getByText('Join Tracking Group')).toBeTruthy()
+    expect(rtlScreen.getByText('Join Tracking Group')).toBeTruthy()
   })
 
   it('shows Reconnecting badge with attempt count', function() {
     mockWsStatus = 'reconnecting'
     var { container } = render(React.createElement(TrackingPage))
-    expect(screen.getByText(/Reconnecting \(3\/50\)/)).toBeTruthy()
+    expect(rtlScreen.getByText(/Reconnecting \(3\/50\)/)).toBeTruthy()
   })
 
   it('shows Leave button when connected', function() {
     mockWsStatus = 'connected'
     var { container } = render(React.createElement(TrackingPage))
-    expect(screen.getByText('Leave')).toBeTruthy()
+    expect(rtlScreen.getByText('Leave')).toBeTruthy()
   })
 
   it('shows Active Group heading when connected', function() {
     mockWsStatus = 'connected'
     var { container } = render(React.createElement(TrackingPage))
-    expect(screen.getByText('Active Group')).toBeTruthy()
+    expect(rtlScreen.getByText('Active Group')).toBeTruthy()
   })
 
   it('renders sr-only heading', function() {
     var { container } = render(React.createElement(TrackingPage))
-    expect(screen.getByText('Live Family Tracking')).toBeTruthy()
+    expect(rtlScreen.getByText('Live Family Tracking')).toBeTruthy()
   })
 })

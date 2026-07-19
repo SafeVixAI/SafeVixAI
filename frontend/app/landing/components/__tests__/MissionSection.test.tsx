@@ -1,7 +1,7 @@
 jest.mock('@/app/landing/hooks/useLandingGSAP', function() { return { useTextReveal: function() { return { current: null } }, useScrollReveal: function() { return function() { return { current: null } } } } })
 
 var React = require('react')
-var { render, screen } = require('@testing-library/react')
+var { render, screen: rtlScreen } = require('@testing-library/react')
 var MissionSection = require('../MissionSection').default
 
 describe('MissionSection', function() {
@@ -13,12 +13,12 @@ describe('MissionSection', function() {
 
   it('renders heading about road safety intelligence', function() {
     render(React.createElement(MissionSection))
-    expect(screen.getByText(/Building India.*Next Generation.*Road Safety/)).toBeTruthy()
+    expect(rtlScreen.getByText(/Building India.*Next Generation.*Road Safety/)).toBeTruthy()
   })
 
   it('renders sub text about seconds and lives', function() {
     render(React.createElement(MissionSection))
-    expect(screen.getByText(/Every second counts/)).toBeTruthy()
+    expect(rtlScreen.getByText(/Every second counts/)).toBeTruthy()
   })
 
   it('renders shield SVG', function() {
@@ -53,6 +53,6 @@ describe('MissionSection', function() {
 
   it('renders SVA text in shield', function() {
     render(React.createElement(MissionSection))
-    expect(screen.getByText('SVA')).toBeTruthy()
+    expect(rtlScreen.getByText('SVA')).toBeTruthy()
   })
 })

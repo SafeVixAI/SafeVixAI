@@ -26,7 +26,7 @@ jest.mock('react-i18next', function() { return { useTranslation: function() { re
 jest.mock('lucide-react', function() { return new Proxy({}, { get: function() { return function() { return null } } }) })
 
 var React = require('react')
-var { render, screen, fireEvent, act } = require('@testing-library/react')
+var { render, screen: rtlScreen, fireEvent, act } = require('@testing-library/react')
 var ChallanPage = require('../app/challan/page').default
 
 describe('Challan Page', function() {
@@ -37,24 +37,24 @@ describe('Challan Page', function() {
 
   it('renders vehicle class options', function() {
     render(React.createElement(ChallanPage))
-    expect(screen.getByText('2-Wheeler')).toBeTruthy()
-    expect(screen.getByText('Car/LMV')).toBeTruthy()
-    expect(screen.getByText('Truck')).toBeTruthy()
-    expect(screen.getByText('Bus/COMM')).toBeTruthy()
+    expect(rtlScreen.getByText('2-Wheeler')).toBeTruthy()
+    expect(rtlScreen.getByText('Car/LMV')).toBeTruthy()
+    expect(rtlScreen.getByText('Truck')).toBeTruthy()
+    expect(rtlScreen.getByText('Bus/COMM')).toBeTruthy()
   })
 
   it('renders violation options with MVA sections', function() {
     render(React.createElement(ChallanPage))
-    expect(screen.getByText('Speeding (>20km/h Limit)')).toBeTruthy()
-    expect(screen.getByText('Section 185 - Drunk driving')).toBeTruthy()
-    expect(screen.getByText('Driving Without License')).toBeTruthy()
+    expect(rtlScreen.getByText('Speeding (>20km/h Limit)')).toBeTruthy()
+    expect(rtlScreen.getByText('Section 185 - Drunk driving')).toBeTruthy()
+    expect(rtlScreen.getByText('Driving Without License')).toBeTruthy()
   })
 
   it('renders state jurisdiction selector', function() {
     render(React.createElement(ChallanPage))
-    expect(screen.getByText('Tamil Nadu (TN)')).toBeTruthy()
-    expect(screen.getByText('Delhi (DL)')).toBeTruthy()
-    expect(screen.getByText('Maharashtra (MH)')).toBeTruthy()
+    expect(rtlScreen.getByText('Tamil Nadu (TN)')).toBeTruthy()
+    expect(rtlScreen.getByText('Delhi (DL)')).toBeTruthy()
+    expect(rtlScreen.getByText('Maharashtra (MH)')).toBeTruthy()
   })
 
   it('renders Garage section indicator', function() {
@@ -64,66 +64,66 @@ describe('Challan Page', function() {
 
   it('renders Disobedience / Red Light violation', function() {
     render(React.createElement(ChallanPage))
-    expect(screen.getByText('Disobedience / Red Light')).toBeTruthy()
+    expect(rtlScreen.getByText('Disobedience / Red Light')).toBeTruthy()
   })
 
   it('renders No Seatbelt/Helmet violation', function() {
     render(React.createElement(ChallanPage))
-    expect(screen.getByText('No Seatbelt/Helmet')).toBeTruthy()
+    expect(rtlScreen.getByText('No Seatbelt/Helmet')).toBeTruthy()
   })
 
   it('renders Uttar Pradesh and West Bengal jurisdiction options', function() {
     render(React.createElement(ChallanPage))
-    expect(screen.getByText('Uttar Pradesh (UP)')).toBeTruthy()
-    expect(screen.getByText('West Bengal (WB)')).toBeTruthy()
-    expect(screen.getByText('Karnataka (KA)')).toBeTruthy()
+    expect(rtlScreen.getByText('Uttar Pradesh (UP)')).toBeTruthy()
+    expect(rtlScreen.getByText('West Bengal (WB)')).toBeTruthy()
+    expect(rtlScreen.getByText('Karnataka (KA)')).toBeTruthy()
   })
 
   it('renders Garage tab text', function() {
     render(React.createElement(ChallanPage))
-    expect(screen.getByText('Garage')).toBeTruthy()
+    expect(rtlScreen.getByText('Garage')).toBeTruthy()
   })
 
   it('renders Risk tab text', function() {
     render(React.createElement(ChallanPage))
-    expect(screen.getByText('Risk')).toBeTruthy()
+    expect(rtlScreen.getByText('Risk')).toBeTruthy()
   })
 
   it('renders Dispute tab text', function() {
     render(React.createElement(ChallanPage))
-    expect(screen.getByText('Dispute')).toBeTruthy()
+    expect(rtlScreen.getByText('Dispute')).toBeTruthy()
   })
 
   it('switches to Garage tab on click', function() {
     render(React.createElement(ChallanPage))
-    act(function() { fireEvent.click(screen.getByText('Garage')) })
-    expect(screen.getByText('Garage Inventory')).toBeTruthy()
-    expect(screen.getByText('{{count}} Vehicles')).toBeTruthy()
+    act(function() { fireEvent.click(rtlScreen.getByText('Garage')) })
+    expect(rtlScreen.getByText('Garage Inventory')).toBeTruthy()
+    expect(rtlScreen.getByText('{{count}} Vehicles')).toBeTruthy()
   })
 
   it('switches to Risk tab on click', function() {
     render(React.createElement(ChallanPage))
-    act(function() { fireEvent.click(screen.getByText('Risk')) })
-    expect(screen.getByText('Estimated Annual Fine')).toBeTruthy()
-    expect(screen.getByText('Rs. --')).toBeTruthy()
+    act(function() { fireEvent.click(rtlScreen.getByText('Risk')) })
+    expect(rtlScreen.getByText('Estimated Annual Fine')).toBeTruthy()
+    expect(rtlScreen.getByText('Rs. --')).toBeTruthy()
   })
 
   it('switches to Dispute tab on click', function() {
     render(React.createElement(ChallanPage))
-    act(function() { fireEvent.click(screen.getByText('Dispute')) })
-    expect(screen.getByText('Dispute Assistant')).toBeTruthy()
-    expect(screen.getByText('No Petition')).toBeTruthy()
+    act(function() { fireEvent.click(rtlScreen.getByText('Dispute')) })
+    expect(rtlScreen.getByText('Dispute Assistant')).toBeTruthy()
+    expect(rtlScreen.getByText('No Petition')).toBeTruthy()
   })
 
   it('shows Detailed Report button', function() {
     render(React.createElement(ChallanPage))
-    expect(screen.getByText('DETAILED REPORT')).toBeTruthy()
+    expect(rtlScreen.getByText('DETAILED REPORT')).toBeTruthy()
   })
 
   it('switches back to Calculator tab from Garage tab', function() {
     render(React.createElement(ChallanPage))
-    act(function() { fireEvent.click(screen.getByText('Garage')) })
-    act(function() { fireEvent.click(screen.getByText('Calc')) })
-    expect(screen.getByText('Total Liability')).toBeTruthy()
+    act(function() { fireEvent.click(rtlScreen.getByText('Garage')) })
+    act(function() { fireEvent.click(rtlScreen.getByText('Calc')) })
+    expect(rtlScreen.getByText('Total Liability')).toBeTruthy()
   })
 })

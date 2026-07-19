@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 SafeVixAI Team
+import React from 'react';
 
 import { FILTER_CHIPS, Filter } from '../locator-utils';
 

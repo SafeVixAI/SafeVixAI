@@ -30,14 +30,14 @@ from services.overpass_service import OverpassService
 # ── Geocoding Service ──────────────────────────────────────────────────
 
 
-@pytest.mark.xfail(reason="Service API mismatch - needs migration to new kwargs", strict=False)
+@pytest.mark.xfail(reason="Photon URL matching needs update", strict=False)
 class TestGeocodingHTTP:
     """Verify geocoding HTTP call patterns."""
 
     @pytest.mark.asyncio
     async def test_reverse_geocode_success(self, httpx_mock):
         httpx_mock.add_response(
-            url="http://photon.komoot.io/reverse?lat=13.0827&lon=80.2707",
+            url="https://photon.komoot.io/reverse?lat=13.0827&lon=80.2707",
             json={
                 "features": [{
                     "properties": {
@@ -50,46 +50,46 @@ class TestGeocodingHTTP:
             },
         )
         svc = GeocodingService(settings=Settings())
-        result = await svc.reverse_geocode(13.0827, 80.2707)
+        result = await svc.reverse_geocode(lat=13.0827, lon=80.2707)
         assert result is not None
         assert "Chennai" in str(result)
 
     @pytest.mark.asyncio
     async def test_reverse_geocode_empty_response(self, httpx_mock):
         httpx_mock.add_response(
-            url="http://photon.komoot.io/reverse?lat=0&lon=0",
+            url="https://photon.komoot.io/reverse?lat=0&lon=0",
             json={"features": []},
         )
         svc = GeocodingService(settings=Settings())
-        result = await svc.reverse_geocode(0, 0)
+        result = await svc.reverse_geocode(lat=0, lon=0)
         assert result is None or result == {}
 
     @pytest.mark.asyncio
     async def test_reverse_geocode_timeout(self, httpx_mock):
         httpx_mock.add_exception(httpx.TimeoutException("Request timed out"))
         svc = GeocodingService(settings=Settings())
-        result = await svc.reverse_geocode(13.0827, 80.2707)
+        result = await svc.reverse_geocode(lat=13.0827, lon=80.2707)
         assert result is None
 
     @pytest.mark.asyncio
     async def test_reverse_geocode_http_500(self, httpx_mock):
         httpx_mock.add_response(status_code=500)
         svc = GeocodingService(settings=Settings())
-        result = await svc.reverse_geocode(13.0827, 80.2707)
+        result = await svc.reverse_geocode(lat=13.0827, lon=80.2707)
         assert result is None
 
     @pytest.mark.asyncio
     async def test_reverse_geocode_http_429(self, httpx_mock):
         httpx_mock.add_response(status_code=429, headers={"Retry-After": "5"})
         svc = GeocodingService(settings=Settings())
-        result = await svc.reverse_geocode(13.0827, 80.2707)
+        result = await svc.reverse_geocode(lat=13.0827, lon=80.2707)
         assert result is None
 
 
 # ── Overpass Service ───────────────────────────────────────────────────
 
 
-@pytest.mark.xfail(reason="Service API mismatch - needs migration to new kwargs", strict=False)
+@pytest.mark.xfail(reason="Overpass URL/fallback mirror matching", strict=False)
 class TestOverpassHTTP:
     """Verify Overpass API call patterns."""
 
@@ -101,28 +101,28 @@ class TestOverpassHTTP:
             json={"elements": [{"type": "node", "id": 1, "lat": 13.0, "lon": 80.0}]},
         )
         svc = OverpassService(settings=Settings())
-        result = await svc.query_emergency_services(13.0827, 80.2707, 5000)
+        result = await svc.search_services(lat=13.0827, lon=80.2707, radius=5000, categories=["hospital"], limit=10)
         assert result is not None
 
     @pytest.mark.asyncio
     async def test_overpass_timeout(self, httpx_mock):
         httpx_mock.add_exception(httpx.TimeoutException("Overpass timeout"))
         svc = OverpassService(settings=Settings())
-        result = await svc.query_emergency_services(13.0827, 80.2707, 5000)
+        result = await svc.search_services(lat=13.0827, lon=80.2707, radius=5000, categories=["hospital"], limit=10)
         assert result is None or result == []
 
     @pytest.mark.asyncio
     async def test_overpass_http_503(self, httpx_mock):
         httpx_mock.add_response(status_code=503)
         svc = OverpassService(settings=Settings())
-        result = await svc.query_emergency_services(13.0827, 80.2707, 5000)
+        result = await svc.search_services(lat=13.0827, lon=80.2707, radius=5000, categories=["hospital"], limit=10)
         assert result is None or result == []
 
     @pytest.mark.asyncio
     async def test_overpass_rate_limited(self, httpx_mock):
         httpx_mock.add_response(status_code=429)
         svc = OverpassService(settings=Settings())
-        result = await svc.query_emergency_services(13.0827, 80.2707, 5000)
+        result = await svc.search_services(lat=13.0827, lon=80.2707, radius=5000, categories=["hospital"], limit=10)
         assert result is None or result == []
 
     @pytest.mark.asyncio
@@ -133,14 +133,14 @@ class TestOverpassHTTP:
             json={"elements": []},
         )
         svc = OverpassService(settings=Settings())
-        result = await svc.query_emergency_services(13.0827, 80.2707, 5000)
-        assert result is None or result == []
+        result = await svc.search_services(lat=13.0827, lon=80.2707, radius=5000, categories=["hospital"], limit=10)
+        assert result is not None
 
 
 # ── Routing Service ────────────────────────────────────────────────────
 
 
-@pytest.mark.xfail(reason="Service API mismatch - needs migration to new kwargs", strict=False)
+@pytest.mark.xfail(reason="Needs OpenRouteService API URL + response format", strict=False)
 class TestRoutingHTTP:
     """Verify OSRM/ORS HTTP call patterns."""
 
@@ -159,9 +159,9 @@ class TestRoutingHTTP:
         )
         from services.routing_service import RoutingService
         svc = RoutingService(settings=Settings(), cache=MagicMock())
-        result = await svc.get_route(
-            origin=(13.0827, 80.2707),
-            destination=(13.0900, 80.2800),
+        result = await svc.preview_route(
+            origin_lat=13.0827, origin_lon=80.2707,
+            destination_lat=13.0900, destination_lon=80.2800,
         )
         assert result is not None
 
@@ -173,8 +173,8 @@ class TestRoutingHTTP:
         )
         from services.routing_service import RoutingService
         svc = RoutingService(settings=Settings(), cache=MagicMock())
-        result = await svc.get_route(
-            origin=(0, 0),
-            destination=(0, 0),
+        result = await svc.preview_route(
+            origin_lat=0, origin_lon=0,
+            destination_lat=0, destination_lon=0,
         )
         assert result is None

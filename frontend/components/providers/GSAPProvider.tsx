@@ -1,5 +1,6 @@
-﻿// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: MIT
 // Copyright (c) 2026 SafeVixAI Team
+import React from 'react';
 
 // frontend/components/providers/GSAPProvider.tsx
 'use client';
@@ -7,7 +8,7 @@
 import { useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
 
-// Routes that have GSAP animations â€” everything else skips the 50KB GSAP bundle
+// Routes that have GSAP animations — everything else skips the 50KB GSAP bundle
 const ANIMATION_ROUTES = new Set([
   '/', '/assistant', '/bystander', '/challan', '/command-center',
   '/emergency', '/first-aid', '/guide', '/landing', '/locator',

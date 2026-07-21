@@ -220,7 +220,6 @@ describe('EnterpriseClientAppHooks', function() {
   })
 
   it('calls clearAuth when supabase session is null', async function() {
-    var supabase = require('@/lib/supabase-auth')
     var mod = await import('../EnterpriseClientAppHooks')
     render(React.createElement(mod.EnterpriseClientAppHooks))
     await waitFor(function() {

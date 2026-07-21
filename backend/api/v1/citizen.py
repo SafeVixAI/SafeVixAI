@@ -72,7 +72,7 @@ async def track_complaint(
             if row:
                 lat, lon = float(row[0]), float(row[1])
         except Exception:
-            logger.debug("Suppressed exception", exc_info=True)
+            logger.debug("Citizen resolve — location coordinates unavailable for issue %s", issue.uuid)
 
     # Calculate SLA status
     sla_status = "on_track"

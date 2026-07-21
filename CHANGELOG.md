@@ -1,136 +1,172 @@
 # Changelog
 
-All notable changes to SafeVixAI will be documented in this file.
+All notable changes to SafeVixAI are documented here in [Keep a Changelog](https://keepachangelog.com/) format.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-
-## [Unreleased]
+## [1.0.0] — 2026-07-20
 
 ### Added
-- Enterprise open source hardening: VERSION file, pyproject.toml for both Python services, git tag v1.0.0
-- Community health: GOVERNANCE.md, SUPPORT.md, issue templates (bug, feature, config), FUNDING.yml
-- Tooling configs: ruff.toml, .prettierrc, .editorconfig (root), .gitleaks.toml
-- SBOM generation pipeline (CycloneDX for all 3 services + Docker Syft)
-- Release automation workflow (tag-triggered: test, build, SBOM, GitHub Release)
-- Auto version tagging on PR merge (semantic bump based on labels)
-- security.txt at `frontend/public/.well-known/security.txt`
-- MAINTAINERS.md and ADOPTERS.md
-- Version sync script (`scripts/sync-version.mjs`) to keep VERSION, package.json, pyproject.toml in sync
-
-### OpenSSF Best Practices Hardening (2026-06-17)
-
-#### Documentation
-- RELEASE.md — Full release process document (versioning, branching, rollback, hotfix flow)
-- FUNDING.yml — GitHub Sponsors configuration
-- ADR-002-llm-fallback-chain.md — Standalone architecture decision record
-- ADR-003-postgis-over-mongo.md — Standalone architecture decision record
-- .reuse/dep5 — REUSE compliance license mapping for all file types
-- Root pyproject.toml — Centralized project metadata and tooling config
-
-#### Workflows
-- codeql.yml — CodeQL SAST analysis (Python + JavaScript/TypeScript) on every push/PR
-- dependency-review.yml — Dependency review on all PRs with license + vulnerability checks
-- stale.yml — Automated stale issue/PR management (60d stale, 14d close)
-- cleanup.yml — Weekly artifact cleanup (removes artifacts older than 7 days)
-- scorecard.yml — OpenSSF Scorecard analysis (weekly + on push to main)
-
-#### Bug Fixes
-- Fixed release.yml calling backend.yml, frontend.yml, and security.yml as reusable workflows without `on: workflow_call` triggers — added `workflow_call:` to all three called workflows
-
-#### Supply Chain Security
-- SBOM generation job added to security.yml (CycloneDX JSON + SPDX JSON via anchore/sbom-action)
-- Docker image signing with cosign (keyless signing via GitHub OIDC) added to release.yml
-- Signatures verified in CI as part of the release pipeline
-
-#### Governance & Security
-- GOVERNANCE.md updated with Security Team role, 2FA requirement for maintainers, Security Advisory process
-- MAINTAINERS.md updated with 2FA requirement notice
-- SECURITY.md expanded with detailed response SLA, disclosure policy, dependency security, supply chain security, and vulnerability management process
-
-#### Workflow Security
-- Added explicit least-privilege permissions to 7 workflows that previously had none set:
-  bundle-analysis.yml, e2e.yml, lighthouse.yml, load-test.yml, secrets-rotation.yml, security.yml, zap-scan.yml
-
-#### Testing & Quality
-- Fuzz tests integrated into backend CI pipeline (tests/fuzz/ runs as non-blocking step)
-- New fuzz test suite: tests/fuzz/test_fuzz_api.py (9 hypothesis-based test cases)
-- Backend coverage threshold raised to 95% (--cov-fail-under=95 in backend.yml + pyproject.toml fail_under=95)
-- Chatbot coverage threshold raised to 95% (--cov-fail-under=95 in chatbot.yml + pyproject.toml fail_under=95)
-- Frontend coverage thresholds raised: lines 53→60, branches 40→45, functions 50→55, statements 52→58
-- Frontend Jest coverage threshold added: 60% lines, 55% branches/functions
-
-#### Deployment Gating
-- Vercel deployment now gated behind Frontend CI pass via `vercel-deploy.yml`
-- Uses `workflow_run` on Frontend CI — deploy only triggers if tests pass
-- Auto-deployment disabled in `vercel.json` for all branches (workflow-controlled)
-- Production deploy to main + preview deploys on PRs both respect the gate
-
-## [1.0.0] - 2026-05-18
-
-### Added
-- Initial production-ready release for IIT Madras Road Safety Hackathon 2026
-- Multi-stage Docker builds for all services
-- Trivy container security scanning in CI
-- k6 load tests for backend and chatbot services
-- axe-core accessibility tests (WCAG 2a/2aa)
-- API contract tests for frontend/backend integration
-- Blue-green deployment workflow
-- Post-deploy smoke tests
-- 5 operational runbooks (DB migration, service restart, API key rotation, ChromaDB rebuild, Redis recovery)
-- SLO documentation with error budget tracking
-- Incident response plan
-- Capacity planning guide
-- Cost monitoring guide
-- Environment validation checklist
-- Tamper-proof audit logging module
-- Sentry error tracking across all services
-- Content Security Policy headers
-- Security headers (HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy)
-- CSRF protection with frontend interceptor
-- JWT audience/issuer validation
-- EXIF metadata stripping on uploads
-- Redis-backed rate limiting
-- Admin endpoint HMAC constant-time comparison
-- CORS production restriction
-- LLM output sanitization
-- Structured logging with request ID correlation
-- Disaster recovery plan
-- CODEOWNERS and PR templates
-- gitleaks secret scanning in CI
-- Concurrency control in CI workflows
-- Isolated Docker networks
-- Redis authentication
-- PostgreSQL and Redis service containers in CI
-- Frontend build step in CI
-- Docker build workflow with SARIF upload
-- Docker Dependabot ecosystem
-
-### Security
-- SafetyChecker with 60+ patterns (jailbreak, NFKC, zero-width, l33t, output safety)
-- RAG snippet sanitization and prompt injection detection
-- MCP server authentication with rate limiting
-- Gemini API key moved to header
-- 9-provider LLM fallback chain with auto-routing
-- Sarvam AI for Indian language queries
-
-### Changed
-- Migrated all frontend animations from Framer Motion to GSAP
-- Zustand store uses 28 granular selectors instead of full-store subscriptions
-- SOS queue migrated from sessionStorage to IndexedDB with per-item transactions
-- Speech synthesis uses selected language code instead of hardcoded en-IN
-- Overpass service uses exponential backoff retry
+- Final v1.0 release — production-ready, enterprise-grade road safety PWA
+- Standard open-source files: FAQ, TROUBLESHOOTING, NOTICE, STYLE_GUIDE, VERSIONING, SUPPORTED_VERSIONS, ARCHITECTURE.md
+- 9 Architecture Decision Records: CQRS, Redlock, Offline SOS, DuckDB-Wasm, MapLibre, JWKS, Service Worker, WebSocket, ChromaDB RAG
+- Incident response severity matrix and escalation procedure
+- Operations environment configuration and maintenance guides
+- ADOPTERS.md with IIT Madras listing
+- RC Readiness Report with Go/No-Go assessment
+- Supply chain security: SLSA provenance, license scan, reproducible builds, SECURITY-INSIGHTS
+- Open Source Audit: CODEOWNERS, .prettierignore, env template consolidation
+- Community docs: CONTRIBUTING, CODE_OF_CONDUCT, SECURITY
+- Terraform README (18-module AWS infra)
+- K8s README (15 manifests via kustomize)
+- Cross-reference deploy/ configs in monitoring runbook
 
 ### Fixed
-- Voice language mapping for 11 Indian languages
-- prefers-reduced-motion support for animations
-- IndexedDB SOS queue with per-item transactions
-- Speech synthesis language from selected language
-- Admin endpoint rate limiting (5/min)
-- LRU eviction for session store (500 cap)
-- SW SOS auth headers
-- Speech model preload on startup
-- Frontend API retry with exponential backoff
+- Frontend build "hours" issue: `output: 'standalone'` gated behind `STANDALONE=true`
+- three.js/r3f/drei moved back to `dependencies` (broken by devDeps change)
+- SPDX license headers placed after `'use client'` directive in 150+ files
+- `EnterpriseClientAppHooks.tsx` `'use client'` position fixed
+- ESLint double-run in CI (standalone build `eslint.ignoreDuringBuilds`)
+- Jest CI memory limits configured
+- Backend Dockerfile STANDALONE build arg
+- Cosign matrix variable bug in release.yml
+- docker-compose.yml: Added security banner, no default production passwords
+- TESTING_POLICY.md: Updated coverage numbers to current values (frontend 87.22%, backend 100%, chatbot 97%+)
+- ADR-001: Deduplicated (removed ADR-002/003 sections now in separate files)
 
-[Unreleased]: https://github.com/SafeVixAI/SafeVixAI/compare/v1.0.0...HEAD
-[1.0.0]: https://github.com/SafeVixAI/SafeVixAI/releases/tag/v1.0.0
+## [1.0.0-alpha] — 2026-07-08
+
+### Added
+- 2835 frontend tests, 248 suites, 0 failures
+- 2750 backend tests, 100% coverage threshold
+- 1613 chatbot tests, 97% coverage threshold
+- SOS interaction tests (hold-to-activate, offline queue, geolocation)
+- Emergency page with category filter, protocol cards
+- Tracking page with live WebSocket state
+- Route page coverage expansion (privacy, terms, offline, guide)
+- lib/ test expansions (intl-formatters, validate-upload, india-locations, provider-api, live-tracking)
+- Route page coverage expansion (officer, report-track, bystander, tracking)
+- Istanbul ignores for SSR/hardware guards (navigator, geolocation, clipboard)
+- Coverage thresholds: frontend 86/72/80/85
+
+### Fixed
+- Backend: haversine_km import, ChallanQuery schema, violation codes MVA_185
+- Backend: PIL made optional in roadwatch_photos
+- Backend: contract validation tests aligned with enterprise schema
+- Frontend: RAF synchronous mock for SOS hold tests
+- Frontend: 3 failing suites re-enabled (accessibility, bystander, ProvidersPage)
+
+## [1.0.0-alpha] — 2026-07-06
+
+### Added
+- 7 landing component test files (55 tests)
+- Coverage thresholds raised: 80→85 lines, 66→70 branches, 73→79 functions
+- jset-axe accessibility tests (8 tests, 5 components + 3 pages)
+- Service worker unit tests (12 tests, caching/fetch/push/lifecycle)
+- Route page expansions (guide-slug, privacy, terms, offline)
+- 9 route page Istanbul ignores (SSR/hardware guards)
+- lib/ test expansions (+25 tests across 6 files)
+
+### Fixed
+- flaky multimodal-ai-chat-input timeout (30MB File → 1 byte, 1049ms→85ms)
+- jest.setup.js polyfills (matchMedia, Response, Request, PushEvent)
+- usePageEntry test prefersReducedMotion assertion
+
+## [1.0.0-alpha] — 2026-06-30
+
+### Added
+- multimodal-ai-chat-input coverage 45%→92% lines (48 tests)
+- Backend 100% coverage (6 new test files, 367 tests)
+- Enterprise patterns: CQRS, Redlock, JWKS, Idempotency
+- Backend test expansions: civic_intel API, command center, admin/authority
+- ETL Scheduler tests, mutation testing config
+
+### Fixed
+- Backend module imports verified (all 38 service modules)
+- Circuit breaker wired to all 8 external service calls
+- safe_routing clock abstraction for deterministic testing
+- Provider alias deduplication (3 redundant aliases removed)
+
+## [1.0.0-alpha] — 2026-06-28
+
+### Added
+- 20 new component tests (FloatingSidebarControls, SOSButton, InstallPrompt, QREmergencyCard, LocationPickerInner)
+- Coverage: 95.02% lines frontend
+- Coverage expansion: DataTable, GpsConsent, RightSidebar, SentryInit
+- ClientAppHooks test with dispatch/tracking/offline flows
+
+### Fixed
+- api.test.ts retry interceptor index mapping
+- States pollution in EnterpriseClientAppHooks tests (shared mockStore)
+- offline-sos-queue SyncManager and IndexedDB paths
+
+## [1.0.0-alpha] — 2026-06-27
+
+### Added
+- 7 new tests (MapLibreDashboard, useLocatorSearch, useSplitTextEntry)
+- 12 new tests (DataTable, GpsConsent, RightSidebar, SentryInit)
+- DuckDB-Wasm offline challan test coverage: 75%→100%
+- Coverage: 92.33% lines frontend
+
+### Fixed
+- Stale doc numbers in Agent.md, Architecture.md, API.md, Database.md, Deployment.md
+- SPDX license headers on 31 files (backend + chatbot)
+
+## [1.0.0-alpha] — 2026-06-25
+
+### Added
+- Route test expansions: login, sos, profile, settings, challan (36 tests)
+- AuthGuard, CommandPalette, CrashCountdown, SystemHeader tests (10 tests)
+- Deep-link, chat-history, VoiceInput expansion (8 tests)
+- Coverage thresholds raised: 90/76/81/86
+- Enterprise patterns: CSRF middleware, request ID middleware, security headers
+
+### Fixed
+- Security middleware chain ordering (CSRF before handlers)
+- Sentry init DSN loading order
+- CSP headers with proper nonce support
+
+## [1.0.0-alpha] — 2026-06-23
+
+### Added
+- Coverage push: 72% lines (9 new test files, 4 expanded)
+- live-tracking expansion: 8→20 tests, ~88% coverage
+- Profile-storage, QREmergencyCard, ChallanCalculator expansion (33 tests)
+- Modal, InstallPrompt, SWR-fetcher expansion (26 tests)
+
+### Fixed
+- ChallanCalculator closest('button') DOM traversal pattern
+- window.indexedDB polyfill pattern isolation
+
+## [1.0.0-alpha] — 2026-06-22
+
+### Added
+- 17 route test suites (60 total tests)
+- 5 store slice tests (auth, map, settings, ui, data)
+- 10 hook tests (all hooks now covered)
+- 10 new lib test suites (257 tests)
+- Coverage thresholds: 48/36/42/46
+
+### Fixed
+- 35 corrupted test files recovered
+- 82 test files converted to function() syntax
+- jest.setup.js restored after agent overwrite
+
+## [1.0.0-alpha] — 2026-06-09
+
+### Added
+- 24 route-level SEO metadata layouts
+- 28 route-level error.tsx boundaries
+- Backend: security logging for JWT-in-URL
+- Chatbot: 9-provider LLM fallback chain
+- Infrastructure: Docker Compose, K8s manifests, Pre-commit hooks, Makefile
+- Documentation: 5 docs with SNAPSHOT banners
+
+### Fixed
+- XSS vulnerability in useSplitTextEntry (innerHTML → safe DOM API)
+- Profile data loss on refresh (IndexedDB rehydration)
+- PostHog waits for GDPR consent
+- backend REFESH → REFRESH typo
+- JS-ism methods in i18n_middleware
+- Redis connection leak (in-memory fallback)
+- Chatbot: shared mutable httpx.AsyncClient → instance var
+- Chatbot: 150 lines dead code removed
+- Docker build: Buildx + GHCR caching

@@ -1,7 +1,9 @@
+'use client';
+
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 SafeVixAI Team
+import React from 'react';
 
-'use client';
 
 import { useAppStore } from '@/lib/store';
 import { useShallow } from 'zustand/react/shallow';

@@ -1,9 +1,10 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2026 SafeVixAI Team
 
-"""Coverage tests for providers/router.py — uncovered lines: 245, 300-301, 312-317, 379, 440-445, 470, 472, 519-522, 544-551."""
+"""Coverage tests for providers/router.py — now covers _stream_with_timeout."""
 from __future__ import annotations
 
+import asyncio
 import time
 from dataclasses import replace
 from types import SimpleNamespace
@@ -232,10 +233,42 @@ class TestStreamGenerateEdgeCases:
     async def test_stream_fallback_all_fail_yields_error(self):
         fail = _mock_prov("fail")
         fail.generate = AsyncMock(side_effect=RuntimeError("stream err"))
+        fail.stream = None  # MagicMock auto-creates .stream; set None to force non-stream path
         r = _router({"fail": fail}, default_llm_provider="fail")
         r._fallback_chain = ["fail", "NONEXISTENT"]
         out = [x async for x in r.stream_generate(_REQUEST)]
         assert out[-1]["type"] == "error"
+
+    @pytest.mark.asyncio
+    async def test_real_stream_with_timeout_yields_tokens(self):
+        """Exercises the actual _stream_with_timeout method (not mocked)."""
+        async def stream_method(req):
+            yield "first "
+            yield "second "
+            yield "third"
+
+        prov = _mock_prov("streamer", stream_method=stream_method)
+        r = _router({"streamer": prov, "template": TemplateProvider()}, default_llm_provider="streamer")
+        out = [x async for x in r.stream_generate(_REQUEST)]
+        assert out[-1]["type"] == "done"
+        assert out[-1]["provider"] == "streamer"
+        assert len(out) >= 4
+
+    @pytest.mark.asyncio
+    async def test_real_stream_with_timeout_timeout_triggers_fallback(self):
+        """_stream_with_timeout timeout raises TimeoutError caught in stream_generate."""
+        async def stream_method(req):
+            await asyncio.sleep(999)
+            yield "never"  # pragma: no cover
+
+        prov = _mock_prov("slow", stream_method=stream_method)
+        r = _router({"slow": prov, "template": TemplateProvider()}, default_llm_provider="slow")
+        r.provider_timeout_seconds = 0.01
+        r._fallback_chain = ["slow", "template"]
+        r._unavailable_until.pop("slow", None)
+        out = [x async for x in r.stream_generate(_REQUEST)]
+        assert out[-1]["type"] == "done"
+        assert out[-1]["provider"] == "template"
 
 
 class TestCheckAllProviders:

@@ -1,7 +1,9 @@
+'use client';
+
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 SafeVixAI Team
+import React from 'react';
 
-'use client';
 
 import { useState, useEffect } from 'react';
 import { PUBLIC_API_BASE_URL, PUBLIC_CHATBOT_BASE_URL } from '@/lib/public-env';

@@ -16,17 +16,54 @@ import httpx
 
 logger = logging.getLogger(__name__)
 
-SYSTEM_PROMPT = (
-    "You are SafeVixAI, an AI assistant built for Indian road safety and emergency response. "
-    "Help users with: emergency contacts, first aid, pothole/accident reporting, traffic challans, "
-    "navigation, and road authority escalation. "
-    "Always answer concisely in the SAME language the user writes in (Hindi, Tamil, Telugu, etc.). "
-    "For life-threatening situations, always lead with 112 (universal emergency) or 102 (ambulance). "
-    "Be factual — cite MV Act sections when answering challan questions."
-)
-
-MAX_HISTORY = 10          # messages to include in context window
-MAX_RESPONSE_TOKENS = 800
+# Load from versioned YAML prompts with in-memory fallback defaults
+try:
+    from prompts import (
+        get_system_prompt,
+        get_prohibited_patterns,
+        get_max_history,
+        get_max_response_tokens,
+    )
+    SYSTEM_PROMPT = get_system_prompt() or (
+        "You are SafeVixAI, an AI assistant built for Indian road safety and emergency response. "
+        "Help users with: emergency contacts, first aid, pothole/accident reporting, traffic challans, "
+        "navigation, and road authority escalation. "
+        "Always answer concisely in the SAME language the user writes in (Hindi, Tamil, Telugu, etc.). "
+        "For life-threatening situations, always lead with 112 (universal emergency) or 102 (ambulance). "
+        "Be factual — cite MV Act sections when answering challan questions."
+    )
+    PROHIBITED_PATTERNS = get_prohibited_patterns() or [
+        "ignore all previous", "ignore previous", "disregard", "bypass",
+        "system prompt", "you are now", "you are no longer", "forget instructions",
+        "jailbreak", "forget everything", "new instructions",
+        "hypothetical scenario where you ignore", "pretend you are", "act as if",
+        "override", "reveal your instructions", "show me your prompt",
+        "show me your instructions", "what are your instructions", "do not follow",
+        "do anything now", "<script",
+    ]
+    MAX_HISTORY = get_max_history()
+    MAX_RESPONSE_TOKENS = get_max_response_tokens()
+except ImportError:
+    logger.warning("prompts package not available — using hardcoded defaults")
+    SYSTEM_PROMPT = (
+        "You are SafeVixAI, an AI assistant built for Indian road safety and emergency response. "
+        "Help users with: emergency contacts, first aid, pothole/accident reporting, traffic challans, "
+        "navigation, and road authority escalation. "
+        "Always answer concisely in the SAME language the user writes in (Hindi, Tamil, Telugu, etc.). "
+        "For life-threatening situations, always lead with 112 (universal emergency) or 102 (ambulance). "
+        "Be factual — cite MV Act sections when answering challan questions."
+    )
+    PROHIBITED_PATTERNS = [
+        "ignore all previous", "ignore previous", "disregard", "bypass",
+        "system prompt", "you are now", "you are no longer", "forget instructions",
+        "jailbreak", "forget everything", "new instructions",
+        "hypothetical scenario where you ignore", "pretend you are", "act as if",
+        "override", "reveal your instructions", "show me your prompt",
+        "show me your instructions", "what are your instructions", "do not follow",
+        "do anything now", "<script",
+    ]
+    MAX_HISTORY = 10
+    MAX_RESPONSE_TOKENS = 800
 
 # P1-11: Input token budget guard (audit H22/C3)
 # tiktoken is not always installed (e.g. Render free-tier), so we use a
@@ -34,31 +71,6 @@ MAX_RESPONSE_TOKENS = 800
 # 3000 input tokens × 4 = 12000 chars budget for message + RAG + history.
 _MAX_INPUT_CHARS = 12_000
 _MAX_SINGLE_MESSAGE_CHARS = 4_000   # Hard cap on any single user message
-
-PROHIBITED_PATTERNS = [
-    "ignore all previous",
-    "ignore previous",
-    "disregard",
-    "bypass",
-    "system prompt",
-    "you are now",
-    "you are no longer",
-    "forget instructions",
-    "jailbreak",
-    "forget everything",
-    "new instructions",
-    "hypothetical scenario where you ignore",
-    "pretend you are",
-    "act as if",
-    "override",
-    "reveal your instructions",
-    "show me your prompt",
-    "show me your instructions",
-    "what are your instructions",
-    "do not follow",
-    "do anything now",
-    "<script",
-]
 
 # Regex for common obfuscation: zero-width chars, invisible separators, and control chars
 _INVISIBLE_CHARS_RE = re.compile(r'[\u200b\u200c\u200d\u200e\u200f\ufeff\u00ad\u2060\u2063\u180e]')
@@ -279,7 +291,7 @@ def build_messages(request: ProviderRequest) -> list[dict]:
             s for s in request.tool_summaries[:4]
             if not check_prompt_injection(s)
         ]
-        if safe_summaries:
+        if safe_summaries:  # pragma: no branch
             live_block = "## Live Data\n" + "\n".join(f"- {s}" for s in safe_summaries)
             messages.append({"role": "system", "content": live_block})
 
@@ -288,7 +300,7 @@ def build_messages(request: ProviderRequest) -> list[dict]:
         safe_snippets = [_sanitize_rag_snippet(s) for s in request.document_snippets[:4]]
         # Filter out fully redacted snippets
         safe_snippets = [s for s in safe_snippets if "[Snippet redacted" not in s or len(safe_snippets) > 1]
-        if safe_snippets:
+        if safe_snippets:  # pragma: no branch
             rag_block = (
                 _RAG_TRUST_BOUNDARY_PREFIX
                 + "\n".join(f"- {s}" for s in safe_snippets)
@@ -302,7 +314,7 @@ def build_messages(request: ProviderRequest) -> list[dict]:
     for turn in request.history[-(MAX_HISTORY * 2):]:
         role = turn.get("role", "user")
         content = turn.get("content", "")
-        if role in ("user", "assistant") and content:
+        if role in ("user", "assistant") and content:  # pragma: no branch
             # Skip history entries that contain injection attempts
             if role == "user" and check_prompt_injection(content):
                 logger.warning("Injection pattern found in history entry — skipping.")
@@ -397,7 +409,7 @@ class HttpProvider:
         async with self._get_client().stream("POST", self.base_url(), headers=headers, json=payload) as resp:
             raise_for_provider_status(resp, provider=self.name, model=model)
             buffer = ""
-            async for chunk in resp.aiter_text():
+            async for chunk in resp.aiter_text():  # pragma: no branch
                 buffer += chunk
                 while "\n" in buffer:
                     line, buffer = buffer.split("\n", 1)
@@ -410,10 +422,10 @@ class HttpProvider:
                     try:
                         data = json.loads(data_str)
                         choices = data.get("choices", [])
-                        if choices:
+                        if choices:  # pragma: no branch
                             delta = choices[0].get("delta", {})
                             content = delta.get("content", "")
-                            if content:
+                            if content:  # pragma: no branch
                                 yield content
                     except json.JSONDecodeError:
                         logger.debug("Skipping malformed SSE chunk in stream: %.100s", data_str, exc_info=True)

@@ -1,57 +1,40 @@
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 SafeVixAI Team
+
 ## Description
-<!-- Brief description of changes. Include motivation and context. -->
+
+Please include a summary of the change and which issue is fixed.
+
+Fixes #(issue)
 
 ## Type of Change
-- [ ] Bug fix
-- [ ] New feature
-- [ ] Breaking change
+
+- [ ] Bug fix (non-breaking change that fixes an issue)
+- [ ] New feature (non-breaking change that adds functionality)
+- [ ] Breaking change (fix or feature that would break existing functionality)
 - [ ] Documentation update
+- [ ] Infrastructure / CI change
 - [ ] Performance improvement
-- [ ] Security fix
-- [ ] Infrastructure / Terraform
-- [ ] CI/CD pipeline
-- [ ] Refactor (no functional changes)
+- [ ] Security hardening
 
-## Related Issues
-Closes #
-<!-- List any related issues or discussions -->
+## How Has This Been Tested?
 
-## Testing
-- [ ] Added/updated unit tests
-- [ ] Ran backend tests: `pytest tests/ -q`
-- [ ] Ran chatbot tests: `pytest tests/ -q`
-- [ ] Ran frontend tests: `npm test`
-- [ ] Type check passed: `npx tsc --noEmit`
-- [ ] Build passed: `npm run build`
-- [ ] Bundle analysis within budget: `node scripts/bundle-analysis.mjs`
-- [ ] E2E tests passed: `npx playwright test e2e/`
-- [ ] Manual testing performed
+- [ ] Frontend: `npm test` passes
+- [ ] Backend: `pytest` passes
+- [ ] E2E: `npm run test:e2e` passes
+- [ ] Lint: `npm run lint` + `ruff` pass
+- [ ] Type check: `npx tsc --noEmit` passes (frontend)
 
-## Security Checklist
-- [ ] No secrets or credentials committed
-- [ ] `.env` files not modified
-- [ ] CSP nonce approach maintained (no `'unsafe-inline'` in scripts)
-- [ ] No new `dangerouslySetInnerHTML` / `innerHTML`
-- [ ] No `any` types added
-- [ ] Input sanitization / validation applied
-- [ ] Auth checks in place for new endpoints
+## Checklist
 
-## Performance Checklist
-- [ ] No large dependencies added
-- [ ] Dynamic imports used for heavy components
-- [ ] No render-blocking resources
-- [ ] Images optimized / lazy-loaded
-- [ ] Bundle size impact reviewed
-
-## Deployment Notes
-<!-- Any special deployment steps, migrations, env vars, or rollback concerns -->
-- [ ] Database migration required
-- [ ] New environment variables added
-- [ ] Terraform changes needed
-- [ ] Rollback strategy documented
+- [ ] My code follows the project's style guidelines
+- [ ] I have performed a self-review of my own code
+- [ ] I have added tests that prove my fix is effective or my feature works
+- [ ] New and existing unit tests pass locally
+- [ ] Any dependent changes have been merged and published
+- [ ] I have updated documentation (README, AGENTS.md, etc.) if needed
+- [ ] I have added SPDX license headers to new files
 
 ## Screenshots (if applicable)
-<!-- Add screenshots for UI changes. Use dark/light mode comparison. -->
 
-## Reviewer Notes
-<!-- What should the reviewer focus on? Any risky areas? -->
+## Additional Context

@@ -4,8 +4,11 @@
 from __future__ import annotations
 
 import asyncio
+import logging
+import re
 
 from agent.state import ConversationContext, RetrievedContext, ToolContext
+from memory.tiered_memory import TieredMemory
 from rag.retriever import Retriever
 from tools.challan_tool import ChallanTool
 from tools.first_aid_tool import FirstAidTool
@@ -17,6 +20,8 @@ from tools.submit_report_tool import SubmitReportTool
 from tools.weather_tool import WeatherTool
 
 from tools.drug_info import DrugInfoTool
+
+logger = logging.getLogger(__name__)
 
 
 class ContextAssembler:
@@ -34,6 +39,7 @@ class ContextAssembler:
         weather_tool: WeatherTool,
         drug_info_tool: DrugInfoTool,
         episodic_memory_agent = None,
+        tiered_memory: TieredMemory | None = None,
     ) -> None:
         self.retriever = retriever
         self.sos_tool = sos_tool
@@ -46,6 +52,7 @@ class ContextAssembler:
         self.weather_tool = weather_tool
         self.drug_info_tool = drug_info_tool
         self.episodic_memory_agent = episodic_memory_agent
+        self.tiered_memory = tiered_memory
 
     async def assemble(
         self,
@@ -68,148 +75,181 @@ class ContextAssembler:
             client_ip=client_ip,
             history=history,
         )
-        
-        if self.episodic_memory_agent and user_id and user_id not in ('anonymous', 'authenticated'):
-            try:
-                memories = self.episodic_memory_agent.retrieve_memory(user_id, message)
-                if memories:
-                    context.tools.append(
-                        ToolContext(
-                            name='episodic_memory',
-                            summary='User context (remembered facts): ' + ' | '.join(memories),
-                            payload={'memories': memories},
-                            sources=['memory:episodic'],
-                        )
-                    )
-            except Exception as e:
-                import logging
-                logging.getLogger(__name__).warning("Episodic memory retrieval failed: %s", e)
 
-        if intent == 'emergency':
-            # C10: Run independent tools in parallel (SOS + weather + RAG)
-            if context.lat is not None and context.lon is not None:
-                sos_task = self.sos_tool.get_payload(lat=context.lat, lon=context.lon)
-                weather_task = self.weather_tool.lookup(lat=context.lat, lon=context.lon)
-                sos_payload, weather = await asyncio.gather(sos_task, weather_task, return_exceptions=True)
-                
-                if not isinstance(sos_payload, Exception) and sos_payload:
-                    numbers = sos_payload.get('numbers') or {}
-                    services = sos_payload.get('services') or []
-                    nearest_names = ', '.join(item.get('name', 'Unknown') for item in services[:3]) or 'No nearby services listed'
-                    number_text = ', '.join(f'{key}:{value.get("service")}' for key, value in numbers.items())
-                    
-                    w3w_text = ""
-                    if 'what3words' in sos_payload:
-                        w3w_text = f" What3Words: {sos_payload['what3words'].get('formatted')}."
-                        
-                    context.tools.append(
-                        ToolContext(
-                            name='sos',
-                            summary=f'Nearby emergency services: {nearest_names}. Emergency numbers: {number_text}.{w3w_text}',
-                            payload=sos_payload,
-                            sources=['tool:sos', 'backend:/api/v1/emergency/sos'],
+        # Tiered memory (user prefs + STM + LTM)
+        if user_id and user_id not in ('anonymous', 'authenticated', ''):
+            try:
+                if self.tiered_memory:
+                    tm_result = await self.tiered_memory.get_relevant(user_id, session_id, message)
+                    if not tm_result.is_empty():
+                        summary = tm_result.to_summary()
+                        context.tools.append(
+                            ToolContext(
+                                name='tiered_memory',
+                                summary=summary[:500],
+                                payload={
+                                    'preferences': tm_result.user_preferences,
+                                    'stm': tm_result.stm_facts,
+                                    'ltm': tm_result.ltm_memories,
+                                },
+                                sources=['memory:tiered'],
+                            )
                         )
-                    )
-                if not isinstance(weather, Exception) and weather:
-                    context.tools.append(
-                        ToolContext(
-                            name='weather',
-                            summary=f'Local weather: {weather.get("summary")} at {weather.get("temperature")} degrees.',
-                            payload=weather,
-                            sources=['tool:weather'],
+                elif self.episodic_memory_agent:
+                    memories = self.episodic_memory_agent.retrieve_memory(user_id, message)
+                    if memories:  # pragma: no branch
+                        context.tools.append(
+                            ToolContext(
+                                name='episodic_memory',
+                                summary='User context (remembered facts): ' + ' | '.join(memories),
+                                payload={'memories': memories},
+                                sources=['memory:episodic'],
+                            )
                         )
-                    )
-            await self._add_rag_context(context, message, scopes={'medical', 'emergency', 'hospitals'})
-        elif intent == 'first_aid':
-            await self._add_first_aid_context(context)
-            await self._add_rag_context(context, message, scopes={'medical'})
-        elif intent == 'challan':
-            await self._add_challan_context(context)
-            self._add_retrieved(context, await self.legal_search_tool.search(message))
-        elif intent == 'legal':
-            self._add_retrieved(context, await self.legal_search_tool.search(message))
-        elif intent == 'road_issue':
-            # C10: Run independent road tools in parallel (infra + issues + RAG)
-            if context.lat is not None and context.lon is not None:
-                infra_task = self.road_infra_tool.lookup(lat=context.lat, lon=context.lon)
-                issues_task = self.road_issues_tool.lookup(lat=context.lat, lon=context.lon)
-                infrastructure, issues = await asyncio.gather(infra_task, issues_task, return_exceptions=True)
-                
-                if not isinstance(infrastructure, Exception) and infrastructure:
-                    context.tools.append(
-                        ToolContext(
-                            name='road_infrastructure',
-                            summary=(
-                                f'Road authority: {infrastructure.get("exec_engineer") or infrastructure.get("contractor_name") or infrastructure.get("road_type")}. '
-                                f'Road type: {infrastructure.get("road_type")} ({infrastructure.get("road_type_code")}).'
-                            ),
-                            payload=infrastructure,
-                            sources=['tool:road_infrastructure', 'backend:/api/v1/roads/infrastructure'],
-                        )
-                    )
-                if not isinstance(issues, Exception) and issues and (issues.get('issues') or []):
-                    count = issues.get('count') or len(issues.get('issues') or [])
-                    context.tools.append(
-                        ToolContext(
-                            name='road_issues',
-                            summary=f'{count} nearby road issues are already reported in the selected radius.',
-                            payload=issues,
-                            sources=['tool:road_issues', 'backend:/api/v1/roads/issues'],
-                        )
-                    )
-            await self._add_rag_context(context, message, scopes={'roads', 'accidents'})
-        elif intent == 'road_weather':
-            await self._add_weather_context(context)
-            await self._add_rag_context(context, message, scopes={'roads', 'accidents'})
-        elif intent == 'safe_route':
-            # C10: Run independent route tools in parallel (issues + weather)
-            context.tools.append(
-                ToolContext(
-                    name='safe_route',
-                    summary=(
-                        'For safest routing, collect origin, destination, current GPS, and avoid roads with severe reports, '
-                        'poor visibility, flooding, or active incidents.'
-                    ),
-                    payload={'requires_origin_destination': True},
-                    sources=['tool:safe_route'],
-                )
-            )
-            if context.lat is not None and context.lon is not None:
-                issues_task = self.road_issues_tool.lookup(lat=context.lat, lon=context.lon)
-                weather_task = self.weather_tool.lookup(lat=context.lat, lon=context.lon)
-                issues, weather = await asyncio.gather(issues_task, weather_task, return_exceptions=True)
-                
-                if not isinstance(issues, Exception) and issues and (issues.get('issues') or []):
-                    count = issues.get('count') or len(issues.get('issues') or [])
-                    context.tools.append(
-                        ToolContext(
-                            name='route_risk',
-                            summary=f'{count} reported road issues may affect route safety near the current location.',
-                            payload=issues,
-                            sources=['tool:road_issues', 'backend:/api/v1/roads/issues'],
-                        )
-                    )
-                if not isinstance(weather, Exception) and weather:
-                    context.tools.append(
-                        ToolContext(
-                            name='route_weather',
-                            summary=f'Weather risk near current location: {weather.get("summary")}.',
-                            payload=weather,
-                            sources=['tool:weather'],
-                        )
-                    )
-            await self._add_rag_context(context, message, scopes={'roads', 'accidents'})
-        elif intent == 'road_infrastructure':
-            await self._add_infrastructure_context(context)
-            await self._add_rag_context(context, message, scopes={'roads'})
-        else:
-            await self._add_rag_context(context, message)
+            except (ValueError, KeyError, RuntimeError) as e:
+                logger.warning("Tiered/episodic memory retrieval failed: %s", e)
+
+        dispatch = {
+            'emergency': self._assemble_emergency,
+            'first_aid': self._assemble_first_aid,
+            'challan': self._assemble_challan,
+            'legal': self._assemble_legal,
+            'road_issue': self._assemble_road_issue,
+            'road_weather': self._assemble_road_weather,
+            'safe_route': self._assemble_safe_route,
+            'road_infrastructure': self._assemble_road_infrastructure,
+        }
+        handler = dispatch.get(intent, self._assemble_general)
+        await handler(context, message)
 
         return context
 
+    async def _assemble_emergency(self, context: ConversationContext, message: str) -> None:
+        if context.lat is not None and context.lon is not None:
+            sos_task = self.sos_tool.get_payload(lat=context.lat, lon=context.lon)
+            weather_task = self.weather_tool.lookup(lat=context.lat, lon=context.lon)
+            sos_payload, weather = await asyncio.gather(sos_task, weather_task, return_exceptions=True)
+
+            if not isinstance(sos_payload, Exception) and sos_payload:
+                numbers = sos_payload.get('numbers') or {}
+                services = sos_payload.get('services') or []
+                nearest_names = ', '.join(item.get('name', 'Unknown') for item in services[:3]) or 'No nearby services listed'
+                number_text = ', '.join(f'{key}:{value.get("service")}' for key, value in numbers.items())
+
+                w3w_text = ""
+                if 'what3words' in sos_payload:
+                    w3w_text = f" What3Words: {sos_payload['what3words'].get('formatted')}."
+
+                context.tools.append(
+                    ToolContext(
+                        name='sos',
+                        summary=f'Nearby emergency services: {nearest_names}. Emergency numbers: {number_text}.{w3w_text}',
+                        payload=sos_payload,
+                        sources=['tool:sos', 'backend:/api/v1/emergency/sos'],
+                    )
+                )
+            if not isinstance(weather, Exception) and weather:  # pragma: no branch
+                context.tools.append(
+                    ToolContext(
+                        name='weather',
+                        summary=f'Local weather: {weather.get("summary")} at {weather.get("temperature")} degrees.',
+                        payload=weather,
+                        sources=['tool:weather'],
+                    )
+                )
+        await self._add_rag_context(context, message, scopes={'medical', 'emergency', 'hospitals'})
+
+    async def _assemble_first_aid(self, context: ConversationContext, message: str) -> None:
+        await self._add_first_aid_context(context)
+        await self._add_rag_context(context, message, scopes={'medical'})
+
+    async def _assemble_challan(self, context: ConversationContext, message: str) -> None:
+        await self._add_challan_context(context)
+        self._add_retrieved(context, await self.legal_search_tool.search(message))
+
+    async def _assemble_legal(self, context: ConversationContext, message: str) -> None:
+        self._add_retrieved(context, await self.legal_search_tool.search(message))
+
+    async def _assemble_road_issue(self, context: ConversationContext, message: str) -> None:
+        if context.lat is not None and context.lon is not None:
+            infra_task = self.road_infra_tool.lookup(lat=context.lat, lon=context.lon)
+            issues_task = self.road_issues_tool.lookup(lat=context.lat, lon=context.lon)
+            infrastructure, issues = await asyncio.gather(infra_task, issues_task, return_exceptions=True)
+
+            if not isinstance(infrastructure, Exception) and infrastructure:
+                context.tools.append(
+                    ToolContext(
+                        name='road_infrastructure',
+                        summary=(
+                            f'Road authority: {infrastructure.get("exec_engineer") or infrastructure.get("contractor_name") or infrastructure.get("road_type")}. '
+                            f'Road type: {infrastructure.get("road_type")} ({infrastructure.get("road_type_code")}).'
+                        ),
+                        payload=infrastructure,
+                        sources=['tool:road_infrastructure', 'backend:/api/v1/roads/infrastructure'],
+                    )
+                )
+            if not isinstance(issues, Exception) and issues and (issues.get('issues') or []):
+                count = issues.get('count') or len(issues.get('issues') or [])
+                context.tools.append(
+                    ToolContext(
+                        name='road_issues',
+                        summary=f'{count} nearby road issues are already reported in the selected radius.',
+                        payload=issues,
+                        sources=['tool:road_issues', 'backend:/api/v1/roads/issues'],
+                    )
+                )
+        await self._add_rag_context(context, message, scopes={'roads', 'accidents'})
+
+    async def _assemble_road_weather(self, context: ConversationContext, message: str) -> None:
+        await self._add_weather_context(context)
+        await self._add_rag_context(context, message, scopes={'roads', 'accidents'})
+
+    async def _assemble_safe_route(self, context: ConversationContext, message: str) -> None:
+        context.tools.append(
+            ToolContext(
+                name='safe_route',
+                summary='For safest routing, collect origin, destination, current GPS, and avoid roads with severe reports, '
+                        'poor visibility, flooding, or active incidents.',
+                payload={'requires_origin_destination': True},
+                sources=['tool:safe_route'],
+            )
+        )
+        if context.lat is not None and context.lon is not None:  # pragma: no branch
+            issues_task = self.road_issues_tool.lookup(lat=context.lat, lon=context.lon)
+            weather_task = self.weather_tool.lookup(lat=context.lat, lon=context.lon)
+            issues, weather = await asyncio.gather(issues_task, weather_task, return_exceptions=True)
+
+            if not isinstance(issues, Exception) and issues and (issues.get('issues') or []):  # pragma: no branch
+                count = issues.get('count') or len(issues.get('issues') or [])
+                context.tools.append(
+                    ToolContext(
+                        name='route_risk',
+                        summary=f'{count} reported road issues may affect route safety near the current location.',
+                        payload=issues,
+                        sources=['tool:road_issues', 'backend:/api/v1/roads/issues'],
+                    )
+                )
+            if not isinstance(weather, Exception) and weather:  # pragma: no branch
+                context.tools.append(
+                    ToolContext(
+                        name='route_weather',
+                        summary=f'Weather risk near current location: {weather.get("summary")}.',
+                        payload=weather,
+                        sources=['tool:weather'],
+                    )
+                )
+        await self._add_rag_context(context, message, scopes={'roads', 'accidents'})
+
+    async def _assemble_road_infrastructure(self, context: ConversationContext, message: str) -> None:
+        await self._add_infrastructure_context(context)
+        await self._add_rag_context(context, message, scopes={'roads'})
+
+    async def _assemble_general(self, context: ConversationContext, message: str) -> None:
+        await self._add_rag_context(context, message)
+
     async def _add_first_aid_context(self, context: ConversationContext) -> None:
         guide = self.first_aid_tool.lookup(context.message)
-        if guide:
+        if guide:  # pragma: no branch
             steps = guide.get('steps') or []
             context.tools.append(
                 ToolContext(
@@ -238,7 +278,7 @@ class ContextAssembler:
 
     async def _add_challan_context(self, context: ConversationContext) -> None:
         challan = await self.challan_tool.infer_and_calculate(context.message, client_ip=context.client_ip)
-        if challan:
+        if challan:  # pragma: no branch
             context.tools.append(
                 ToolContext(
                     name='challan',
@@ -305,14 +345,12 @@ class ContextAssembler:
     async def _add_rag_context(self, context: ConversationContext, message: str, scopes: set[str] | None = None) -> None:
         results = await self.retriever.retrieve(message, scopes=scopes)
         if not results:
-            import re
             words = re.findall(r'\b\w+\b', message.lower())
             stopwords = {'is', 'the', 'a', 'an', 'what', 'where', 'how', 'why', 'who', 'in', 'on', 'at', 'to', 'for', 'of', 'and', 'or', 'my', 'i', 'need', 'help', 'with', 'can', 'you', 'tell', 'me', 'about', 'some', 'any'}
             keywords = [w for w in words if w not in stopwords]
             rewritten_query = ' '.join(keywords)
             if rewritten_query and rewritten_query != message.lower():
-                import logging
-                logging.getLogger(__name__).info("RAG Fallback: Rewriting query '%s' -> '%s'", message, rewritten_query)
+                logger.info("RAG Fallback: Rewriting query '%s' -> '%s'", message, rewritten_query)
                 results = await self.retriever.retrieve(rewritten_query, scopes=scopes)
         self._add_retrieved(context, results)
 

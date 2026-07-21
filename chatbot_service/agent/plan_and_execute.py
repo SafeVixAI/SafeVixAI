@@ -63,7 +63,7 @@ class PlanAndExecuteAgent:
                         res = await tool.lookup(lat=context.get('lat'), lon=context.get('lon'))
                     else:
                         res = tool.lookup(step.step)
-                        if inspect.isawaitable(res):
+                        if inspect.isawaitable(res):  # pragma: no branch
                             res = await res
                     return str(res)
             except Exception as e:

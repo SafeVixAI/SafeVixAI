@@ -645,13 +645,13 @@ describe('api', function () {
 
   it('warming interceptor sets and clears timers via request/response', function () {
     jest.useFakeTimers()
-    var mod = require('../api')
+    require('../api')
     var handlers = (require('axios') as any)._requestHandlers
     var respHandlers = (require('axios') as any)._responseHandlers
 
     var warmingReq = handlers[1].fulfilled  // client warming request (index 1, after csrfAuthLang at 0)
     var warmingRes = respHandlers[0].fulfilled  // client warming response
-    var warmingErr = respHandlers[1].rejected  // client warming error
+    var _warmingErr = respHandlers[1].rejected  // client warming error
 
     var config: any = { headers: {} }
     var result = warmingReq(config)
@@ -687,12 +687,12 @@ describe('api', function () {
   it('warming error handler clears timer and rejects', function () {
     jest.useFakeTimers()
     var respHandlers = (require('axios') as any)._responseHandlers
-    var warmingErr = respHandlers[0].rejected
+    var _warmingErr = respHandlers[0].rejected
 
     var config: any = { _warmingTimer: setTimeout(function () {}, 1000) }
     var error = { config: config, isAxiosError: true, message: 'fail' }
     expect(function () {
-      warmingErr(error).catch(function () {})
+      _warmingErr(error).catch(function () {})
     }).not.toThrow()
 
     jest.useRealTimers()

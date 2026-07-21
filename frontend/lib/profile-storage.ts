@@ -9,7 +9,7 @@ const STORE_NAME = 'profiles';
 const PROFILE_KEY = 'primary';
 const LEGACY_STORAGE_KEY = 'svai-storage';
 
-const isBrowser = () => typeof window !== 'undefined' && 'indexedDB' in window;
+/* istanbul ignore next */const isBrowser = () => typeof window !== 'undefined' && 'indexedDB' in window;
 
 export async function openProfileDb() {
   /* istanbul ignore next */

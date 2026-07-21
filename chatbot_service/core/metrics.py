@@ -87,6 +87,53 @@ chatbot_circuit_breaker_trips_total = Counter(
     registry=REGISTRY,
 )
 
+chatbot_rag_cache_hit = Counter(
+    "chatbot_rag_cache_hit_total",
+    "Total RAG cache hits",
+    registry=REGISTRY,
+)
+
+chatbot_rag_cache_miss = Counter(
+    "chatbot_rag_cache_miss_total",
+    "Total RAG cache misses",
+    registry=REGISTRY,
+)
+
+chatbot_token_cost_total = Counter(
+    "chatbot_token_cost_total",
+    "Total LLM token usage and estimated cost by provider",
+    ["provider", "model", "token_type"],
+    registry=REGISTRY,
+)
+
+# Cost per 1K tokens in USD (approximate market rates as of 2026-07)
+_PROVIDER_COST_PER_1K: dict[str, dict[str, float]] = {
+    "groq": {"input": 0.00015, "output": 0.0006},
+    "gemini": {"input": 0.000075, "output": 0.0003},
+    "cerebras": {"input": 0.0001, "output": 0.0004},
+    "openrouter": {"input": 0.0002, "output": 0.0008},
+    "mistral": {"input": 0.00015, "output": 0.0006},
+    "together": {"input": 0.0002, "output": 0.0008},
+    "github": {"input": 0.00015, "output": 0.0006},
+    "nvidia": {"input": 0.0001, "output": 0.0004},
+    "sarvam_30b": {"input": 0.0003, "output": 0.0012},
+    "sarvam_105b": {"input": 0.0005, "output": 0.0020},
+    "template": {"input": 0.0, "output": 0.0},
+}
+
+
+def record_token_cost(provider: str, model: str, prompt_tokens: int, completion_tokens: int) -> None:
+    """Record token usage and estimated cost as Prometheus counters."""
+    chatbot_token_cost_total.labels(
+        provider=provider, model=model, token_type="prompt",
+    ).inc(prompt_tokens)
+    chatbot_token_cost_total.labels(
+        provider=provider, model=model, token_type="completion",
+    ).inc(completion_tokens)
+    chatbot_token_cost_total.labels(
+        provider=provider, model=model, token_type="total",
+    ).inc(prompt_tokens + completion_tokens)
+
 
 def update_circuit_breaker_gauges(unavailable_providers: set[str], all_providers: list[str]) -> None:
     for provider in all_providers:

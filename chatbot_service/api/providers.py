@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 SafeVixAI Team
 """Provider configuration API — allows dynamic provider loading from the backend.
 
 Users can configure their own API keys and custom providers via the backend,
@@ -13,6 +15,7 @@ from typing import Any
 from fastapi import APIRouter, Depends, HTTPException, Request
 
 from config import get_settings
+from limiter import limiter
 from providers.router import ProviderRouter
 
 logger = logging.getLogger("safevixai.chatbot.api.providers")
@@ -25,6 +28,7 @@ def get_provider_router(request: Request) -> ProviderRouter:
 
 
 @router.post("/configure")
+@limiter.limit("5/minute")
 async def configure_providers(
     request: Request,
     providers: list[dict[str, Any]],
@@ -49,7 +53,9 @@ async def configure_providers(
 
 
 @router.get("/active")
+@limiter.limit("10/minute")
 async def get_active_providers(
+    request: Request,
     provider_router: ProviderRouter = Depends(get_provider_router),
 ):
     """Return currently active provider configs (env + user-configured)."""
@@ -57,7 +63,9 @@ async def get_active_providers(
 
 
 @router.post("/test")
+@limiter.limit("5/minute")
 async def test_provider(
+    request: Request,
     data: dict[str, Any],
 ):
     """Test a provider connection directly from the chatbot service."""
@@ -92,7 +100,9 @@ async def test_provider(
 
 
 @router.post("/reset")
+@limiter.limit("5/minute")
 async def reset_providers(
+    request: Request,
     provider_router: ProviderRouter = Depends(get_provider_router),
 ):
     """Reset to default env-var-based providers (clear user configs)."""

@@ -5,42 +5,75 @@ jest.mock('@/components/dashboard/SystemHeader', function() { return function() 
 jest.mock('lucide-react', function() { return new Proxy({}, { get: function() { return function() { return null } } }) })
 
 var React = require('react')
-var { render, screen } = require('@testing-library/react')
+var { render, screen: rtlScreen } = require('@testing-library/react')
 var OfflinePage = require('../app/offline/page').default
 
 describe('Offline Page', function() {
   it('renders Offline Mode label', function() {
     render(React.createElement(OfflinePage))
-    expect(screen.getByText('Offline Mode')).toBeTruthy()
+    expect(rtlScreen.getByText('Offline Mode')).toBeTruthy()
   })
 
   it('renders offline title', function() {
     render(React.createElement(OfflinePage))
-    expect(screen.getByText('SafeVixAI is running from cached emergency tools.')).toBeTruthy()
+    expect(rtlScreen.getByText('SafeVixAI is running from cached emergency tools.')).toBeTruthy()
   })
 
   it('renders emergency numbers section title', function() {
     render(React.createElement(OfflinePage))
-    expect(screen.getByText('Emergency Numbers')).toBeTruthy()
+    expect(rtlScreen.getByText('Emergency Numbers')).toBeTruthy()
   })
 
   it('renders emergency number 112', function() {
     render(React.createElement(OfflinePage))
-    expect(screen.getByText('112')).toBeTruthy()
+    expect(rtlScreen.getByText('112')).toBeTruthy()
   })
 
   it('renders SOS link', function() {
     render(React.createElement(OfflinePage))
-    expect(screen.getByText('Open Emergency SOS')).toBeTruthy()
+    expect(rtlScreen.getByText('Open Emergency SOS')).toBeTruthy()
   })
 
   it('renders First Aid link', function() {
     render(React.createElement(OfflinePage))
-    expect(screen.getByText('Open First Aid Guides')).toBeTruthy()
+    expect(rtlScreen.getByText('Open First Aid Guides')).toBeTruthy()
   })
 
   it('renders Locator link', function() {
     render(React.createElement(OfflinePage))
-    expect(screen.getByText('Open Cached Locator')).toBeTruthy()
+    expect(rtlScreen.getByText('Open Cached Locator')).toBeTruthy()
+  })
+
+  it('renders offline description text', function() {
+    render(React.createElement(OfflinePage))
+    expect(rtlScreen.getByText('Network services are unavailable right now. SOS, first aid, emergency numbers, and queued reports remain available.')).toBeTruthy()
+  })
+
+  it('renders Police emergency number', function() {
+    render(React.createElement(OfflinePage))
+    expect(rtlScreen.getByText('Police')).toBeTruthy()
+    expect(rtlScreen.getByText('100')).toBeTruthy()
+  })
+
+  it('renders Fire emergency number', function() {
+    render(React.createElement(OfflinePage))
+    expect(rtlScreen.getByText('101')).toBeTruthy()
+  })
+
+  it('renders Ambulance emergency number', function() {
+    render(React.createElement(OfflinePage))
+    expect(rtlScreen.getByText('102')).toBeTruthy()
+  })
+
+  it('renders SOS link with correct href', function() {
+    render(React.createElement(OfflinePage))
+    var sosLink = rtlScreen.getByText('Open Emergency SOS').closest('a')
+    expect(sosLink.getAttribute('href')).toBe('/sos')
+  })
+
+  it('renders First Aid link with correct href', function() {
+    render(React.createElement(OfflinePage))
+    var firstAidLink = rtlScreen.getByText('Open First Aid Guides').closest('a')
+    expect(firstAidLink.getAttribute('href')).toBe('/first-aid')
   })
 })

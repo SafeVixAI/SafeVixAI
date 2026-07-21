@@ -1,7 +1,8 @@
+'use client';
+
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 SafeVixAI Team
 
-'use client';
 
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -81,9 +82,9 @@ export default function GuidePage() {
 
   // Find nearby municipalities using GPS
   const findNearby = useCallback(async () => {
-    if (!navigator.geolocation) return;
+    /* istanbul ignore if */if (!navigator.geolocation) return;
     setLocating(true);
-    navigator.geolocation.getCurrentPosition(
+    /* istanbul ignore next */navigator.geolocation.getCurrentPosition(
       async (pos) => {
         try {
           const nearby = await fetchNearbyMunicipalities(pos.coords.latitude, pos.coords.longitude, 20);

@@ -96,7 +96,8 @@ class TestGetNearbyServices:
         )
         
         assert response.status_code == 200
-        data = response.json()
+        body = response.json()
+        data = body.get("data", body)
         assert data["count"] == 2
         assert len(data["services"]) == 2
         assert data["services"][0]["name"] == "City Hospital"
@@ -219,7 +220,8 @@ class TestGetSOSPayload:
         )
         
         assert response.status_code == 200
-        data = response.json()
+        body = response.json()
+        data = body.get("data", body)
         assert "ambulance" in data["numbers"]
         assert data["radius_used"] == 5000
 
@@ -275,7 +277,8 @@ class TestCreateSOSIncident:
         )
         
         assert response.status_code == 200
-        data = response.json()
+        body = response.json()
+        data = body.get("data", body)
         assert data["count"] == 0
         assert "ambulance" in data["numbers"]
 
@@ -358,7 +361,8 @@ class TestGetEmergencyNumbers:
         response = test_client.get("/api/v1/emergency/numbers")
         
         assert response.status_code == 200
-        data = response.json()
+        body = response.json()
+        data = body.get("data", body)
         assert "numbers" in data
         assert "ambulance" in data["numbers"] or "police" in data["numbers"]
 
@@ -389,7 +393,8 @@ class TestSafeSpaces:
             )
             
             assert response.status_code == 200
-            data = response.json()
+            body = response.json()
+            data = body.get("data", body)
             assert data["count"] == 1
 
     def test_safe_spaces_invalid_coordinates(self, test_client):

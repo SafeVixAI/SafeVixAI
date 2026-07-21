@@ -57,6 +57,44 @@ describe('geocoding', function () {
     expect(results).toEqual([])
   })
 
+  it('searchPlaces handles null features in response', async function () {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async function () { return { features: null } },
+    })
+    var mod = await import('../geocoding')
+    var results = await mod.searchPlaces('Chennai')
+    expect(results).toEqual([])
+  })
+
+  it('searchPlaces handles empty features array', async function () {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async function () { return { features: [] } },
+    })
+    var mod = await import('../geocoding')
+    var results = await mod.searchPlaces('Chennai')
+    expect(results).toEqual([])
+  })
+
+  it('searchPlaces uses county fallback when city is missing', async function () {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async function () {
+        return {
+          features: [{
+            properties: { name: 'Test', county: 'Test County', state: 'Test State', country: 'India' },
+            geometry: { coordinates: [80.27, 13.08] },
+          }],
+        }
+      },
+    })
+    var mod = await import('../geocoding')
+    var results = await mod.searchPlaces('Chennai')
+    expect(results[0].city).toBe('Test County')
+    expect(results[0].label).toBe('Test, Test County, Test State')
+  })
+
   it('searchPlaces handles missing properties/geometry', async function () {
     mockFetch.mockResolvedValueOnce({
       ok: true,

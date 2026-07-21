@@ -1,0 +1,40 @@
+SafeVixAI — AI-Powered Road Safety PWA
+Copyright (c) 2026 SafeVixAI Team
+
+This product includes software developed by third parties:
+
+---
+
+### MIT License
+
+The following components are licensed under the MIT License:
+
+- Next.js (MIT) — Copyright (c) 2024 Vercel, Inc.
+- React, React DOM (MIT) — Copyright (c) Meta Platforms, Inc.
+- FastAPI (MIT) — Copyright (c) 2018 Sebastián Ramírez
+- MapLibre GL JS (BSD 3-Clause) — Copyright (c) MapLibre contributors
+- DuckDB-Wasm (MIT) — Copyright (c) DuckDB contributors
+- Zod (MIT) — Copyright (c) Colin McDonnell
+
+### Apache License 2.0
+
+The following components are licensed under the Apache License 2.0:
+
+- PostgreSQL + PostGIS (Apache 2.0) — Copyright (c) PostgreSQL Global Development Group
+- Redis (BSD 3-Clause) — Copyright (c) Redis Ltd.
+- ChromaDB (Apache 2.0) — Copyright (c) Chroma contributors
+
+### Other
+
+- GSAP (Standard non-commercial license) — Copyright (c) GreenSock, Inc.
+- Lucide Icons (ISC) — Copyright (c) Lucide contributors
+- Tailwind CSS (MIT) — Copyright (c) Tailwind Labs, Inc.
+
+---
+
+Full license text for all dependencies is available in the respective package repositories.
+This product bundles dependencies via npm (frontend) and pip (backend/chatbot).
+Complete dependency lists with license information are generated in CI via:
+- `pip-licenses` for Python packages
+- `license-checker` for npm packages
+- SBOM generation via CycloneDX and SPDX formats in GitHub Releases

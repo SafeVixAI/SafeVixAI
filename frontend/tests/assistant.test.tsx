@@ -23,7 +23,7 @@ jest.mock('@/lib/public-env', function() { return { PUBLIC_CHATBOT_BASE_URL: 'ht
 jest.mock('lucide-react', function() { return new Proxy({}, { get: function() { return function() { return null } } }) })
 
 var React = require('react')
-var { render, screen } = require('@testing-library/react')
+var { render, screen: rtlScreen } = require('@testing-library/react')
 var ChatPage = require('../app/assistant/page').default
 
 describe('Assistant Page', function() {
@@ -66,6 +66,22 @@ describe('Assistant Page', function() {
 
   it('renders send message button', function() {
     render(React.createElement(ChatPage))
-    expect(screen.getByText('AI Assistant')).toBeTruthy()
+    expect(rtlScreen.getByText('AI Assistant')).toBeTruthy()
   })
+
+  it('renders session encrypted system message', async function() {
+    render(React.createElement(ChatPage))
+    expect(await rtlScreen.findByText('Session encrypted with SafeVixAI Protocol v2.4')).toBeTruthy()
+  })
+
+  it('renders welcome message from AI', async function() {
+    render(React.createElement(ChatPage))
+    expect(await rtlScreen.findByText(/SafeVixAI assistant online/)).toBeTruthy()
+  })
+
+  it('renders suggested inquiries section', function() {
+    render(React.createElement(ChatPage))
+    expect(rtlScreen.getByText('Suggested Inquiries')).toBeTruthy()
+  })
+
 })

@@ -3,7 +3,7 @@
 
 """AI Verification Pipeline for SafeVixAI.
 
-Runs on every new complaint to validate, classify, score confidence,
+Runs on every new road issue to validate, classify, score confidence,
 and detect spam/fake/duplicate submissions.
 
 Pipeline Stages:

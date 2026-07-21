@@ -44,6 +44,7 @@ def mock_request():
     request = MagicMock(spec=Request)
     request.method = "POST"
     request.headers = {}
+    request.client = None
     return request
 
 

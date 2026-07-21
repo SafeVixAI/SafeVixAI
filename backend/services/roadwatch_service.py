@@ -11,7 +11,6 @@ from pathlib import Path
 
 import aiofiles
 import httpx
-from PIL import UnidentifiedImageError
 from fastapi import UploadFile
 from geoalchemy2 import Geography, WKTElement
 from sqlalchemy import cast, func, select
@@ -33,6 +32,18 @@ from services.exceptions import ExternalServiceError, ServiceValidationError
 from services.geocoding_service import GeocodingService
 from core.cqrs import Command, Query, CommandHandler, QueryHandler, cqrs_bus
 from core.distributed_lock import distributed_lock
+from services.roadwatch_photos import (
+    UPLOAD_EXTENSION_BY_CONTENT_TYPE,
+    UploadedPhotoUrl,
+    cleanup_temp_file,
+    compose_photo_url,
+    is_valid_image_magic,
+    read_upload_chunks,
+    save_photo_to_disk,
+    strip_exif,
+    upload_photo_to_supabase,
+    validate_photo_ai,
+)
 
 
 class SubmitReportCommand(Command[RoadReportResponse]):
@@ -86,39 +97,8 @@ cqrs_bus.register_command_handler(VerifyReportCommand, VerifyReportHandler())
 ACTIVE_ROAD_ISSUE_STATUSES = ['open', 'acknowledged', 'in_progress']
 ALL_ROAD_ISSUE_STATUSES = {'open', 'acknowledged', 'in_progress', 'resolved', 'rejected'}
 ISSUES_CACHE_VERSION_KEY = 'roads:issues:version'
-UPLOAD_EXTENSION_BY_CONTENT_TYPE = {
-    'image/jpeg': '.jpg',
-    'image/png': '.png',
-    'image/webp': '.webp',
-}
-
-# Known image file signatures (magic bytes)
-_IMAGE_MAGIC_SIGNATURES: list[bytes] = [
-    b'\xff\xd8\xff',                     # JPEG
-    b'\x89PNG\r\n\x1a\n',               # PNG
-    b'RIFF',                             # WebP (RIFF....WEBP)
-]
 
 logger = logging.getLogger(__name__)
-
-
-def _is_valid_image_magic(header: bytes) -> bool:
-    """Returns True if the first bytes match a known image format signature."""
-    for sig in _IMAGE_MAGIC_SIGNATURES:
-        if header.startswith(sig):
-            # Extra check for WebP: bytes 8-11 must be 'WEBP'
-            if sig == b'RIFF' and header[8:12] != b'WEBP':
-                continue
-            return True
-    return False
-
-
-class UploadedPhotoUrl(str):
-    def __new__(cls, value: str, ai_confidence: float | None = None, yolov8_result: dict | None = None):
-        obj = super().__new__(cls, value)
-        obj.ai_confidence = ai_confidence
-        obj.yolov8_result = yolov8_result
-        return obj
 
 
 class RoadWatchService:
@@ -489,17 +469,10 @@ class RoadWatchService:
                 
                     # EXIF stripping
                     try:
-                        import io
-                        from PIL import Image
-                        with Image.open(io.BytesIO(payload)) as img:
-                            if img.mode in ("RGBA", "P") and content_type == "image/jpeg":
-                                img = img.convert("RGB")
-                            output = io.BytesIO()
-                            fmt = img.format or "JPEG"
-                            img.save(output, format=fmt)
-                            payload = output.getvalue()
-                    except Exception as e:
-                        logger.warning("EXIF stripping failed: %s", e)
+                        from services.roadwatch_photos import strip_exif
+                        payload = strip_exif(payload, content_type)
+                    except (ModuleNotFoundError, Exception) as e:
+                        logger.warning("EXIF stripping skipped: %s", e)
  
                     # Supabase upload or local save
                     file_name = f'{issue_uuid}{Path(temp_photo_path).suffix}'
@@ -691,34 +664,11 @@ class RoadWatchService:
 
     async def _validate_photo_ai(self, payload: bytes) -> dict | None:
         """Call the chatbot service to run YOLO validation on the photo."""
-        chatbot_url = getattr(self.settings, 'chatbot_service_url', None)
-        if not chatbot_url:
-            return None
-
-        url = f"{chatbot_url}/ai/validate-image"
-        headers = {}
-        internal_key = getattr(self.settings, 'chatbot_internal_api_key', None)
-        if internal_key:
-            headers["X-Internal-API-Key"] = internal_key
-
-        try:
-            async with httpx.AsyncClient(timeout=10) as client:
-                files = {"file": ("image.jpg", payload, "image/jpeg")}
-                response = await client.post(url, files=files, headers=headers)
-                if response.status_code == 200:
-                    return response.json()
-                else:
-                    logger.warning(
-                        "AI image validation endpoint returned status code %d: %s",
-                        response.status_code, response.text,
-                        extra={"service": "roadwatch"}
-                    )
-        except Exception as exc:
-            logger.warning(
-                "Failed to call AI image validation service: %s", exc,
-                extra={"service": "roadwatch"}
-            )
-        return None
+        return await validate_photo_ai(
+            payload,
+            chatbot_url=getattr(self.settings, 'chatbot_service_url', None),
+            internal_key=getattr(self.settings, 'chatbot_internal_api_key', None),
+        )
 
     async def _save_photo(self, *, issue_uuid: uuid.UUID, photo: UploadFile | None) -> UploadedPhotoUrl | None:
         if photo is None or not photo.filename:
@@ -739,51 +689,15 @@ class RoadWatchService:
             suffix = Path(photo.filename).suffix.lower() or UPLOAD_EXTENSION_BY_CONTENT_TYPE.get(content_type, '.jpg')
             file_name = f'{issue_uuid}{suffix}'
             max_bytes = self.settings.max_upload_bytes
-            written = 0
-            chunks: list[bytes] = []
 
-            first_chunk = True
-            while True:
-                chunk = await photo.read(1024 * 1024)
-                if not chunk:
-                    break
-                # Validate magic bytes on first chunk before writing anywhere
-                if first_chunk:
-                    first_chunk = False
-                    header = chunk[:12]
-                    if not _is_valid_image_magic(header):
-                        raise ServiceValidationError(
-                            'Uploaded file does not appear to be a valid JPEG, PNG, or WebP image.'
-                        )
-                written += len(chunk)
-                if written > max_bytes:
-                    raise ServiceValidationError(
-                        f'Photo exceeds max upload size of {max_bytes // (1024 * 1024)} MB'
-                    )
-                chunks.append(chunk)
-
+            chunks, written = await read_upload_chunks(photo, max_bytes)
             if not chunks:
                 return None
 
             payload = b''.join(chunks)
 
-            # P1-03: Strip EXIF metadata from uploaded images (audit H5)
-            # This prevents inadvertent leakage of user GPS coordinates or device data.
-            try:
-                import io
-                from PIL import Image
-
-                with Image.open(io.BytesIO(payload)) as img:
-                    # Strip EXIF by re-saving without the 'exif' kwarg
-                    if img.mode in ("RGBA", "P") and content_type == "image/jpeg":
-                        img = img.convert("RGB")
-                    
-                    output = io.BytesIO()
-                    fmt = img.format or "JPEG"
-                    img.save(output, format=fmt)
-                    payload = output.getvalue()
-            except (OSError, ValueError, UnidentifiedImageError) as e:
-                logger.warning("Failed to strip EXIF data; proceeding with original payload. Error: %s", e, extra={"service": "roadwatch"})
+            # Strip EXIF metadata
+            payload = strip_exif(payload, content_type)
 
             # Run YOLO image validation on chatbot service
             ai_res = await self._validate_photo_ai(payload)
@@ -791,7 +705,10 @@ class RoadWatchService:
                 ai_conf = ai_res.get("confidence")
                 yolov8_result = ai_res
 
-            uploaded_url = await self._upload_photo_to_supabase(
+            uploaded_url = await upload_photo_to_supabase(
+                supabase_url=self.settings.supabase_url,
+                service_key=self.settings.supabase_service_role_key,
+                bucket=self.settings.road_photo_bucket.strip() or 'road-photos',
                 file_name=file_name,
                 content_type=content_type or 'image/jpeg',
                 payload=payload,
@@ -800,8 +717,7 @@ class RoadWatchService:
                 return UploadedPhotoUrl(uploaded_url, ai_conf, yolov8_result)
 
             target = self.settings.upload_dir / file_name
-            async with aiofiles.open(target, 'wb') as handle:
-                await handle.write(payload)
+            await save_photo_to_disk(target, payload)
         except (OSError, httpx.HTTPError):
             if target is not None:
                 with contextlib.suppress(FileNotFoundError):
@@ -810,7 +726,7 @@ class RoadWatchService:
         finally:
             await photo.close()
 
-        url_path = f'{self.settings.local_upload_base_url}/{file_name}' if self.settings.local_upload_base_url else f'/uploads/{file_name}'
+        url_path = compose_photo_url(self.settings.local_upload_base_url, file_name)
         return UploadedPhotoUrl(url_path, ai_conf, yolov8_result)
 
     async def _upload_photo_to_supabase(
@@ -820,32 +736,14 @@ class RoadWatchService:
         content_type: str,
         payload: bytes,
     ) -> str | None:
-        supabase_url = (self.settings.supabase_url or '').rstrip('/')
-        service_key = self.settings.supabase_service_role_key
-        bucket = self.settings.road_photo_bucket.strip() or 'road-photos'
-        if not supabase_url or not service_key:
-            return None
-
-        object_path = f'roadwatch/{file_name}'
-        upload_url = f'{supabase_url}/storage/v1/object/{bucket}/{object_path}'
-        try:
-            async with httpx.AsyncClient(timeout=20) as client:
-                response = await client.post(
-                    upload_url,
-                    content=payload,
-                    headers={
-                        'Authorization': f'Bearer {service_key}',
-                        'apikey': service_key,
-                        'Content-Type': content_type,
-                        'x-upsert': 'false',
-                    },
-                )
-                response.raise_for_status()
-        except httpx.HTTPError as exc:
-            logger.warning('Supabase Storage upload failed; falling back to local upload: %s', exc, extra={"service": "roadwatch"})
-            return None
-
-        return f'{supabase_url}/storage/v1/object/public/{bucket}/{object_path}'
+        return await upload_photo_to_supabase(
+            supabase_url=self.settings.supabase_url,
+            service_key=self.settings.supabase_service_role_key,
+            bucket=self.settings.road_photo_bucket.strip() or 'road-photos',
+            file_name=file_name,
+            content_type=content_type,
+            payload=payload,
+        )
 
 
 @task("process_road_report")
@@ -923,22 +821,9 @@ async def process_road_report_task(
         # 3. Photo processing
         if temp_photo_path:
             try:
-                import io
-                from PIL import Image
-                
                 with open(temp_photo_path, "rb") as f:
                     payload = f.read()
-
-                try:
-                    with Image.open(io.BytesIO(payload)) as img:
-                        if img.mode in ("RGBA", "P") and content_type == "image/jpeg":
-                            img = img.convert("RGB")
-                        output = io.BytesIO()
-                        fmt = img.format or "JPEG"
-                        img.save(output, format=fmt)
-                        payload = output.getvalue()
-                except Exception as e:
-                    logger.warning("Failed to strip EXIF data in background: %s", e)
+                payload = strip_exif(payload, content_type)
 
                 ai_res = await roadwatch_service._validate_photo_ai(payload)
                 if ai_res and ai_res.get("success"):
@@ -946,7 +831,10 @@ async def process_road_report_task(
                     yolov8_result = ai_res
 
                 file_name = f"{issue_uuid}{Path(temp_photo_path).suffix}"
-                uploaded_url = await roadwatch_service._upload_photo_to_supabase(
+                uploaded_url = await upload_photo_to_supabase(
+                    supabase_url=settings.supabase_url,
+                    service_key=settings.supabase_service_role_key,
+                    bucket=settings.road_photo_bucket.strip() or 'road-photos',
                     file_name=file_name,
                     content_type=content_type or 'image/jpeg',
                     payload=payload,
@@ -957,14 +845,11 @@ async def process_road_report_task(
                     target = settings.upload_dir / file_name
                     with open(target, "wb") as f:
                         f.write(payload)
-                    photo_url = f'{settings.local_upload_base_url}/{file_name}' if settings.local_upload_base_url else f'/uploads/{file_name}'
+                    photo_url = compose_photo_url(settings.local_upload_base_url, file_name)
             except Exception as e:
                 logger.exception("Photo processing failed in background task: %s", e)
             finally:
-                try:
-                    Path(temp_photo_path).unlink(missing_ok=True)
-                except Exception as e:
-                    logger.warning("Cleanup of temp photo failed: %s", e)
+                cleanup_temp_file(temp_photo_path)
 
         from services.ward_service import WardService
         ward = await WardService.find_ward_by_coordinates(db, lat, lon)

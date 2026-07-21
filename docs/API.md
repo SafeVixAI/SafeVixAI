@@ -119,6 +119,22 @@ System statistics (users, reports, sessions, etc.).
 
 Various CRUD operations for system administration.
 
+#### `GET /api/v1/admin/cache/status`
+
+Cache status — returns `{"status": "online"}` if Redis is available, `{"status": "fallback_in_memory"}` if not.
+
+#### `POST /api/v1/admin/cache/purge?key_prefix=...`
+
+Purge cache entries. Optional `key_prefix` query param to filter keys (e.g., `?key_prefix=waze`). Without prefix, flushes entire cache (`flushdb`).
+
+#### `GET /api/v1/admin/cache/status`
+
+Cache status — returns `{"status": "online"}` if Redis is available, `{"status": "fallback_in_memory"}` if not.
+
+#### `POST /api/v1/admin/cache/purge?key_prefix=...`
+
+Purge cache entries. Optional `key_prefix` query param to filter keys (e.g., `?key_prefix=waze`). Without prefix, flushes entire cache (`flushdb`).
+
 ---
 
 ## Analytics (`/api/v1/analytics`)
@@ -441,6 +457,10 @@ MCP Server-Sent Events endpoint for external agent integration.
 
 MCP message endpoint for tool calls.
 
+#### `GET /health`
+
+MCP server health check — returns `{"status": "healthy", "mcp_server": "online"}`.
+
 ---
 
 ## Officers (`/api/v1/officers`)
@@ -611,6 +631,8 @@ Ward-level statistics (report counts, resolved rates, etc.).
 
 ## Waze Feed (`/api/v1/waze`)
 
+> **Note:** The Waze feed endpoint uses a TokenBucket rate limiter. When rate-limited (2 requests per IP), returns `{"note": "Rate limit exceeded. Token bucket depleted."}`.
+
 #### `GET /api/v1/waze/feed?bbox=...`
 
 CIFS-compliant community hazard feed for Waze integration.
@@ -690,4 +712,4 @@ Speech service health and available language pairs.
 
 ---
 
-*Document version: 3.0 | IIT Madras Road Safety Hackathon 2026 | 27 backend route modules + 1 chatbot service*
+*Document version: 3.4 | IIT Madras Road Safety Hackathon 2026 | 28 backend route modules + chatbot + MCP*

@@ -54,7 +54,7 @@ async def chat(
     _auth: None = Depends(verify_internal_auth),
 ) -> ChatResponse:
     """Standard blocking chat — returns full response at once."""
-    if not payload.client_ip:
+    if not payload.client_ip:  # pragma: no branch
         forwarded = request.headers.get('x-forwarded-for', '')
         payload.client_ip = forwarded.split(',')[0].strip() or (request.client.host if request.client else None)
     try:
@@ -85,7 +85,7 @@ async def chat_stream(
     async def event_generator():
         request_id = request.headers.get("X-Request-ID") or str(uuid.uuid4())
         try:
-            if not payload.client_ip and request.client:
+            if not payload.client_ip and request.client:  # pragma: no branch
                 payload.client_ip = request.client.host
 
             stream_timeout = get_settings().http_timeout_seconds + 15.0
@@ -98,7 +98,7 @@ async def chat_stream(
                     elif event['type'] == 'done':
                         yield f'data: {json.dumps(event)}\n\n'
                         return
-                    elif event['type'] == 'error':
+                    elif event['type'] == 'error':  # pragma: no branch
                         yield f'data: {json.dumps(event)}\n\n'
                         return
 

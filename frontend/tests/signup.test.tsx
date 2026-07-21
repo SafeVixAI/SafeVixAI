@@ -13,47 +13,47 @@ jest.mock('@/components/ui/Logo', function() { return { Logo: function() { retur
 jest.mock('lucide-react', function() { return new Proxy({}, { get: function() { return function() { return null } } }) })
 
 var React = require('react')
-var { render, screen, fireEvent } = require('@testing-library/react')
+var { render, screen: rtlScreen, fireEvent } = require('@testing-library/react')
 var SignupPage = require('../app/signup/page').default
 
 describe('Signup Page', function() {
   it('renders SafeVixAI heading', function() {
     render(React.createElement(SignupPage))
-    expect(screen.getByText('SafeVixAI')).toBeTruthy()
+    expect(rtlScreen.getByText('SafeVixAI')).toBeTruthy()
   })
 
   it('renders Create Operator Account text', function() {
     render(React.createElement(SignupPage))
-    expect(screen.getByText('Create Operator Account')).toBeTruthy()
+    expect(rtlScreen.getByText('Create Operator Account')).toBeTruthy()
   })
 
   it('renders Sentinel Online badge', function() {
     render(React.createElement(SignupPage))
-    expect(screen.getByText('Sentinel Online')).toBeTruthy()
+    expect(rtlScreen.getByText('Sentinel Online')).toBeTruthy()
   })
 
   it('renders name input with placeholder', function() {
     render(React.createElement(SignupPage))
-    expect(screen.getByPlaceholderText('Your full name')).toBeTruthy()
+    expect(rtlScreen.getByPlaceholderText('Your full name')).toBeTruthy()
   })
 
   it('renders email input with placeholder', function() {
     render(React.createElement(SignupPage))
-    expect(screen.getByPlaceholderText('operator@safevixai.app')).toBeTruthy()
+    expect(rtlScreen.getByPlaceholderText('operator@safevixai.app')).toBeTruthy()
   })
 
   it('renders password input with placeholder', function() {
     render(React.createElement(SignupPage))
-    expect(screen.getByPlaceholderText('Min 8 characters')).toBeTruthy()
+    expect(rtlScreen.getByPlaceholderText('Min 8 characters')).toBeTruthy()
   })
 
   it('renders submit button', function() {
     render(React.createElement(SignupPage))
-    expect(screen.getByText('Create Account')).toBeTruthy()
+    expect(rtlScreen.getByText('Create Account')).toBeTruthy()
   })
 
   it('renders sign in link for existing users', function() {
     render(React.createElement(SignupPage))
-    expect(screen.getByText(/Sign in/i)).toBeTruthy()
+    expect(rtlScreen.getByText(/Sign in/i)).toBeTruthy()
   })
 })

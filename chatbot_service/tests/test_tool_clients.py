@@ -28,6 +28,7 @@ def _make_settings() -> MagicMock:
     s.main_backend_base_url = "http://test-backend:8000"
     s.main_backend_timeout_seconds = 20.0
     s.http_user_agent = "SafeVixAIChatbot/1.0"
+    s.internal_api_key = None
     return s
 
 

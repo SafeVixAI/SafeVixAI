@@ -1,7 +1,9 @@
+'use client';
+
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 SafeVixAI Team
+import React from 'react';
 
-'use client';
 
 import { useRef, useEffect, useState } from 'react';
 import { useServerWarming } from '@/lib/store';

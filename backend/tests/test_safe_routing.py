@@ -298,7 +298,7 @@ class TestGetSafeRouteOSRM:
             patch("services.safe_routing.is_nighttime", return_value=False),
             patch("services.safe_routing.httpx.AsyncClient", return_value=mock_client),
         ):
-            with pytest.raises(ExternalServiceError, match="Routing service timed out"):
+            with pytest.raises(ExternalServiceError, match="Routing service unavailable"):
                 await get_safe_route((12.97, 77.59), (12.93, 77.61))
 
     @pytest.mark.asyncio

@@ -1,7 +1,8 @@
-﻿// SPDX-License-Identifier: MIT
+'use client';
+
+// SPDX-License-Identifier: MIT
 // Copyright (c) 2026 SafeVixAI Team
 
-'use client';
 
 import React, { memo, useEffect } from 'react';
 import {
@@ -50,7 +51,7 @@ const SystemSidebar = memo(function SystemSidebar() {
     { labelKey: 'common.emergency.highway', defaultLabel: 'Highway', number: '1033', icon: <MapPinPlus size={16} /> },
   ];
 
-  // Close sidebar on Escape key (must be before early return â€” rules of hooks)
+  // Close sidebar on Escape key (must be before early return — rules of hooks)
   useEffect(() => {
     /* istanbul ignore next */
     if (!isOpen) return;
@@ -169,7 +170,7 @@ const SystemSidebar = memo(function SystemSidebar() {
             <span className="relative z-10 tracking-widest uppercase font-mono">{t('common.system_sos', 'System SOS')}</span>
           </Link>
           <p className="text-center text-[10px] font-bold text-text-3 mt-4 tracking-tighter uppercase font-mono">
-            {t('common.sentinel_tier', 'SafeVixAI Sentinel â€¢ Professional Responder Tier')}
+            {t('common.sentinel_tier', 'SafeVixAI Sentinel • Professional Responder Tier')}
           </p>
         </div>
       </div>

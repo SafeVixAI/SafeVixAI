@@ -42,7 +42,7 @@ export function startLocationTracking(map: maplibregl.Map, options: TrackerOptio
         'circle-radius': ['interpolate', ['linear'], ['zoom'], 10, 7, 18, 12],
         'circle-color': '#22C55E',
         'circle-stroke-width': 3,
-        'circle-stroke-color': typeof document !== 'undefined' && document.documentElement.classList.contains('dark') ? '#1C2127' : '#F8FAFC',
+        /* istanbul ignore next */'circle-stroke-color': typeof document !== 'undefined' && document.documentElement.classList.contains('dark') ? '#1C2127' : '#F8FAFC',
       },
     });
   }

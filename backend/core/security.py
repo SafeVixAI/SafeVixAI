@@ -6,6 +6,7 @@ from __future__ import annotations
 import os
 import secrets
 import time
+from collections import OrderedDict
 from datetime import datetime, timedelta, timezone
 import uuid
 from typing import Any
@@ -19,73 +20,192 @@ import re
 
 import logging
 
+from core.rbac import Role
+
 logger = logging.getLogger(__name__)
 
-# Regex matching any development/static/mock token patterns
-REJECTED_TOKEN_RE = re.compile(
-    r'(?:mock|fake|test|demo|dev|hackathon|sample|placeholder).*(?:token|jwt|key|secret)',
-    re.IGNORECASE,
-)
 
-# Static mock tokens that must be explicitly rejected
-REJECTED_STATIC_TOKENS = {
-    "mock-jwt-token-for-hackathon",
-}
-
-# JWT secrets must come from environment in production. In development, an
-# ephemeral key avoids shipping a static secret while keeping local auth usable.
-_ENVIRONMENT = os.environ.get("ENVIRONMENT", "development").lower()
-_env_secret = os.environ.get("JWT_SECRET_KEY")
-if _env_secret:
-    if _ENVIRONMENT == "production" and len(_env_secret.encode("utf-8")) < 32:
-        raise RuntimeError("JWT_SECRET_KEY must be at least 32 bytes when ENVIRONMENT=production")
-    SECRET_KEY = _env_secret
-elif _ENVIRONMENT == "production":
-    raise RuntimeError("JWT_SECRET_KEY is required when ENVIRONMENT=production")
-else:
-    SECRET_KEY = secrets.token_urlsafe(64)
-    logger.warning(
-        "JWT_SECRET_KEY not set; generated an ephemeral key. "
-        "Tokens will not survive server restarts."
+class SecurityState:
+    __slots__ = (
+        "_environment", "_secret_key", "_algorithm",
+        "_access_token_expire_hours", "_refresh_token_expire_days",
+        "_app_jwt_audience", "_app_jwt_issuer",
+        "_supabase_jwt_secret", "_supabase_jwt_audience",
+        "_revoked_token_jtis", "_revoked_lru_max",
+        "_cookie_secure", "_cookie_samesite", "_cookie_httponly", "_cookie_path",
+        "_rejected_token_re", "_rejected_static_tokens",
+        "_internal_auth_attempts",
     )
 
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_HOURS = int(os.environ.get("ACCESS_TOKEN_EXPIRE_HOURS", "24"))
+    def __init__(self) -> None:
+        env = os.environ.get("ENVIRONMENT", "development").lower()
 
-# P1-01: Audience and Issuer validation for internal operator tokens
-APP_JWT_AUDIENCE = os.environ.get("APP_JWT_AUDIENCE", "safevixai-internal")
-APP_JWT_ISSUER = os.environ.get("APP_JWT_ISSUER", "safevixai-auth-service")
+        secret = os.environ.get("JWT_SECRET_KEY")
+        if secret:
+            if env == "production" and len(secret.encode("utf-8")) < 32:
+                raise RuntimeError("JWT_SECRET_KEY must be at least 32 bytes when ENVIRONMENT=production")
+            self._secret_key = secret
+        elif env == "production":
+            raise RuntimeError("JWT_SECRET_KEY is required when ENVIRONMENT=production")
+        else:
+            self._secret_key = secrets.token_urlsafe(64)
+            logger.warning(
+                "JWT_SECRET_KEY not set; generated an ephemeral key. "
+                "Tokens will not survive server restarts."
+            )
 
-SUPABASE_JWT_SECRET = os.environ.get("SUPABASE_JWT_SECRET", "").strip()
-SUPABASE_JWT_AUDIENCE = os.environ.get("SUPABASE_JWT_AUDIENCE", "authenticated").strip()
+        self._environment = env
+        self._algorithm = "HS256"
+        self._access_token_expire_hours = int(os.environ.get("ACCESS_TOKEN_EXPIRE_HOURS", "24"))
+        self._refresh_token_expire_days = int(os.environ.get("REFRESH_TOKEN_EXPIRE_DAYS", "30"))
+        self._app_jwt_audience = os.environ.get("APP_JWT_AUDIENCE", "safevixai-internal")
+        self._app_jwt_issuer = os.environ.get("APP_JWT_ISSUER", "safevixai-auth-service")
+        self._supabase_jwt_secret = os.environ.get("SUPABASE_JWT_SECRET", "").strip()
+        self._supabase_jwt_audience = os.environ.get("SUPABASE_JWT_AUDIENCE", "authenticated").strip()
+        self._revoked_lru_max = 10_000
+        self._revoked_token_jtis: OrderedDict[str, None] = OrderedDict()
+        self._cookie_secure = env == "production"
+        self._cookie_samesite = "lax"
+        self._cookie_httponly = True
+        self._cookie_path = "/"
+        self._rejected_token_re = re.compile(
+            r'(?:mock|fake|test|demo|dev|hackathon|sample|placeholder).*(?:token|jwt|key|secret)',
+            re.IGNORECASE,
+        )
+        self._rejected_static_tokens = {"mock-jwt-token-for-hackathon"}
+        self._internal_auth_attempts: dict[str, list[float]] = {}
 
-# Token revocation set (in-memory fallback, persisted to Redis when available)
-_revoked_token_jtis: set[str] = set()
-REFRESH_TOKEN_EXPIRE_DAYS = int(os.environ.get("REFRESH_TOKEN_EXPIRE_DAYS", "30"))
+    # ── Properties (backward-compatible access) ──
 
-def _get_revocation_cache_key(jti: str) -> str:
-    return f"revoked_token:{jti}"
+    @property
+    def secret_key(self) -> str:
+        return self._secret_key
 
-async def revoke_token(jti: str, cache=None) -> None:
-    _revoked_token_jtis.add(jti)
-    if cache:
-        await cache.set_json(_get_revocation_cache_key(jti), True, ttl_seconds=86400 * 30)
+    @property
+    def algorithm(self) -> str:
+        return self._algorithm
 
-async def is_token_revoked(jti: str, cache=None) -> bool:
-    if jti in _revoked_token_jtis:
-        return True
-    if cache:
-        result = await cache.get_json(_get_revocation_cache_key(jti))
-        if result:
-            _revoked_token_jtis.add(jti)
+    @property
+    def access_token_expire_hours(self) -> int:
+        return self._access_token_expire_hours
+
+    @property
+    def refresh_token_expire_days(self) -> int:
+        return self._refresh_token_expire_days
+
+    @property
+    def app_jwt_audience(self) -> str:
+        return self._app_jwt_audience
+
+    @property
+    def app_jwt_issuer(self) -> str:
+        return self._app_jwt_issuer
+
+    @property
+    def supabase_jwt_secret(self) -> str:
+        return self._supabase_jwt_secret
+
+    @property
+    def supabase_jwt_audience(self) -> str:
+        return self._supabase_jwt_audience
+
+    @property
+    def cookie_secure(self) -> bool:
+        return self._cookie_secure
+
+    @property
+    def cookie_samesite(self) -> str:
+        return self._cookie_samesite
+
+    @property
+    def cookie_httponly(self) -> bool:
+        return self._cookie_httponly
+
+    @property
+    def cookie_path(self) -> str:
+        return self._cookie_path
+
+    @property
+    def rejected_static_tokens(self) -> set[str]:
+        return self._rejected_static_tokens
+
+    # ── Token revocation ──
+
+    def _get_revocation_cache_key(self, jti: str) -> str:
+        return f"revoked_token:{jti}"
+
+    async def revoke_token(self, jti: str, cache=None) -> None:
+        self._revoked_token_jtis.pop(jti, None)
+        self._revoked_token_jtis[jti] = None
+        if len(self._revoked_token_jtis) > self._revoked_lru_max:
+            self._revoked_token_jtis.popitem(last=False)
+        if cache:
+            await cache.set_json(self._get_revocation_cache_key(jti), True, ttl_seconds=86400 * 30)
+
+    async def is_token_revoked(self, jti: str, cache=None) -> bool:
+        if jti in self._revoked_token_jtis:
+            self._revoked_token_jtis.move_to_end(jti)
             return True
-    return False
+        if cache:
+            result = await cache.get_json(self._get_revocation_cache_key(jti))
+            if result:
+                self._revoked_token_jtis[jti] = None
+                if len(self._revoked_token_jtis) > self._revoked_lru_max:
+                    self._revoked_token_jtis.popitem(last=False)
+                return True
+        return False
 
-# Phase 0.2: Cookie security flags
-COOKIE_SECURE = _ENVIRONMENT == "production"
-COOKIE_SAMESITE = "lax"
-COOKIE_HTTPONLY = True
-COOKIE_PATH = "/"
+    # ── Internal auth rate limiting ──
+
+    async def check_internal_auth_rate_limit(self, client_ip: str | None, cache=None) -> None:
+        if not client_ip:
+            return
+        if cache is not None:
+            key = f"internal_auth:{client_ip}"
+            try:
+                current = await cache.increment(key)
+                if current == 1:
+                    await cache.set_json(key, 1, ttl_seconds=60)
+                elif current > 5:
+                    logger.warning("Internal auth rate limit exceeded for IP: %s (Redis)", client_ip)
+                    raise HTTPException(status_code=429, detail="Too many authentication attempts. Try again later.")
+                return
+            except Exception as e:
+                logger.warning("Redis rate limiter failed, falling back to in-memory: %s", e)
+
+        now = time.monotonic()
+        window = 60.0
+        key = f"internal_auth:{client_ip}"
+        attempts = self._internal_auth_attempts.setdefault(key, [])
+        attempts[:] = [t for t in attempts if now - t < window]
+        if len(attempts) >= 5:
+            logger.warning("Internal auth rate limit exceeded for IP: %s (InMemory)", client_ip)
+            raise HTTPException(status_code=429, detail="Too many authentication attempts. Try again later.")
+        attempts.append(now)
+
+
+# Module-level singleton (backward compatible)
+_state = SecurityState()
+
+# Backward-compatible module-level constants
+SECRET_KEY: str = _state.secret_key
+ALGORITHM: str = _state.algorithm
+ACCESS_TOKEN_EXPIRE_HOURS: int = _state.access_token_expire_hours
+REFRESH_TOKEN_EXPIRE_DAYS: int = _state.refresh_token_expire_days
+APP_JWT_AUDIENCE: str = _state.app_jwt_audience
+APP_JWT_ISSUER: str = _state.app_jwt_issuer
+SUPABASE_JWT_SECRET: str = _state.supabase_jwt_secret
+SUPABASE_JWT_AUDIENCE: str = _state.supabase_jwt_audience
+COOKIE_SECURE: bool = _state.cookie_secure
+COOKIE_SAMESITE: str = _state.cookie_samesite
+COOKIE_HTTPONLY: bool = _state.cookie_httponly
+COOKIE_PATH: str = _state.cookie_path
+REJECTED_STATIC_TOKENS: set[str] = _state.rejected_static_tokens
+
+# Module-level references to state internals (backward compat for direct importers)
+_REVOKED_LRU_MAX: int = _state._revoked_lru_max  # noqa: SLF001
+_revoked_token_jtis: OrderedDict[str, None] = _state._revoked_token_jtis  # noqa: SLF001
+REJECTED_TOKEN_RE: re.Pattern = _state._rejected_token_re  # noqa: SLF001
 
 security = HTTPBearer(auto_error=False)
 
@@ -170,7 +290,6 @@ def _normalize_user_payload(payload: dict[str, Any], *, provider: str) -> dict[s
     if raw_role == "authenticated":
         raw_role = "user"
         
-    from core.rbac import Role
     try:
         Role(raw_role)
     except ValueError:
@@ -186,12 +305,13 @@ def _normalize_user_payload(payload: dict[str, Any], *, provider: str) -> dict[s
     }
 
 
-def require_role(required_role: str | Any):
+def require_role(required_role: str | Role):
     """FastAPI dependency that enforces role-based access.
     
     Accepts a Role enum or role string (e.g. 'admin', 'operator').
+    Delegates to core.rbac for the actual permission check.
     """
-    from core.rbac import Role, require_role as rbac_require_role
+    from core.rbac import require_role as rbac_require_role
     if isinstance(required_role, str):
         try:
             role_enum = Role(required_role)
@@ -243,42 +363,14 @@ def _decode_bearer_token(token: str) -> dict[str, Any]:
                 # For now, fall back to static secret
                 logger.debug("JWT verification failed; JWKS not available in this context")
             except ImportError:
-                logger.debug("Suppressed exception", exc_info=True)
+                logger.debug("JWKS module not available — falling back to static secret")
             logger.info("Bearer token rejected by app, Supabase, and JWKS validators")
             raise _unauthorized() from app_error
 
 
-# Simple in-memory rate limiter fallback for internal auth bypass attempts
-_internal_auth_attempts: dict[str, list[float]] = {}
-
+# Delegate internal auth rate limiting to SecurityState
 async def _check_internal_auth_rate_limit(client_ip: str | None, cache=None) -> None:
-    """Allow max 5 internal auth attempts per IP per 60 seconds (Redis-backed with in-memory fallback)."""
-    if not client_ip:
-        return
-    
-    if cache is not None:
-        key = f"internal_auth:{client_ip}"
-        try:
-            current = await cache.increment(key)
-            if current == 1:
-                await cache.set_json(key, 1, ttl_seconds=60)
-            elif current > 5:
-                logger.warning("Internal auth rate limit exceeded for IP: %s (Redis)", client_ip)
-                raise HTTPException(status_code=429, detail="Too many authentication attempts. Try again later.")
-            return
-        except Exception as e:
-            logger.warning("Redis rate limiter failed, falling back to in-memory: %s", e)
-
-    now = time.monotonic()
-    window = 60.0
-    key = f"internal_auth:{client_ip}"
-    attempts = _internal_auth_attempts.setdefault(key, [])
-    # Prune old entries
-    attempts[:] = [t for t in attempts if now - t < window]
-    if len(attempts) >= 5:
-        logger.warning("Internal auth rate limit exceeded for IP: %s (InMemory)", client_ip)
-        raise HTTPException(status_code=429, detail="Too many authentication attempts. Try again later.")
-    attempts.append(now)
+    await _state.check_internal_auth_rate_limit(client_ip, cache)
 
 
 async def get_current_user_optional(
@@ -328,6 +420,15 @@ async def get_current_user(
     jti = user.get("jti")
     if jti:
         cache = getattr(request.app.state, 'cache', None)
-        if await is_token_revoked(jti, cache):
+        if await _state.is_token_revoked(jti, cache):
             raise HTTPException(status_code=401, detail="Token has been revoked")
     return user
+
+
+# Module-level wrappers (delegate to internal SecurityState instance)
+async def is_token_revoked(jti: str, cache=None) -> bool:
+    return await _state.is_token_revoked(jti, cache)
+
+
+async def revoke_token(jti: str, cache=None) -> None:
+    await _state.revoke_token(jti, cache)

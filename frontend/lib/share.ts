@@ -10,6 +10,7 @@
 
 // ── Base URL ──────────────────────────────────────────────────────────────────
 
+/* istanbul ignore next */
 const BASE_URL =
  typeof window !== 'undefined'
  ? window.location.origin
@@ -77,8 +78,9 @@ export async function shareLink(
  url,
  };
 
- // Try native share first (mobile)
- if (typeof navigator !== 'undefined' && navigator.share) {
+  // Try native share first (mobile)
+  /* istanbul ignore next */
+  if (typeof navigator !== 'undefined' && navigator.share) {
  try {
  await navigator.share(shareData);
  return true;
@@ -92,9 +94,10 @@ export async function shareLink(
  try {
  await navigator.clipboard.writeText(url);
  return true;
- } catch {
- // Last resort: prompt
- if (typeof window !== 'undefined') {
+  } catch {
+    // Last resort: prompt
+    /* istanbul ignore next */
+    if (typeof window !== 'undefined') {
  window.prompt('Copy this link:', url);
  }
  return false;

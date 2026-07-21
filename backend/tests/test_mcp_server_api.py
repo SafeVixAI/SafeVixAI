@@ -133,11 +133,12 @@ class TestReportRoadIssue:
     @pytest.mark.asyncio
     async def test_valid_report_submission(self):
         """Test successful road issue report."""
-        mock_service = MagicMock()
+        mock_service = AsyncMock()
+        mock_service.submit_report = AsyncMock()
         mock_result = MagicMock()
         mock_result.uuid = "test-uuid-123"
         mock_result.complaint_ref = "CR-2026-001"
-        mock_service.submit_report = AsyncMock(return_value=mock_result)
+        mock_service.submit_report.return_value = mock_result
         
         mock_cache = MagicMock()
         mock_cache.close = AsyncMock()

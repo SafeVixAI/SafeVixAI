@@ -315,4 +315,27 @@ describe('live-tracking', function () {
     expect(url).toContain('15551234567')
     window.open = windowOpen
   })
+
+  it('openEmergencyWhatsApp handles phone without + prefix', async function () {
+    var openMock = jest.fn()
+    var windowOpen = window.open
+    window.open = openMock
+    var mod = await import('../live-tracking')
+    mod.notifyContactsViaWhatsApp(['919876543210'], 'Alice', 'http://track.me')
+    expect(openMock).toHaveBeenCalled()
+    var url = openMock.mock.calls[0][0]
+    expect(url).toContain('919876543210')
+    window.open = windowOpen
+  })
+
+  it('openEmergencyWhatsApp sets opener to null', async function () {
+    var mockPopup = { opener: 'original' }
+    var openMock = jest.fn().mockReturnValue(mockPopup)
+    var windowOpen = window.open
+    window.open = openMock
+    var mod = await import('../live-tracking')
+    mod.notifyContactsViaWhatsApp(['+919876543210'], 'Alice', 'http://track.me')
+    expect(mockPopup.opener).toBeNull()
+    window.open = windowOpen
+  })
 })

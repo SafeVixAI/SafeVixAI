@@ -95,8 +95,22 @@ def test_new_migration_has_correct_down_revision():
     # Verify every referenced down_revision exists (except None)
     for rev, data in migrations.items():
         if data["down"] is not None:
-            assert data["down"] in migrations, \
-                f"Migration {rev} references non-existent down_revision '{data['down']}'"
+            # Handle merge migrations (tuple of revision IDs)
+            if data["down"].startswith("("):
+                # Extract individual revision IDs from the tuple string
+                import ast
+                try:
+                    down_list = ast.literal_eval(data["down"].replace("'", '"') if "'" not in data["down"] else data["down"])
+                    if not isinstance(down_list, tuple):
+                        down_list = (down_list,)
+                except (ValueError, SyntaxError):
+                    down_list = (data["down"],)
+                for d in down_list:
+                    assert d in migrations, \
+                        f"Migration {rev} references non-existent down_revision '{d}'"
+            else:
+                assert data["down"] in migrations, \
+                    f"Migration {rev} references non-existent down_revision '{data['down']}'"
 
 
 def test_all_migrations_have_upgrade_downgrade():

@@ -1,16 +1,17 @@
-// SPDX-License-Identifier: MIT
-// Copyright (c) 2026 SafeVixAI Team
-
 'use client';
 
-import { use, useEffect, useRef, useState } from 'react';
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 SafeVixAI Team
+import React from 'react';
+
+import { useEffect, useRef, useState } from 'react';
 import type { RealtimeChannel } from '@supabase/supabase-js';
 import { subscribeToTracking, LiveLocation } from '@/lib/live-tracking';
 import { getSupabaseBrowserClient } from '@/lib/supabase-auth';
 import { gsap } from '@/lib/gsap';
 import { useGSAP } from '@gsap/react';
 import dynamic from 'next/dynamic';
-import { useSearchParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import { 
   Shield, 
   Battery, 
@@ -33,8 +34,9 @@ interface PageProps {
   params: Promise<{ session_id: string }>;
 }
 
-export default function FamilyTrackingPage({ params }: PageProps) {
-  const { session_id } = use(params);
+export default function FamilyTrackingPage(_props: PageProps) {
+  const params = useParams();
+  const session_id = (params as { session_id: string }).session_id;
   const searchParams = useSearchParams();
   const legacyToken = searchParams.get('token') || '';
   

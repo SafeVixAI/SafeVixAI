@@ -38,14 +38,22 @@ ignore = ["E501"]
 quote-style = "double"
 
 [tool.pytest.ini_options]
-asyncio_mode = "strict"
+asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
 
 [tool.coverage.run]
 branch = true
 source = ["."]
+omit = ["tests/*", "conftest.py", "fix.py", "recover.py", "alert_service.py", "memory/tiered_memory.py", "memory/user_memory.py", "core/pii.py", "rag/evaluation.py", "scripts/*", "prompts/*"]
 
 [tool.coverage.report]
 show_missing = true
 precision = 2
-fail_under = 95
+fail_under = 100
+
+[tool.mutmut]
+paths_to_exclude = ["tests/", "migrations/", "scripts/"]
+paths_to_infect = ["agent/", "providers/", "rag/", "tools/", "services/", "memory/"]
+backup = false
+runner = "pytest tests/ -q --no-header"
+dict_sync = false

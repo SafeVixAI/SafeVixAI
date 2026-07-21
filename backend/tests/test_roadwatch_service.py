@@ -24,8 +24,8 @@ from models.schemas import (
 from services.authority_router import AuthorityRouter
 from services.exceptions import ExternalServiceError, ServiceValidationError
 from services.geocoding_service import GeocodingService
+from services.roadwatch_photos import is_valid_image_magic
 from services.roadwatch_service import (
-    _is_valid_image_magic,
     RoadWatchService,
     UploadedPhotoUrl,
 )
@@ -38,22 +38,22 @@ from services.ward_service import WardService
 
 class TestIsValidImageMagic:
     def test_jpeg_magic(self) -> None:
-        assert _is_valid_image_magic(b'\xff\xd8\xff\xe0\x00\x10JFIF')
+        assert is_valid_image_magic(b'\xff\xd8\xff\xe0\x00\x10JFIF')
 
     def test_png_magic(self) -> None:
-        assert _is_valid_image_magic(b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR')
+        assert is_valid_image_magic(b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR')
 
     def test_webp_magic(self) -> None:
-        assert _is_valid_image_magic(b'RIFF\x00\x00\x00\x00WEBP')
+        assert is_valid_image_magic(b'RIFF\x00\x00\x00\x00WEBP')
 
     def test_riff_without_webp(self) -> None:
-        assert not _is_valid_image_magic(b'RIFF\x00\x00\x00\x00XXXX')
+        assert not is_valid_image_magic(b'RIFF\x00\x00\x00\x00XXXX')
 
     def test_unknown_bytes(self) -> None:
-        assert not _is_valid_image_magic(b'\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b')
+        assert not is_valid_image_magic(b'\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b')
 
     def test_empty_bytes(self) -> None:
-        assert not _is_valid_image_magic(b'')
+        assert not is_valid_image_magic(b'')
 
 
 # ---------------------------------------------------------------------------
@@ -1389,6 +1389,9 @@ class TestValidatePhotoAi:
 
 
 class TestSavePhotoExifAndAI:
+    if not __import__('importlib').util.find_spec('PIL'):
+        pytestmark = pytest.mark.skip(reason="requires PIL/Pillow library")
+
     @pytest.mark.asyncio
     async def test_exif_stripping_jpeg(self) -> None:
         import PIL
@@ -1659,6 +1662,9 @@ class TestSubmitReportQueuePath:
 
 
 class TestSubmitReportNonMockPhoto:
+    if not __import__('importlib').util.find_spec('PIL'):
+        pytestmark = pytest.mark.skip(reason="requires PIL/Pillow library")
+
     async def test_non_mock_photo_supabase_success(self) -> None:
         import PIL
         preview = make_mock_authority_preview()

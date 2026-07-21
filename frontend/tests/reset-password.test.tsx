@@ -11,32 +11,60 @@ jest.mock('@/components/ui/Logo', function() { return { Logo: function() { retur
 jest.mock('lucide-react', function() { return new Proxy({}, { get: function() { return function() { return null } } }) })
 
 var React = require('react')
-var { render, screen } = require('@testing-library/react')
+var { render, screen: rtlScreen, fireEvent, waitFor } = require('@testing-library/react')
 var ResetPasswordPage = require('../app/reset-password/page').default
 
 describe('ResetPassword Page', function() {
   it('renders SafeVixAI heading', function() {
     render(React.createElement(ResetPasswordPage))
-    expect(screen.getByText('SafeVixAI')).toBeTruthy()
+    expect(rtlScreen.getByText('SafeVixAI')).toBeTruthy()
   })
 
   it('renders Set New Password text', function() {
     render(React.createElement(ResetPasswordPage))
-    expect(screen.getByText('Set New Password')).toBeTruthy()
+    expect(rtlScreen.getByText('Set New Password')).toBeTruthy()
   })
 
   it('renders description text', function() {
     render(React.createElement(ResetPasswordPage))
-    expect(screen.getByText(/Choose a new access key/)).toBeTruthy()
+    expect(rtlScreen.getByText(/Choose a new access key/)).toBeTruthy()
   })
 
   it('renders password input', function() {
     render(React.createElement(ResetPasswordPage))
-    expect(screen.getByPlaceholderText('Min 8 characters')).toBeTruthy()
+    expect(rtlScreen.getByPlaceholderText('Min 8 characters')).toBeTruthy()
+  })
+
+  it('renders confirm password input', function() {
+    render(React.createElement(ResetPasswordPage))
+    expect(rtlScreen.getByPlaceholderText('Re-enter access key')).toBeTruthy()
+  })
+
+  it('renders Confirm Access Key label', function() {
+    render(React.createElement(ResetPasswordPage))
+    expect(rtlScreen.getByText('Confirm Access Key')).toBeTruthy()
   })
 
   it('renders submit button', function() {
     render(React.createElement(ResetPasswordPage))
-    expect(screen.getByText('Update Password')).toBeTruthy()
+    expect(rtlScreen.getByText('Update Password')).toBeTruthy()
+  })
+
+  it('shows error when password is too short', function() {
+    render(React.createElement(ResetPasswordPage))
+    var input = rtlScreen.getByPlaceholderText('Min 8 characters')
+    fireEvent.change(input, { target: { value: '123' } })
+    fireEvent.click(rtlScreen.getByText('Update Password'))
+    expect(rtlScreen.getByText(/at least 8 characters/)).toBeTruthy()
+  })
+
+  it('shows mismatch error when passwords differ', function() {
+    render(React.createElement(ResetPasswordPage))
+    var pwd = rtlScreen.getByPlaceholderText('Min 8 characters')
+    var confirm = rtlScreen.getByPlaceholderText('Re-enter access key')
+    fireEvent.change(pwd, { target: { value: 'password123' } })
+    fireEvent.change(confirm, { target: { value: 'different' } })
+    fireEvent.click(rtlScreen.getByText('Update Password'))
+    expect(rtlScreen.getByText(/do not match/)).toBeTruthy()
   })
 })

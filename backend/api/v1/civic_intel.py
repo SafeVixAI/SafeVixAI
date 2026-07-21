@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2026 SafeVixAI Team
 
-"""Civic Intelligence API — boundaries, LGD, features, grievances, municipalities."""
+"""Civic Intelligence API — boundaries, LGD, features, datasets, grievances, analysis."""
 
 from __future__ import annotations
 
@@ -21,13 +21,15 @@ from models.etl_run_log import ETLRunLog
 from models.gov_dataset import GovDataset
 from models.grievance import Grievance
 from models.lgd_entity import LGDEntity
-from models.municipality import Municipality
-from models.municipal_feature import MunicipalFeature
 from models.osm_civic_feature import OSMCivicFeature
+from api.v1.civic_intel_municipalities import router as municipalities_router
+from api.v1.civic_intel_streetlights import router as streetlights_router
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=['Civic Intelligence'])
+router.include_router(municipalities_router)
+router.include_router(streetlights_router)
 
 
 # ──────────────────────────────────────────────────────────
@@ -373,204 +375,6 @@ async def get_civic_stats(request: Request,
 
 
 # ──────────────────────────────────────────────────────────
-# MUNICIPALITY CIVIC HUB (MeraWard-style)
-# ──────────────────────────────────────────────────────────
-
-@limiter.limit("20/minute")
-@router.get('/civic/municipalities')
-async def list_municipalities(request: Request, 
-    q: str | None = Query(None, description='Search by name'),
-    state_code: str | None = Query(None),
-    municipality_type: str | None = Query(None),
-    limit: int = Query(50, le=500),
-    offset: int = Query(0),
-    db: AsyncSession = Depends(get_async_session),
-) -> dict[str, Any]:
-    """Search and list municipalities — MeraWard-style directory."""
-    stmt = select(Municipality).where(Municipality.is_active.is_(True))
-
-    if q:
-        stmt = stmt.where(
-            Municipality.name.ilike(f'%{q}%')
-            | Municipality.city.ilike(f'%{q}%')
-            | Municipality.short_name.ilike(f'%{q}%')
-        )
-    if state_code:
-        stmt = stmt.where(Municipality.state_code == state_code.upper())
-    if municipality_type:
-        stmt = stmt.where(Municipality.municipality_type == municipality_type)
-
-    # Count total
-    count_stmt = select(func.count()).select_from(stmt.subquery())
-    total = (await db.execute(count_stmt)).scalar() or 0
-
-    stmt = stmt.order_by(Municipality.name).offset(offset).limit(limit)
-    result = await db.execute(stmt)
-    municipalities = result.scalars().all()
-
-    return {
-        'total': total,
-        'municipalities': [
-            {
-                'slug': m.slug, 'name': m.name, 'short_name': m.short_name,
-                'municipality_type': m.municipality_type,
-                'city': m.city, 'state_code': m.state_code,
-                'state_name': m.state_name, 'ward_count': m.ward_count,
-                'population': m.population, 'helpline_phone': m.helpline_phone,
-            }
-            for m in municipalities
-        ],
-    }
-
-
-@limiter.limit("20/minute")
-@router.get('/civic/municipalities/nearby')
-async def nearby_municipality(request: Request, 
-    lat: float = Query(..., ge=-90, le=90),
-    lon: float = Query(..., ge=-180, le=180),
-    limit: int = Query(5, le=20),
-    db: AsyncSession = Depends(get_async_session),
-) -> dict[str, Any]:
-    """Find nearest municipalities by GPS coordinates."""
-    point = func.ST_MakePoint(lon, lat)
-    distance_col = func.ST_Distance(
-        func.ST_MakePoint(Municipality.centroid_lon, Municipality.centroid_lat)
-        .cast(text('geography')),
-        func.ST_SetSRID(point, 4326).cast(text('geography')),
-    ).label('distance_m')
-
-    stmt = (
-        select(Municipality, distance_col)
-        .where(Municipality.is_active.is_(True))
-        .where(Municipality.centroid_lat.isnot(None))
-        .order_by(distance_col)
-        .limit(limit)
-    )
-
-    result = await db.execute(stmt)
-    rows = result.all()
-
-    return {
-        'lat': lat, 'lon': lon,
-        'municipalities': [
-            {
-                'slug': m.slug, 'name': m.name, 'city': m.city,
-                'state_code': m.state_code, 'distance_km': round(d / 1000, 1),
-            }
-            for m, d in rows
-        ],
-    }
-
-
-@limiter.limit("20/minute")
-@router.get('/civic/municipalities/{slug}')
-async def get_municipality(request: Request, 
-    slug: str,
-    db: AsyncSession = Depends(get_async_session),
-) -> dict[str, Any]:
-    """Full municipality profile — MeraWard-style."""
-    result = await db.execute(
-        select(Municipality).where(Municipality.slug == slug)
-    )
-    m = result.scalar_one_or_none()
-    if not m:
-        raise HTTPException(status_code=404, detail='Municipality not found')
-
-    return {
-        'slug': m.slug, 'name': m.name, 'short_name': m.short_name,
-        'municipality_type': m.municipality_type,
-        'city': m.city, 'state_code': m.state_code, 'state_name': m.state_name,
-        'lgd_code': m.lgd_code, 'district_name': m.district_name,
-        'contact': {
-            'headquarters_address': m.headquarters_address,
-            'helpline_phone': m.helpline_phone,
-            'whatsapp_number': m.whatsapp_number,
-            'email': m.email,
-            'website_url': m.website_url,
-            'app_name': m.app_name,
-            'app_url': m.app_url,
-            'grievance_portal_url': m.grievance_portal_url,
-        },
-        'leadership': {
-            'mayor_name': m.mayor_name,
-            'mayor_photo_url': m.mayor_photo_url,
-            'commissioner_name': m.commissioner_name,
-            'commissioner_phone': m.commissioner_phone,
-        },
-        'stats': {
-            'ward_count': m.ward_count,
-            'population': m.population,
-            'area_sqkm': m.area_sqkm,
-        },
-        'geo': {
-            'centroid_lat': m.centroid_lat,
-            'centroid_lon': m.centroid_lon,
-        },
-        'description': m.description,
-        'services_offered': m.services_offered,
-        'last_verified': m.last_verified.isoformat() if m.last_verified else None,
-    }
-
-
-@limiter.limit("20/minute")
-@router.get('/civic/municipalities/{slug}/stats')
-async def get_municipality_stats(request: Request, 
-    slug: str,
-    db: AsyncSession = Depends(get_async_session),
-) -> dict[str, Any]:
-    """Get local complaint/grievance stats for a municipality."""
-    from services.civic_intel.civic_analytics_service import CivicAnalyticsService
-    return await CivicAnalyticsService.get_municipality_stats(db, slug)
-
-
-@limiter.limit("20/minute")
-@router.get('/civic/municipalities/{slug}/wards')
-async def get_municipality_wards(request: Request, 
-    slug: str,
-    db: AsyncSession = Depends(get_async_session),
-) -> dict[str, Any]:
-    """Get ward list and boundaries for a municipality."""
-    result = await db.execute(
-        select(Municipality).where(Municipality.slug == slug)
-    )
-    m = result.scalar_one_or_none()
-    if not m:
-        raise HTTPException(status_code=404, detail='Municipality not found')
-
-    # Get ward boundaries from municipal_features
-    ward_stmt = select(
-        MunicipalFeature.feature_id,
-        MunicipalFeature.attributes_json,
-        func.ST_AsGeoJSON(MunicipalFeature.geometry).label('geojson'),
-    ).where(
-        MunicipalFeature.municipality == m.short_name,
-        MunicipalFeature.layer_name.ilike('%ward%'),
-    )
-
-    ward_result = await db.execute(ward_stmt)
-    wards = ward_result.all()
-
-    import json
-    features = []
-    for w in wards:
-        features.append({
-            'type': 'Feature',
-            'properties': {
-                'feature_id': w.feature_id,
-                **w.attributes_json,
-            },
-            'geometry': json.loads(w.geojson) if w.geojson else None,
-        })
-
-    return {
-        'slug': slug,
-        'ward_count': m.ward_count,
-        'type': 'FeatureCollection',
-        'features': features,
-    }
-
-
-# ──────────────────────────────────────────────────────────
 # ADMIN ETL MANAGEMENT
 # ──────────────────────────────────────────────────────────
 
@@ -760,98 +564,6 @@ async def get_escalation_risk(request: Request,
             for p in predictions
         ],
     }
-
-
-# ──────────────────────────────────────────────────────────
-# STREETLIGHT ASSET REGISTRY
-# ──────────────────────────────────────────────────────────
-
-@limiter.limit("20/minute")
-@router.get('/civic/streetlights/qr/{qr_code}')
-async def lookup_streetlight_qr(request: Request, 
-    qr_code: str,
-    db: AsyncSession = Depends(get_async_session),
-) -> dict[str, Any]:
-    """Look up a streetlight pole by QR code (citizen scan flow)."""
-    from services.streetlight_service import StreetlightService
-
-    pole = await StreetlightService.lookup_by_qr(db, qr_code)
-    if not pole:
-        raise HTTPException(status_code=404, detail='Pole not found')
-    return {
-        'pole_id': pole.pole_id,
-        'qr_code': pole.qr_code,
-        'city': pole.city,
-        'ward_id': pole.ward_id,
-        'street_name': pole.street_name,
-        'is_operational': pole.is_operational,
-        'lamp_type': pole.lamp_type,
-        'wattage': pole.wattage,
-        'failure_count': pole.failure_count,
-        'last_maintenance': pole.last_maintenance.isoformat() if pole.last_maintenance else None,
-        'authority': pole.authority,
-    }
-
-
-@limiter.limit("20/minute")
-@router.get('/civic/streetlights/nearby')
-async def nearby_streetlights(request: Request, 
-    lat: float = Query(..., ge=-90, le=90),
-    lon: float = Query(..., ge=-180, le=180),
-    radius: int = Query(500, le=2000),
-    db: AsyncSession = Depends(get_async_session),
-) -> dict[str, Any]:
-    """Find streetlight poles near a location."""
-    from services.streetlight_service import StreetlightService
-
-    poles = await StreetlightService.find_nearby(db, lat, lon, radius)
-    return {
-        'total': len(poles),
-        'poles': [
-            {
-                'pole_id': p.pole_id,
-                'qr_code': p.qr_code,
-                'is_operational': p.is_operational,
-                'lamp_type': p.lamp_type,
-                'failure_count': p.failure_count,
-            }
-            for p in poles
-        ],
-    }
-
-
-@limiter.limit("10/minute")
-@router.post('/civic/streetlights/{pole_id}/outage')
-async def report_streetlight_outage(request: Request, 
-    pole_id: str,
-    notes: str | None = Query(None),
-    db: AsyncSession = Depends(get_async_session),
-) -> dict[str, Any]:
-    """Report a streetlight outage (citizen endpoint)."""
-    from services.streetlight_service import StreetlightService
-
-    pole = await StreetlightService.report_outage(db, pole_id, notes)
-    if not pole:
-        raise HTTPException(status_code=404, detail='Pole not found')
-    return {
-        'status': 'outage_recorded',
-        'pole_id': pole.pole_id,
-        'failure_count': pole.failure_count,
-    }
-
-
-@limiter.limit("20/minute")
-@router.get('/civic/streetlights/maintenance-prediction')
-async def streetlight_maintenance_prediction(request: Request, 
-    city: str | None = Query(None),
-    top_n: int = Query(20, le=100),
-    db: AsyncSession = Depends(get_async_session),
-) -> dict[str, Any]:
-    """Predictive maintenance ranking for streetlight poles."""
-    from services.streetlight_service import StreetlightService
-
-    predictions = await StreetlightService.predict_maintenance(db, city=city, top_n=top_n)
-    return {'predictions': predictions}
 
 
 # ──────────────────────────────────────────────────────────

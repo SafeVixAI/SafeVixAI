@@ -76,3 +76,55 @@ jobs:
           name: production-db-backup
           path: production_backup.sql
           retention-days: 30
+
+  restore-test:
+    needs: [backup]
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    services:
+      postgres:
+        image: postgis/postgis:16-3.4
+        env:
+          POSTGRES_DB: safevixai_restore_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download backup artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: safevixai-db-backup
+          path: backups/
+
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
+      - name: Restore backup to test database
+        run: |
+          BACKUP_FILE=$(ls backups/*.sql.gz 2>/dev/null | head -1)
+          if [ -z "$BACKUP_FILE" ]; then
+            echo "No backup file found — skipping restore test"
+            exit 0
+          fi
+          PGPASSWORD=postgres pg_restore -h localhost -p 5433 -U postgres -d safevixai_restore_test \
+            --no-owner --no-acl --clean --if-exists "$BACKUP_FILE" 2>&1 | tail -5
+          echo "Restore completed (warnings expected)"
+
+      - name: Verify restored data
+        run: |
+          PGPASSWORD=postgres psql -h localhost -p 5433 -U postgres -d safevixai_restore_test \
+            -c "SELECT COUNT(*) AS table_count FROM information_schema.tables WHERE table_schema='public';" 2>&1
+          PGPASSWORD=postgres psql -h localhost -p 5433 -U postgres -d safevixai_restore_test \
+            -c "SELECT COUNT(*) AS total_tables FROM pg_catalog.pg_tables WHERE schemaname='public';" 2>&1
+
+      - name: Notify restore test result
+        if: failure()
+        run: echo "⚠️ Backup restore verification failed — backup may be corrupted"

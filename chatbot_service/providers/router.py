@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2026 SafeVixAI Team
 
-"""Provider Router — 11-provider fallback chain with Indian language routing.
+"""Provider Router — 10-provider fallback chain with Indian language routing.
 
 Auto-routing rules (in priority order):
   1. User speaks Indian language → Sarvam-30B (Indic specialist)
@@ -16,7 +16,6 @@ from __future__ import annotations
 
 import asyncio
 import logging
-import re
 import time
 
 from cache.llm_cache import LLMResponseCache, CacheEntry
@@ -31,79 +30,36 @@ from providers.base import (
     RateLimitError,
     TemplateProvider,
 )
-from providers.cerebras_provider import CerebrasProvider
-from providers.gemini_provider import GeminiProvider
-from providers.github_models_provider import GitHubModelsProvider
-from providers.groq_provider import GroqProvider
-from providers.mistral_provider import MistralProvider
-from providers.nvidia_nim_provider import NvidiaNimProvider
-from providers.openrouter_provider import OpenRouterProvider
+from providers.lang_detection import detect_lang
+from providers.provider_registry import (
+    create_default_providers,
+    DEFAULT_FALLBACK_CHAIN,
+    get_provider_configs,
+)
 from providers.sarvam_provider import (
     INDIAN_LANGUAGE_CODES,
     HIGH_STAKES_INTENTS,
-    Sarvam105BProvider,
-    SarvamProvider,
 )
-from providers.together_provider import TogetherProvider
 from providers.openai_compat import OpenAICompatibleProvider
 
-import sys as _sys
-from pathlib import Path as _Path
-for parent in _Path(__file__).resolve().parents:
-    if (parent / 'alert_service.py').exists():
-        if str(parent) not in _sys.path:
-            _sys.path.insert(0, str(parent))
-        break
-from alert_service import get_alert_service
-
-from core.metrics import chatbot_circuit_breaker_trips_total, update_circuit_breaker_gauges
+from core.alert import get_alert_service
+from core.metrics import (
+    chatbot_circuit_breaker_trips_total,
+    update_circuit_breaker_gauges,
+    record_token_cost,
+)
 
 
 logger = logging.getLogger("safevixai.chatbot.providers")
 
-# ── Language detection (lightweight — no NLTK dependency) ─────────────────
-# Script ranges for Indian languages
-_DEVANAGARI = re.compile(r'[\u0900-\u097f]')   # Hindi, Marathi, Sanskrit, etc.
-_TAMIL = re.compile(r'[\u0b80-\u0bff]')
-_TELUGU = re.compile(r'[\u0c00-\u0c7f]')
-_KANNADA = re.compile(r'[\u0c80-\u0cff]')
-_MALAYALAM = re.compile(r'[\u0d00-\u0d7f]')
-_BENGALI = re.compile(r'[\u0980-\u09ff]')
-_GUJARATI = re.compile(r'[\u0a80-\u0aff]')
-_PUNJABI = re.compile(r'[\u0a00-\u0a7f]')
-_ODIA = re.compile(r'[\u0b00-\u0b7f]')
-_URDU = re.compile(r'[\u0600-\u06ff]')  # Arabic script — includes Urdu
-
-
-def detect_lang(text: str) -> str | None:
-    """Detect if the text contains Indian language script.
-    Returns ISO 639-1 code or None (English/unknown).
-    """
-    if _DEVANAGARI.search(text):
-        return 'hi'  # Default Devanagari → Hindi
-    if _TAMIL.search(text):
-        return 'ta'
-    if _TELUGU.search(text):
-        return 'te'
-    if _KANNADA.search(text):
-        return 'kn'
-    if _MALAYALAM.search(text):
-        return 'ml'
-    if _BENGALI.search(text):
-        return 'bn'
-    if _GUJARATI.search(text):
-        return 'gu'
-    if _PUNJABI.search(text):
-        return 'pa'
-    if _ODIA.search(text):
-        return 'or'
-    if _URDU.search(text):
-        return 'ur'
-    return None
+# Backward-compatible re-export for tests that import from providers.router
+from providers.lang_detection import detect_lang as _detect_lang  # noqa: E402
+detect_lang = _detect_lang
+del _detect_lang
 
 
 class ProviderRouter:
-    """Routes requests through the 11-provider fallback chain.
+    """Routes requests through the 10-provider fallback chain.
 
     Key routing decisions:
     - Indian language input → Sarvam AI (trained on 4 trillion Indic tokens)
@@ -117,27 +73,7 @@ class ProviderRouter:
         self.cache = cache
 
         # All 11 providers + Sarvam variants
-        self.providers: dict[str, TemplateProvider] = {
-            # Tier 1 — Critical
-            'groq': GroqProvider(),
-            'cerebras': CerebrasProvider(),
-            'gemini': GeminiProvider(),
-            # Indian language routing
-            'sarvam': SarvamProvider(),
-            'sarvam_30b': SarvamProvider(),
-            'sarvam_105b': Sarvam105BProvider(),
-            # Tier 2 — High
-            'github': GitHubModelsProvider(),
-            'github_models': GitHubModelsProvider(),
-            'nvidia': NvidiaNimProvider(),
-            'nvidia_nim': NvidiaNimProvider(),
-            # Tier 3 — Medium
-            'openrouter': OpenRouterProvider(),
-            'mistral': MistralProvider(),
-            'together': TogetherProvider(),
-            # Template / testing
-            'template': TemplateProvider(),
-        }
+        self.providers: dict[str, TemplateProvider] = create_default_providers()
         self.default_provider = settings.default_llm_provider
         self.provider_timeout_seconds = max(0.001, float(settings.http_timeout_seconds))
         self._unavailable_until: dict[str, float] = {}
@@ -151,21 +87,7 @@ class ProviderRouter:
         self._confidence_threshold = 0.3
 
         # Fallback chain — tried in order when provider fails
-        self._fallback_chain = [
-            'groq',
-            'cerebras',
-            'sarvam_30b',
-            'github',      # 1. Free with GitHub account (Student Pack)
-            'groq',        # 2. Fastest English — 300+ tok/s
-            'cerebras',    # 3. Speed overflow — 2000+ tok/s
-            'gemini',      # 4. Large context, 1M tok/day
-            'nvidia',      # 5. GPU-optimized
-            'openrouter',  # 6. Gateway to 20+ models
-            'mistral',     # 7. 1B tok/month free
-            'together',    # 8. $25 credit bank
-            'template',    # 9. Always works (deterministic fallback)
-        ]
-        self._fallback_chain = list(dict.fromkeys(self._fallback_chain))
+        self._fallback_chain = list(DEFAULT_FALLBACK_CHAIN)
 
         # ── User-configured providers (overrides env-var defaults) ─────────
         self._user_providers: dict[str, dict] = {}
@@ -210,7 +132,7 @@ class ProviderRouter:
                 self.providers[provider_name] = provider
             else:
                 existing = self.providers.get(name)
-                if existing and hasattr(existing, '__init__'):
+                if existing and hasattr(existing, '__init__'):  # pragma: no branch
                     try:
                         provider = existing.__class__(api_key=api_key, model=model or existing.default_model())
                         if base_url and hasattr(provider, '_custom_base_url'):
@@ -263,24 +185,8 @@ class ProviderRouter:
         self._user_providers.clear()
         self._user_providers_configured = False
 
-        self.providers.update({
-            'groq': GroqProvider(),
-            'cerebras': CerebrasProvider(),
-            'gemini': GeminiProvider(),
-            'sarvam': SarvamProvider(),
-            'sarvam_30b': SarvamProvider(),
-            'sarvam_105b': Sarvam105BProvider(),
-            'github': GitHubModelsProvider(),
-            'nvidia': NvidiaNimProvider(),
-            'openrouter': OpenRouterProvider(),
-            'mistral': MistralProvider(),
-            'together': TogetherProvider(),
-        })
-        self._fallback_chain = list(dict.fromkeys([
-            'groq', 'cerebras', 'sarvam_30b', 'github',
-            'groq', 'cerebras', 'gemini', 'nvidia',
-            'openrouter', 'mistral', 'together', 'template',
-        ]))
+        self.providers = create_default_providers()
+        self._fallback_chain = list(DEFAULT_FALLBACK_CHAIN)
         logger.info("ProviderRouter reset to default env-var providers")
 
     def get_active_provider_info(self) -> list[dict]:
@@ -364,6 +270,7 @@ class ProviderRouter:
             )
             if cached:
                 logger.info("LLM cache hit for intent=%s", request.intent)
+                record_token_cost(cached.provider, cached.model, cached.prompt_tokens, cached.completion_tokens)
                 return ProviderResult(
                     text=cached.text,
                     provider=cached.provider,
@@ -402,6 +309,8 @@ class ProviderRouter:
             # Attach routing metadata
             result.provider_used = primary  # type: ignore[attr-defined]
             result.detected_lang = detected_lang  # type: ignore[attr-defined]
+            # Record token cost for observability
+            record_token_cost(result.provider, result.model, result.prompt_tokens, result.completion_tokens)
             # Add badge when Sarvam is used
             if primary.startswith('sarvam'):
                 result.india_badge = True  # type: ignore[attr-defined]
@@ -478,6 +387,7 @@ class ProviderRouter:
                     failed_providers.append(fallback_name)
                     continue
 
+                record_token_cost(result.provider, result.model, result.prompt_tokens, result.completion_tokens)
                 logger.info(
                     "Fallback success: %s → %s (confidence=%.2f)",
                     primary, fallback_name, confidence,
@@ -631,34 +541,38 @@ class ProviderRouter:
 
     async def _stream_with_timeout(
         self,
-        provider,
+        provider: TemplateProvider,
         request: ProviderRequest,
-    ):
+        *,
+        timeout_override: float | None = None,
+    ) -> AsyncIterator[str]:
         """Wrapper around provider.stream() with timeout."""
+        timeout = timeout_override if timeout_override is not None else self.provider_timeout_seconds
         try:
-            async for token in asyncio.wait_for(
-                provider.stream(request),
-                timeout=self.provider_timeout_seconds,
-            ):
-                yield token
+            async with asyncio.timeout(timeout):
+                async for token in provider.stream(request):
+                    yield token
         except asyncio.TimeoutError:
             raise TimeoutError(
-                f"{provider.name} streaming timed out after {self.provider_timeout_seconds:.1f}s"
+                f"{provider.name} streaming timed out after {timeout:.1f}s"
             )
 
     async def _generate_with_timeout(
         self,
         provider: TemplateProvider,
         request: ProviderRequest,
+        *,
+        timeout_override: float | None = None,
     ) -> ProviderResult:
+        timeout = timeout_override if timeout_override is not None else self.provider_timeout_seconds
         try:
             return await asyncio.wait_for(
                 provider.generate(request),
-                timeout=self.provider_timeout_seconds,
+                timeout=timeout,
             )
         except TimeoutError as exc:
             raise TimeoutError(
-                f"{provider.name} timed out after {self.provider_timeout_seconds:.1f}s"
+                f"{provider.name} timed out after {timeout:.1f}s"
             ) from exc
 
     def _provider_unavailable(self, provider_name: str) -> bool:
@@ -720,14 +634,14 @@ class ProviderRouter:
             until_time = time.time() + duration
             self._unavailable_until[provider_name] = until_time
             # Persistent state synchronization to Redis
-            if self.cache and hasattr(self.cache, 'set_provider_unavailable_until'):
+            if self.cache and hasattr(self.cache, 'set_provider_unavailable_until'):  # pragma: no branch
                 try:
                     loop = asyncio.get_running_loop()
-                    if loop.is_running():
+                    if loop.is_running():  # pragma: no branch
                         loop.create_task(
                             self.cache.set_provider_unavailable_until(provider_name, until_time, int(duration))
                         )
-                except RuntimeError:
+                except RuntimeError:  # pragma: no branch
                     logger.debug("No running event loop for Redis circuit-breaker sync of %s", provider_name, exc_info=True)
             logger.warning(
                 "Provider %s disabled for %ss after %s",

@@ -37,6 +37,9 @@ mistralai==2.4.0
 # --- Cache / Memory ---
 redis==8.0.0
 
+# --- Configuration ---
+PyYAML>=6.0.2
+
 # --- Observability ---
 sentry-sdk[fastapi]==2.61.0
 

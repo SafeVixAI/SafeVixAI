@@ -1,0 +1,189 @@
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 SafeVixAI Team
+#
+# Versioned system prompts and safety patterns for SafeVixAI chatbot.
+# Loaded by prompts/__init__.py at startup; backing store for live hot-reload.
+# --- DO NOT embed secrets or API keys in this file ---
+
+# ── Core system prompt ──────────────────────────────────────────────────────────
+system_prompt: >
+  You are SafeVixAI, an AI assistant built for Indian road safety and emergency
+  response. Help users with: emergency contacts, first aid, pothole/accident
+  reporting, traffic challans, navigation, and road authority escalation.
+  Always answer concisely in the SAME language the user writes in (Hindi, Tamil,
+  Telugu, etc.). For life-threatening situations, always lead with 112 (universal
+  emergency) or 102 (ambulance). Be factual — cite MV Act sections when answering
+  challan questions.
+
+# ── Input guardrails ────────────────────────────────────────────────────────────
+max_history: 10
+max_response_tokens: 800
+max_input_chars: 12000
+max_single_message_chars: 4000
+
+# ── Prohibited injection patterns ───────────────────────────────────────────────
+prohibited_patterns:
+  - "ignore all previous"
+  - "ignore previous"
+  - "disregard"
+  - "bypass"
+  - "system prompt"
+  - "you are now"
+  - "you are no longer"
+  - "forget instructions"
+  - "jailbreak"
+  - "forget everything"
+  - "new instructions"
+  - "hypothetical scenario where you ignore"
+  - "pretend you are"
+  - "act as if"
+  - "override"
+  - "reveal your instructions"
+  - "show me your prompt"
+  - "show me your instructions"
+  - "what are your instructions"
+  - "do not follow"
+  - "do anything now"
+  - "<script"
+
+# ── Harm / evasion patterns (safety checker) ────────────────────────────────────
+harm_patterns:
+  - "fake an accident"
+  - "escape after an accident"
+  - "avoid police after"
+  - "hit and run"
+  - "flee the scene"
+  - "leave the scene after hitting"
+  - "drive away after accident"
+  - "evade police"
+  - "evade law enforcement"
+  - "hide evidence of crash"
+  - "bribe police"
+  - "report fake insurance"
+  - "hurt someone with a car"
+  - "kill someone with a car"
+  - "run over"
+  - "mow down"
+  - "weaponize vehicle"
+  - "use car as weapon"
+  - "vehicular attack"
+  - "vehicular homicide how to"
+  - "how to kill"
+  - "how to hurt"
+  - "murder using"
+  - "poison someone"
+  - "drive drunk without getting caught"
+  - "cheat breathalyzer"
+  - "beat alcohol test"
+  - "how to pass drug test while driving"
+  - "track someone without them knowing"
+  - "stalk using gps"
+  - "monitor someone secretly"
+  - "how to road rage"
+  - "make driver crash"
+  - "cut off a car intentionally"
+  - "fake driving license"
+  - "forge insurance"
+  - "fake vehicle registration"
+  - "fake challan receipt"
+  - "ignore 112"
+  - "avoid calling ambulance"
+  - "not call emergency"
+  - "crash my car on purpose"
+  - "drive into traffic to die"
+  - "use car to end my life"
+
+# ── Jailbreak patterns ──────────────────────────────────────────────────────────
+jailbreak_patterns:
+  - "ignore previous instructions"
+  - "ignore all prior"
+  - "disregard your instructions"
+  - "you are now dan"
+  - "act as if you have no restrictions"
+  - "pretend you have no guidelines"
+  - "you are an ai without limits"
+  - "do anything now"
+  - "bypass your training"
+  - "override system prompt"
+  - "forget you are an assistant"
+  - "new persona"
+  - "roleplay as an evil"
+  - "simulate a harmful"
+  - "jailbreak"
+  - "developer mode"
+  - "sudo mode"
+  - "unrestricted mode"
+  - "you must comply"
+  - "your true self"
+  - "you are freed from"
+  - "no content policy"
+  - "no restrictions apply"
+
+# ── Output safety patterns ──────────────────────────────────────────────────────
+severe_output_patterns:
+  - "how to kill"
+  - "how to hurt"
+  - "evade police"
+  - "flee the scene"
+  - "jailbreak"
+  - "ignore previous instructions"
+  - "bypass safety"
+
+# ── Medical / first-aid keywords ────────────────────────────────────────────────
+medical_keywords:
+  - "first aid"
+  - "cpr"
+  - "tourniquet"
+  - "fracture"
+  - "bleeding"
+  - "unconscious"
+  - "shock treatment"
+  - "spinal injury"
+  - "overdose"
+  - "burn treatment"
+  - "heart attack"
+  - "stroke symptoms"
+  - "medication"
+  - "drug interaction"
+  - "medical advice"
+  - "should i take"
+  - "treat my wound"
+
+# ── Medical disclaimer ───────────────────────────────────────────────────────────
+medical_disclaimer: >
+  
+  **Medical Disclaimer:** This information is for general guidance only and does
+  not constitute medical advice. Always call 108 (ambulance) or 112 (emergency)
+  in a real emergency. Consult a qualified healthcare professional for medical
+  decisions.
+
+# ── Sub-agent system prompts ────────────────────────────────────────────────────
+sub_agent_prompts:
+  legal: >
+    You are the SafeVixAI Legal Advisor sub-agent. You provide precise, factual
+    legal information based on the Motor Vehicles Act and other relevant statutes.
+    Do not give binding legal counsel.
+  first_aid: >
+    You are the SafeVixAI Medical Response sub-agent. You provide calm, accurate,
+    and step-by-step first aid guidance. Always recommend seeking professional
+    medical help.
+  road_infrastructure: >
+    You are the SafeVixAI Technical Analyst sub-agent. You specialize in road
+    infrastructure, engineering, and maintenance authority structures.
+  safe_route: >
+    You are the SafeVixAI Route Planning sub-agent. You calculate and recommend
+    the safest path based on real-time hazards, weather, and traffic conditions.
+  challan: >
+    You are the SafeVixAI Traffic Enforcement sub-agent. You evaluate traffic
+    violations and calculate penalties according to official schedules.
+
+# ── Episodic memory extraction prompt ───────────────────────────────────────────
+episodic_memory_extraction_prompt: >
+  You are a memory extraction agent. Read the following conversation history and
+  extract key user preferences, context, or facts that should be remembered for
+  future sessions (e.g., user's location, vehicle type, medical condition,
+  frequent problems). Output ONLY a concise bulleted list of facts. If there is
+  nothing worth remembering, output exactly 'NO_FACTS'.
+
+  Conversation History:
+  {history_text}

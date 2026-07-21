@@ -21,8 +21,7 @@ MAX_TRACKING_GROUP_ID_LENGTH = 80
 HEARTBEAT_INTERVAL_SECONDS = 25
 STALE_CONNECTION_TIMEOUT_SECONDS = 60
 STALE_CLEANUP_INTERVAL_SECONDS = 30
-
-
+MAX_CONNECTIONS = 500
 
 from pydantic import BaseModel, Field, model_validator, ValidationError
 
@@ -123,7 +122,19 @@ class RedisConnectionManager:
     def set_redis(self, redis_client: Redis | None):
         self.redis = redis_client
 
+    def total_connections(self) -> int:
+        """Return total active WebSocket connections across all groups."""
+        total = 0
+        for group in self.active_connections.values():
+            total += len(group)
+        return total
+
     async def connect(self, websocket: WebSocket, group_id: str):
+        total = self.total_connections()
+        if total >= MAX_CONNECTIONS:
+            await websocket.close(code=1013, reason="Server at capacity — try again later")
+            logger.warning("Rejected WebSocket connection: %d active (max %d)", total, MAX_CONNECTIONS)
+            return
         await websocket.accept()
         connection_health.mark_activity(websocket)
         if group_id not in self.active_connections:
@@ -140,7 +151,7 @@ class RedisConnectionManager:
             from core.metrics import ws_connections_total
             ws_connections_total.labels(group=group_id).inc()
         except ImportError:
-            logger.debug("Suppressed exception", exc_info=True)
+            logger.debug("WS metrics not available — skipping connection counter increment")
 
     def disconnect(self, websocket: WebSocket, group_id: str):
         connection_health.remove(websocket)
@@ -159,7 +170,7 @@ class RedisConnectionManager:
                 from core.metrics import ws_connections_total
                 ws_connections_total.labels(group=group_id).dec()
             except ImportError:
-                logger.debug("Suppressed exception", exc_info=True)
+                logger.debug("WS metrics not available — skipping connection counter decrement")
 
     async def broadcast(self, message: dict, group_id: str):
         if self.redis:
@@ -198,7 +209,7 @@ class RedisConnectionManager:
                 for ws in stale:
                     self.disconnect(ws, group_id)
         except asyncio.CancelledError:
-            logger.debug("Suppressed exception", exc_info=True)
+            logger.info("Heartbeat loop cancelled for group %s", group_id)
 
     async def _stale_cleanup_loop(self):
         """Periodically close connections that haven't sent data recently."""
@@ -211,11 +222,11 @@ class RedisConnectionManager:
                         logger.warning("Closing stale connection in group %s", group_id)
                         try:
                             await ws.close(code=1001, reason="Connection timeout")
-                        except Exception:
-                            logger.debug("Suppressed exception", exc_info=True)
+                        except Exception as exc:
+                            logger.debug("Stale connection close failed for group %s: %s", group_id, exc)
                         self.disconnect(ws, group_id)
         except asyncio.CancelledError:
-            logger.debug("Suppressed exception", exc_info=True)
+            logger.info("Stale cleanup loop cancelled")
 
     def start_cleanup(self):
         if self.cleanup_task is None or self.cleanup_task.done():

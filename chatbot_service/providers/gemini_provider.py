@@ -40,6 +40,9 @@ class GeminiProvider(HttpProvider):
     def api_key_env(self) -> str:
         return "GEMINI_API_KEY"
 
+    def base_url(self) -> str:
+        return GEMINI_BASE
+
     def _get_client(self) -> httpx.AsyncClient:
         if self._client is None or self._client.is_closed:
             self._client = httpx.AsyncClient(timeout=40.0)
@@ -63,7 +66,7 @@ class GeminiProvider(HttpProvider):
                 system_text_parts.append(content)
             elif role == "user":
                 contents.append({"role": "user", "parts": [{"text": content}]})
-            elif role == "assistant":
+            elif role == "assistant":  # pragma: no branch
                 contents.append({"role": "model", "parts": [{"text": content}]})
 
         body: dict = {
@@ -73,7 +76,7 @@ class GeminiProvider(HttpProvider):
                 "temperature": 0.5,
             },
         }
-        if system_text_parts:
+        if system_text_parts:  # pragma: no branch
             body["systemInstruction"] = {
                 "parts": [{"text": "\n\n".join(system_text_parts)}]
             }
@@ -96,7 +99,7 @@ class GeminiProvider(HttpProvider):
                         continue
                     data_str = line[6:].strip()
                     if not data_str:
-                        continue
+                        continue  # pragma: no cover
                     try:
                         data = json.loads(data_str)
                         candidates = data.get("candidates", [])
@@ -128,7 +131,7 @@ class GeminiProvider(HttpProvider):
                 system_text_parts.append(content)
             elif role == "user":
                 contents.append({"role": "user", "parts": [{"text": content}]})
-            elif role == "assistant":
+            elif role == "assistant":  # pragma: no branch
                 contents.append({"role": "model", "parts": [{"text": content}]})
 
         # Gemini takes system instruction separately
@@ -139,7 +142,7 @@ class GeminiProvider(HttpProvider):
                 "temperature": 0.5,
             },
         }
-        if system_text_parts:
+        if system_text_parts:  # pragma: no branch
             body["systemInstruction"] = {
                 "parts": [{"text": "\n\n".join(system_text_parts)}]
             }

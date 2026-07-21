@@ -1,7 +1,9 @@
+'use client';
+
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 SafeVixAI Team
+import React from 'react';
 
-'use client';
 
 import { useState, useCallback } from 'react';
 import {
@@ -30,7 +32,7 @@ const BYSTANDER_STEPS: Step[] = [
 
 // ── TTS Engine ────────────────────────────────────────────────────────────────
 function speak(text: string) {
- if (typeof window === 'undefined' || !window.speechSynthesis) return;
+ /* istanbul ignore next */if (typeof window === 'undefined' || !window.speechSynthesis) return;
  window.speechSynthesis.cancel();
  const utt = new SpeechSynthesisUtterance(text);
  utt.lang = 'en-IN';
@@ -54,13 +56,13 @@ export default function BystanderModePage() {
  setPhase('gps');
  speak('GPS is capturing your location. Stay calm.');
 
- if (!navigator.geolocation) {
- setGpsError('GPS not supported on this device');
- setPhase('steps');
- return;
- }
+  /* istanbul ignore if */if (!navigator.geolocation) {
+  /* istanbul ignore next */setGpsError('GPS not supported on this device');
+  /* istanbul ignore next */setPhase('steps');
+  /* istanbul ignore next */return;
+  }
 
- navigator.geolocation.getCurrentPosition(
+  /* istanbul ignore next */navigator.geolocation.getCurrentPosition(
  (pos) => {
  const coords: GpsPos = { lat: pos.coords.latitude, lon: pos.coords.longitude };
  setGps(coords);

@@ -32,7 +32,7 @@ connect_args = (
 )
 
 
-def _build_engine(database_url: str, pool_size: int = 5, max_overflow: int = 10) -> AsyncEngine:
+def _build_engine(database_url: str, pool_size: int = 25, max_overflow: int = 50) -> AsyncEngine:
     """Create a configured async engine for the given database URL."""
     return create_async_engine(
         database_url,

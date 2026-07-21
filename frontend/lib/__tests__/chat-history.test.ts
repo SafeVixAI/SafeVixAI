@@ -24,7 +24,7 @@ if (typeof window !== 'undefined') {
   Object.defineProperty(window, 'indexedDB', { value: {}, writable: true, configurable: true })
 }
 
-var ChatLog
+var _ChatLog
 beforeEach(function() {
   mockSupabase.from = makeFromMock()
   mockSupabaseAuth.getSupabaseBrowserClient.mockClear()
@@ -39,7 +39,7 @@ beforeEach(function() {
 })
 beforeAll(async function () {
   var mod = await import('../chat-history')
-  ChatLog = mod.ChatLog
+  _ChatLog = mod.ChatLog
 })
 
 describe('chat-history', function () {

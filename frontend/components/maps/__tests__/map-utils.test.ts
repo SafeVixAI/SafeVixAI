@@ -1,4 +1,4 @@
-import React from 'react'
+import React from 'react' // eslint-disable-line @typescript-eslint/no-unused-vars
 
 var utils = require('../map-utils')
 

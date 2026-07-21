@@ -30,10 +30,12 @@ class Settings(BaseSettings):
     database_url: str = 'postgresql+asyncpg://postgres:postgres@localhost:5432/safevixai'
     database_replica_url: str | None = None
     redis_url: str | None = None
+    redis_tls_enabled: bool = Field(default=False, validation_alias='REDIS_TLS_ENABLED')
+    redis_password: str | None = Field(default=None, validation_alias='REDIS_PASSWORD')
     provider_encryption_key: str | None = Field(default=None, validation_alias='PROVIDER_ENCRYPTION_KEY')
-    # P1-05: Increased pool size from 1 to 10 (audit H8) to prevent severe connection bottlenecks
-    db_pool_size: int = 10
-    db_max_overflow: int = 20
+    # P1-05: Production-ready pool size to handle concurrent requests
+    db_pool_size: int = 25
+    db_max_overflow: int = 50
     db_pool_timeout_seconds: float = 30.0
     db_pool_recycle_seconds: int = 1800
     echo_queries: bool = False
@@ -225,6 +227,6 @@ def get_settings() -> Settings:
         settings.data_dir.mkdir(parents=True, exist_ok=True)
         settings.upload_dir.mkdir(parents=True, exist_ok=True)
         (settings.upload_dir / 'temp_pending').mkdir(parents=True, exist_ok=True)
-    except OSError:
-        logger.debug("Suppressed exception", exc_info=True)
+    except OSError as exc:
+        logger.warning("Failed to create data/upload directories: %s", exc)
     return settings

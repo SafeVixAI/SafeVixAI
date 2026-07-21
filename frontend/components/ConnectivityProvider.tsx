@@ -1,7 +1,8 @@
-﻿// SPDX-License-Identifier: MIT
+'use client';
+
+// SPDX-License-Identifier: MIT
 // Copyright (c) 2026 SafeVixAI Team
 
-'use client';
 
 import { useEffect, ReactNode } from 'react';
 import { useAppStore } from '@/lib/store';

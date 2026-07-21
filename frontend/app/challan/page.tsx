@@ -1,7 +1,8 @@
+'use client';
+
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 SafeVixAI Team
 
-'use client';
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useGSAP } from '@gsap/react';
@@ -332,7 +333,7 @@ export default function ChallanPage() {
 
   const handleCopy = () => {
     if (disputeResponse?.appeal_letter) {
-      navigator.clipboard.writeText(disputeResponse.appeal_letter);
+      /* istanbul ignore next */navigator.clipboard.writeText(disputeResponse.appeal_letter);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }

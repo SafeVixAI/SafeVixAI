@@ -2,7 +2,7 @@ jest.mock('../app/first-aid/FirstAidClient', function() { return { FirstAidClien
 jest.mock('@/public/offline-data/first-aid.json', function() { return [] })
 
 var React = require('react')
-var { render, screen } = require('@testing-library/react')
+var { render, screen: rtlScreen } = require('@testing-library/react')
 var Page = require('../app/first-aid/page').default
 
 describe('FirstAidPage', function() {
@@ -19,6 +19,6 @@ describe('FirstAidPage', function() {
   it('builds CPR guide from static data', function() {
     render(React.createElement(Page))
     // Page builds guides from offline data, component renders via FirstAidClient
-    expect(screen.queryByText('CPR')).toBeNull()
+    expect(rtlScreen.queryByText('CPR')).toBeNull()
   })
 })

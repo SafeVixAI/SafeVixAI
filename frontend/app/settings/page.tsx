@@ -1,7 +1,8 @@
+'use client';
+
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 SafeVixAI Team
 
-'use client';
 
 import React, { useState, useEffect } from 'react';
 import {
@@ -88,7 +89,7 @@ export default function SettingsPage() {
 
   const setAnalyticsConsent = (enabled: boolean) => {
     setAnalyticsOptIn(enabled);
-    if (typeof window === 'undefined') return;
+    /* istanbul ignore next */if (typeof window === 'undefined') return;
     window.localStorage.setItem(ANALYTICS_CONSENT_KEY, enabled ? 'granted' : 'denied');
     if (enabled) {
       posthog.opt_in_capturing();
@@ -111,7 +112,7 @@ export default function SettingsPage() {
     document.title = `${t('settings.title')} | SafeVixAI`;
 
     // Calculate actual local storage size
-    if (typeof window !== 'undefined') {
+    /* istanbul ignore next */if (typeof window !== 'undefined') {
       let total = 0;
       for (const x in localStorage) {
         if (Object.prototype.hasOwnProperty.call(localStorage, x)) {

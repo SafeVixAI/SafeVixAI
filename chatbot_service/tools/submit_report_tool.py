@@ -74,7 +74,7 @@ class SubmitReportTool:
             headers = {}
             from config import get_settings
             settings = get_settings()
-            if settings.internal_api_key:
+            if settings.internal_api_key:  # pragma: no branch
                 headers['X-Internal-Api-Key'] = settings.internal_api_key
 
             resp = await self._get_client().post(

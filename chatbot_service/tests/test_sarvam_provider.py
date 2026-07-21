@@ -165,7 +165,7 @@ class TestLanguageDetection:
 class TestSarvamProviderInstantiation:
     def test_sarvam_provider_name(self):
         provider = SarvamProvider()
-        assert provider.name == "sarvam"
+        assert provider.name == "sarvam_30b"
 
     def test_sarvam_105b_provider_name(self):
         provider = Sarvam105BProvider()

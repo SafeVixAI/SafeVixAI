@@ -24,7 +24,14 @@ jest.mock('@/lib/sounds', function() { return { sounds: { sosSent: jest.fn() } }
 jest.mock('@/lib/analytics', function() { return { track: { trackingShared: jest.fn() } } })
 jest.mock('lucide-react', function() { return new Proxy({}, { get: function() { return function() { return null } } }) })
 
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent, act } from '@testing-library/react'
+var triggerSos = require('@/lib/api').triggerSos
+var enqueueSOS = require('@/lib/offline-sos-queue').enqueueSOS
+var startFamilyTracking = require('@/lib/live-tracking').startFamilyTracking
+var beginLocationBroadcast = require('@/lib/live-tracking').beginLocationBroadcast
+var notifyContactsViaWhatsApp = require('@/lib/live-tracking').notifyContactsViaWhatsApp
+var haptics = require('@/lib/haptics').haptics
+var sounds = require('@/lib/sounds').sounds
 import React from 'react'
 import Page from '../app/sos/page'
 
@@ -113,5 +120,81 @@ describe('SOSPage', function() {
   it('renders GPS Coordinates Preview label', function() {
     render(React.createElement(Page))
     expect(screen.getByText('GPS Coordinates Preview')).toBeTruthy()
+  })
+
+  describe('hold-to-activate interaction', function() {
+    var rafAllowed
+
+    function setupGeo(lat, lon) {
+      Object.defineProperty(navigator, 'geolocation', {
+        value: { getCurrentPosition: function(success) { success({ coords: { latitude: lat, longitude: lon } }) } },
+        writable: true, configurable: true
+      })
+    }
+
+    beforeEach(function() {
+      rafAllowed = true
+      triggerSos.mockClear()
+      enqueueSOS.mockClear()
+      startFamilyTracking.mockClear()
+      jest.spyOn(window, 'requestAnimationFrame').mockImplementation(function(cb) {
+        if (!rafAllowed) return 1
+        cb(performance.now() + 2000)
+        return 1
+      })
+      jest.spyOn(window, 'cancelAnimationFrame').mockImplementation(jest.fn())
+    })
+
+    afterEach(function() {
+      jest.restoreAllMocks()
+    })
+
+    it('activates SOS after hold completes and calls triggerSos with geolocation', function() {
+      setupGeo(13.0827, 80.2707)
+      render(React.createElement(Page))
+      act(function() { fireEvent.pointerDown(screen.getByLabelText('Activate emergency SOS')) })
+      expect(screen.getByLabelText('Emergency SOS dispatched')).toBeTruthy()
+      expect(screen.getByText('DISPATCHED')).toBeTruthy()
+      expect(triggerSos).toHaveBeenCalledWith({ lat: 13.0827, lon: 80.2707 })
+      expect(startFamilyTracking).toHaveBeenCalledWith({
+        userName: 'Test', bloodGroup: 'O+', vehicleNumber: 'TN01AB1234',
+        latitude: 13.0827, longitude: 80.2707
+      })
+    })
+
+    it('enqueues SOS offline when navigator.onLine is false', function() {
+      setupGeo(12.9716, 77.5946)
+      Object.defineProperty(navigator, 'onLine', { value: false, writable: true, configurable: true })
+      render(React.createElement(Page))
+      act(function() { fireEvent.pointerDown(screen.getByLabelText('Activate emergency SOS')) })
+      expect(screen.getByLabelText('Emergency SOS dispatched')).toBeTruthy()
+      expect(enqueueSOS).toHaveBeenCalledWith({ lat: 12.9716, lon: 77.5946 })
+      expect(triggerSos).not.toHaveBeenCalled()
+    })
+
+    it('cancel hold does not activate', function() {
+      render(React.createElement(Page))
+      rafAllowed = false
+      act(function() { fireEvent.pointerDown(screen.getByLabelText('Activate emergency SOS')) })
+      act(function() { fireEvent.pointerUp(screen.getByLabelText('Activate emergency SOS')) })
+      rafAllowed = true
+      expect(screen.getByLabelText('Activate emergency SOS')).toBeTruthy()
+    })
+
+    it('cancel dispatch resets SOS state', function() {
+      setupGeo(13.0, 80.0)
+      render(React.createElement(Page))
+      act(function() { fireEvent.pointerDown(screen.getByLabelText('Activate emergency SOS')) })
+      expect(screen.getByLabelText('Emergency SOS dispatched')).toBeTruthy()
+      act(function() { fireEvent.click(screen.getByText('Cancel Dispatch')) })
+      expect(screen.getByLabelText('Activate emergency SOS')).toBeTruthy()
+    })
+
+    it('creates tracking URL and displays live tracking section', function() {
+      setupGeo(28.6139, 77.2090)
+      render(React.createElement(Page))
+      act(function() { fireEvent.pointerDown(screen.getByLabelText('Activate emergency SOS')) })
+      expect(screen.getByLabelText('Emergency SOS dispatched')).toBeTruthy()
+    })
   })
 })

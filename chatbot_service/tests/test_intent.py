@@ -1,10 +1,18 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2026 SafeVixAI Team
-
 from __future__ import annotations
 
+import pytest
+from unittest.mock import patch
 from agent.intent_detector import INTENT_CLASSES, IntentDetector
+from rag.embeddings import build_embedding_function
 
+@pytest.fixture(autouse=True)
+def mock_embeddings():
+    with patch('agent.intent_detector.build_embedding_function') as mock_build:
+        # Return a deterministic hash embedding function that acts locally
+        mock_build.return_value = build_embedding_function('hash')
+        yield
 
 def test_intent_detector_routes_emergency_queries():
     detector = IntentDetector()

@@ -4,37 +4,37 @@ jest.mock('next/dynamic', function() { return function() { return function() { r
 jest.mock('next/link', function() { return function({ children, href }) { return React.createElement('a', { href: href }, children) } })
 
 var React = require('react')
-var { render, screen } = require('@testing-library/react')
+var { render, screen: rtlScreen } = require('@testing-library/react')
 var HeroSection = require('../HeroSection').default
 
 describe('HeroSection', function() {
   it('renders overline text', function() {
     render(React.createElement(HeroSection))
-    expect(screen.getByText('National Road Safety Intelligence')).toBeTruthy()
+    expect(rtlScreen.getByText('National Road Safety Intelligence')).toBeTruthy()
   })
 
   it('renders headline about AI-powered road safety', function() {
     render(React.createElement(HeroSection))
-    expect(screen.getByText(/AI-Powered/)).toBeTruthy()
+    expect(rtlScreen.getByText(/AI-Powered/)).toBeTruthy()
   })
 
   it('renders Launch Platform link', function() {
     render(React.createElement(HeroSection))
-    expect(screen.getByText('Launch Platform')).toBeTruthy()
+    expect(rtlScreen.getByText('Launch Platform')).toBeTruthy()
   })
 
   it('renders Create Account link', function() {
     render(React.createElement(HeroSection))
-    expect(screen.getByText('Create Account')).toBeTruthy()
+    expect(rtlScreen.getByText('Create Account')).toBeTruthy()
   })
 
   it('renders Explore Intelligence link', function() {
     render(React.createElement(HeroSection))
-    expect(screen.getByText('Explore Intelligence')).toBeTruthy()
+    expect(rtlScreen.getByText('Explore Intelligence')).toBeTruthy()
   })
 
   it('renders system status indicator', function() {
     render(React.createElement(HeroSection))
-    expect(screen.getByText('System Online — Monitoring Active')).toBeTruthy()
+    expect(rtlScreen.getByText('System Online — Monitoring Active')).toBeTruthy()
   })
 })

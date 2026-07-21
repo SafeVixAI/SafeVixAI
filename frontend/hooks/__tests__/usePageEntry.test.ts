@@ -9,18 +9,6 @@ jest.mock('@/lib/gsap', function() {
   }
 })
 
-var origMatchMedia: typeof window.matchMedia
-
-beforeEach(function() {
-  document.body.innerHTML = ''
-  origMatchMedia = window.matchMedia
-})
-
-afterEach(function() {
-  jest.restoreAllMocks()
-  window.matchMedia = origMatchMedia
-})
-
 function TestCase() {
   var ref = require('../usePageEntry').usePageEntry()
   return React.createElement('div', { ref: ref, 'data-testid': 'container' },
@@ -30,7 +18,10 @@ function TestCase() {
 }
 
 describe('usePageEntry', function() {
-  it('sets children visible initially', function() {
+  it('sets children visible initially with reduced motion', function() {
+    window.matchMedia = jest.fn().mockImplementation(function() {
+      return { matches: true, addEventListener: jest.fn(), removeEventListener: jest.fn() }
+    })
     render(React.createElement(TestCase))
     var children = document.querySelectorAll('[data-testid^="child"]')
     expect(children.length).toBe(2)

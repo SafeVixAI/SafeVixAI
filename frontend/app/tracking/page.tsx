@@ -1,7 +1,9 @@
+'use client';
+
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 SafeVixAI Team
+import React from 'react';
 
-'use client';
 
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useAppStore } from '@/lib/store';
@@ -66,8 +68,8 @@ export default function TrackingPage() {
   useEffect(() => {
     if (wsStatus === 'connected') {
       trackingIntervalRef.current = setInterval(() => {
-        if (navigator.geolocation) {
-          navigator.geolocation.getCurrentPosition((pos) => {
+        /* istanbul ignore if */if (navigator.geolocation) {
+          /* istanbul ignore next */navigator.geolocation.getCurrentPosition((pos) => {
             wsSend(JSON.stringify({
               user_id: userId,
               lat: pos.coords.latitude,

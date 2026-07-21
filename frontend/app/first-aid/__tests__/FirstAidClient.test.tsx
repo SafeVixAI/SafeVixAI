@@ -6,7 +6,7 @@ jest.mock('next/dynamic', function() { return function() { return function() { r
 jest.mock('lucide-react', function() { return new Proxy({}, { get: function() { return function() { return null } } }) })
 
 var React = require('react')
-var { render, screen, fireEvent } = require('@testing-library/react')
+var { render, screen: rtlScreen, fireEvent } = require('@testing-library/react')
 var { FirstAidClient } = require('../FirstAidClient')
 
 var mockGuides = {
@@ -18,39 +18,67 @@ var mockGuides = {
 describe('FirstAidClient', function() {
   it('renders first aid guides', function() {
     render(React.createElement(FirstAidClient, { guides: mockGuides }))
-    expect(screen.getByText('CPR')).toBeTruthy()
-    expect(screen.getByText('Choking')).toBeTruthy()
-    expect(screen.getByText('Burns')).toBeTruthy()
+    expect(rtlScreen.getByText('CPR')).toBeTruthy()
+    expect(rtlScreen.getByText('Choking')).toBeTruthy()
+    expect(rtlScreen.getByText('Burns')).toBeTruthy()
   })
 
   it('renders search input', function() {
     render(React.createElement(FirstAidClient, { guides: mockGuides }))
-    expect(screen.getByPlaceholderText(/Search/)).toBeTruthy()
+    expect(rtlScreen.getByPlaceholderText(/Search/)).toBeTruthy()
   })
 
   it('renders guide subtitles', function() {
     render(React.createElement(FirstAidClient, { guides: mockGuides }))
-    expect(screen.getByText('Cardiopulmonary Resuscitation')).toBeTruthy()
-    expect(screen.getByText('Heimlich maneuver')).toBeTruthy()
+    expect(rtlScreen.getByText('Cardiopulmonary Resuscitation')).toBeTruthy()
+    expect(rtlScreen.getByText('Heimlich maneuver')).toBeTruthy()
   })
 
   it('renders emergency mode toggle', function() {
     render(React.createElement(FirstAidClient, { guides: mockGuides }))
-    expect(screen.getByText(/Emergency/i)).toBeTruthy()
+    expect(rtlScreen.getByText(/Emergency/i)).toBeTruthy()
   })
 
   it('opens guide detail on click', function() {
     render(React.createElement(FirstAidClient, { guides: mockGuides }))
-    fireEvent.click(screen.getByText('CPR'))
-    expect(screen.getAllByText('Call 112').length).toBeGreaterThanOrEqual(1)
-    expect(screen.getByText('Check breathing')).toBeTruthy()
-    expect(screen.getByText('Start compressions')).toBeTruthy()
+    fireEvent.click(rtlScreen.getByText('CPR'))
+    expect(rtlScreen.getAllByText('Call 112').length).toBeGreaterThanOrEqual(1)
+    expect(rtlScreen.getByText('Check breathing')).toBeTruthy()
+    expect(rtlScreen.getByText('Start compressions')).toBeTruthy()
   })
 
   it('closes guide detail with close button', function() {
     render(React.createElement(FirstAidClient, { guides: mockGuides }))
-    fireEvent.click(screen.getByText('CPR'))
-    expect(screen.getAllByText('Call 112').length).toBeGreaterThanOrEqual(1)
-    fireEvent.click(screen.getAllByText('CPR')[0])
+    fireEvent.click(rtlScreen.getByText('CPR'))
+    expect(rtlScreen.getAllByText('Call 112').length).toBeGreaterThanOrEqual(1)
+    fireEvent.click(rtlScreen.getAllByText('CPR')[0])
+  })
+
+  it('filters guides by search query', function() {
+    render(React.createElement(FirstAidClient, { guides: mockGuides }))
+    var input = rtlScreen.getByPlaceholderText(/Search/)
+    fireEvent.change(input, { target: { value: 'Burn' } })
+    expect(rtlScreen.getByText('Burns')).toBeTruthy()
+    expect(rtlScreen.queryByText('CPR')).toBeNull()
+  })
+
+  it('shows empty state when search has no matches', function() {
+    render(React.createElement(FirstAidClient, { guides: mockGuides }))
+    var input = rtlScreen.getByPlaceholderText(/Search/)
+    fireEvent.change(input, { target: { value: 'zzzznonexistent' } })
+    expect(rtlScreen.getByText(/No protocols match/)).toBeTruthy()
+  })
+
+  it('toggles step completion in guide detail', function() {
+    render(React.createElement(FirstAidClient, { guides: mockGuides }))
+    fireEvent.click(rtlScreen.getByText('CPR'))
+    var steps = rtlScreen.getAllByText('Call 112')
+    fireEvent.click(steps[0])
+    expect(rtlScreen.getByText('first_aid.complete_count')).toBeTruthy()
+  })
+
+  it('renders Invoke Full Scan button', function() {
+    render(React.createElement(FirstAidClient, { guides: mockGuides }))
+    expect(rtlScreen.getByText(/Invoke Full Scan/)).toBeTruthy()
   })
 })

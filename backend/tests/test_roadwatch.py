@@ -154,11 +154,11 @@ def test_nearby_issues_rejects_invalid_status(app):
 
 
 def test_authority_router_normalizes_road_types():
-    assert AuthorityRouter._normalize_road_type('State Highway', 'SH49') == 'SH'
-    assert AuthorityRouter._normalize_road_type('Village Road', None) == 'VILLAGE'
-    assert AuthorityRouter._normalize_road_type('National Highway', 'NH32') == 'NH'
+    assert AuthorityRouter.normalize_road_type('State Highway', 'SH49') == 'SH'
 
+    assert AuthorityRouter.normalize_road_type('Village Road', None) == 'VILLAGE'
 
+    assert AuthorityRouter.normalize_road_type('National Highway', 'NH32') == 'NH'
 class DummyDbResult:
     def scalar(self):
         return 0

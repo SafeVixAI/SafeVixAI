@@ -84,4 +84,25 @@ describe('AuthGuard', function() {
     fireEvent.click(screen.getByText('Go to Dashboard'))
     expect(pushMock).toHaveBeenCalledWith('/')
   })
+
+  it('restores session via supabase with token', async function() {
+    var roles = require('@/lib/auth/roles')
+    roles.canAccessRoute = jest.fn(function() { return true })
+    var supabase = require('@/lib/supabase-auth')
+    supabase.getSupabaseBrowserClient.mockReturnValueOnce({
+      auth: {
+        getSession: jest.fn(function() { return Promise.resolve({ data: { session: { user: { user_metadata: { name: 'SessionUser', role: 'officer' }, email: 'op@test.com' }, access_token: 'tok-456' } }, error: null }) }),
+      },
+    })
+    useAppStore.setState({ isAuthenticated: false, profileHydrated: true })
+    render(React.createElement(AuthGuard, null, React.createElement('div', { 'data-testid': 'child' }, 'Hello')))
+    await waitFor(function() { expect(screen.getByTestId('child')).toBeInTheDocument() })
+  })
+
+  it('renders children when isPublic route', function() {
+    var roles = require('@/lib/auth/roles')
+    roles.isPublicRoute = jest.fn(function() { return true })
+    render(React.createElement(AuthGuard, null, React.createElement('div', { 'data-testid': 'child' }, 'Hello')))
+    expect(screen.getByTestId('child')).toBeTruthy()
+  })
 })

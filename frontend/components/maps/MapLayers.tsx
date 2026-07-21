@@ -1,7 +1,8 @@
+'use client';
+
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 SafeVixAI Team
 
-'use client';
 
 import { useEffect, useRef } from 'react';
 import maplibregl from 'maplibre-gl';

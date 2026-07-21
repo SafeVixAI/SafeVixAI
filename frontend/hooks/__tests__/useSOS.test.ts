@@ -4,23 +4,26 @@
 jest.mock('axios', () => ({
   __esModule: true,
   default: (() => {
-    const post = jest.fn();
-    const get = jest.fn();
-    const requestUse = jest.fn();
+    var post = jest.fn();
+    var get = jest.fn();
+    var requestUse = jest.fn();
+    var responseUse = jest.fn();
     return {
       __post: post,
       __get: get,
       __requestUse: requestUse,
-      create: jest.fn(() => ({
-        get,
-        post,
-        interceptors: {
-          request: {
-            use: requestUse,
+      __responseUse: responseUse,
+      create: jest.fn(function() {
+        return {
+          get,
+          post,
+          interceptors: {
+            request: { use: requestUse },
+            response: { use: responseUse },
           },
-        },
-      })),
-    };
+        }
+      }),
+    }
   })(),
 }));
 

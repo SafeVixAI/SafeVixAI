@@ -3,10 +3,8 @@
 
 from __future__ import annotations
 
-import json
 import logging
 import os
-import sys
 import time
 import uuid
 from contextlib import asynccontextmanager
@@ -35,6 +33,8 @@ from middleware.query_profiler import setup_query_profiler
 from middleware.correlation_id import setup_correlation_id
 
 from memory.redis_memory import ConversationMemoryStore
+from memory.tiered_memory import TieredMemory
+from memory.user_memory import UserPreferenceStore
 from providers.router import ProviderRouter
 from rag.retriever import Retriever
 from rag.vectorstore import LocalVectorStore
@@ -55,44 +55,14 @@ from tools import (
 )
 
 
-# P2-02: Structured JSON logging (audit H35) — mirrors backend/main.py
-class _JsonFormatter(logging.Formatter):
-    def format(self, record: logging.LogRecord) -> str:
-        payload: dict = {
-            "ts": self.formatTime(record, datefmt="%Y-%m-%dT%H:%M:%S"),
-            "level": record.levelname,
-            "logger": record.name,
-            "msg": record.getMessage(),
-        }
-        if record.exc_info:
-            payload["exc"] = self.formatException(record.exc_info)
-        for key in ("request_id", "method", "path", "status", "duration_ms"):
-            if hasattr(record, key):
-                payload[key] = getattr(record, key)
-        return json.dumps(payload, ensure_ascii=False)
+# P2-02: Structured JSON logging (audit H35) — mirrors backend/core/logging.py
+from core.logging import configure_logging
 
-
-def _configure_logging(environment: str) -> None:
-    root = logging.getLogger()
-    root.setLevel(logging.INFO)
-    root.handlers.clear()
-    handler = logging.StreamHandler(sys.stdout)
-    if environment == "production":
-        handler.setFormatter(_JsonFormatter())
-    else:
-        handler.setFormatter(
-            logging.Formatter("%(asctime)s [%(levelname)s] %(name)s: %(message)s")
-        )
-    root.addHandler(handler)
-    logging.getLogger("uvicorn.access").setLevel(logging.WARNING)
-
-
-logger = logging.getLogger("safevixai.chatbot")
+logger = configure_logging(get_settings().environment, "safevixai.chatbot")
 
 
 def create_app() -> FastAPI:
     settings = get_settings()
-    _configure_logging(settings.environment)
 
     # OBSERVABILITY#1: Sentry error tracking (free tier: 5K errors/month)
     if settings.sentry_dsn and sentry_sdk is not None:
@@ -110,11 +80,11 @@ def create_app() -> FastAPI:
         _shutdown_requested = False
         def _handle_signal():
             nonlocal _shutdown_requested
-            _shutdown_requested = True
-            logger.info("Chatbot received shutdown signal — draining connections")
+            _shutdown_requested = True  # pragma: no cover
+            logger.info("Chatbot received shutdown signal — draining connections")  # pragma: no cover
         try:
             loop = asyncio.get_event_loop()
-            for sig in (signal.SIGTERM, signal.SIGINT):
+            for sig in (signal.SIGTERM, signal.SIGINT):  # pragma: no branch
                 loop.add_signal_handler(sig, _handle_signal)
         except (NotImplementedError, ValueError, RuntimeError):
             logger.warning("Signal handlers not supported on this platform")
@@ -129,11 +99,16 @@ def create_app() -> FastAPI:
             data_dir=settings.rag_data_dir,
             embedding_model=settings.embedding_model,
         )
+        # User preference store and tiered memory
+        user_pref_store = UserPreferenceStore(redis_url=settings.redis_url)
+        tiered_memory = TieredMemory(pref_store=user_pref_store, episodic_agent=None)
+
         retriever = Retriever(
             vectorstore,
             default_top_k=settings.top_k_retrieval,
             min_score=settings.rag_min_score,
             cross_encoder_model=settings.rag_reranker,
+            redis_url=settings.redis_url,
         )
         weather_tool = WeatherTool(settings)
         speech_service = IndicSeamlessService(settings)
@@ -150,6 +125,9 @@ def create_app() -> FastAPI:
         from memory.episodic_memory import EpisodicMemoryAgent
         episodic_memory_agent = EpisodicMemoryAgent(provider_router, settings.database_url, settings.chroma_persist_dir)
 
+        # Wire episodic agent into tiered memory now that both exist
+        tiered_memory.episodic_agent = episodic_memory_agent
+
         context_assembler = ContextAssembler(
             retriever=retriever,
             sos_tool=SosTool(backend_client, w3w_tool, geocode_client),
@@ -162,12 +140,13 @@ def create_app() -> FastAPI:
             weather_tool=weather_tool,
             drug_info_tool=drug_info_tool,
             episodic_memory_agent=episodic_memory_agent,
+            tiered_memory=tiered_memory,
         )
         
         chat_engine = ChatEngine(
             memory_store=memory_store,
             vectorstore=vectorstore,
-            intent_detector=IntentDetector(),
+            intent_detector=IntentDetector(embedding_model=settings.embedding_model),
             safety_checker=SafetyChecker(),
             context_assembler=context_assembler,
             provider_router=provider_router,
@@ -236,6 +215,7 @@ def create_app() -> FastAPI:
             await submit_report_tool.aclose()
             await memory_store.close()
             await llm_cache.close()
+            await user_pref_store.close()
 
     docs_url = None if settings.environment == 'production' else '/docs'
     redoc_url = None if settings.environment == 'production' else '/redoc'

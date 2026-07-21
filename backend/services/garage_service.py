@@ -226,8 +226,8 @@ class GarageService:
             try:
                 # Simulate small dynamic network processing latency
                 await asyncio.sleep(0.05)
-            except Exception:
-                logger.debug("Suppressed exception", exc_info=True)
+            except Exception as exc:
+                logger.debug("Garage service — network latency simulation failed: %s", exc)
                 
             # Construct the dynamic metadata
             v_data = cls._generate_deterministic_vehicle(plate)

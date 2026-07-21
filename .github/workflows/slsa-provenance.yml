@@ -1,0 +1,58 @@
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 SafeVixAI Team
+# SLSA Provenance attestation for release artifacts
+name: SLSA Provenance
+
+on:
+  workflow_call:
+    inputs:
+      artifact-path:
+        required: true
+        type: string
+      artifact-name:
+        required: true
+        type: string
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  attestations: write
+  contents: read
+  id-token: write
+
+jobs:
+  attest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Generate SLSA3 provenance
+        uses: slsa-framework/slsa-github-generator@v2
+        with:
+          artifact-source: "${{ inputs.artifact-path || github.server_url }}/${{ github.repository }}/releases/download/${{ github.ref_name }}"
+          artifact-name: "${{ inputs.artifact-name || 'release-artifacts' }}"
+
+  container-attest:
+    runs-on: ubuntu-latest
+    permissions:
+      attestations: write
+      id-token: write
+      packages: read
+    steps:
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Attest container provenance
+        uses: actions/attest-build-provenance@v1
+        with:
+          subject-path: ghcr.io/${{ github.repository }}/*
+
+      - name: Verify attestation
+        run: |
+          gh attestation verify \
+            --repo ${{ github.repository }} \
+            ghcr.io/${{ github.repository }}/backend:latest 2>&1 | head -5

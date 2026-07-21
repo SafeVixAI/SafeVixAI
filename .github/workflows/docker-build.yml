@@ -100,3 +100,19 @@ jobs:
           for TAG in $TAGS; do
             docker rmi "${IMG}:${TAG}" 2>/dev/null || true
           done
+
+      - name: Install cosign
+        if: github.ref == 'refs/heads/main'
+        uses: sigstore/cosign-installer@v3
+
+      - name: Sign image with cosign keyless
+        if: github.ref == 'refs/heads/main'
+        run: |
+          REPO=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          IMG="ghcr.io/${REPO}/${{ matrix.image }}"
+          cosign sign --yes \
+            -a "repo=${{ github.repository }}" \
+            -a "workflow=${{ github.workflow }}" \
+            -a "sha=${{ github.sha }}" \
+            "${IMG}:latest"
+          echo "✅ Signed ${IMG}:latest"

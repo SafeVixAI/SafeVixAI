@@ -223,8 +223,12 @@ frontend/public/models/yolov8n_pothole.onnx
 .agents/
 .opencode/
 .claude/
+.codebuddy/
+.cursor/
 .factory/
+.gemini/
 .junie/
+.kilo/
 .kiro/
 .pi/
 .qoder/
@@ -267,15 +271,25 @@ backend/.hypothesis/
 # Coverage files
 *.coverage
 *.py,cover
+*.lcov
 coverage.xml
 frontend/coverage-report.json
 frontend/coverage-summary.json
 frontend/coverage-text.txt
+frontend/coverage-full.txt
+frontend/coverage-share.txt
 frontend/full-test-output.json
+frontend/hookcov.txt
+frontend/jest-final.json
+frontend/jest-results.json
 
 # Local runner logs/results
 check_runs.json
 run_error.json
+test_output.txt
+
+# Alternative package manager lockfiles
+backend/uv.lock
 
 # --- Local Scraping & Raw ETL Datasets ---
 backend/data/civic_intel/

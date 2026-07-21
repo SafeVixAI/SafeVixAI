@@ -1,0 +1,66 @@
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 SafeVixAI Team
+name: Bug Report
+description: File a bug report to help us improve SafeVixAI
+title: "[Bug]: "
+labels: ["bug", "triage"]
+projects: ["SafeVixAI/1"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report. Please search [existing issues](https://github.com/SafeVixAI/SafeVixAI/issues) first.
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: "Browser, OS, device (e.g., Chrome 120 / Windows 11 / Desktop)"
+      placeholder: "Chrome 120 / Windows 11 / Desktop"
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Describe the bug in detail. What did you expect to happen?
+      placeholder: "When I click the SOS button..."
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: How can we reproduce this bug?
+      placeholder: |
+        1. Go to /sos
+        2. Click "Activate SOS"
+        3. See error
+    validations:
+      required: true
+  - type: dropdown
+    id: service
+    attributes:
+      label: Affected Service
+      options:
+        - Frontend (Next.js PWA)
+        - Backend API
+        - Chatbot Service
+        - Infrastructure / CI
+        - Documentation
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant Log Output
+      description: Paste any relevant console logs, error messages, or screenshots
+      render: shell
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Code of Conduct
+      description: By submitting this issue, you agree to follow our [Code of Conduct](https://github.com/SafeVixAI/SafeVixAI/blob/main/CODE_OF_CONDUCT.md)
+      options:
+        - label: I agree to follow this project's Code of Conduct
+          required: true

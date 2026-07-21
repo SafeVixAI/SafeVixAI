@@ -217,4 +217,12 @@ describe('useMapInstance', function() {
     expect(map.resize).toHaveBeenCalled()
     expect(map.jumpTo).toHaveBeenCalled()
   })
+
+  it('switches style when theme changes after map is ready', function() {
+    var { rerender } = render(React.createElement(MapTestComponent, { resolvedTheme: 'dark' }))
+    var map = getMapInstance()
+    map.isStyleLoaded.mockReturnValue(true)
+    rerender(React.createElement(MapTestComponent, { resolvedTheme: 'light' }))
+    expect(map.setStyle).toHaveBeenCalled()
+  })
 })

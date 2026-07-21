@@ -60,7 +60,7 @@ class FirstAidTool:
     def lookup(self, query: str) -> dict | None:
         text = query.lower()
         for key, guide in self._guides.items():
-            keywords = guide.get('keywords') or [key, guide.get('title', ''), guide.get('category', '')]
+            keywords = [k for k in (guide.get('keywords') or [key, guide.get('title', ''), guide.get('category', '')]) if k]
             if any(keyword.lower() in text for keyword in keywords):
                 return guide
         return None

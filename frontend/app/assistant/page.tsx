@@ -1,7 +1,9 @@
+'use client';
+
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 SafeVixAI Team
+import React from 'react';
 
-'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import dynamic from 'next/dynamic';
@@ -131,7 +133,7 @@ export default function ChatPage() {
     } else {
       const isAlreadyReady = isOfflineAIReady();
       if (!isAlreadyReady) {
-        const conn = typeof navigator !== 'undefined' ? (navigator as any).connection : null;
+        /* istanbul ignore next */const conn = typeof navigator !== 'undefined' ? (navigator as any).connection : null;
         const isCellular = conn && (conn.type === 'cellular' || conn.effectiveType === '2g' || conn.effectiveType === '3g' || conn.saveData);
         if (isCellular) {
           const confirmDownload = window.confirm(
@@ -165,10 +167,10 @@ export default function ChatPage() {
 
  const { location } = useGeolocation();
   const [sessionId] = useState(() => {
-    if (typeof window === 'undefined') return `assistant-${Date.now()}`;
+    /* istanbul ignore next */if (typeof window === 'undefined') return `assistant-${Date.now()}`;
     const existing = window.localStorage.getItem('safevixai:assistant-session');
     if (existing) return existing;
-    const uuid = typeof crypto !== 'undefined' && crypto.randomUUID
+    const uuid = typeof crypto !== 'undefined' && /* istanbul ignore next */crypto.randomUUID
       ? crypto.randomUUID()
       : Math.random().toString(36).substring(2, 15) + '-' + Date.now();
     const next = `assistant-${uuid}`;
@@ -185,7 +187,7 @@ export default function ChatPage() {
  const [isSpeaking, setIsSpeaking] = useState(false);
 
  const speakText = useCallback((text: string) => {
-   if (!('speechSynthesis' in window)) return;
+   /* istanbul ignore next */if (!('speechSynthesis' in window)) return;
    window.speechSynthesis.cancel();
    
    const utterance = new SpeechSynthesisUtterance(text);
@@ -200,7 +202,7 @@ export default function ChatPage() {
  }, [selectedLanguage]);
 
  const stopSpeaking = useCallback(() => {
-   if (!('speechSynthesis' in window)) return;
+   /* istanbul ignore next */if (!('speechSynthesis' in window)) return;
    window.speechSynthesis.cancel();
    setIsSpeaking(false);
  }, []);
@@ -574,7 +576,7 @@ export default function ChatPage() {
 <button 
     onClick={async () => {
       try {
-        await navigator.clipboard.writeText(msg.text);
+        /* istanbul ignore next */await navigator.clipboard.writeText(msg.text);
         setToastMessage(t('chat.copied', 'Copied to clipboard!'));
       } catch {
         setToastMessage(t('chat.clipboard_unavailable', 'Clipboard unavailable'));

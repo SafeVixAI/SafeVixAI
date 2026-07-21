@@ -14,6 +14,7 @@ from sqlalchemy import cast, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.config import Settings
+from core.metrics import emergency_lookup_total
 from core.redis_client import CacheHelper
 from models.emergency import EmergencyService
 from models.schemas import (
@@ -42,83 +43,18 @@ SUPPORTED_CATEGORIES = {
     'showroom',
 }
 
-CITY_CENTERS: dict[str, tuple[float, float]] = {
-    'agartala': (23.8315, 91.2868),
-    'agra': (27.1767, 78.0081),
-    'ahmedabad': (23.0225, 72.5714),
-    'aizawl': (23.7271, 92.7176),
-    'amritsar': (31.6340, 74.8723),
-    'bengaluru': (12.9716, 77.5946),
-    'bhopal': (23.2599, 77.4126),
-    'bhubaneswar': (20.2961, 85.8245),
-    'chandigarh': (30.7333, 76.7794),
-    'chennai': (13.0827, 80.2707),
-    'coimbatore': (11.0168, 76.9558),
-    'dehradun': (30.3165, 78.0322),
-    'delhi': (28.6139, 77.2090),
-    'gangtok': (27.3389, 88.6065),
-    'gurugram': (28.4595, 77.0266),
-    'guwahati': (26.1445, 91.7362),
-    'hyderabad': (17.3850, 78.4867),
-    'imphal': (24.8170, 93.9368),
-    'indore': (22.7196, 75.8577),
-    'itanagar': (27.0844, 93.6053),
-    'jaipur': (26.9124, 75.7873),
-    'jammu': (32.7266, 74.8570),
-    'kochi': (9.9312, 76.2673),
-    'kohima': (25.6751, 94.1086),
-    'kolkata': (22.5726, 88.3639),
-    'lucknow': (26.8467, 80.9462),
-    'madurai': (9.9252, 78.1198),
-    'mangaluru': (12.9141, 74.8560),
-    'mumbai': (19.0760, 72.8777),
-    'mysuru': (12.2958, 76.6394),
-    'nagpur': (21.1458, 79.0882),
-    'noida': (28.5355, 77.3910),
-    'panaji': (15.4909, 73.8278),
-    'patna': (25.5941, 85.1376),
-    'pune': (18.5204, 73.8567),
-    'raipur': (21.2514, 81.6296),
-    'ranchi': (23.3441, 85.3096),
-    'shillong': (25.5788, 91.8933),
-    'siliguri': (26.7271, 88.3953),
-    'srinagar': (34.0837, 74.7973),
-    'surat': (21.1702, 72.8311),
-    'thiruvananthapuram': (8.5241, 76.9366),
-    'tiruchirappalli': (10.7905, 78.7047),
-    'vadodara': (22.3072, 73.1812),
-    'varanasi': (25.3176, 82.9739),
-    'vijayawada': (16.5062, 80.6480),
-    'visakhapatnam': (17.6868, 83.2185),
-}
+from services.city_center_repo import (
+    _HARDCODED_CENTERS,
+    _OFFLINE_CENTERS,
+    get_all_city_centers,
+    get_city_center,
+    get_offline_centers,
+)
 
-OFFLINE_CITY_CENTERS: dict[str, tuple[float, float]] = {
-    'chennai': CITY_CENTERS['chennai'],
-    'coimbatore': CITY_CENTERS['coimbatore'],
-    'madurai': CITY_CENTERS['madurai'],
-    'thiruvananthapuram': CITY_CENTERS['thiruvananthapuram'],
-    'kochi': CITY_CENTERS['kochi'],
-    'bengaluru': CITY_CENTERS['bengaluru'],
-    'mumbai': CITY_CENTERS['mumbai'],
-    'pune': CITY_CENTERS['pune'],
-    'nagpur': CITY_CENTERS['nagpur'],
-    'hyderabad': CITY_CENTERS['hyderabad'],
-    'delhi': CITY_CENTERS['delhi'],
-    'jaipur': CITY_CENTERS['jaipur'],
-    'ahmedabad': CITY_CENTERS['ahmedabad'],
-    'surat': CITY_CENTERS['surat'],
-    'vadodara': CITY_CENTERS['vadodara'],
-    'kolkata': CITY_CENTERS['kolkata'],
-    'patna': CITY_CENTERS['patna'],
-    'bhopal': CITY_CENTERS['bhopal'],
-    'indore': CITY_CENTERS['indore'],
-    'lucknow': CITY_CENTERS['lucknow'],
-    'agra': CITY_CENTERS['agra'],
-    'varanasi': CITY_CENTERS['varanasi'],
-    'chandigarh': CITY_CENTERS['chandigarh'],
-    'visakhapatnam': CITY_CENTERS['visakhapatnam'],
-    'bhubaneswar': CITY_CENTERS['bhubaneswar'],
-}
+# Backward-compatible aliases (used by scripts and tests).
+# Prefer the repo functions for DB-backed lookups.
+CITY_CENTERS: dict[str, tuple[float, float]] = dict(_HARDCODED_CENTERS)
+OFFLINE_CITY_CENTERS: dict[str, tuple[float, float]] = dict(_OFFLINE_CENTERS)
 
 DEFAULT_EMERGENCY_NUMBERS_DATA: dict[str, dict[str, str]] = {
     'national_emergency': {'service': '112', 'coverage': 'Pan-India', 'notes': 'Unified emergency response'},
@@ -231,6 +167,8 @@ class EmergencyLocatorService:
             raise
 
         await self.cache.set_json(cache_key, response.model_dump(mode='json'), self.settings.cache_ttl_seconds)
+        for cat in parsed_categories:
+            emergency_lookup_total.labels(service_type=cat, source=response.source).inc()
         return response
 
     async def build_sos_payload(

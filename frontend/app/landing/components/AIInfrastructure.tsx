@@ -1,7 +1,9 @@
+'use client';
+
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 SafeVixAI Team
+import React from 'react';
 
-'use client';
 
 import { useScrollReveal } from '../hooks/useLandingGSAP';
 import { Database, Cpu, Brain, Siren, BarChart3, type LucideIcon } from 'lucide-react';

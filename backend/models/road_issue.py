@@ -45,6 +45,7 @@ class RoadIssue(Base):
     # Enterprise extensions
     category: Mapped[str] = mapped_column(String(32), default='roads', index=True)
     sub_category: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    city: Mapped[str | None] = mapped_column(String(128), nullable=True, index=True)
     ward_id: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
     ward_name: Mapped[str | None] = mapped_column(Text, nullable=True)
     assigned_officer_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), nullable=True)

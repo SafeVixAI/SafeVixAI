@@ -3,27 +3,12 @@
 
 from __future__ import annotations
 
-import sys
-from pathlib import Path
-
-# Add project root (containing alert_service.py) to sys.path
-for parent in Path(__file__).resolve().parents:
-    if (parent / 'alert_service.py').exists():
-        sys.path.insert(0, str(parent))
-        break
-
-from alert_service import get_alert_service
-
-import json
 import logging
 import re
 from datetime import datetime, timezone
-import logging.config
 import time
-import uuid
 from contextlib import asynccontextmanager
 
-import jwt
 import httpx
 try:
     import sentry_sdk
@@ -35,6 +20,7 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from api.v1 import api_router
+from core.alert import get_alert_service
 from core.config import get_settings
 from core.database import check_database, check_replica_database
 from core.limiter import limiter
@@ -59,46 +45,9 @@ from services.routing_service import RoutingService
 # alert_service imported at top level
 
 
-# P2-01: Structured JSON logging (audit H35)
-# In production, emit newline-delimited JSON for Render/Cloud log aggregators.
-# In development, use a human-readable format with colour-coded levels.
-class _JsonFormatter(logging.Formatter):
-    """Emit one JSON object per log line for machine-parseable log ingestion."""
+from core.logging import configure_logging
 
-    def format(self, record: logging.LogRecord) -> str:
-        payload: dict = {
-            "ts": self.formatTime(record, datefmt="%Y-%m-%dT%H:%M:%S"),
-            "level": record.levelname,
-            "logger": record.name,
-            "msg": record.getMessage(),
-        }
-        if record.exc_info:
-            payload["exc"] = self.formatException(record.exc_info)
-        # Include any extra fields attached via LogRecord (e.g. request_id)
-        for key in ("request_id", "method", "path", "status", "duration_ms"):
-            if hasattr(record, key):
-                payload[key] = getattr(record, key)
-        return json.dumps(payload, ensure_ascii=False)
-
-
-def _configure_logging(environment: str) -> None:
-    root = logging.getLogger()
-    root.setLevel(logging.INFO)
-    # Remove any existing handlers set by uvicorn/gunicorn
-    root.handlers.clear()
-    handler = logging.StreamHandler(sys.stdout)
-    if environment == "production":
-        handler.setFormatter(_JsonFormatter())
-    else:
-        handler.setFormatter(
-            logging.Formatter("%(asctime)s [%(levelname)s] %(name)s: %(message)s")
-        )
-    root.addHandler(handler)
-    # Keep uvicorn access logs quiet — our middleware handles request logging
-    logging.getLogger("uvicorn.access").setLevel(logging.WARNING)
-
-
-logger = logging.getLogger("safevixai.backend")
+logger = configure_logging(get_settings().environment, "safevixai.backend")
 
 _start_time = time.time()
 
@@ -109,7 +58,6 @@ def _get_uptime() -> float:
 
 def create_app() -> FastAPI:
     settings = get_settings()
-    _configure_logging(settings.environment)
 
     # OBSERVABILITY#1: Sentry error tracking (free tier: 5K errors/month)
     if settings.sentry_dsn and sentry_sdk is not None:
@@ -139,7 +87,11 @@ def create_app() -> FastAPI:
         except (NotImplementedError, ValueError, RuntimeError):
             logger.warning("Signal handlers not supported on this platform")
 
-        cache = create_cache(settings.redis_url)
+        cache = create_cache(
+            settings.redis_url,
+            tls_enabled=settings.redis_tls_enabled,
+            password=settings.redis_password,
+        )
         jwks_manager = JWKSManager(jwks_url=settings.jwks_url if hasattr(settings, 'jwks_url') else None)
         await jwks_manager.start()
         
@@ -159,6 +111,11 @@ def create_app() -> FastAPI:
 
         app.state.cache = cache
         app.state.jwks_manager = jwks_manager
+
+        # Initialize CQRS command/query bus and register handlers
+        from core.cqrs import init_cqrs_bus
+        cqrs_bus = init_cqrs_bus(app)
+        app.state.cqrs_bus = cqrs_bus
         app.state.overpass_service = overpass_service
         app.state.geocoding_service = geocoding_service
         app.state.authority_router = authority_router
@@ -205,6 +162,44 @@ def create_app() -> FastAPI:
         app.state.data_retention = data_retention
         retention_interval = 3600 if settings.environment == "development" else 86400  # 1 hour dev, 24 hours prod
         await data_retention.start(interval_seconds=retention_interval)
+
+        # ── Wire remaining domain services into app.state ────────────────────
+        from services.roadwatch_photos import PhotoService
+        from services.roadwatch_moderation_service import RoadWatchModerationService
+        from services.ai_verification import AIVerificationPipeline
+        from services.complaint_lifecycle import ComplaintLifecycle
+        from services.complaint_state_machine import ComplaintStateMachine
+        from services.complaint_cluster import ComplaintClusterService
+        from services.ward_service import WardService
+        from services.workload_balancer import WorkloadBalancer
+        from services.officer_route_optimizer import OfficerRouteOptimizer
+        from services.sla_notification import SLANotificationService
+        from services.geo_verifier import GeoVerifier
+        from services.report_classifier import ReportClassifier
+        from services.duplicate_detector import DuplicateDetector
+        from services.fraud_detector import FraudDetector
+        from services.escalation_predictor import EscalationPredictor
+        from services.fine_prediction_service import FinePredictionService
+        from services.challan_dispute_service import ChallanDisputeService
+
+        app.state.roadwatch_moderation = RoadWatchModerationService(settings=settings)
+        app.state.photo_service = PhotoService()
+        app.state.ai_verification = AIVerificationPipeline()
+        app.state.complaint_lifecycle = ComplaintLifecycle()
+        app.state.complaint_state_machine = ComplaintStateMachine()
+        app.state.complaint_cluster = ComplaintClusterService()
+        app.state.ward_service = WardService()
+        app.state.workload_balancer = WorkloadBalancer()
+        app.state.officer_route_optimizer = OfficerRouteOptimizer()
+        app.state.sla_notification = SLANotificationService()
+        app.state.geo_verifier = GeoVerifier()
+        app.state.report_classifier = ReportClassifier()
+        app.state.duplicate_detector = DuplicateDetector()
+        app.state.fraud_detector = FraudDetector()
+        app.state.escalation_predictor = EscalationPredictor()
+        app.state.fine_prediction = FinePredictionService()
+        app.state.challan_dispute = ChallanDisputeService()
+        logger.info("All domain services initialized and wired into app.state")
 
         # Initialize and start background task queue and worker daemon
         from core.queue import TaskQueue, BackgroundWorker
@@ -282,91 +277,13 @@ def create_app() -> FastAPI:
     # Phase 0.4: API versioning middleware
     app.add_middleware(APIVersioningMiddleware)
 
-    # P2-01: Request-ID correlation middleware
-    # Stamps every request with a unique ID so all log lines for a single
-    # request can be correlated in Render / any log aggregator.
-    @app.middleware("http")
-    async def _security_headers_middleware(request: Request, call_next):
-        response = await call_next(request)
-        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains; preload"
-        response.headers["X-Content-Type-Options"] = "nosniff"
-        response.headers["X-Frame-Options"] = "DENY"
-        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
-        response.headers["Permissions-Policy"] = (
-            "geolocation=(self), "
-            "microphone=(self), "
-            "camera=(), "
-            "accelerometer=(), "
-            "gyroscope=(), "
-            "magnetometer=(), "
-            "payment=()"
-        )
-        is_prod = get_settings().environment == "production"
-        script_src = "'self' 'unsafe-inline'" + ("" if is_prod else " 'unsafe-eval'")
-        response.headers["Content-Security-Policy"] = (
-            f"default-src 'self'; "
-            f"script-src {script_src}; "
-            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
-            "font-src 'self' https://fonts.gstatic.com; "
-            "img-src 'self' https: data: blob:; "
-            "connect-src 'self' https: wss: ws:; "
-            "media-src 'self' blob:; "
-        )
-        # Performance: Cache-Control headers for suitable GET endpoints
-        if request.method == "GET" and response.status_code < 400:
-            path = request.url.path
-            if path == "/api/v1/emergency/numbers" or path == "/health":
-                response.headers["Cache-Control"] = "public, max-age=300, stale-while-revalidate=60"
-            elif path.startswith("/api/v1/emergency/nearby"):
-                response.headers["Cache-Control"] = "public, max-age=60, stale-while-revalidate=30"
-            elif path.startswith("/api/v1/emergency/sos"):
-                response.headers["Cache-Control"] = "public, max-age=120, stale-while-revalidate=60"
-            elif path.startswith("/api/v1/challan/calculate"):
-                response.headers["Cache-Control"] = "public, max-age=300, stale-while-revalidate=60"
-            elif path.startswith("/api/v1/roadwatch/feed"):
-                response.headers["Cache-Control"] = "public, max-age=120, stale-while-revalidate=60"
-            elif path.startswith("/api/v1/user/"):
-                response.headers["Cache-Control"] = "private, max-age=60, stale-while-revalidate=30"
-        return response
+    # P2-01: Security headers, CSP, and Cache-Control
+    from middleware.security_headers import setup_security_headers
+    setup_security_headers(app)
 
-    @app.middleware("http")
-    async def _request_id_middleware(request: Request, call_next):
-        request_id = request.headers.get("X-Request-ID") or str(uuid.uuid4())
-        start = time.monotonic()
-        response = await call_next(request)
-        duration_ms = round((time.monotonic() - start) * 1000, 1)
-        response.headers["X-Request-ID"] = request_id
-        # Extract user_id from JWT payload WITHOUT signature verification.
-        # This is safe because we only read the 'sub' claim for logging correlation.
-        # We do NOT trust any claims from an unverified token.
-        user_id = "anonymous"
-        auth_header = request.headers.get("Authorization", "")
-        if auth_header.startswith("Bearer "):
-            token = auth_header.removeprefix("Bearer ")
-            try:
-                payload = jwt.decode(
-                    token,
-                    options={"verify_signature": False},
-                )
-                user_id = payload.get("sub") or payload.get("user_id") or "authenticated"
-            except Exception:
-                user_id = "authenticated"
-        logger.info(
-            "%s %s → %d (%.1fms)",
-            request.method,
-            request.url.path,
-            response.status_code,
-            duration_ms,
-            extra={
-                "request_id": request_id,
-                "user_id": user_id,
-                "method": request.method,
-                "path": request.url.path,
-                "status": response.status_code,
-                "duration_ms": duration_ms,
-            },
-        )
-        return response
+    # P2-01: Request-ID correlation middleware
+    from middleware.request_id import setup_request_id
+    setup_request_id(app)
 
     # OBSERVABILITY#4: Prometheus API metrics middleware
     @app.middleware("http")
@@ -395,40 +312,8 @@ def create_app() -> FastAPI:
         
         return response
 
-    @app.middleware("http")
-    async def _csrf_middleware(request: Request, call_next):
-        csrf_cookie = request.cookies.get("csrf_token")
-
-        if request.method in ("POST", "PUT", "PATCH", "DELETE"):
-            # CSRF only matters for cookie-based auth. Bearer token requests are immune.
-            has_bearer = request.headers.get("Authorization", "").startswith("Bearer ")
-            skip_paths = (
-                request.url.path.startswith("/api/v1/auth/login")
-                or request.url.path.startswith("/mcp")
-            )
-            if settings.environment != "test" and not has_bearer and not skip_paths:
-                csrf_header = request.headers.get("X-CSRF-Token")
-                if not csrf_cookie or not csrf_header or csrf_cookie != csrf_header:
-                    return JSONResponse(
-                        status_code=403,
-                        content={"detail": "CSRF token missing or invalid"}
-                    )
-
-        response = await call_next(request)
-
-        if not csrf_cookie:
-            import secrets
-            new_token = secrets.token_urlsafe(32)
-            is_prod = settings.environment == "production"
-            response.set_cookie(
-                key="csrf_token",
-                value=new_token,
-                httponly=False,
-                secure=is_prod,
-                samesite="lax",
-                path="/"
-            )
-        return response
+    from middleware.csrf import setup_csrf
+    setup_csrf(app)
 
     # Phase 0.6: Tenant isolation middleware
     # Automatically filters database queries by org_id for multi-tenant data isolation
@@ -629,7 +514,7 @@ def create_app() -> FastAPI:
             cb_stats = CircuitBreakerRegistry.all_stats()
             circuit_breakers = {name: stats["state"] for name, stats in cb_stats.items()}
         except ImportError:
-            logger.debug("Suppressed exception", exc_info=True)
+            logger.debug("Circuit breaker module not available — skipping stats")
 
         overall_status = 'ok'
         if not database_available:

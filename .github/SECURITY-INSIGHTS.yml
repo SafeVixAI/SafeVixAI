@@ -1,0 +1,107 @@
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 SafeVixAI Team
+# OpenSSF Security Insights metadata
+# https://securityinsights.dev/docs/
+header:
+  schema-version: 2.0.0
+  last-updated: "2026-07-19"
+  tool: SafeVixAI Security Insights Generator
+
+repository:
+  url: https://github.com/SafeVixAI/SafeVixAI
+  status: active
+  license: MIT
+
+security:
+  vulnerability-reporting:
+    url: https://github.com/SafeVixAI/SafeVixAI/security/advisories
+    contacts:
+      primary: mailto:safevixai@googlegroups.com
+    policy: https://github.com/SafeVixAI/SafeVixAI/SECURITY.md
+    response-sla:
+      acknowledgment: 48h
+      triage: 5 business days
+      fix-critical: 14 days
+      fix-high: 30 days
+      fix-medium-low: 90 days
+
+  dependency-management:
+    automated-updates:
+      - tool: dependabot
+        scope: pip
+        schedule: weekly
+        directories:
+          - /backend
+          - /chatbot_service
+      - tool: dependabot
+        scope: npm
+        schedule: weekly
+        directories:
+          - /frontend
+      - tool: dependabot
+        scope: github-actions
+        schedule: weekly
+        directories:
+          - /
+    scanning:
+      - tool: pip-audit
+        scope: python
+        schedule: on-push
+      - tool: npm-audit
+        scope: javascript
+        schedule: on-push
+      - tool: trivy
+        scope: container
+        schedule: on-push
+
+  secret-management:
+    tool: gitleaks
+    config: frontend/.gitleaks.toml
+    pre-commit: true
+
+  static-analysis:
+    - tool: codeql
+      languages:
+        - python
+        - javascript-typescript
+      schedule: on-push
+      queries: security-and-quality
+    - tool: eslint
+      scope: frontend
+      schedule: on-push
+    - tool: ruff
+      scope: backend
+      schedule: on-push
+
+  supply-chain:
+    sbom:
+      formats:
+        - cyclonedx-json
+        - spdx-json
+      generated-by: anchore/sbom-action
+      attached-to-release: true
+    container-signing:
+      tool: cosign
+      type: keyless
+      identity: github-oidc
+    attestations:
+      - type: build-provenance
+        standard: slsa
+        level: 3
+      - type: sbom
+        tool: actions/attest-sbom
+
+  policy:
+    code-of-conduct: https://github.com/SafeVixAI/SafeVixAI/CODE_OF_CONDUCT.md
+    security-policy: https://github.com/SafeVixAI/SafeVixAI/SECURITY.md
+    contributing-guide: https://github.com/SafeVixAI/SafeVixAI/CONTRIBUTING.md
+
+  verification:
+    signed-commits:
+      required: false
+      recommendation: true
+    signed-releases:
+      tool: cosign
+      format: keyless
+    reproducible-builds:
+      status: in-progress

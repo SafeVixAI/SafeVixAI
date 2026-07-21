@@ -18,8 +18,6 @@ from enum import Enum
 
 from fastapi import Depends, HTTPException
 
-from core.security import get_current_user
-
 
 class Role(str, Enum):
     """User roles with hierarchical permissions."""
@@ -49,6 +47,7 @@ def _has_permission(user_role: str, required_role: Role) -> bool:
 
 
 def require_role(required_role: Role):
+    from core.security import get_current_user
     async def dependency(user: dict = Depends(get_current_user)) -> dict:
         user_role = user.get("role", Role.READONLY.value)
         if not _has_permission(user_role, required_role):

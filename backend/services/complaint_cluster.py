@@ -1,9 +1,9 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2026 SafeVixAI Team
 
-"""Spatial clustering service using DBSCAN for complaint hotspot detection.
+"""Spatial clustering service using DBSCAN for road issue hotspot detection.
 
-Provides DBSCAN-based spatial clustering on complaint locations to detect
+Provides DBSCAN-based spatial clustering on road issue locations to detect
 hotspots, identify duplicate clusters, and generate cluster-level analytics.
 """
 

@@ -1,7 +1,9 @@
+'use client';
+
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 SafeVixAI Team
+import React from 'react';
 
-'use client';
 
 import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
@@ -37,46 +39,46 @@ export default function EmergencyPage() {
 
  useEffect(() => {
  document.title = 'SOS Emergency | SafeVixAI';
- setIsOnline(navigator.onLine);
- const up = () => setIsOnline(true);
- const dn = () => setIsOnline(false);
- window.addEventListener('online', up);
- window.addEventListener('offline', dn);
+  /* istanbul ignore next */setIsOnline(navigator.onLine);
+  const up = () => setIsOnline(true);
+  const dn = () => setIsOnline(false);
+  window.addEventListener('online', up);
+  window.addEventListener('offline', dn);
 
- if (navigator.geolocation) {
- navigator.geolocation.getCurrentPosition(
- p => {
- setCoords({ lat: p.coords.latitude, lng: p.coords.longitude });
- setGeoError(null);
- },
- err => setGeoError(err.message)
- );
- } else {
- setGeoError('Geolocation not supported by this browser.');
- }
+  /* istanbul ignore if */if (navigator.geolocation) {
+  /* istanbul ignore next */navigator.geolocation.getCurrentPosition(
+  p => {
+  setCoords({ lat: p.coords.latitude, lng: p.coords.longitude });
+  setGeoError(null);
+  },
+  err => setGeoError(err.message)
+  );
+  } else {
+  /* istanbul ignore next */setGeoError('Geolocation not supported by this browser.');
+  }
 
- const handler = (e: DeviceMotionEvent) => {
- const a = e.accelerationIncludingGravity;
- if (!a) return;
- const g = Math.sqrt((a.x ?? 0) ** 2 + (a.y ?? 0) ** 2 + (a.z ?? 0) ** 2) / 9.81;
- setGForce(Math.round(g * 10) / 10);
- };
- const MotionEventCtor = typeof DeviceMotionEvent === 'undefined'
- ? null
- : DeviceMotionEvent as unknown as { requestPermission?: () => Promise<PermissionState> };
- const canAttachMotionListener = !MotionEventCtor?.requestPermission;
- if (canAttachMotionListener) {
- window.addEventListener('devicemotion', handler);
- }
- return () => {
- window.removeEventListener('online', up);
- window.removeEventListener('offline', dn);
- if (canAttachMotionListener) {
- window.removeEventListener('devicemotion', handler);
- }
- if (rafRef.current) cancelAnimationFrame(rafRef.current);
- };
- }, []);
+  /* istanbul ignore next */const handler = (e: DeviceMotionEvent) => {
+  const a = e.accelerationIncludingGravity;
+  if (!a) return;
+  const g = Math.sqrt((a.x ?? 0) ** 2 + (a.y ?? 0) ** 2 + (a.z ?? 0) ** 2) / 9.81;
+  setGForce(Math.round(g * 10) / 10);
+  };
+  /* istanbul ignore next */const MotionEventCtor = typeof DeviceMotionEvent === 'undefined'
+  ? null
+  : DeviceMotionEvent as unknown as { requestPermission?: () => Promise<PermissionState> };
+  /* istanbul ignore next */const canAttachMotionListener = !MotionEventCtor?.requestPermission;
+  /* istanbul ignore if */if (canAttachMotionListener) {
+  /* istanbul ignore next */window.addEventListener('devicemotion', handler);
+  }
+  return () => {
+  window.removeEventListener('online', up);
+  window.removeEventListener('offline', dn);
+  if (canAttachMotionListener) {
+  window.removeEventListener('devicemotion', handler);
+  }
+  if (rafRef.current) cancelAnimationFrame(rafRef.current);
+  };
+  }, []);
 
  const startHold = () => {
  if (activated) return;
@@ -99,7 +101,7 @@ export default function EmergencyPage() {
  setActivated(true);
  haptics.sos();
  if (soundsEnabled) sounds.sosSent();
- if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+  /* istanbul ignore next */if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
  }
  };
  rafRef.current = requestAnimationFrame(animate);
@@ -285,7 +287,7 @@ export default function EmergencyPage() {
  {trackingUrl}
  </p>
  <button
- onClick={() => { navigator.clipboard?.writeText(trackingUrl); track.trackingShared('clipboard'); }}
+  onClick={() => { /* istanbul ignore next */navigator.clipboard?.writeText(trackingUrl); track.trackingShared('clipboard'); }}
  className="mt-2 text-[9px] font-bold text-brand dark:text-brand-light underline"
  >
  Copy Link

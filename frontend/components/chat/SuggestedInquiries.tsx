@@ -1,7 +1,9 @@
-﻿// SPDX-License-Identifier: MIT
-// Copyright (c) 2026 SafeVixAI Team
-
 'use client';
+
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 SafeVixAI Team
+import React from 'react';
+
 
 import { useRef } from 'react';
 import { HelpCircle } from 'lucide-react';

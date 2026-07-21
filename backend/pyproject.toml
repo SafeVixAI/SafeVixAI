@@ -55,3 +55,10 @@ omit = [
 show_missing = true
 precision = 2
 fail_under = 100
+
+[tool.mutmut]
+paths_to_exclude = ["tests/", "migrations/", "scripts/"]
+paths_to_infect = ["core/", "services/", "api/v1/", "models/", "middleware/"]
+backup = false
+runner = "pytest tests/ -q --no-header"
+dict_sync = false

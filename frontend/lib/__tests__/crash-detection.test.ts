@@ -145,7 +145,7 @@ describe('crash-detection', function () {
     jest.isolateModules(function () {
       var origEventListener = window.addEventListener
       var capturedHandler: any = null
-      window.addEventListener = function (type: string, handler: any, opts?: any) {
+      window.addEventListener = function (type: string, handler: any, _opts?: any) {
         if (type === 'devicemotion') capturedHandler = handler
       }
       var mod = require('../crash-detection')
@@ -164,7 +164,7 @@ describe('crash-detection', function () {
     jest.isolateModules(function () {
       var origEventListener = window.addEventListener
       var capturedHandler: any = null
-      window.addEventListener = function (type: string, handler: any, opts?: any) {
+      window.addEventListener = function (type: string, handler: any, _opts?: any) {
         if (type === 'devicemotion') capturedHandler = handler
       }
       var mod = require('../crash-detection')
@@ -185,7 +185,7 @@ describe('crash-detection', function () {
     jest.isolateModules(function () {
       var origEventListener = window.addEventListener
       var capturedHandler: any = null
-      window.addEventListener = function (type: string, handler: any, opts?: any) {
+      window.addEventListener = function (type: string, handler: any, _opts?: any) {
         if (type === 'devicemotion') capturedHandler = handler
       }
       var mod = require('../crash-detection')
@@ -210,7 +210,7 @@ describe('crash-detection', function () {
     jest.isolateModules(function () {
       var origEventListener = window.addEventListener
       var capturedHandler: any = null
-      window.addEventListener = function (type: string, handler: any, opts?: any) {
+      window.addEventListener = function (type: string, handler: any, _opts?: any) {
         if (type === 'devicemotion') capturedHandler = handler
       }
       var mod = require('../crash-detection')

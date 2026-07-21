@@ -141,5 +141,3 @@ class AuthorityRouter:
         if 'VILLAGE' in text or 'PMGSY' in text:
             return 'VILLAGE'
         return 'URBAN'
-
-    _normalize_road_type = normalize_road_type

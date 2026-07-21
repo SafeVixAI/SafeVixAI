@@ -557,7 +557,7 @@ class TestOsrmFallbackDirect:
         client.__aenter__.return_value = client
 
         with patch("services.safe_routing.httpx.AsyncClient", return_value=client):
-            with pytest.raises(ExternalServiceError, match="Routing service timed out"):
+            with pytest.raises(ExternalServiceError, match="Routing service unavailable"):
                 await _osrm_fallback((12.97, 77.59), (12.93, 77.61), safety_mode=False)
 
     @pytest.mark.asyncio

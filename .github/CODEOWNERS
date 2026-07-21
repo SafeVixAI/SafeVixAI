@@ -1,42 +1,40 @@
-# SafeVixAI Code Ownership
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 SafeVixAI Team
+#
+# Each line is a file pattern followed by one or more owners.
+# Order matters: the last matching pattern takes precedence.
+# See https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
 
-# Default owners
-* @safevixai/engineering
+# Default owner for everything
+* @SafeVixAI/maintainers
 
-# Backend (FastAPI, PostGIS, Alembic)
-/backend/ @safevixai/backend
+# Backend service
+/backend/ @SafeVixAI/backend
+/backend/tests/ @SafeVixAI/backend
 
-# Chatbot Service (RAG, LLM providers, agent)
-/chatbot_service/ @safevixai/ai
+# Chatbot service
+/chatbot_service/ @SafeVixAI/chatbot
+/chatbot_service/tests/ @SafeVixAI/chatbot
 
-# Frontend (Next.js, React, PWA, maps)
-/frontend/ @safevixai/frontend
+# Frontend service
+/frontend/ @SafeVixAI/frontend
+/frontend/tests/ @SafeVixAI/frontend
 
 # Infrastructure
-/terraform/ @safevixai/sre
-/k8s/ @safevixai/sre
-/docker-compose*.yml @safevixai/sre
-/Dockerfile* @safevixai/sre
-/Makefile @safevixai/sre
-
-# CI/CD
-/.github/ @safevixai/sre
+/.github/ @SafeVixAI/devops
+/terraform/ @SafeVixAI/devops
+/k8s/ @SafeVixAI/devops
+/docker-compose.yml @SafeVixAI/devops
+/Dockerfile* @SafeVixAI/devops
+/Makefile @SafeVixAI/devops
 
 # Documentation
-/docs/ @safevixai/docs
-/AGENTS.md @safevixai/docs
-/SETUP.md @safevixai/docs
+/docs/ @SafeVixAI/docs
+/README.md @SafeVixAI/docs
+/CONTRIBUTING.md @SafeVixAI/docs
 
-# Root config
-/.env* @safevixai/sre
-/.gitignore @safevixai/engineering
-/.pre-commit-config.yaml @safevixai/engineering
-/.gitleaks.toml @safevixai/security
-
-# Tests
-/backend/tests/ @safevixai/backend
-/chatbot_service/tests/ @safevixai/ai
-/frontend/tests/ @safevixai/frontend
-
-# Load testing
-/load-testing/ @safevixai/sre
+# Root config files
+/.editorconfig @SafeVixAI/devops
+/.gitignore @SafeVixAI/devops
+/.prettierrc @SafeVixAI/docs
+/.gitattributes @SafeVixAI/devops

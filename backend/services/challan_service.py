@@ -8,6 +8,7 @@ import re
 from pathlib import Path
 
 from core.config import Settings
+from core.metrics import challan_calculation_total
 from models.challan import ChallanRule, StateChallanOverride
 from models.schemas import ChallanQuery, ChallanResponse
 from services.exceptions import ExternalServiceError, ServiceValidationError
@@ -184,6 +185,7 @@ class ChallanService:
             override_note = override.note or f'{state_code} override applied'
 
         amount_due = repeat_fine if query.is_repeat and repeat_fine is not None else base_fine
+        challan_calculation_total.labels(violation_code=rule.violation_code, source='csv').inc()
         return ChallanResponse(
             violation_code=rule.violation_code,
             vehicle_class=vehicle_class,

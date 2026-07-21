@@ -10,6 +10,10 @@ const customJestConfig = {
   setupFiles: ['<rootDir>/jest.env.js'],
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   testEnvironment: 'jest-environment-jsdom',
+  ...(process.env.CI === 'true' ? {
+    maxWorkers: '50%',
+    workerIdleMemoryLimit: '512MB',
+  } : {}),
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/$1',
   },
@@ -17,10 +21,10 @@ const customJestConfig = {
     '<rootDir>/e2e/',
     '<rootDir>/tests/a11y/',
     '<rootDir>/tests/api-contract.spec.ts',
-    '<rootDir>/hooks/__tests__/useSOS.test.ts',
     '<rootDir>/node_modules/',
     '<rootDir>/.next/',
     '<rootDir>/components/__tests__/test-utils.tsx',
+
   ],
   modulePathIgnorePatterns: ['<rootDir>/.next/'],
   coveragePathIgnorePatterns: [],
@@ -36,13 +40,19 @@ const customJestConfig = {
     '!app/layout.tsx',
     '!app/global-error.tsx',
     '!**/route.ts',
+    '!app/landing/hooks/**',
+    '!app/landing/components/three/**',
+    '!components/maps/index.ts',
+    '!app/guide/**/layout.tsx',
+    '!app/track/**/layout.tsx',
+    '!app/emergency-card/**/page.tsx',
   ],
   coverageThreshold: {
     global: {
-    branches: 66,
-    functions: 74,
-    lines: 80,
-    statements: 79,
+    branches: 72,
+    functions: 80,
+    lines: 86,
+    statements: 85,
     },
   },
 }

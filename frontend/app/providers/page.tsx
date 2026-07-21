@@ -3,8 +3,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   Plus, Trash2, Check, X, RefreshCw, Wifi,
-  Server, Key, Globe, Sliders, ChevronDown, ChevronUp,
-  ExternalLink, AlertTriangle, Zap, Cpu, GripVertical, ArrowDown, ArrowUp,
+  Server, Globe, Sliders, ChevronDown, ChevronUp,
+  AlertTriangle, Zap, Cpu, GripVertical, ArrowDown,
 } from 'lucide-react';
 import { usePageEntry } from '@/hooks/usePageEntry';
 import { TerminalHeader } from '@/components/ui/TerminalHeader';
@@ -42,17 +42,11 @@ type TestStatus = 'idle' | 'testing' | 'ok' | 'error';
 export default function ProvidersPage() {
   const pageRef = usePageEntry();
   const {
-    selectedProvider, setSelectedProvider,
     providerSyncStatus, setProviderSyncStatus,
-    activeFallbackChain, setActiveFallbackChain,
   } = useAppStore(
     useShallow((s) => ({
-      selectedProvider: s.selectedProvider,
-      setSelectedProvider: s.setSelectedProvider,
       providerSyncStatus: s.providerSyncStatus,
       setProviderSyncStatus: s.setProviderSyncStatus,
-      activeFallbackChain: s.activeFallbackChain,
-      setActiveFallbackChain: s.setActiveFallbackChain,
     }))
   );
 
@@ -78,13 +72,11 @@ export default function ProvidersPage() {
       ]);
       setBuiltins(b);
       setUserConfigs(c);
-      const activeConfigs = c.filter((cfg) => cfg.isActive).sort((x, y) => x.priority - y.priority);
-      setActiveFallbackChain(activeConfigs.map((cfg) => cfg.providerName));
-    } catch (e) {
+    } catch {
       setError('Failed to load providers. Check your connection.');
     }
     setLoading(false);
-  }, [setActiveFallbackChain]);
+  }, []);
 
   useEffect(() => { loadData(); }, [loadData]);
 

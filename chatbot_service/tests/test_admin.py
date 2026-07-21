@@ -58,7 +58,7 @@ class FakeVectorStore:
 
 
 class FakeRetriever:
-    def __init__(self, vectorstore, *args, **kwargs):
+    def __init__(self, vectorstore=None, *args, **kwargs):
         self.vectorstore = vectorstore
 
     async def retrieve(self, query, *, top_k=None, scopes=None):
@@ -95,7 +95,7 @@ class FakeLegalSearchTool:
     def __init__(self, retriever):
         self.retriever = retriever
 
-    def search(self, message):
+    async def search(self, message):
         return []
 
 
@@ -155,6 +155,9 @@ class FakeProviderRouter:
 
 
 class FakeIntentDetector:
+    def __init__(self, **kwargs):
+        pass
+
     def detect(self, message):
         return "general"
 

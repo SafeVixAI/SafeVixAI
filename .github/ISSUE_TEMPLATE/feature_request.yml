@@ -1,0 +1,46 @@
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 SafeVixAI Team
+name: Feature Request
+description: Suggest an idea for SafeVixAI
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting a feature! Please check the [ROADMAP.md](https://github.com/SafeVixAI/SafeVixAI/blob/main/ROADMAP.md) to see if it's already planned.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Is your feature request related to a problem?
+      description: A clear and concise description of what the problem is
+      placeholder: "I'm always frustrated when..."
+  - type: textarea
+    id: solution
+    attributes:
+      label: Describe the solution you'd like
+      description: What should happen?
+      placeholder: "I'd like a button that..."
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: What alternatives have you considered?
+  - type: dropdown
+    id: service
+    attributes:
+      label: Affected Service
+      options:
+        - Frontend (Next.js PWA)
+        - Backend API
+        - Chatbot Service
+        - Infrastructure / CI
+        - Documentation
+        - New (cross-service)
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Add any other context, screenshots, or mockups

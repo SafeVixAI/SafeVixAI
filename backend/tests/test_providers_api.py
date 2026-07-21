@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 SafeVixAI Team
+
 """Tests for the provider management encryption and API."""
 
 from __future__ import annotations
@@ -9,6 +12,7 @@ from uuid import uuid4
 from datetime import datetime, timezone
 
 from services.provider_encrypt import encrypt_api_key, decrypt_api_key, mask_api_key
+from core.security import get_current_user
 
 
 class MockResult:
@@ -36,7 +40,7 @@ class MockSession:
         self.add = MagicMock()
         self.commit = AsyncMock()
         self.refresh = AsyncMock()
-        self.delete = MagicMock()
+        self.delete = AsyncMock()
 
 
 @pytest.fixture
@@ -207,12 +211,17 @@ async def test_sync_route_is_registered(monkeypatch):
 # ═══════════════ CRUD Tests (with mocked DB) ═══════════════
 
 
-def _make_app(mock_session):
+def _make_app(mock_session, monkeypatch=None):
     """Build a test app with a mock DB session injected."""
-    import os
-    os.environ["REDIS_URL"] = ""
-    os.environ["ENVIRONMENT"] = "test"
-    os.environ["ADMIN_SECRET"] = "test-admin-secret-2026"
+    if monkeypatch:
+        monkeypatch.setenv("REDIS_URL", "")
+        monkeypatch.setenv("ENVIRONMENT", "test")
+        monkeypatch.setenv("ADMIN_SECRET", "test-admin-secret-2026")
+    else:
+        import os
+        os.environ["REDIS_URL"] = ""
+        os.environ["ENVIRONMENT"] = "test"
+        os.environ["ADMIN_SECRET"] = "test-admin-secret-2026"
 
     from core.config import get_settings
     from core.database import get_db
@@ -225,15 +234,24 @@ def _make_app(mock_session):
         yield mock_session
 
     app.dependency_overrides[get_db] = override_db
+    async def override_auth():
+        return {"sub": "test-user", "role": "user", "jti": None}
+    app.dependency_overrides[get_current_user] = override_auth
     return app
 
 
 async def test_create_provider_config_returns_201(monkeypatch, mock_db, sample_config):  # B1
     """POST /api/v1/providers with minimal fields returns 201."""
     mock_db.execute.return_value = MockResult(row=None)  # No duplicate
-    mock_db.refresh.side_effect = lambda cfg: setattr(cfg, "id", sample_config.id)
+    from datetime import datetime, timezone
+    mock_db.refresh.side_effect = lambda cfg: (
+        setattr(cfg, "id", sample_config.id),
+        setattr(cfg, "created_at", datetime.now(timezone.utc)),
+        setattr(cfg, "updated_at", datetime.now(timezone.utc)),
+        setattr(cfg, "circuit_breaker_failures", 0),
+    )[-1]  # last value is the return
 
-    app = _make_app(mock_db)
+    app = _make_app(mock_db, monkeypatch)
     from httpx import AsyncClient, ASGITransport
     transport = ASGITransport(app=app)
 
@@ -249,12 +267,13 @@ async def test_create_provider_config_returns_201(monkeypatch, mock_db, sample_c
     }
 
     async with AsyncClient(transport=transport, base_url="http://test") as client:
-        resp = await client.post("/api/v1/providers", json=payload)
+        resp = await client.post("/api/v1/providers/", json=payload)
 
     assert resp.status_code == 201
-    data = resp.json()
-    assert data["provider_name"] == "test-groq"
-    assert data["api_key_masked"] is not None
+    body = resp.json()
+    assert body["data"]["provider_name"] == "test-groq"
+    assert body["data"]["api_key_masked"] is not None
+    assert body["success"] is True
     mock_db.add.assert_called_once()
     mock_db.commit.assert_awaited_once()
 
@@ -263,7 +282,7 @@ async def test_update_provider_config_returns_updated(monkeypatch, mock_db, samp
     """PUT /api/v1/providers/{id} updates a single field."""
     mock_db.execute.return_value = MockResult(row=sample_config)
 
-    app = _make_app(mock_db)
+    app = _make_app(mock_db, monkeypatch)
     from httpx import AsyncClient, ASGITransport
     transport = ASGITransport(app=app)
 
@@ -274,8 +293,9 @@ async def test_update_provider_config_returns_updated(monkeypatch, mock_db, samp
         )
 
     assert resp.status_code == 200
-    data = resp.json()
-    assert data["display_name"] == sample_config.display_name
+    body = resp.json()
+    assert body["data"]["display_name"] == sample_config.display_name
+    assert body["success"] is True
     mock_db.commit.assert_awaited_once()
 
 
@@ -283,7 +303,7 @@ async def test_delete_provider_config_returns_204(monkeypatch, mock_db, sample_c
     """DELETE /api/v1/providers/{id} returns 204."""
     mock_db.execute.return_value = MockResult(row=sample_config)
 
-    app = _make_app(mock_db)
+    app = _make_app(mock_db, monkeypatch)
     from httpx import AsyncClient, ASGITransport
     transport = ASGITransport(app=app)
 
@@ -299,7 +319,7 @@ async def test_delete_non_existent_returns_404(monkeypatch, mock_db):  # B4
     """DELETE /api/v1/providers/{id} with non-existent ID returns 404."""
     mock_db.execute.return_value = MockResult(row=None)
 
-    app = _make_app(mock_db)
+    app = _make_app(mock_db, monkeypatch)
     from httpx import AsyncClient, ASGITransport
     transport = ASGITransport(app=app)
 
@@ -315,7 +335,7 @@ async def test_update_non_existent_returns_404(monkeypatch, mock_db):  # B5
     """PUT /api/v1/providers/{id} with non-existent ID returns 404."""
     mock_db.execute.return_value = MockResult(row=None)
 
-    app = _make_app(mock_db)
+    app = _make_app(mock_db, monkeypatch)
     from httpx import AsyncClient, ASGITransport
     transport = ASGITransport(app=app)
 
@@ -332,7 +352,7 @@ async def test_create_duplicate_provider_returns_409(monkeypatch, mock_db, sampl
     """POST /api/v1/providers with duplicate provider_name returns 409."""
     mock_db.execute.return_value = MockResult(row=sample_config)  # Found existing
 
-    app = _make_app(mock_db)
+    app = _make_app(mock_db, monkeypatch)
     from httpx import AsyncClient, ASGITransport
     transport = ASGITransport(app=app)
 
@@ -343,7 +363,7 @@ async def test_create_duplicate_provider_returns_409(monkeypatch, mock_db, sampl
     }
 
     async with AsyncClient(transport=transport, base_url="http://test") as client:
-        resp = await client.post("/api/v1/providers", json=payload)
+        resp = await client.post("/api/v1/providers/", json=payload)
 
     assert resp.status_code == 409
     detail = resp.json()

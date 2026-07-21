@@ -1,20 +1,24 @@
+'use client';
+
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 SafeVixAI Team
+import React from 'react';
 
-'use client';
 
 import { useSmoothScroll } from './hooks/useSmoothScroll';
 import { useBackendPrewarm } from './hooks/useBackendPrewarm';
 
 import LandingNavbar from './components/LandingNavbar';
 import HeroSection from './components/HeroSection';
-import CrisisSection from './components/CrisisSection';
+import dynamic from 'next/dynamic';
+
+const CrisisSection = dynamic(() => import('./components/CrisisSection'), { ssr: false });
+const CommandCenter = dynamic(() => import('./components/CommandCenter'), { ssr: false });
+const AIInfrastructure = dynamic(() => import('./components/AIInfrastructure'), { ssr: false });
+const NationalNetwork = dynamic(() => import('./components/NationalNetwork'), { ssr: false });
+const TechStack = dynamic(() => import('./components/TechStack'), { ssr: false });
 import HowItWorks from './components/HowItWorks';
 import CoreModules from './components/CoreModules';
-import CommandCenter from './components/CommandCenter';
-import AIInfrastructure from './components/AIInfrastructure';
-import NationalNetwork from './components/NationalNetwork';
-import TechStack from './components/TechStack';
 import MissionSection from './components/MissionSection';
 import CTASection from './components/CTASection';
 import LandingFooter from './components/LandingFooter';

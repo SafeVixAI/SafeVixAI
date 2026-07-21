@@ -1,7 +1,8 @@
+'use client';
+
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 SafeVixAI Team
 
-'use client';
 
 import React from 'react';
 import { ShieldCheck, Scale, ArrowLeft, Eye, HeartPulse, Trash2 } from 'lucide-react';

@@ -35,7 +35,7 @@ jest.mock('@/components/maps/map-utils', function() {
       return el;
     },
     buildPopupContent: function() { return document.createElement('div'); },
-    iconForType: function(t: string) { return 'H'; },
+    iconForType: function(_t: string) { return 'H'; },
     ACCURACY_SOURCE_ID: 'svai-current-location-accuracy',
     ACCURACY_FILL_LAYER_ID: 'svai-current-location-accuracy-fill',
     ACCURACY_LINE_LAYER_ID: 'svai-current-location-accuracy-line',

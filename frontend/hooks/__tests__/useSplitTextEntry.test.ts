@@ -54,7 +54,7 @@ describe('useSplitTextEntry', function() {
 
   it('renders heading with text content', function() {
     render(React.createElement(TestCase))
-    expect(screen.getByTestId('heading').textContent).toBe('Hello World')
+    expect(rtlScreen.getByTestId('heading').textContent).toBe('Hello World')
   })
 
   it('handles null container ref gracefully', function() {
@@ -72,8 +72,8 @@ describe('useSplitTextEntry', function() {
     var lastFromTo = gsapMock.fromTo.mock.calls[gsapMock.fromTo.mock.calls.length - 1]
     var config = lastFromTo[2]
     config.onComplete()
-    expect(screen.getByTestId('heading').innerHTML).toBe('Hello World')
+    expect(rtlScreen.getByTestId('heading').innerHTML).toBe('Hello World')
   })
 })
 
-var screen = require('@testing-library/react').screen
+var { screen: rtlScreen } = require('@testing-library/react')

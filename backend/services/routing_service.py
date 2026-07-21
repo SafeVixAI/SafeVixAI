@@ -10,6 +10,7 @@ from typing import Any
 
 import httpx
 
+from core.circuit_breaker import CircuitBreakerRegistry, CircuitBreakerOpenError
 from core.config import Settings
 from core.redis_client import CacheHelper
 from models.schemas import (
@@ -28,7 +29,7 @@ for parent in Path(__file__).resolve().parents:
         if str(parent) not in sys.path:
             sys.path.insert(0, str(parent))
         break
-from alert_service import get_alert_service
+from core.alert import get_alert_service
 
 logger = logging.getLogger("safevixai.backend.routing")
 
@@ -94,19 +95,18 @@ class RoutingService:
                     'weight_factor': 1.4,
                 }
             try:
-                response = await self._client.post(
-                    url,
-                    json=body,
-                    headers={'Authorization': self.settings.openrouteservice_api_key},
-                )
-            except httpx.HTTPError as exc:
+                cb = CircuitBreakerRegistry.get("ors_routing", failure_threshold=3, recovery_timeout=30.0)
+                response = await cb.call(self._do_ors_request, url, body)
+            except CircuitBreakerOpenError:
                 get_alert_service().alert_external_api_failed(
                     service_name="OpenRouteService (Routing)",
                     endpoint=url,
                     status_code=0,
-                    error_msg=str(exc),
+                    error_msg="Circuit breaker OPEN — too many ORS failures",
                 )
-                raise ExternalServiceError('Unable to reach ORS routing provider.') from exc
+                raise ExternalServiceError('Unable to reach ORS routing provider.')
+            except ExternalServiceError:
+                raise
         else:
             # OSRM — free, no API key needed
             warnings.append('Using public OSRM routing (no ORS key configured).')
@@ -122,15 +122,16 @@ class RoutingService:
             if requested_alternatives > 0:
                 params['alternatives'] = str(requested_alternatives)
             try:
-                response = await self._client.get(url, params=params)
-            except httpx.HTTPError as exc:
+                cb = CircuitBreakerRegistry.get("osrm_routing", failure_threshold=3, recovery_timeout=30.0)
+                response = await cb.call(self._do_osrm_request, url, params)
+            except CircuitBreakerOpenError:
                 get_alert_service().alert_external_api_failed(
                     service_name="OSRM (Routing)",
                     endpoint=url,
                     status_code=0,
-                    error_msg=str(exc),
+                    error_msg="Circuit breaker OPEN — too many OSRM failures",
                 )
-                raise ExternalServiceError('Unable to reach OSRM routing provider.') from exc
+                raise ExternalServiceError('Unable to reach OSRM routing provider.')
 
         data = response.json()
         if response.status_code >= 400:
@@ -169,6 +170,36 @@ class RoutingService:
         )
         return route
 
+    async def _do_ors_request(self, url: str, body: dict) -> httpx.Response:
+        try:
+            response = await self._client.post(
+                url,
+                json=body,
+                headers={'Authorization': self.settings.openrouteservice_api_key},
+            )
+            return response
+        except httpx.HTTPError as exc:
+            get_alert_service().alert_external_api_failed(
+                service_name="OpenRouteService (Routing)",
+                endpoint=url,
+                status_code=0,
+                error_msg=str(exc),
+            )
+            raise ExternalServiceError('Unable to reach ORS routing provider.') from exc
+
+    async def _do_osrm_request(self, url: str, params: dict) -> httpx.Response:
+        try:
+            response = await self._client.get(url, params=params)
+            return response
+        except httpx.HTTPError as exc:
+            get_alert_service().alert_external_api_failed(
+                service_name="OSRM (Routing)",
+                endpoint=url,
+                status_code=0,
+                error_msg=str(exc),
+            )
+            raise ExternalServiceError('Unable to reach OSRM routing provider.') from exc
+
     @staticmethod
     def _same_point(
         origin_lat: float,
@@ -194,54 +225,6 @@ class RoutingService:
         if response.status_code == 429:
             return 'Routing provider rate limit reached. Please try again in a moment.'
         return 'Routing provider could not generate a route right now.'
-
-    def _normalize_tomtom_route(self, route_data: dict[str, Any], *, index: int) -> RouteOption:
-        summary = route_data.get('summary') or {}
-        
-        path: list[RoutePoint] = []
-        for leg in route_data.get('legs') or []:
-            for pt in leg.get('points') or []:
-                path.append(RoutePoint(lat=float(pt['latitude']), lon=float(pt['longitude'])))
-                
-        if len(path) < 2:
-            raise ExternalServiceError('Routing provider returned invalid path coordinates.')
-
-        steps: list[RouteInstruction] = []
-        guidance = route_data.get('guidance') or {}
-        previous_offset_meters = 0.0
-        for step_index, inst in enumerate(guidance.get('instructions') or [], start=1):
-            offset_value = inst.get('routeOffsetInMeters')
-            try:
-                current_offset_meters = float(offset_value) if offset_value is not None else None
-            except (TypeError, ValueError):
-                current_offset_meters = None
-
-            if current_offset_meters is None:
-                step_distance_meters = 0.0
-            else:
-                step_distance_meters = max(0.0, current_offset_meters - previous_offset_meters)
-                previous_offset_meters = current_offset_meters
-
-            steps.append(
-                RouteInstruction(
-                    index=step_index,
-                    instruction=str(inst.get('message') or 'Continue'),
-                    distance_meters=step_distance_meters,
-                    duration_seconds=float(inst.get('travelTimeInSeconds') or 0.0),
-                    street_name=inst.get('street') or None,
-                )
-            )
-
-        label = 'Primary route' if index == 1 else f'Alternative {index - 1}'
-        return RouteOption(
-            route_id=f'route-{index}',
-            label=label,
-            distance_meters=float(summary.get('lengthInMeters') or 0.0),
-            duration_seconds=float(summary.get('travelTimeInSeconds') or 0.0),
-            path=path,
-            bounds=self._build_bounds(path),
-            steps=steps,
-        )
 
     @staticmethod
     def _decode_polyline(encoded: str, precision: int = 5) -> list[tuple[float, float]]:

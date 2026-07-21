@@ -67,7 +67,7 @@ class PotholeValidator:
                     # Accept any anomaly detection above threshold
                     if conf > 0.25:
                         anomaly_detected = True
-                        if conf > max_confidence:
+                        if conf > max_confidence:  # pragma: no branch
                             max_confidence = conf
                         
                         xyxy = box.xyxy[0].tolist()

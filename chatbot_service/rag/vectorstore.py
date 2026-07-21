@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 from dataclasses import asdict, dataclass
@@ -69,10 +70,11 @@ class LocalVectorStore:
                     embedding vector({self.embedding_dim})
                 )
             ''')
-            # Create HNSW index for L2 distance
+            # Create HNSW index for L2 distance (tuned: m=32, ef_construction=200)
             await conn.execute(f'''
                 CREATE INDEX IF NOT EXISTS {self.collection_name}_embedding_idx
                 ON {self.collection_name} USING hnsw (embedding vector_l2_ops)
+                WITH (m = 32, ef_construction = 200)
             ''')
 
     async def ensure_index(self) -> list[DocumentChunk]:
@@ -120,7 +122,7 @@ class LocalVectorStore:
         # We need to compute embeddings for all chunks before inserting
         contents = [chunk.content for chunk in chunks]
         try:
-            embeddings = self._embedding_function(contents)
+            embeddings = await asyncio.to_thread(self._embedding_function, contents)
         except Exception as exc:
             logger.warning('Failed to generate embeddings: %s', exc)
             return
@@ -154,7 +156,8 @@ class LocalVectorStore:
         pool = await self._get_pool()
         
         try:
-            query_embedding = self._embedding_function([query])[0]
+            query_results = await asyncio.to_thread(self._embedding_function, [query])
+            query_embedding = query_results[0]
             emb_str = f"[{','.join(str(x) for x in query_embedding)}]"
         except Exception as exc:
             logger.warning('Failed to generate query embedding: %s', exc)
@@ -170,10 +173,12 @@ class LocalVectorStore:
                 args.extend(list(scopes))
 
             try:
+                # Set ef_search for HNSW recall (200 = best balance for legal RAG)
+                await conn.execute('SET hnsw.ef_search = 200')
                 # Using L2 distance (<->) for similarity scoring
                 query_sql = f'''
                     SELECT chunk_id, source, title, category, content,
-                           1.0 / (1.0 + (embedding <-> $1::vector)) as score
+                            1.0 / (1.0 + (embedding <-> $1::vector)) as score
                     FROM {self.collection_name}
                     {where_clause}
                     ORDER BY embedding <-> $1::vector
@@ -241,7 +246,7 @@ class LocalVectorStore:
                 current_length = 0
             current.append(paragraph)
             current_length += len(paragraph)
-        if current:
+        if current:  # pragma: no branch
             chunks.append(
                 DocumentChunk(
                     chunk_id=f'{document.source}:{chunk_index}',

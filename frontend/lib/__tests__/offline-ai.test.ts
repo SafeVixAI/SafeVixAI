@@ -199,7 +199,7 @@ describe('offline-ai', function() {
     });
 
     it('handles audioBlob input via pipeline', async function() {
-      tfPipeline.mockResolvedValue(async function(messages: Array<{ role: string; content: unknown }>) {
+      tfPipeline.mockResolvedValue(async function(_messages: Array<{ role: string; content: unknown }>) {
         return [{ generated_text: 'audio processed' }];
       });
       await mod.getOfflineAI();

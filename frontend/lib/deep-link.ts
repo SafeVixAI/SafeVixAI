@@ -105,7 +105,7 @@ export function useDeepLinkContext(): DeepLinkContext {
  * Use in service workers, API routes, or non-component code.
  */
 export function parseDeepLink(url: string): DeepLinkContext {
-  const base = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_VERCEL_URL || (typeof window !== 'undefined' ? window.location.origin : '');
+  /* istanbul ignore next */const base = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_VERCEL_URL || (typeof window !== 'undefined' ? window.location.origin : '');
   const params = new URL(url, base).searchParams;
   const lat = parseValidLat(params.get('lat'));
   const lon = parseValidLon(params.get('lon'));

@@ -8,7 +8,7 @@ jest.mock('@/lib/gsap', function() {
   return { gsap: { fromTo: jest.fn(), to: jest.fn(), globalTimeline: { timeScale: jest.fn() }, killTweensOf: jest.fn() }, default: { fromTo: jest.fn(), to: jest.fn() } }
 })
 jest.mock('@gsap/react', function() { return { useGSAP: function() {} } })
-jest.mock('@/lib/analytics', function() { return { track: jest.fn() } })
+jest.mock('@/lib/analytics', function() { return { track: { profileCompleted: jest.fn() } } })
 jest.mock('sonner', function() { return { toast: { error: jest.fn(), success: jest.fn() } } })
 jest.mock('@/lib/guest-auth', function() {
   return { getOrCreateGuestId: function() { return 'guest-1' }, getGuestProfile: function() { return null }, updateGuestProfile: jest.fn(), isGuestMode: function() { return true } }
@@ -21,7 +21,7 @@ jest.mock('@/components/dashboard/Toggle', function() { return function() { retu
 jest.mock('@/components/profile/QREmergencyCard', function() { return function() { return null } })
 jest.mock('lucide-react', function() { return new Proxy({}, { get: function() { return function() { return null } } }) })
 
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent, act } from '@testing-library/react'
 import React from 'react'
 import ProfilePage from '../app/profile/page'
 import { useAppStore } from '@/lib/store'
@@ -108,5 +108,44 @@ describe('Profile Page', function() {
   it('renders VEHICLE_REGISTRATION label', function() {
     render(React.createElement(ProfilePage))
     expect(screen.getByText('VEHICLE_REGISTRATION')).toBeTruthy()
+  })
+
+  it('enters edit mode on Edit Profile click', function() {
+    render(React.createElement(ProfilePage))
+    act(function() { fireEvent.click(screen.getByText('Edit Profile')) })
+    expect(screen.getByText('Cancel')).toBeTruthy()
+    expect(screen.getByText('Save')).toBeTruthy()
+  })
+
+  it('cancel edit returns to view mode', function() {
+    render(React.createElement(ProfilePage))
+    act(function() { fireEvent.click(screen.getByText('Edit Profile')) })
+    act(function() { fireEvent.click(screen.getByText('Cancel')) })
+    expect(screen.getByText('Edit Profile')).toBeTruthy()
+  })
+
+  it('save flashes Profile Saved banner', function() {
+    render(React.createElement(ProfilePage))
+    act(function() { fireEvent.click(screen.getByText('Edit Profile')) })
+    act(function() { fireEvent.click(screen.getByText('Save')) })
+    expect(screen.getByText('Profile Saved')).toBeTruthy()
+  })
+
+  it('shows Full Name input in edit mode', function() {
+    render(React.createElement(ProfilePage))
+    act(function() { fireEvent.click(screen.getByText('Edit Profile')) })
+    expect(screen.getByLabelText('Full Name')).toBeTruthy()
+  })
+
+  it('shows Vehicle Number input in edit mode', function() {
+    render(React.createElement(ProfilePage))
+    act(function() { fireEvent.click(screen.getByText('Edit Profile')) })
+    expect(screen.getByLabelText('Vehicle Number')).toBeTruthy()
+  })
+
+  it('shows Blood Group select in edit mode', function() {
+    render(React.createElement(ProfilePage))
+    act(function() { fireEvent.click(screen.getByText('Edit Profile')) })
+    expect(screen.getByLabelText('Blood Group')).toBeTruthy()
   })
 })

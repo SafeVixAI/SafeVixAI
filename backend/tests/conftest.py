@@ -1,10 +1,20 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2026 SafeVixAI Team
 
+"""Global test configuration and fixtures for SafeVixAI backend."""
 from __future__ import annotations
 
+import os
 import sys
-from pathlib import Path
+from pathlib import Path, PosixPath, WindowsPath
+
+# Prevent real database connections — set dummy URL before any module imports engine
+os.environ.setdefault("DATABASE_URL", "postgresql+asyncpg://test:test@localhost:99999/test_db")
+
+# Python 3.11.9 removed Path._flavour which some libraries (PIL) depend on.
+# Monkey-patch it back so Path() calls work without AttributeError.
+if not hasattr(Path, '_flavour'):
+    Path._flavour = PosixPath._flavour if os.name != 'nt' else WindowsPath._flavour
 
 import pytest
 
@@ -43,6 +53,7 @@ def app(monkeypatch):
     monkeypatch.setenv("REDIS_URL", "")
     monkeypatch.setenv("ENVIRONMENT", "test")
     monkeypatch.setenv("ADMIN_SECRET", "test-admin-secret-2026")
+    monkeypatch.setenv("DATABASE_URL", "postgresql+asyncpg://test:test@localhost:99999/test_db")
     from core.config import get_settings
     get_settings.cache_clear()
     application = create_app()
@@ -51,7 +62,23 @@ def app(monkeypatch):
         yield DummySession()
 
     application.dependency_overrides[get_db] = override_db
-    return application
+    yield application
+    # Cleanup: close engine to prevent event loop contamination
+    import asyncio
+    try:
+        loop = asyncio.get_event_loop()
+        if loop.is_running():
+            loop.create_task(cleanup_engine())
+        elif not loop.is_closed():
+            loop.run_until_complete(cleanup_engine())
+    except Exception:
+        pass
+
+
+async def cleanup_engine():
+    from core.database import engine
+    if engine is not None:
+        await engine.dispose()
 
 
 @pytest.fixture

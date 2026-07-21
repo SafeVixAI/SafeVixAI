@@ -36,8 +36,10 @@ def _has_any(text: str, terms: tuple[str, ...]) -> bool:
 from rag.embeddings import build_embedding_function
 
 class IntentDetector:
-    def __init__(self, embedding_model: str = 'sentence-transformers/all-MiniLM-L6-v2'):
-        self.embedding_function = build_embedding_function(embedding_model)
+    def __init__(self, embedding_model: str | None = None):
+        resolved = embedding_model or 'sentence-transformers/all-MiniLM-L6-v2'
+        self.embedding_function = build_embedding_function(resolved)
+        self._embedding_model = resolved
         
         # Define semantic examples for each intent
         self.intent_examples = {

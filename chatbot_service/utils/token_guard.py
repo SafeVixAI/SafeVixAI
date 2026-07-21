@@ -29,7 +29,7 @@ def trim_history(
     if total <= max_tokens:
         return messages
     result = [messages[0]]
-    for msg in reversed(messages[1:]):
+    for msg in reversed(messages[1:]):  # pragma: no branch
         result.insert(1, msg)
         if estimate_messages_tokens(result) > max_tokens:
             result.pop(1)

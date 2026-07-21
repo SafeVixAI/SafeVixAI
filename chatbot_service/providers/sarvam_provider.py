@@ -52,7 +52,7 @@ class SarvamProvider(HttpProvider):
       2. Otherwise → use HF_TOKEN via api-inference.huggingface.co (free, OpenAI-compatible)
     """
 
-    name = "sarvam"
+    name = "sarvam_30b"
 
     def __init__(self, model_size: str = "30b", api_key: str = "", model: str = "") -> None:
         self.model_size = model_size

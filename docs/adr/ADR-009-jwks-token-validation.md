@@ -1,4 +1,4 @@
-# ADR-006: JWKS Token Validation with Atomic Key Fetching
+# ADR-009: JWKS Token Validation with Atomic Key Fetching
 
 **Status:** Accepted
 **Date:** 2026-06-29

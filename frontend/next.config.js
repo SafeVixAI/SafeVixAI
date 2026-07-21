@@ -13,6 +13,10 @@ const nextConfig = {
     optimizePackageImports: ['lucide-react', 'date-fns', '@radix-ui/react-icons', 'recharts'],
   },
   reactStrictMode: true,
+  poweredByHeader: false,
+  compress: true,
+  generateEtags: true,
+  httpAgentOptions: { keepAlive: true },
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
   },

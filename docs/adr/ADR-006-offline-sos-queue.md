@@ -1,4 +1,4 @@
-# ADR-007: Offline-First SOS Queue
+# ADR-006: Offline-First SOS Queue
 
 **Status:** Accepted
 **Date:** 2026-06-29

@@ -4,7 +4,7 @@ Thank you for contributing to SafeVixAI — an AI-powered road safety platform f
 
 ## Code of Conduct
 
-This project follows the [Contributor Covenant v2.1](CODE_OF_CONDUCT.md). By participating, you agree to uphold it. Report violations to **safevixai@**.
+This project follows the [Contributor Covenant v2.1](CODE_OF_CONDUCT.md). By participating, you agree to uphold it. Report violations to **safevixai@googlegroups.com**.
 
 ## Quick Start
 

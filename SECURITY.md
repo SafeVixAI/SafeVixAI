@@ -65,4 +65,4 @@ This project operates on a **responsible disclosure** basis — no bug bounty pr
 ## Contact
 
 - **Security issues:** security@safevixai.gov.in
-- **General inquiries:** safevixai@
+- **General inquiries:** safevixai@googlegroups.com

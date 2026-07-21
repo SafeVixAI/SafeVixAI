@@ -1,0 +1,91 @@
+# Repository Labels Configuration
+# Sync using: gh label clone SafeVixAI/SafeVixAI
+# See: https://github.com/marketplace/actions/github-labeler
+
+# Priority
+- name: priority/critical
+  description: Blocking release or security issue
+  color: B60205
+- name: priority/high
+  description: Major feature or bug for current milestone
+  color: D93F0B
+- name: priority/medium
+  description: Important but not blocking
+  color: FBCA04
+- name: priority/low
+  description: Nice to have
+  color: 0E8A16
+
+# Type
+- name: type/bug
+  description: Something isn't working
+  color: D73A4A
+- name: type/feature
+  description: New feature request
+  color: A2EEEF
+- name: type/enhancement
+  description: Improvement to existing feature
+  color: 84B6EB
+- name: type/documentation
+  description: Documentation changes
+  color: 0075CA
+- name: type/security
+  description: Security vulnerability
+  color: B60205
+- name: type/performance
+  description: Performance improvement
+  color: 1D76DB
+- name: type/refactor
+  description: Code restructuring
+  color: FFD33A
+- name: type/test
+  description: Test additions or fixes
+  color: 41C454
+- name: type/ci
+  description: CI/CD pipeline changes
+  color: 5319E7
+
+# Status
+- name: status/needs-triage
+  description: Needs review by maintainer
+  color: E6E6E6
+- name: status/blocked
+  description: Blocked by another issue/PR
+  color: 000000
+- name: status/duplicate
+  description: Duplicate of another issue
+  color: CFD3D7
+- name: status/wontfix
+  description: Will not be addressed
+  color: FFFFFF
+- name: status/good-first-issue
+  description: Good for new contributors
+  color: 7057FF
+- name: status/help-wanted
+  description: Extra attention needed
+  color: 008672
+
+# Area
+- name: area/backend
+  description: Backend service (FastAPI)
+  color: 0D1117
+- name: area/frontend
+  description: Frontend service (Next.js)
+  color: 58A6FF
+- name: area/chatbot
+  description: Chatbot service (AI agents)
+  color: 8957E5
+- name: area/infrastructure
+  description: Docker, K8s, CI/CD, Terraform
+  color: 6F42C1
+- name: area/docs
+  description: Documentation
+  color: 4A4A4A
+
+# Release
+- name: release/blocker
+  description: Must fix before next release
+  color: FF0000
+- name: release/v1.0
+  description: v1.0 release milestone
+  color: 0E8A16

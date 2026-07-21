@@ -151,7 +151,7 @@ class RedisConnectionManager:
             from core.metrics import ws_connections_total
             ws_connections_total.labels(group=group_id).inc()
         except ImportError:
-            logger.debug("Suppressed exception", exc_info=True)
+            logger.debug("WS metrics not available — skipping connection counter increment")
 
     def disconnect(self, websocket: WebSocket, group_id: str):
         connection_health.remove(websocket)
@@ -170,7 +170,7 @@ class RedisConnectionManager:
                 from core.metrics import ws_connections_total
                 ws_connections_total.labels(group=group_id).dec()
             except ImportError:
-                logger.debug("Suppressed exception", exc_info=True)
+                logger.debug("WS metrics not available — skipping connection counter decrement")
 
     async def broadcast(self, message: dict, group_id: str):
         if self.redis:
@@ -209,7 +209,7 @@ class RedisConnectionManager:
                 for ws in stale:
                     self.disconnect(ws, group_id)
         except asyncio.CancelledError:
-            logger.debug("Suppressed exception", exc_info=True)
+            logger.info("Heartbeat loop cancelled for group %s", group_id)
 
     async def _stale_cleanup_loop(self):
         """Periodically close connections that haven't sent data recently."""
@@ -222,11 +222,11 @@ class RedisConnectionManager:
                         logger.warning("Closing stale connection in group %s", group_id)
                         try:
                             await ws.close(code=1001, reason="Connection timeout")
-                        except Exception:
-                            logger.debug("Suppressed exception", exc_info=True)
+                        except Exception as exc:
+                            logger.debug("Stale connection close failed for group %s: %s", group_id, exc)
                         self.disconnect(ws, group_id)
         except asyncio.CancelledError:
-            logger.debug("Suppressed exception", exc_info=True)
+            logger.info("Stale cleanup loop cancelled")
 
     def start_cleanup(self):
         if self.cleanup_task is None or self.cleanup_task.done():

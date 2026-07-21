@@ -1,8 +1,8 @@
+'use client';
+
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 SafeVixAI Team
 import React from 'react';
-
-'use client';
 
 import { useEffect, useMemo, useState } from 'react';
 import { AlertTriangle, Car, CheckCircle2, FileText, Heart, Phone, Pill, Shield } from 'lucide-react';

@@ -1,10 +1,11 @@
+'use client';
+
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 SafeVixAI Team
 import React from 'react';
 
 // frontend/components/crash/ProgressRing.tsx
 // SVG ring that depletes as countdown progresses
-'use client';
 
 import { useRef } from 'react';
 import { useGSAP } from '@gsap/react';

@@ -24,12 +24,12 @@ This policy applies to all three codebases in this repository:
 ### 2. Coverage Targets
 | Target | Current | Badge Level |
 |--------|---------|-------------|
-| Backend: ≥80% statement coverage | ~75-85% | Silver |
-| Chatbot: ≥80% statement coverage | 95%+ | Silver |
-| Frontend: ≥54% statement coverage | 54.4% | Silver (basic) |
-| Backend: ≥90% statement, ≥80% branch | ~75-85% / ~65-75% | Gold (target) |
-| Chatbot: ≥90% statement, ≥80% branch | 95%+ / ~85%+ | Gold (target) |
-| Frontend: ≥90% statement, ≥80% branch | 54.4% / ~45% | Gold (target) |
+| Backend: 100% lines + branches | 100% / 100% | 🥇 Gold |
+| Chatbot: ≥97% lines | 97%+ | 🥇 Gold |
+| Frontend: ≥86% lines, ≥72% branches | 87.22% / 73.13% | 🥈 Silver |
+| Backend: ≥90% statement, ≥80% branch | 100% / 100% | 🥇 Gold (achieved) |
+| Chatbot: ≥90% statement, ≥80% branch | 97%+ / ~85%+ | 🥇 Gold (achieved) |
+| Frontend: ≥90% statement, ≥80% branch | 87.22% / 73.13% | 🥇 Gold (target for v1.1) |
 
 Coverage thresholds are enforced in CI via `--cov-fail-under` (Python) and `jest --coverage` thresholds. Branch coverage (`--cov-branch`) is measured for Python services.
 

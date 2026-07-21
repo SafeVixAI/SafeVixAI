@@ -1,0 +1,75 @@
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 SafeVixAI Team
+# SafeVixAI-specific gitleaks configuration
+# Extends default gitleaks patterns with project-specific secrets
+title = "SafeVixAI Gitleaks Configuration"
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "safevixai-api-key"
+description = "SafeVixAI API Key or Secret"
+regex = '''(?i)(?:safevixai|svx)[_-]?(?:api|secret|key|token)[_-]?[a-zA-Z0-9]{16,}'''
+tags = ["safevixai", "api-key"]
+
+[[rules]]
+id = "supabase-service-role"
+description = "Supabase Service Role Key (anon key excluded)"
+regex = '''(?i)(?:supabase[_-]?service[_-]?role[_-]?key|SERVICE_ROLE_KEY)['"]?\s*[:=]\s*['"](eyJh[a-zA-Z0-9_-]{20,})'''
+tags = ["safevixai", "supabase", "critical"]
+
+[[rules]]
+id = "render-deploy-hook"
+description = "Render Deploy Hook URL"
+regex = '''https://api\.render\.com/deploy/srv-[a-zA-Z0-9]{20,}'''
+tags = ["safevixai", "render", "deploy"]
+
+[[rules]]
+id = "jwt-secret-key"
+description = "JWT Secret Key or Supabase JWT Secret"
+regex = '''(?:JWT_SECRET_KEY|SUPABASE_JWT_SECRET)['"]?\s*[:=]\s*['"][a-zA-Z0-9_\-]{32,}'''
+tags = ["safevixai", "jwt", "critical"]
+
+[[rules]]
+id = "aws-role-arn"
+description = "AWS Role ARN for cross-account access"
+regex = '''arn:aws:iam::\d{12}:role/[a-zA-Z0-9_\-/]+'''
+tags = ["safevixai", "aws", "infra"]
+
+[[rules]]
+id = "openai-api-key"
+description = "OpenAI / Groq / Gemini API Key"
+regex = '''(?:sk-[a-zA-Z0-9]{20,}|gsk_[a-zA-Z0-9]{20,}|AIza[a-zA-Z0-9_\-]{35})'''
+tags = ["safevixai", "llm", "critical"]
+
+[[rules]]
+id = "postgres-connection-string"
+description = "PostgreSQL connection URL with credentials"
+regex = '''postgres(?:ql)?(?:\\+asyncpg)?://[a-zA-Z0-9_]+:[^@\s]+@[a-zA-Z0-9_.-]+:\d+/[a-zA-Z0-9_]+'''
+tags = ["safevixai", "database", "critical"]
+
+[[rules]]
+id = "redis-connection-string"
+description = "Redis connection URL"
+regex = '''redis(?:s)?://(?::[^@]+@)?[a-zA-Z0-9_.-]+:\d+'''
+tags = ["safevixai", "cache"]
+
+[allowlist]
+description = "Allowlisted files and paths"
+paths = [
+  "node_modules/",
+  ".next/",
+  "__pycache__/",
+  ".venv/",
+  "venv/",
+  "dist/",
+  "data/chroma_db/",
+  "*.test.*",
+  "*.spec.*",
+  "tests/",
+  "migrations/versions/",
+  "*.min.js",
+  "pnpm-lock.yaml",
+  "package-lock.json",
+]

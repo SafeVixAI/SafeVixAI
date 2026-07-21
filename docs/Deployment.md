@@ -298,7 +298,7 @@ Configured in `.github/workflows/` — 19 workflow files:
 |---|---|---|
 | `backend.yml` | `backend/**` changes | `pytest tests/ -v` with Python 3.11 |
 | `chatbot.yml` | `chatbot_service/**` changes | `pytest tests/ -v` with Python 3.11 |
-| `frontend.yml` | `frontend/**` changes | `pnpm run lint` + `npx tsc --noEmit` with Node 20 |
+| `frontend.yml` | `frontend/**` changes | `npm run lint` + `npx tsc --noEmit` with Node 20 |
 | `e2e.yml` | Push to `main`, PR | Full-stack Playwright E2E tests + Vercel deploy |
 | `security.yml` | Push, PR | Dependency auditing + security scanning |
 | `system.yml` | Push to `main` | Cross-service system validation |

@@ -68,10 +68,18 @@ jobs:
     uses: ./.github/workflows/security.yml
     secrets: inherit
 
+  license-scan:
+    name: License Compliance Check
+    needs: [validate]
+    uses: ./.github/workflows/license-scan.yml
+    secrets: inherit
+
   build:
     name: Build & Push Images
     needs: [validate, test, lint]
     runs-on: ubuntu-latest
+    outputs:
+      digest: ${{ steps.push.outputs.digest }}
     strategy:
       matrix:
         service:
@@ -103,6 +111,7 @@ jobs:
             type=sha
 
       - name: Build and push
+        id: push
         uses: docker/build-push-action@v6
         with:
           context: ${{ matrix.service.context }}
@@ -112,6 +121,13 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@v1
+        with:
+          subject-name: ghcr.io/${{ github.repository }}/${{ matrix.service.name }}
+          subject-digest: ${{ steps.push.outputs.digest }}
+          push-to-registry: true
 
   sign:
     name: Sign Container Images
@@ -123,10 +139,7 @@ jobs:
       packages: write
     strategy:
       matrix:
-        service:
-          - { name: backend, tag: ghcr.io/${{ github.repository }}/backend }
-          - { name: chatbot, tag: ghcr.io/${{ github.repository }}/chatbot }
-          - { name: frontend, tag: ghcr.io/${{ github.repository }}/frontend }
+        name: [backend, chatbot, frontend]
     steps:
       - name: Install cosign
         uses: sigstore/cosign-installer@v3
@@ -138,6 +151,12 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Compute image tag
+        id: tag
+        run: |
+          REPO=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          echo "image=ghcr.io/${REPO}/${{ matrix.name }}" >> $GITHUB_OUTPUT
+
       - name: Sign image with cosign keyless
         run: |
           cosign sign --yes \
@@ -145,16 +164,16 @@ jobs:
             -a "workflow=${{ github.workflow }}" \
             -a "ref=${{ github.ref }}" \
             -a "sha=${{ github.sha }}" \
-            "${{ matrix.service.tag }}:v${{ needs.validate.outputs.version }}"
+            "${{ steps.tag.outputs.image }}:v${{ needs.validate.outputs.version }}"
 
       - name: Verify signature
         run: |
           cosign verify --insecure-ignore-tlog \
-            "${{ matrix.service.tag }}:v${{ needs.validate.outputs.version }}"
+            "${{ steps.tag.outputs.image }}:v${{ needs.validate.outputs.version }}"
 
   create-release:
     name: Create GitHub Release
-    needs: [validate, build, sign, sbom]
+    needs: [validate, build, sbom]
     runs-on: ubuntu-latest
     permissions:
       contents: write

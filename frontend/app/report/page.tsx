@@ -1,8 +1,9 @@
+'use client';
+
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 SafeVixAI Team
 import React from 'react';
 
-'use client';
 
 import { useEffect, useMemo, useState, useRef } from 'react';
 import Link from 'next/link';
@@ -784,4 +785,3 @@ export default function ReportPage() {
     </div>
   );
 }
-

@@ -171,8 +171,8 @@ class LGDIngestor(BaseIngestor):
                                 'parent_lgd_code': blk.get('districtCode'),
                                 'state_code': state_code,
                             })
-                except Exception:
-                    logger.debug("Suppressed exception", exc_info=True)
+                except Exception as exc:
+                    logger.debug("LGD ingestor — block fetch failed for state %s: %s", state_code, exc)
 
             # 5. Fetch local bodies (ULBs) per state
             for state_code in INDIAN_STATE_CODES:
@@ -195,8 +195,8 @@ class LGDIngestor(BaseIngestor):
                                 'state_code': state_code,
                                 'census_code_2011': ulb.get('censusCode2011'),
                             })
-                except Exception:
-                    logger.debug("Suppressed exception", exc_info=True)
+                except Exception as exc:
+                    logger.debug("LGD ingestor — ULB fetch failed for state %s: %s", state_code, exc)
 
         logger.info('[LGD:NAPIX] Total fetched: %d entities', len(all_records))
         return all_records

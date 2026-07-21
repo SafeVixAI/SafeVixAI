@@ -1,0 +1,26 @@
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 SafeVixAI Team
+
+node_modules/
+.next/
+coverage/
+test-results/
+playwright-report/
+*.tsbuildinfo
+frontend/.next/
+frontend/coverage/
+frontend/test-results/
+frontend/playwright-report/
+backend/.venv/
+backend/__pycache__/
+chatbot_service/.venv/
+chatbot_service/__pycache__/
+*.min.js
+*.bundle.js
+dist/
+build/
+.next/
+*.wasm
+*.onnx
+*.bin
+*.pickle

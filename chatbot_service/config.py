@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import os
 from functools import lru_cache
 from pathlib import Path
 
@@ -133,7 +134,6 @@ class Settings(BaseSettings):
     @computed_field
     @property
     def bootstrap_env_providers(self) -> list[str]:
-        import os
         providers = []
         if os.environ.get("GROQ_API_KEY"): providers.append("groq")
         if os.environ.get("OPENAI_API_KEY"): providers.append("openai")
@@ -160,5 +160,9 @@ def get_settings() -> Settings:
 
 import logging as _logging
 
-_logging.getLogger(__name__).info(f"Module config loaded for environment={get_settings().environment}")
-_logging.getLogger(__name__).info(f"Contributor bootstrap providers detected: {get_settings().bootstrap_env_providers}")
+_logging.getLogger(__name__).info(
+    "Module config loaded for environment=%s", get_settings().environment,
+)
+_logging.getLogger(__name__).info(
+    "Contributor bootstrap providers detected: %s", get_settings().bootstrap_env_providers,
+)

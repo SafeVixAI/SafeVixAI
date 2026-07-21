@@ -1,8 +1,9 @@
+'use client';
+
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 SafeVixAI Team
 import React from 'react';
 
-'use client';
 
 import dynamic from 'next/dynamic';
 import { Loader2 } from 'lucide-react';

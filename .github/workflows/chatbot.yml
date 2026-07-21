@@ -72,6 +72,22 @@ jobs:
         run: |
           pytest tests/test_httpx_recording.py -v -q || echo "httpx recording tests skipped (no cassette)"
 
+      - name: Health check smoke test
+        working-directory: chatbot_service
+        env:
+          ENVIRONMENT: test
+          DEFAULT_LLM_PROVIDER: template
+          MAIN_BACKEND_BASE_URL: http://localhost:8000
+        run: |
+          pip install uvicorn httpx
+          uvicorn main:app --port 8010 &
+          UVICORN_PID=$!
+          sleep 3
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8010/health || echo "000")
+          kill $UVICORN_PID 2>/dev/null || true
+          if [ "$STATUS" != "200" ]; then echo "Health check returned $STATUS"; exit 1; fi
+          echo "Health check passed (200)"
+
       - name: Upload coverage
         uses: codecov/codecov-action@v4
         with:

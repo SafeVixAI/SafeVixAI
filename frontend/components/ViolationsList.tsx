@@ -1,8 +1,9 @@
+'use client';
+
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 SafeVixAI Team
 import React from 'react';
 
-'use client';
 
 // A simple scrollable list to browse standard challans
 const OFFENSES = [

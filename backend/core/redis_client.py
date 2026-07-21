@@ -148,6 +148,13 @@ class CacheHelper:
 
         On cache miss, acquires a distributed lock to prevent multiple concurrent
         recomputations. Supports stale-while-revalidate when ``stale_ttl`` is set.
+
+        TTL strategy: wall-clock from time.monotonic() for stale detection
+        (get_json_stale), Redis EXPIRE/PEXPIRE for cache expiry. The two are
+        independent — Redis expiry evicts old keys, monotonic clock detects
+        staleness without worrying about clock drift. The mutex lock TTL is
+        generous (2x mutex_timeout) to avoid premature lock release during
+        recomputation.
         """
         result = await self.get_json(key)
         if result is not None:

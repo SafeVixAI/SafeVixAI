@@ -1,165 +1,113 @@
 # Contributing to SafeVixAI
 
+Thank you for contributing to SafeVixAI — an AI-powered road safety platform for the IIT Madras Road Safety Hackathon.
+
+## Code of Conduct
+
+This project follows the [Contributor Covenant v2.1](CODE_OF_CONDUCT.md). By participating, you agree to uphold it. Report violations to **safevixai@**.
+
 ## Quick Start
 
 ```bash
 git clone https://github.com/safevixai/safevixai.git
 cd safevixai
 
-# Option A: Dev Container (recommended)
-# Open in VS Code → "Reopen in Container"
+# Backend
+cd backend
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env
 
-# Option B: Manual setup
-make setup
+# Chatbot Service
+cd ../chatbot_service
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env
+
+# Frontend
+cd ../frontend
+npm ci
+cp .env.local.example .env.local
 ```
 
-## Three Terminals (Manual)
+## Development
+
+Run the 3 services in separate terminals:
 
 ```bash
-# Terminal 1: Backend
+# Terminal 1: Backend (:8000)
 cd backend && uvicorn main:app --reload --port 8000
 
-# Terminal 2: Chatbot
+# Terminal 2: Chatbot (:8010)
 cd chatbot_service && uvicorn main:app --reload --port 8010
 
-# Terminal 3: Frontend
+# Terminal 3: Frontend (:3000)
 cd frontend && npm run dev
 ```
 
-### Developer Certificate of Origin
+Verify: `curl http://localhost:8000/health` and `curl http://localhost:8010/health`
 
-All contributions MUST include a `Signed-off-by` trailer in the commit message to certify acceptance of the [Developer Certificate of Origin](DCO):
+## Workflow
 
+### Branch Naming
+- `feature/<issue>-<desc>` — new features
+- `fix/<issue>-<desc>` — bug fixes
+- `docs/<desc>` — documentation
+- `test/<desc>` — test additions
+- `chore/<desc>` — tooling/CI
+
+### Commits
+Use [Conventional Commits](https://www.conventionalcommits.org/):
 ```
-Signed-off-by: Your Name <your.email@example.com>
+<type>(<scope>): <description>
 ```
+Types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`
+Scopes: `backend`, `chatbot`, `frontend`, `docs`, `infra`, `e2e`
 
-This certifies that you have the right to submit your contribution under the project's MIT license. See the full DCO text in [`DCO`](DCO).
+### Pull Requests
+1. Branch from `main`
+2. Write tests for new code
+3. Run lint + typecheck + tests locally
+4. Open PR with clear description
+5. CI must pass
+6. One maintainer review required
+7. Squash-merge to `main`
 
-## Code Standards
+## Coding Standards
 
-### Python (Backend / Chatbot)
-- **Formatter:** `ruff format` (line length: 100)
-- **Linter:** `ruff check` (pre-commit hook runs this)
-- **Types:** Use type hints for all function signatures
-- **Async:** Backend uses `asyncio_mode = auto`, chatbot uses `strict`
-- **Imports:** `ruff` organizes imports automatically
+### Python
+- PEP 8, Black (88 chars), Ruff linting
+- Type hints required on public functions
+- Google-style docstrings
+- Async/await preferred
 
-### TypeScript / React (Frontend)
-- **Framework:** Next.js 15 App Router, React 19
-- **State:** Zustand (`lib/store.ts`) — read-only selectors with `useShallow`
-- **Maps:** MapLibre GL (dynamic import, `ssr: false`)
-- **Styling:** Tailwind CSS 3 + shadcn/ui (see `tailwind.config.ts`)
-- **Animations:** GSAP via `useGSAP` hook (never Framer Motion)
-- **Client components:** `'use client'` directive at top
+### TypeScript/React
+- ESLint + Prettier
+- Strict TypeScript mode
+- Functional components + hooks
+- Zustand for state (no Redux)
+- Tailwind CSS (no inline styles)
+- Lucide icons
 
-### All Code
-- **No `any` types** — use TypeScript strict mode
-- **No console.log** in production — use `lib/client-logger.ts`
-- **No hardcoded secrets** — all env vars via `lib/public-env.ts`
-- **No inline styles** — use Tailwind classes
-- **No nested ternaries** — extract to variables
+### Testing
 
-## Testing
-
-See [`TESTING_POLICY.md`](TESTING_POLICY.md) for the formal testing policy. In summary:
+| Service | Framework | Thresholds |
+|---------|-----------|------------|
+| Backend | pytest (asyncio_mode=auto) | 100% lines/branches |
+| Chatbot | pytest (asyncio_mode=strict) | 97% lines |
+| Frontend | Jest + RTL | 86% lines / 72% branches |
 
 ```bash
-# Run all tests
-make test
+# Backend
+cd backend && pytest tests/ -v --cov
 
-# Or individually
-cd backend && pytest tests/ -q
-cd chatbot_service && pytest tests/ -q
-cd frontend && npm test
+# Chatbot
+cd chatbot_service && pytest tests/ -v --cov
 
-# E2E
-cd frontend && npx playwright test e2e/
+# Frontend
+cd frontend && npm test && npm run lint && npx tsc --noEmit
 ```
 
-All PRs must pass:
-- [ ] `make test` (all 2800+ tests)
-- [ ] `make lint` (0 errors)
-- [ ] Frontend type-check: `npx tsc --noEmit`
-- [ ] Frontend build: `npm run build`
-- [ ] CodeQL analysis (SAST)
-- [ ] Dependency review (supply chain check)
-- [ ] Security scans (Gitleaks + Trivy)
-- [ ] SBOM generation (CycloneDX + SPDX)
+## Security
 
-## Git Workflow
-
-```bash
-main        # Production — protected, CI must pass
-├── staging # Pre-production testing
-├── feat/*  # Feature branches
-├── fix/*   # Bug fixes
-└── chore/* # Tooling, deps, docs
-```
-
-### Commit Messages
-
-Follow conventional commits:
-```
-feat: add emergency card share
-fix: resolve WebSocket reconnection loop
-chore(deps): bump groq-sdk to 0.8.0
-docs: update API reference for challan endpoint
-perf: lazy-load GSAP (50KB savings)
-security: add CSP nonce-based script loading
-```
-
-### PR Rules
-
-1. PRs need at least one review from the relevant team (see `CODEOWNERS`)
-2. At least 50% of all modifications MUST be reviewed by a person other than the author (Gold tier requirement). See [`docs/CODE_REVIEW_GUIDE.md`](docs/CODE_REVIEW_GUIDE.md).
-3. All CI checks must pass
-4. Branch must be up-to-date with `main`
-5. Squash-merge with descriptive message
-6. Delete branch after merge
-
-## Architecture
-
-See:
-- `AGENTS.md` — Agent quick-reference (start here)
-- `docs/Agent.md` — Full app overview
-- `docs/Architecture.md` — System diagrams
-- `docs/API.md` — All endpoints
-- `docs/Database.md` — Tables + PostGIS
-- `docs/adr/` — Architecture Decision Records
-
-## Project Structure
-
-```
-SafeVixAI/
-├── backend/           FastAPI :8000
-├── chatbot_service/   FastAPI :8010
-├── frontend/          Next.js 15 PWA
-├── terraform/         AWS infrastructure
-├── k8s/               Kubernetes manifests
-├── load-testing/      k6 scripts
-├── scripts/           Data pipeline + tooling
-├── docs/              Documentation
-└── .github/           CI/CD + governance
-```
-
-## New Contributors
-
-See [`docs/NEW_CONTRIBUTOR_GUIDE.md`](docs/NEW_CONTRIBUTOR_GUIDE.md) for guidance on finding your first task and making changes.
-
-## Code Review
-
-See [`docs/CODE_REVIEW_GUIDE.md`](docs/CODE_REVIEW_GUIDE.md) for the full code review standards and process.
-
-## Reviewing Checklist
-
-- [ ] No security regressions (check CSP, headers, auth)
-- [ ] No performance regressions (check bundle, waterfalls)
-- [ ] No accessibility regressions (check aria, focus, contrast)
-- [ ] No new `any` types
-- [ ] Tests added/updated
-- [ ] Coverage maintained or improved
-- [ ] E2E tests pass (if UI change)
-- [ ] Error boundaries in place (if new route)
-- [ ] SPDX license header present in new source files
-- [ ] DCO Signed-off-by in commit message
+Report vulnerabilities to **security@safevixai.gov.in** — do not file public issues. See [SECURITY.md](SECURITY.md).

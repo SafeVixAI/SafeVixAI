@@ -73,7 +73,7 @@ class ETLScheduler:
             try:
                 await self._task
             except asyncio.CancelledError:
-                logger.debug("Suppressed exception", exc_info=True)
+                logger.info("ETL scheduler task cancelled — graceful stop")
         logger.info('[ETLScheduler] Stopped')
 
     async def _run_loop(self, check_interval: int = 3600) -> None:

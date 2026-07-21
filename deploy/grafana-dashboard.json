@@ -1,0 +1,147 @@
+{
+  "title": "SafeVixAI Production Overview",
+  "description": "SPDX-License-Identifier: MIT | Copyright (c) 2026 SafeVixAI Team",
+  "uid": "safevixai-prod",
+  "tags": ["safevixai", "production"],
+  "timezone": "utc",
+  "schemaVersion": 36,
+  "version": 1,
+  "panels": [
+    {
+      "title": "API Request Rate",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 6, "x": 0, "y": 0},
+      "targets": [{
+        "expr": "sum(rate(http_requests_duration_seconds_count[5m]))",
+        "legendFormat": "All Endpoints"
+      }],
+      "fieldConfig": {
+        "defaults": {"unit": "rps", "min": 0},
+        "overrides": []
+      }
+    },
+    {
+      "title": "Error Rate (5xx vs Total)",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 6, "x": 6, "y": 0},
+      "targets": [
+        {"expr": "sum(rate(http_requests_duration_seconds_count{status_code=~\"5..\"}[5m])) / sum(rate(http_requests_duration_seconds_count[5m]))", "legendFormat": "Error Rate"},
+        {"expr": "sum(rate(http_requests_duration_seconds_count[5m]))", "legendFormat": "Total RPS"}
+      ],
+      "fieldConfig": {
+        "defaults": {"unit": "percentunit", "min": 0, "max": 1},
+        "overrides": []
+      }
+    },
+    {
+      "title": "p50 / p95 / p99 Latency",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 6, "x": 12, "y": 0},
+      "targets": [
+        {"expr": "histogram_quantile(0.50, sum(rate(http_requests_duration_seconds_bucket[5m])) by (le))", "legendFormat": "p50"},
+        {"expr": "histogram_quantile(0.95, sum(rate(http_requests_duration_seconds_bucket[5m])) by (le))", "legendFormat": "p95"},
+        {"expr": "histogram_quantile(0.99, sum(rate(http_requests_duration_seconds_bucket[5m])) by (le))", "legendFormat": "p99"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "s"}}
+    },
+    {
+      "title": "Active Circuit Breakers",
+      "type": "stat",
+      "gridPos": {"h": 4, "w": 3, "x": 0, "y": 8},
+      "targets": [{"expr": "count(safevixai_circuit_breaker_state{state=\"open\"})", "legendFormat": "Open"}],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "thresholds": {"steps": [{"color": "green", "value": null}, {"color": "red", "value": 1}]}
+        }
+      }
+    },
+    {
+      "title": "DB Connection Pool",
+      "type": "gauge",
+      "gridPos": {"h": 4, "w": 3, "x": 3, "y": 8},
+      "targets": [{"expr": "pg_stat_activity_count{datname=~\"safevixai.*\"}", "legendFormat": "Active"}],
+      "fieldConfig": {
+        "defaults": {
+          "min": 0,
+          "max": 100,
+          "thresholds": {"steps": [
+            {"color": "green", "value": null},
+            {"color": "yellow", "value": 50},
+            {"color": "red", "value": 80}
+          ]}
+        }
+      }
+    },
+    {
+      "title": "Health Check Status",
+      "type": "stat",
+      "gridPos": {"h": 4, "w": 3, "x": 6, "y": 8},
+      "targets": [{"expr": "probe_success{job=\"safevixai\"}", "legendFormat": "{{instance}}"}],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "thresholds": {"steps": [{"color": "red", "value": null}, {"color": "green", "value": 1}]}
+        }
+      }
+    },
+    {
+      "title": "SOS / Emergency KPI",
+      "type": "stat",
+      "gridPos": {"h": 4, "w": 3, "x": 9, "y": 8},
+      "targets": [
+        {"expr": "sum(increase(http_requests_duration_seconds_count{endpoint=~\"/api/v1/emergency/sos.*\"}[24h]))", "legendFormat": "SOS 24h"},
+        {"expr": "sum(increase(http_requests_duration_seconds_count{endpoint=~\"/api/v1/emergency/sos.*\"}[1h]))", "legendFormat": "SOS 1h"}
+      ]
+    },
+    {
+      "title": "Memory Usage",
+      "type": "timeseries",
+      "gridPos": {"h": 6, "w": 6, "x": 0, "y": 12},
+      "targets": [
+        {"expr": "process_resident_memory_bytes", "legendFormat": "{{service}} RSS"},
+        {"expr": "process_virtual_memory_bytes", "legendFormat": "{{service}} VMS"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "bytes"}}
+    },
+    {
+      "title": "CPU Usage",
+      "type": "timeseries",
+      "gridPos": {"h": 6, "w": 6, "x": 6, "y": 12},
+      "targets": [{"expr": "rate(process_cpu_seconds_total[5m])", "legendFormat": "{{service}}"}],
+      "fieldConfig": {"defaults": {"unit": "percent"}}
+    },
+    {
+      "title": "Redis Operations",
+      "type": "timeseries",
+      "gridPos": {"h": 6, "w": 6, "x": 12, "y": 12},
+      "targets": [{"expr": "rate(redis_commands_total[5m])", "legendFormat": "commands/s"}],
+      "fieldConfig": {"defaults": {"unit": "ops"}}
+    },
+    {
+      "title": "Top Error Endpoints (5xx)",
+      "type": "table",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 18},
+      "targets": [{
+        "expr": "topk(10, sum(rate(http_requests_duration_seconds_count{status_code=~\"5..\"}[1h])) by (endpoint, service))",
+        "format": "table",
+        "instant": true
+      }],
+      "transformations": [{"id": "organize", "options": {"excludeByName": {"Time": true, "Value": false}}}
+      ]
+    },
+    {
+      "title": "LLM Provider Reliability",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 18},
+      "targets": [{
+        "expr": "rate(http_requests_duration_seconds_count{service=\"chatbot\"}[5m])",
+        "legendFormat": "{{endpoint}}"
+      }]
+    }
+  ],
+  "refresh": "30s",
+  "time": {"from": "now-1h", "to": "now"},
+  "editable": true,
+  "sharedCrosshair": true
+}

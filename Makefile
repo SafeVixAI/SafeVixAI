@@ -4,6 +4,8 @@
         ecr-login ecr-build ecr-push security-scan
 
 SHELL := /bin/bash
+# NOTE: Windows contributors should use `make` via WSL, Git Bash, or Docker.
+# The `find`, `rm -rf` and `cp` commands work across all three.
 TF_DIR := terraform
 K8S_DIR := k8s
 K6_DIR := load-testing/k6
@@ -13,9 +15,10 @@ help:
 	@echo "║              SafeVixAI Development CLI              ║"
 	@echo "╠══════════════════════════════════════════════════════╣"
 	@echo "║  Development                                         ║"
-	@echo "║    make setup          Install all dependencies      ║"
+	@echo "║    make setup          Install all deps + copy .env  ║"
 	@echo "║    make test           Run all tests                 ║"
 	@echo "║    make lint           Lint all code                 ║"
+	@echo "║    make typecheck     TypeScript type-check         ║"
 	@echo "║    make build          Build frontend                ║"
 	@echo "║                                                     ║"
 	@echo "║  Docker                                              ║"
@@ -55,9 +58,10 @@ help:
 # === Development ===
 
 setup:
-	cd backend && python -m pip install -r requirements.txt
-	cd chatbot_service && python -m pip install -r requirements.txt
-	cd frontend && npm ci
+	cd backend && python -m pip install -r requirements.txt && cp -n .env.example .env 2>/dev/null || true
+	cd chatbot_service && python -m pip install -r requirements.txt && cp -n .env.example .env 2>/dev/null || true
+	cd frontend && npm ci && cp -n .env.local.example .env.local 2>/dev/null || true
+	@echo "✓ Dependencies installed. Edit .env files with your keys."
 
 test:
 	cd backend && PYTHONPATH=. pytest tests/ -q --tb=short
@@ -190,6 +194,9 @@ clean:
 	cd backend && find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
 	cd chatbot_service && find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
 	cd frontend && rm -rf .next coverage test-results playwright-report
+	cd frontend && rm -f lint_output.txt ts-errors.txt log.txt ls_recursive.txt eslint.json
+	rm -rf .pytest_cache .ruff_cache htmlcov
+	@echo "✓ Cleaned build artifacts"
 
 # === Deploy ===
 

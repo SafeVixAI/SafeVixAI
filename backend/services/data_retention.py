@@ -63,10 +63,23 @@ class DataRetentionScheduler:
         async with self.session_factory() as db:
             try:
                 # Call the cleanup function defined in Alembic migrations
-                await db.execute("SELECT safevixai_cleanup_expired_data()")
+                from sqlalchemy import text as sql_text, delete
+                from models.sos_incident import SosIncident
+
+                cutoff_90 = datetime.now(timezone.utc)
+                stmt = delete(SosIncident).where(SosIncident.created_at < cutoff_90)
+                result = await db.execute(stmt)
+                deleted_sos = result.rowcount
+
+                try:
+                    await db.execute(sql_text("SELECT safevixai_cleanup_expired_data()"))
+                except Exception:
+                    logger.warning("safevixai_cleanup_expired_data() not available — skipping stored proc")
+
                 await db.commit()
                 logger.info(
-                    "Data retention cleanup executed successfully at %s",
+                    "Data retention cleanup executed: %d SOS records purged at %s",
+                    deleted_sos,
                     datetime.now(timezone.utc).isoformat()
                 )
             except Exception as e:

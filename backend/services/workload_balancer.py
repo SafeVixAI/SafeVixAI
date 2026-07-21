@@ -189,7 +189,7 @@ class WorkloadBalancer:
                     elif distance_km < 5:
                         reasons.append(f"Nearby ({distance_km:.1f}km)")
                 except Exception:
-                    logger.debug("Suppressed exception", exc_info=True)
+                    logger.debug("Workload balancer — proximity score failed for officer")
 
             # Factor 5: Severity urgency — 10% weight
             if severity >= 4 and workload < 3:

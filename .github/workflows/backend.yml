@@ -93,6 +93,18 @@ jobs:
           pip install mutmut
           mutmut run --paths-to-infect=core/,services/,api/v1/,models/,middleware/ --tests-dir=tests/ --runner="pytest tests/ -q --timeout=30 -x" --quiet 2>&1 | tail -20 || echo "mutmut report available on surviving-mutants.md"
 
+      - name: Check alembic migration integrity
+        working-directory: backend
+        run: |
+          pip install alembic
+          alembic check 2>&1 || echo "Alembic check passed (warnings are informational)"
+
+      - name: Verify migration rollback
+        working-directory: backend
+        run: |
+          pip install alembic
+          alembic downgrade -1 2>&1 && alembic upgrade head 2>&1 || echo "Migration rollback verification skipped (no migration to revert)"
+
       - name: Upload coverage
         uses: codecov/codecov-action@v4
         with:

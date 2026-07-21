@@ -1,5 +1,13 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2026 SafeVixAI Team
+#
+# ╔══════════════════════════════════════════════════════════════════╗
+# ║  DEVELOPMENT ONLY — DO NOT USE IN PRODUCTION                   ║
+# ║  Default passwords are embedded for local dev convenience.     ║
+# ║  For production: docker compose -f docker-compose.yml          ║
+# ║                  -f docker-compose.prod.yml up -d              ║
+# ║  Production config REQUIRES POSTGRES_PASSWORD + REDIS_PASSWORD ║
+# ╚══════════════════════════════════════════════════════════════════╝
 version: "3.9"
 
 # DEVOPS#11 FIX: Isolated networks prevent compromised frontend from reaching DB directly

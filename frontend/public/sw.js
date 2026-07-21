@@ -122,6 +122,19 @@ const DUCKDB_WASM = [
   '/duckdb/duckdb-browser-coi.pthread.worker.js',
 ];
 
+const PWA_ASSETS = [
+  '/icons/icon-72x72.png',
+  '/icons/icon-96x96.png',
+  '/icons/icon-128x128.png',
+  '/icons/icon-144x144.png',
+  '/icons/icon-152x152.png',
+  '/icons/icon-192x192.png',
+  '/icons/icon-384x384.png',
+  '/icons/icon-512x512.png',
+  '/theme-init.js',
+  '/manifest.json',
+];
+
 const STATIC_ASSETS = [
   '/',
   '/offline',
@@ -131,6 +144,7 @@ const STATIC_ASSETS = [
   '/offline-data/first-aid.json',
   '/offline-data/india-emergency.geojson',
   ...DUCKDB_WASM,
+  ...PWA_ASSETS,
 ];
 
 self.addEventListener('install', (event) => {

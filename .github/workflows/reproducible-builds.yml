@@ -1,0 +1,53 @@
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 SafeVixAI Team
+# Verify builds are reproducible across independent runs
+name: Reproducible Builds
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service:
+          - { name: backend, dir: backend, dockerfile: backend/Dockerfile }
+          - { name: frontend, dir: frontend, dockerfile: frontend/Dockerfile.frontend }
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build (run 1)
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{ matrix.service.dir }}
+          file: ${{ matrix.service.dockerfile }}
+          tags: ${{ matrix.service.name }}-r1
+          load: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build (run 2 - independent)
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{ matrix.service.dir }}
+          file: ${{ matrix.service.dockerfile }}
+          tags: ${{ matrix.service.name }}-r2
+          load: true
+          no-cache: true
+
+      - name: Compare image digests
+        run: |
+          DIGEST1=$(docker inspect --format='{{.Id}}' ${{ matrix.service.name }}-r1)
+          DIGEST2=$(docker inspect --format='{{.Id}}' ${{ matrix.service.name }}-r2)
+          if [ "$DIGEST1" = "$DIGEST2" ]; then
+            echo "✅ ${{ matrix.service.name }}: REPRODUCIBLE ($DIGEST1)"
+          else
+            echo "⚠️ ${{ matrix.service.name }}: NOT REPRODUCIBLE"
+            echo "  Run 1: $DIGEST1"
+            echo "  Run 2: $DIGEST2"
+          fi

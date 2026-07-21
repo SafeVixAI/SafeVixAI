@@ -187,7 +187,7 @@ Correctly used in VoiceInput.tsx and assistant page speechSynthesis.
 - E2E: 8 form validation tests fail in production standalone build but pass in dev server — suspected React 19 RSC streaming event handler registration.
 - Live tracking E2E tests (2) need a WebSocket mock server.
 - OpenAPI spec generation blocked by Pydantic ForwardRef issue (pre-existing).
-- CI uses `pnpm 9` while local uses `npm` — lockfile drift possible.
+- CI uses `npm ci` (lockfile: `package-lock.json`); `pnpm-lock.yaml` is gitignored.
 - Dependabot active for moderate npm transitive dependencies.
 
 ---

@@ -43,9 +43,42 @@ jobs:
         working-directory: frontend
         run: npm test -- --watchAll=false --coverage
 
+      - name: Restore Next.js cache
+        uses: actions/cache@v4
+        with:
+          path: frontend/.next/cache
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('frontend/package-lock.json') }}
+
+      - name: Build (no standalone — faster for CI verification)
+        working-directory: frontend
+        run: npm run build
+
+  bundle-check:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    needs: [test]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm ci
       - name: Build
         working-directory: frontend
         run: npm run build
+      - name: Check bundle size
+        working-directory: frontend
+        run: |
+          TOTAL_SIZE=$(du -sk .next/static/chunks 2>/dev/null | cut -f1)
+          echo "Total bundle size: ${TOTAL_SIZE:-0}KB"
+          if [ "${TOTAL_SIZE:-0}" -gt 15000 ]; then
+            echo "⚠️ Bundle size exceeds 15MB threshold (${TOTAL_SIZE}KB)"
+          fi
 
   build:
     if: github.ref == 'refs/heads/main'
@@ -67,11 +100,18 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
-      - name: Build, tag, and push image
-        working-directory: frontend
-        run: |
-          IMAGE_TAG=${{ github.sha }}
-          docker build -t $ECR_REPOSITORY:$IMAGE_TAG .
-          docker tag $ECR_REPOSITORY:$IMAGE_TAG $ECR_REPOSITORY:latest
-          docker push $ECR_REPOSITORY:$IMAGE_TAG
-          docker push $ECR_REPOSITORY:latest
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Build and push Docker image (with standalone output)
+        uses: docker/build-push-action@v5
+        with:
+          context: frontend
+          file: frontend/Dockerfile.frontend
+          push: true
+          tags: |
+            ${{ env.ECR_REPOSITORY }}:${{ github.sha }}
+            ${{ env.ECR_REPOSITORY }}:latest
+          build-args: |
+            STANDALONE=true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

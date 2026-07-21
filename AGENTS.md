@@ -3,7 +3,7 @@
 > Compact instruction file for AI coding agents (OpenCode, Copilot, Cursor, etc.).
 > Every section answers: "Would an agent likely get this wrong without help?"
 
-**Last Updated: 2026-07-08**  
+**Last Updated: 2026-07-19**  
 **Note: 2026-07-08 — Batch 29 Final: SOS Interaction Tests + Tracking/Emergency Page Expansion + Backend Hypothesis Fixes. 7160 unit tests (2835 frontend + 2741 backend + 1584 chatbot), 0 collection errors. Frontend: 237 suites, 0 failures. Coverage: 85.38% stmts / 73.13% branch / 81.06% funcs / 87.22% lines. Thresholds: lines 86, branches 72, functions 80, statements 85.**
 
 ---
@@ -1013,7 +1013,7 @@ POST /api/v1/chat/stream
 
 ### Known Infra Limitations
 - OpenAPI spec generation blocked by Pydantic ForwardRef issue (pre-existing)
-- CI uses `pnpm 9` while local uses `npm` — lockfile drift possible
+- CI uses `npm ci` (like local) — lockfile is `package-lock.json`; `pnpm-lock.yaml` is gitignored
 - Dependabot active for moderate npm transitive dependencies.
 - E2E tests: 8 form validation tests fail in production standalone build but pass in dev server — suspected React 19 RSC streaming event handler registration issue.
 - Live tracking E2E tests (2) need a WebSocket mock server.
@@ -1141,10 +1141,10 @@ SafeVixAI/
 ### Safety Rule (Never Remove)
 - Any AI response about injuries **must** start with "Call 112 immediately" — check `agent/safety_checker.py`
 
-### Package Manager Conflict
-- **Locally:** Uses **npm** — `package-lock.json` is the lockfile
-- **CI (`frontend.yml`):** Uses **pnpm 9** with `pnpm-lock.yaml` — if CI breaks, check lockfile sync
-- The `pnpm-lock.yaml` is `.gitignored` locally. CI generates its own. This may cause drift.
+### Package Manager — npm Only
+
+- **CI (`frontend.yml`):** Uses **npm ci** with `package-lock.json` — consistent with local development
+- `pnpm-lock.yaml` is gitignored (only relevant for older legacy CI builds)
 
 ---
 
@@ -1325,7 +1325,7 @@ Backend connects to chatbot at `http://chatbot:8010` (Docker network name).
 `next.config.js` enables `asyncWebAssembly` and `layers` experiments for WASM modules (Transformers.js, DuckDB-Wasm). The `worker-loader` rule handles `@xenova/transformers` web workers.
 
 ### Package Manager
-Uses **npm** locally (`package-lock.json` is the lockfile). CI uses **pnpm 9** — see "Package Manager Conflict" gotcha above.
+Uses **npm** (`package-lock.json` is the lockfile). CI also uses `npm ci` — no package manager conflict.
 
 ---
 
@@ -1365,7 +1365,7 @@ Both use the same `violations_seed.csv` and `state_overrides.csv` source data.
 |----------|---------|--------|-----------|
 | `backend.yml` | `backend/**` changes | ubuntu-latest, Python 3.11 | `pip install` → `pytest tests/ -v` |
 | `chatbot.yml` | `chatbot_service/**` changes | ubuntu-latest, Python 3.11 | `pip install` → `pytest tests/ -v` |
-| `frontend.yml` | `frontend/**` changes | ubuntu-latest, Node 20 | **pnpm 9** → `pnpm run lint` → `npx tsc --noEmit` |
+| `frontend.yml` | `frontend/**` changes | ubuntu-latest, Node 20 | `npm ci` → `npm run lint` → `npx tsc --noEmit` |
 | `e2e.yml` | Full stack E2E | ubuntu-latest | Integration tests |
 | `security.yml` | Security scanning | ubuntu-latest | Dependency audits |
 | `system.yml` | System-level checks | ubuntu-latest | Cross-service validation |

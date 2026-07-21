@@ -1,0 +1,91 @@
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 SafeVixAI Team
+name: Benchmark Regression
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  benchmark:
+    if: github.event.issue.pull_request && contains(github.event.comment.body, '/benchmark')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: refs/pull/${{ github.event.issue.number }}/head
+
+      - name: Set up Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install frontend deps
+        working-directory: frontend
+        run: npm ci
+
+      - name: Measure frontend build time
+        id: frontend-build
+        working-directory: frontend
+        run: |
+          START=$(date +%s%N)
+          npm run build 2>&1 | tail -5
+          END=$(date +%s%N)
+          DURATION_MS=$(( (END - START) / 1000000 ))
+          echo "duration=$DURATION_MS" >> $GITHUB_OUTPUT
+          echo "Frontend build: $(( DURATION_MS / 1000 ))s $(( DURATION_MS % 1000 ))ms"
+
+      - name: Measure backend import time
+        id: backend-import
+        working-directory: backend
+        run: |
+          START=$(date +%s%N)
+          python -c "import sys; sys.path.insert(0,'.'); from main import create_app; print('Backend imports OK')"
+          END=$(date +%s%N)
+          DURATION_MS=$(( (END - START) / 1000000 ))
+          echo "duration=$DURATION_MS" >> $GITHUB_OUTPUT
+          echo "Backend import: $(( DURATION_MS / 1000 ))s $(( DURATION_MS % 1000 ))ms"
+
+      - name: Measure frontend test time
+        id: frontend-tests
+        working-directory: frontend
+        run: |
+          START=$(date +%s%N)
+          npx jest --no-coverage --passWithNoTests 2>&1 | tail -2
+          END=$(date +%s%N)
+          DURATION_MS=$(( (END - START) / 1000000 ))
+          echo "duration=$DURATION_MS" >> $GITHUB_OUTPUT
+
+      - name: Post benchmark results
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = `## 🏎️ Benchmark Results
+| Metric | Duration |
+|--------|----------|
+| Frontend Build | ${{ steps.frontend-build.outputs.duration }} ms |
+| Backend Import | ${{ steps.backend-import.outputs.duration }} ms |
+| Frontend Tests | ${{ steps.frontend-tests.outputs.duration }} ms |
+
+> Triggered by \`/benchmark\` on PR #${{ github.event.issue.number }}
+> Commit: ${{ github.sha }}`;
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body,
+            });

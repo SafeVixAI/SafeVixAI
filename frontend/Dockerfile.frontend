@@ -5,6 +5,7 @@
 
 # Stage 1: Builder
 FROM node:20-alpine AS builder
+ARG STANDALONE=true
 RUN apk update && apk upgrade && apk add --no-cache libc6-compat
 WORKDIR /app
 
@@ -17,6 +18,7 @@ COPY . .
 ENV NEXT_PUBLIC_API_URL=http://localhost:8000
 ENV NEXT_PUBLIC_CHATBOT_URL=http://localhost:8010
 ENV NODE_ENV=production
+ENV STANDALONE=${STANDALONE}
 RUN npm run build
 
 # Stage 2: Runner

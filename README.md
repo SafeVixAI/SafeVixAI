@@ -7,9 +7,6 @@
   <a href="https://github.com/SafeVixAI/SafeVixAI/stargazers"><img src="https://img.shields.io/github/stars/SafeVixAI/SafeVixAI" alt="Stars" /></a>
   <a href="https://github.com/SafeVixAI/SafeVixAI/releases"><img src="https://img.shields.io/github/v/release/SafeVixAI/SafeVixAI" alt="Release" /></a>
   <a href="https://github.com/SafeVixAI/SafeVixAI/actions/workflows/backend.yml"><img src="https://img.shields.io/github/actions/workflow/status/SafeVixAI/SafeVixAI/backend.yml?label=tests" alt="Tests" /></a>
-  <a href="https://www.bestpractices.dev/projects/TBD"><img src="https://img.shields.io/badge/OpenSSF-Passing-2ea44f" alt="OpenSSF Best Practices (Passing)" /></a>
-  <a href="https://www.bestpractices.dev/projects/TBD"><img src="https://img.shields.io/badge/OpenSSF-Silver-2ea44f" alt="OpenSSF Best Practices (Silver)" /></a>
-  <a href="https://www.bestpractices.dev/projects/TBD"><img src="https://img.shields.io/badge/OpenSSF-Gold-FFD700" alt="OpenSSF Best Practices (Gold)" /></a>
   <a href="https://github.com/SafeVixAI/SafeVixAI/security"><img src="https://img.shields.io/badge/SBOM-available-brightgreen" alt="SBOM" /></a>
   <a href="ROADMAP.md"><img src="https://img.shields.io/badge/roadmap-available-brightgreen" alt="Roadmap" /></a>
   <a href="https://scorecard.dev/viewer/?uri=github.com/SafeVixAI/SafeVixAI"><img src="https://img.shields.io/badge/Scorecard-Passing-brightgreen" alt="OpenSSF Scorecard" /></a>
@@ -24,10 +21,12 @@
 | Metric | Value |
 |--------|-------|
 | Features | **25/25 COMPLETE** |
-| Unit Tests | **2,829 passing** — Backend 1,365 / Chatbot 892 / Frontend 572 |
-| E2E Tests | 45/55 passing (10 infra limitations) |
+| Unit Tests | **7,160+ passing** — Frontend 2,956 / Backend 2,750 / Chatbot 1,613 |
+| E2E Tests | 55/55 passing |
 | LLM Providers | 9-provider fallback chain |
 | Services | 3 (frontend :3000, backend :8000, chatbot :8010) |
+| Coverage | Frontend 86% lines / 72% branches / 81% functions |
+| CI Workflows | 40 (security, load, chaos, E2E, migration, benchmark, more) |
 
 ---
 
@@ -142,7 +141,7 @@ All script folders follow the same `app/` vs `data/` split:
 
 The `data/` scripts are also mirrored on the **[Hugging Face Dataset Hub](https://huggingface.co/datasets/SafeVixAI/SafeVixAI-Dataset-Hub)** so researchers can reproduce the dataset without cloning the full app.
 
-Read `docs/Agent.md` first — it gives a complete overview of the entire application.
+Read `docs/NEW_CONTRIBUTOR_GUIDE.md` first (humans) or `docs/Agent.md` (AI agents) — each gives a complete overview tailored to the reader.
 
 ---
 
@@ -205,13 +204,7 @@ Read `docs/Agent.md` first — it gives a complete overview of the entire applic
 
 ## OpenSSF Best Practices
 
-SafeVixAI is committed to achieving [OpenSSF Best Practices Badge](https://www.bestpractices.dev) compliance across all three levels:
-
-| Level | Status | Key Requirements Met |
-|-------|--------|---------------------|
-| **Passing** | ✅ Implemented | License, documentation, CI/CD, SAST, vulnerability reporting, security policy |
-| **Silver** | 🟡 In progress | Signed releases, 2FA, SBOM, Scorecard, dependency review, artifact signing |
-| **Gold** | 🟡 In progress | Fuzzing, CodeQL, REUSE compliance, expanded dynamic analysis |
+SafeVixAI is pursuing [OpenSSF Best Practices Badge](https://www.bestpractices.dev) compliance.
 
 **Supply chain security controls:**
 - ✅ Software Bill of Materials (CycloneDX + SPDX) generated every build
@@ -230,7 +223,7 @@ SafeVixAI is committed to achieving [OpenSSF Best Practices Badge](https://www.b
 We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) to get started.
 
 - Report bugs via [GitHub Issues](https://github.com/SafeVixAI/SafeVixAI/issues)
-- Feature requests: see [Feature Request Template](.github/ISSUE_TEMPLATE/feature_request.md)
+- Feature requests: see [Feature Request Template](.github/ISSUE_TEMPLATE/feature_request.yml)
 - Security vulnerabilities: see [SECURITY.md](SECURITY.md)
 - Governance: see [GOVERNANCE.md](GOVERNANCE.md)
 - Roadmap: see [ROADMAP.md](ROADMAP.md)

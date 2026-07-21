@@ -67,7 +67,7 @@ class JWKSManager:
             try:
                 await self._rotation_task
             except asyncio.CancelledError:
-                logger.debug("Suppressed exception", exc_info=True)
+                logger.info("JWKS rotation task cancelled (expected during shutdown)")
         logger.info("JWKS manager stopped")
 
     async def get_signing_key(self) -> tuple[str, str]:

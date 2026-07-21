@@ -24,7 +24,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.database import get_db
 from core.limiter import limiter
-from core.security import get_current_user
+from core.rbac import require_role, Role
 from models.road_issue import RoadIssue
 from services.complaint_state_machine import ComplaintStateMachine, InvalidTransitionError
 
@@ -75,7 +75,7 @@ async def start_field_work(
     issue_uuid: str,
     body: StartWorkRequest,
     db: AsyncSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user),
+    current_user: dict = Depends(require_role(Role.FIELD_OFFICER)),
 ) -> dict:
     """Officer marks field work started. GPS is recorded and verified against complaint location."""
     try:
@@ -134,7 +134,7 @@ async def complete_field_work(
     issue_uuid: str,
     body: CompleteWorkRequest,
     db: AsyncSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user),
+    current_user: dict = Depends(require_role(Role.FIELD_OFFICER)),
 ) -> dict:
     """Officer marks complaint as resolved with GPS verification and evidence."""
     try:
@@ -197,7 +197,7 @@ async def geo_checkin_at_complaint(
     issue_uuid: str,
     body: GeoCheckinRequest,
     db: AsyncSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user),
+    current_user: dict = Depends(require_role(Role.FIELD_OFFICER)),
 ) -> dict:
     """Verify officer is physically at the complaint location."""
     try:
@@ -235,7 +235,7 @@ async def get_optimized_route(
     lat: float,
     lon: float,
     db: AsyncSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user),
+    current_user: dict = Depends(require_role(Role.FIELD_OFFICER)),
 ) -> dict:
     """Get optimized complaint visit route from officer's current position."""
     try:
@@ -288,5 +288,5 @@ async def _get_issue_coords(db: AsyncSession, issue: RoadIssue) -> tuple[float |
         if row:
             return float(row[0]), float(row[1])
     except Exception:
-        logger.debug("Suppressed exception", exc_info=True)
+        logger.debug("Field workflow — location coords unavailable for issue %s", issue.uuid)
     return None, None

@@ -3,10 +3,8 @@
 
 from __future__ import annotations
 
-import json
 import logging
 import os
-import sys
 import time
 import uuid
 from contextlib import asynccontextmanager
@@ -57,44 +55,14 @@ from tools import (
 )
 
 
-# P2-02: Structured JSON logging (audit H35) — mirrors backend/main.py
-class _JsonFormatter(logging.Formatter):
-    def format(self, record: logging.LogRecord) -> str:
-        payload: dict = {
-            "ts": self.formatTime(record, datefmt="%Y-%m-%dT%H:%M:%S"),
-            "level": record.levelname,
-            "logger": record.name,
-            "msg": record.getMessage(),
-        }
-        if record.exc_info:
-            payload["exc"] = self.formatException(record.exc_info)
-        for key in ("request_id", "method", "path", "status", "duration_ms"):
-            if hasattr(record, key):
-                payload[key] = getattr(record, key)
-        return json.dumps(payload, ensure_ascii=False)
+# P2-02: Structured JSON logging (audit H35) — mirrors backend/core/logging.py
+from core.logging import configure_logging
 
-
-def _configure_logging(environment: str) -> None:
-    root = logging.getLogger()
-    root.setLevel(logging.INFO)
-    root.handlers.clear()
-    handler = logging.StreamHandler(sys.stdout)
-    if environment == "production":
-        handler.setFormatter(_JsonFormatter())
-    else:
-        handler.setFormatter(
-            logging.Formatter("%(asctime)s [%(levelname)s] %(name)s: %(message)s")
-        )
-    root.addHandler(handler)
-    logging.getLogger("uvicorn.access").setLevel(logging.WARNING)
-
-
-logger = logging.getLogger("safevixai.chatbot")
+logger = configure_logging(get_settings().environment, "safevixai.chatbot")
 
 
 def create_app() -> FastAPI:
     settings = get_settings()
-    _configure_logging(settings.environment)
 
     # OBSERVABILITY#1: Sentry error tracking (free tier: 5K errors/month)
     if settings.sentry_dsn and sentry_sdk is not None:

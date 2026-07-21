@@ -9,15 +9,24 @@ try {
 }
 
 const nextConfig = {
-  reactStrictMode: true,
-  output: 'standalone',
-  outputFileTracingExcludes: {
-    '*': [
-      'node_modules/onnxruntime-node/**/*',
-      'node_modules/@huggingface/transformers/**/*',
-    ],
+  experimental: {
+    optimizePackageImports: ['lucide-react', 'date-fns', '@radix-ui/react-icons', 'recharts'],
   },
+  reactStrictMode: true,
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production',
+  },
+  output: process.env.STANDALONE === 'true' ? 'standalone' : undefined,
+  ...(process.env.STANDALONE === 'true' ? {
+    outputFileTracingExcludes: {
+      '*': [
+        'node_modules/onnxruntime-node/**/*',
+        'node_modules/@huggingface/transformers/**/*',
+      ],
+    },
+  } : {}),
   images: {
+    formats: ['image/avif', 'image/webp'],
     remotePatterns: [
       { protocol: 'https', hostname: 'images.unsplash.com' },
       { protocol: 'https', hostname: 'picsum.photos' },
@@ -28,9 +37,9 @@ const nextConfig = {
       { protocol: 'https', hostname: 'huggingface.co' },
     ],
   },
-  // D6: ESLint blocks production builds for safety. Use `npm run lint` in CI.
+  // D6: ESLint blocks production builds for safety. CI has its own lint step.
   eslint: {
-    ignoreDuringBuilds: process.env.CI !== 'true' && process.env.NODE_ENV !== 'production',
+    ignoreDuringBuilds: process.env.CI === 'true' || process.env.NODE_ENV !== 'production',
   },
   // No orphan redirects needed; /emergency and /settings routes now exist.
   async redirects() {

@@ -64,7 +64,7 @@ Key terms used across the SafeVixAI documentation.
 
 **LLM (Large Language Model)** — AI model used by the chatbot. SafeVixAI supports 9 providers.
 
-**LocalHashEmbeddingFunction** — Zero-dependency embedding function using SHA-256 hashing. Replaced `sentence-transformers/all-MiniLM-L6-v2`.
+**LocalHashEmbeddingFunction** — Zero-dependency embedding function using SHA-256 hashing. Replaced `LocalHashEmbeddingFunction (zero-dependency)`.
 
 ## M
 

@@ -35,7 +35,7 @@ openai==2.38.0
 mistralai==2.4.0
 
 # --- Cache / Memory ---
-redis==8.0.0
+redis==8.0.1
 
 # --- Configuration ---
 PyYAML>=6.0.2

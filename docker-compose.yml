@@ -170,6 +170,12 @@ services:
       NEXT_PUBLIC_CHATBOT_URL: http://chatbot:8010
     networks:
       - frontend-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     ports:
       - "3000:3000"
     deploy:

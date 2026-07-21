@@ -1,0 +1,120 @@
+groups:
+  - name: safevixai-alerts
+    interval: 30s
+    rules:
+      - alert: BackendDown
+        expr: up{job="backend"} == 0
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Backend service is down"
+          description: "Backend at {{ $labels.instance }} has been unreachable for >30s"
+
+      - alert: ChatbotDown
+        expr: up{job="chatbot"} == 0
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Chatbot service is down"
+          description: "Chatbot at {{ $labels.instance }} has been unreachable for >30s"
+
+      - alert: FrontendDown
+        expr: up{job="frontend"} == 0
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Frontend service is down"
+          description: "Frontend at {{ $labels.instance }} has been unreachable for >30s"
+
+      - alert: HighMemoryUsage
+        expr: (container_memory_usage_bytes / container_spec_memory_limit_bytes) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage on {{ $labels.container }}"
+          description: "Container {{ $labels.container }} is using >85% of memory limit"
+
+      - alert: HighCPUUsage
+        expr: rate(container_cpu_usage_seconds_total[5m]) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage on {{ $labels.container }}"
+          description: "Container {{ $labels.container }} is using >80% CPU"
+
+      - alert: HighErrorRate
+        expr: rate(http_requests_duration_seconds_count{status=~"5.."}[5m]) / rate(http_requests_duration_seconds_count[5m]) * 100 > 5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High error rate on {{ $labels.service }}"
+          description: "Error rate on {{ $labels.service }} is >5% over 5m"
+
+      - alert: RateLimitedRequests
+        expr: rate(http_requests_total{status="429"}[5m]) > 10
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High rate-limiting on {{ $labels.service }}"
+          description: ">10 requests/min being rate-limited on {{ $labels.service }}"
+
+      - alert: HighResponseLatency
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High p95 latency on {{ $labels.service }}"
+          description: "p95 latency on {{ $labels.service }} is >2s"
+
+      - alert: ExternalAPIFailure
+        expr: rate(http_requests_total{service="backend",handler=~"/api/v1/(geocode|routing|waze)"}[5m]) == 0
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "External API calls failing"
+          description: "External API calls from backend are failing"
+
+      - alert: RedisDown
+        expr: redis_up{job="redis-exporter"} == 0
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Redis is down"
+          description: "Redis has been unreachable for >30s"
+
+      - alert: PostgresDown
+        expr: pg_up{job="postgres-exporter"} == 0
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "PostgreSQL is down"
+          description: "PostgreSQL has been unreachable for >30s"
+
+      - alert: HighDBConnections
+        expr: pg_stat_activity_count{datname=~"safevixai"} > 50
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High database connections"
+          description: ">50 active connections on database"
+
+      - alert: DiskSpaceLow
+        expr: (node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"}) * 100 < 10
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Low disk space"
+          description: "Less than 10% disk space remaining"

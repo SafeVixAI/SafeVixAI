@@ -9,7 +9,6 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-
 RouteProfile = Literal['driving-car', 'cycling-regular', 'foot-walking']
 
 

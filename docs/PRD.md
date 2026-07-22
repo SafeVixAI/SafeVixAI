@@ -1,4 +1,4 @@
-# SafeVixAI Product Requirements Document (PRD)
+﻿# SafeVixAI Product Requirements Document (PRD)
 
 ## 1. Product Overview
 
@@ -7,7 +7,7 @@
 | Module | Problem Statement | Core Value |
 |--------|------------------|------------|
 | Emergency Locator | SafeVixAI | Find nearest hospital/police/ambulance instantly, even offline |
-| AI Chatbot | SafeVixAI + DriveLegal | 9-provider online fallback + Phi-3 Mini offline legal Q&A + first aid |
+| AI Chatbot | SafeVixAI + DriveLegal | 10-provider online fallback + Phi-3 Mini offline legal Q&A + first aid |
 | Challan Calculator | DriveLegal | Deterministic MVA 2019 fine calculation with state overrides |
 | Road Reporter | RoadWatch | Geotagged issue reporting with automatic authority routing |
 
@@ -57,7 +57,7 @@ India has over 4.5 lakh km of national and state highways with poor pothole repo
 
 ### Module 2 — AI Chatbot
 - [x] 9-intent detection: FIND_HOSPITAL, FIND_POLICE, FIND_AMBULANCE, FIND_TOW, FIRST_AID_INFO, CHALLAN_QUERY, ROAD_REPORT, LEGAL_INFO, OTHER
-- [x] Online RAG: ChatEngine + 9-provider fallback + ChromaDB (MV Act + WHO Guidelines)
+- [x] Online RAG: ChatEngine + 10-provider fallback + ChromaDB (MV Act + WHO Guidelines)
 - [x] Offline AI: WebLLM Phi-3 Mini (3.8B, 4-bit) + IndexedDB cache
 - [x] Multilingual: auto-detect and respond in 14 Indian languages
 - [x] Voice input via Web Speech API + voice output via Speech Synthesis
@@ -115,7 +115,7 @@ India has over 4.5 lakh km of national and state highways with poor pothole repo
 | Offline functionality | 5 independent offline layers from first visit |
 | Innovation | In-browser LLM + computer vision, crash detection, heatmap |
 | Global applicability | OSM worldwide, WHO 100+ country data in RAG |
-| Test coverage | 2829 unit tests, 45 E2E tests, all CI workflows passing |
+| Test coverage | 2829 unit tests, 55 E2E tests, all CI workflows passing |
 
 ---
 

@@ -4,18 +4,18 @@
 from __future__ import annotations
 
 import uuid
-import pytest
-from datetime import datetime, timezone
 from unittest.mock import AsyncMock, MagicMock, patch
-from fastapi import Request, HTTPException
 
-from services.roadwatch_moderation_service import RoadWatchModerationService
-from services.civic_intel.civic_analytics_service import CivicAnalyticsService
-from services.civic_intel.osm_bulk_ingestor import OSMBulkIngestor
-from models.schemas import AdminBoundaryFeature
+import pytest
+from fastapi import HTTPException
+
 from api.v1.admin import get_cache_status_admin, purge_cache_admin
 from api.v1.mcp_server import get_mcp_health
 from api.v1.waze_feed import TokenBucket, get_waze_cifs_feed
+from models.schemas import AdminBoundaryFeature
+from services.civic_intel.civic_analytics_service import CivicAnalyticsService
+from services.civic_intel.osm_bulk_ingestor import OSMBulkIngestor
+from services.roadwatch_moderation_service import RoadWatchModerationService
 
 
 @pytest.mark.asyncio
@@ -71,8 +71,8 @@ async def test_civic_analytics_service_stats_no_state():
     db.execute.side_effect = [
         MagicMock(scalar=lambda: 20),
         MagicMock(scalar=lambda: 12),
-        MagicMock(fetchall=lambda: []),
-        MagicMock(fetchall=lambda: []),
+        MagicMock(fetchall=list),
+        MagicMock(fetchall=list),
         MagicMock(scalar=lambda: 7)
     ]
     service = CivicAnalyticsService()
@@ -114,16 +114,16 @@ async def test_osm_bulk_ingestor_fetch_stream():
 async def test_admin_cache_endpoints():
     req = MagicMock(client=MagicMock(host="127.0.0.1"))
     user = {"sub": str(uuid.uuid4()), "role": "operator"}
-    
+
     # Mock create_cache to test both with client and without client
     mock_cache = AsyncMock()
     mock_cache._client = AsyncMock()
     mock_cache._client.keys.return_value = ["waze:1", "waze:2"]
-    
+
     with patch("core.redis_client.create_cache", return_value=mock_cache):
         status = await get_cache_status_admin(request=req, current_user=user)
         assert status == {"status": "online"}
-        
+
         purge_res1 = await purge_cache_admin(request=req, key_prefix="waze", current_user=user)
         assert purge_res1["status"] == "success"
         mock_cache._client.keys.assert_called_with("waze*")
@@ -139,7 +139,7 @@ async def test_admin_cache_endpoints():
     with patch("core.redis_client.create_cache", return_value=mock_cache_none):
         status_none = await get_cache_status_admin(request=req, current_user=user)
         assert status_none == {"status": "fallback_in_memory"}
-        
+
         purge_none = await purge_cache_admin(request=req, key_prefix="waze", current_user=user)
         assert purge_none["status"] == "success"
 
@@ -149,7 +149,7 @@ async def test_mcp_health_endpoint():
     res = await get_mcp_health()
     assert res["status"] == "healthy"
     assert res["mcp_server"] == "online"
-    
+
     with patch("api.v1.mcp_server.mcp", MagicMock()) as mock_mcp:
         del mock_mcp._mcp_server
         # Force an exception by passing an object that raises when accessed
@@ -189,15 +189,15 @@ def test_admin_boundary_feature_validators():
     )
     assert feat.geom_wkb == "0101000020E6100000C1CA432B"
     assert feat.geojson == {"type": "Point", "coordinates": [80.2, 13.0]}
-    
+
     # Invalid WKB
     with pytest.raises(ValueError, match="Invalid WKB: must be a valid hex string"):
         AdminBoundaryFeature(id=1, code="TN01", name="Chennai", state_code="TN", geom_wkb="invalid_hex_wkb")
-        
+
     # Invalid GeoJSON non-dict
     with pytest.raises(ValueError, match="Invalid GeoJSON: must be a dictionary"):
         AdminBoundaryFeature(id=1, code="TN01", name="Chennai", state_code="TN", geojson="not_a_dict")
-        
+
     # Invalid GeoJSON missing fields
     with pytest.raises(ValueError, match="Invalid GeoJSON: missing 'type' or 'coordinates'"):
         AdminBoundaryFeature(id=1, code="TN01", name="Chennai", state_code="TN", geojson={"type": "Point"})

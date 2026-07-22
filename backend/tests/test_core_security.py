@@ -4,29 +4,29 @@
 from __future__ import annotations
 
 import uuid
-from datetime import timedelta, datetime, timezone
-from unittest.mock import AsyncMock, MagicMock, patch, PropertyMock
+from datetime import UTC, datetime, timedelta
+from unittest.mock import AsyncMock, MagicMock, PropertyMock, patch
 
 import jwt
 import pytest
 from fastapi import HTTPException
 
 from core.security import (
+    ALGORITHM,
+    APP_JWT_AUDIENCE,
+    APP_JWT_ISSUER,
+    SECRET_KEY,
+    _decode_app_token,
+    _decode_bearer_token,
+    _normalize_user_payload,
     create_access_token,
     create_refresh_token,
     create_secure_cookie_response,
-    is_token_revoked,
-    revoke_token,
-    _normalize_user_payload,
-    _decode_app_token,
-    _decode_bearer_token,
-    get_current_user_optional,
     get_current_user,
+    get_current_user_optional,
+    is_token_revoked,
     require_role,
-    APP_JWT_AUDIENCE,
-    APP_JWT_ISSUER,
-    ALGORITHM,
-    SECRET_KEY,
+    revoke_token,
 )
 
 
@@ -203,8 +203,8 @@ class TestDecodeAppToken:
             "iss": APP_JWT_ISSUER,
             "role": "user",
             "jti": str(uuid.uuid4()),
-            "exp": datetime.now(timezone.utc) + timedelta(hours=1),
-            "iat": datetime.now(timezone.utc),
+            "exp": datetime.now(UTC) + timedelta(hours=1),
+            "iat": datetime.now(UTC),
         }
         token = jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
         with pytest.raises(jwt.InvalidTokenError):
@@ -217,8 +217,8 @@ class TestDecodeAppToken:
             "iss": "wrong-issuer",
             "role": "user",
             "jti": str(uuid.uuid4()),
-            "exp": datetime.now(timezone.utc) + timedelta(hours=1),
-            "iat": datetime.now(timezone.utc),
+            "exp": datetime.now(UTC) + timedelta(hours=1),
+            "iat": datetime.now(UTC),
         }
         token = jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
         with pytest.raises(jwt.InvalidTokenError):
@@ -231,8 +231,8 @@ class TestDecodeAppToken:
             "iss": APP_JWT_ISSUER,
             "role": "user",
             "jti": str(uuid.uuid4()),
-            "exp": datetime.now(timezone.utc) - timedelta(hours=1),
-            "iat": datetime.now(timezone.utc) - timedelta(hours=2),
+            "exp": datetime.now(UTC) - timedelta(hours=1),
+            "iat": datetime.now(UTC) - timedelta(hours=2),
         }
         token = jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
         with pytest.raises(jwt.ExpiredSignatureError):
@@ -246,7 +246,7 @@ class TestDecodeAppToken:
 
     def test_jwks_import_error_path(self):
         """When both app and supabase decode fail and JWKS import fails, hits ImportError handler."""
-        from datetime import datetime, timezone, timedelta
+        from datetime import datetime, timedelta
         wrong_key = "completely-wrong-key-for-jwt"
         token = jwt.encode(
             {
@@ -255,8 +255,8 @@ class TestDecodeAppToken:
                 "iss": APP_JWT_ISSUER,
                 "role": "user",
                 "jti": "test-jwks-jti",
-                "exp": datetime.now(timezone.utc) + timedelta(hours=1),
-                "iat": datetime.now(timezone.utc),
+                "exp": datetime.now(UTC) + timedelta(hours=1),
+                "iat": datetime.now(UTC),
             },
             wrong_key, algorithm=ALGORITHM,
         )
@@ -297,8 +297,8 @@ class TestDecodeBearerToken:
             "aud": "authenticated",
             "role": "user",
             "jti": str(uuid.uuid4()),
-            "exp": datetime.now(timezone.utc) + timedelta(hours=1),
-            "iat": datetime.now(timezone.utc),
+            "exp": datetime.now(UTC) + timedelta(hours=1),
+            "iat": datetime.now(UTC),
         }
         supabase_token = jwt.encode(supabase_payload, "supabase-secret", algorithm=ALGORITHM)
         payload = _decode_bearer_token(supabase_token)

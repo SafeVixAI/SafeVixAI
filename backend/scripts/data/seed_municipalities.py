@@ -30,9 +30,10 @@ async def seed_municipalities(dry_run: bool = False) -> None:
         print(f'  ... and {len(municipalities) - 5} more')
         return
 
+    from sqlalchemy.dialects.postgresql import insert as pg_insert
+
     from core.database import AsyncSessionLocal
     from models.municipality import Municipality
-    from sqlalchemy.dialects.postgresql import insert as pg_insert
 
     async with AsyncSessionLocal() as db:
         inserted, updated = 0, 0

@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import uuid
 from contextlib import ExitStack, contextmanager
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import httpx
@@ -558,16 +558,16 @@ class TestStreetlightService:
             p.ward_id = "ward_01"
             p.is_operational = True
             p.failure_count = fc
-            p.next_maintenance_due = datetime(2025, 1, 1, tzinfo=timezone.utc)
-            p.last_maintenance = datetime(2024, 1, 1, tzinfo=timezone.utc)
-            p.installation_date = datetime(2010, 1, 1, tzinfo=timezone.utc)
+            p.next_maintenance_due = datetime(2025, 1, 1, tzinfo=UTC)
+            p.last_maintenance = datetime(2024, 1, 1, tzinfo=UTC)
+            p.installation_date = datetime(2010, 1, 1, tzinfo=UTC)
             poles.append(p)
 
         db = _make_mock_db()
         _set_db_execute_chain(db, scalars_list=poles)
 
         with patch("services.streetlight_service.datetime") as mock_dt:
-            mock_dt.now.return_value = datetime(2026, 6, 8, tzinfo=timezone.utc)
+            mock_dt.now.return_value = datetime(2026, 6, 8, tzinfo=UTC)
             mock_dt.timezone = timezone
             results = await StreetlightService.predict_maintenance(db, top_n=10)
 
@@ -584,14 +584,14 @@ class TestStreetlightService:
         pole.is_operational = True
         pole.failure_count = 0
         pole.next_maintenance_due = None
-        pole.last_maintenance = datetime(2026, 6, 1, tzinfo=timezone.utc)
-        pole.installation_date = datetime(2024, 1, 1, tzinfo=timezone.utc)
+        pole.last_maintenance = datetime(2026, 6, 1, tzinfo=UTC)
+        pole.installation_date = datetime(2024, 1, 1, tzinfo=UTC)
 
         db = _make_mock_db()
         _set_db_execute_chain(db, scalars_list=[pole])
 
         with patch("services.streetlight_service.datetime") as mock_dt:
-            mock_dt.now.return_value = datetime(2026, 6, 8, tzinfo=timezone.utc)
+            mock_dt.now.return_value = datetime(2026, 6, 8, tzinfo=UTC)
             mock_dt.timezone = timezone
             results = await StreetlightService.predict_maintenance(db, top_n=10)
 
@@ -606,15 +606,15 @@ class TestStreetlightService:
         pole.ward_id = "ward_01"
         pole.is_operational = True
         pole.failure_count = 5
-        pole.next_maintenance_due = datetime(2024, 1, 1, tzinfo=timezone.utc)
-        pole.last_maintenance = datetime(2023, 1, 1, tzinfo=timezone.utc)
-        pole.installation_date = datetime(2015, 1, 1, tzinfo=timezone.utc)
+        pole.next_maintenance_due = datetime(2024, 1, 1, tzinfo=UTC)
+        pole.last_maintenance = datetime(2023, 1, 1, tzinfo=UTC)
+        pole.installation_date = datetime(2015, 1, 1, tzinfo=UTC)
 
         db = _make_mock_db()
         _set_db_execute_chain(db, scalars_list=[pole])
 
         with patch("services.streetlight_service.datetime") as mock_dt:
-            mock_dt.now.return_value = datetime(2026, 6, 8, tzinfo=timezone.utc)
+            mock_dt.now.return_value = datetime(2026, 6, 8, tzinfo=UTC)
             mock_dt.timezone = timezone
             results = await StreetlightService.predict_maintenance(db, city="Delhi", top_n=5)
 
@@ -637,7 +637,7 @@ class TestStreetlightService:
         _set_db_execute_chain(db, scalars_list=[pole])
 
         with patch("services.streetlight_service.datetime") as mock_dt:
-            mock_dt.now.return_value = datetime(2026, 6, 8, tzinfo=timezone.utc)
+            mock_dt.now.return_value = datetime(2026, 6, 8, tzinfo=UTC)
             mock_dt.timezone = timezone
             results = await StreetlightService.predict_maintenance(db)
 
@@ -681,7 +681,7 @@ class TestEscalationPredictorBoost:
         issue.uuid = "test-uuid"
         issue.severity = 3
         issue.issue_type = "pothole"
-        issue.created_at = datetime(2026, 5, 22, 10, 0, 0, tzinfo=timezone.utc)
+        issue.created_at = datetime(2026, 5, 22, 10, 0, 0, tzinfo=UTC)
         issue.sla_deadline = datetime(2026, 5, 22, 9, 0, 0)
         issue.confirmation_count = 0
         issue.location = None
@@ -690,7 +690,7 @@ class TestEscalationPredictorBoost:
         db = _make_mock_db()
 
         with patch("services.escalation_predictor.datetime") as mock_dt:
-            mock_dt.now.return_value = datetime(2026, 5, 23, 12, 0, 0, tzinfo=timezone.utc)
+            mock_dt.now.return_value = datetime(2026, 5, 23, 12, 0, 0, tzinfo=UTC)
             mock_dt.timezone = timezone
             pred = await EscalationPredictor.predict(db, issue)
 
@@ -704,8 +704,8 @@ class TestEscalationPredictorBoost:
         issue.uuid = "test-uuid"
         issue.severity = 1
         issue.issue_type = "graffiti"
-        issue.created_at = datetime(2026, 5, 23, 8, 0, 0, tzinfo=timezone.utc)
-        issue.sla_deadline = datetime(2026, 5, 25, 12, 0, 0, tzinfo=timezone.utc)
+        issue.created_at = datetime(2026, 5, 23, 8, 0, 0, tzinfo=UTC)
+        issue.sla_deadline = datetime(2026, 5, 25, 12, 0, 0, tzinfo=UTC)
         issue.confirmation_count = 0
         issue.location = None
         issue.status = "open"
@@ -713,7 +713,7 @@ class TestEscalationPredictorBoost:
         db = _make_mock_db()
 
         with patch("services.escalation_predictor.datetime") as mock_dt:
-            mock_dt.now.return_value = datetime(2026, 5, 23, 12, 0, 0, tzinfo=timezone.utc)
+            mock_dt.now.return_value = datetime(2026, 5, 23, 12, 0, 0, tzinfo=UTC)
             pred = await EscalationPredictor.predict(db, issue)
 
         assert pred.risk_level == "low"
@@ -726,7 +726,7 @@ class TestEscalationPredictorBoost:
         issue.uuid = "test-uuid"
         issue.severity = 1
         issue.issue_type = "pothole"
-        issue.created_at = datetime(2026, 5, 23, 8, 0, 0, tzinfo=timezone.utc)
+        issue.created_at = datetime(2026, 5, 23, 8, 0, 0, tzinfo=UTC)
         issue.sla_deadline = None
         issue.confirmation_count = 5
         issue.location = None
@@ -735,7 +735,7 @@ class TestEscalationPredictorBoost:
         db = _make_mock_db()
 
         with patch("services.escalation_predictor.datetime") as mock_dt:
-            mock_dt.now.return_value = datetime(2026, 5, 23, 12, 0, 0, tzinfo=timezone.utc)
+            mock_dt.now.return_value = datetime(2026, 5, 23, 12, 0, 0, tzinfo=UTC)
             pred = await EscalationPredictor.predict(db, issue)
 
         assert "Multiple citizen reports" in " ".join(pred.contributing_factors)
@@ -748,7 +748,7 @@ class TestEscalationPredictorBoost:
         issue.uuid = "test-uuid"
         issue.severity = 3
         issue.issue_type = "pothole"
-        issue.created_at = datetime(2026, 5, 23, 8, 0, 0, tzinfo=timezone.utc)
+        issue.created_at = datetime(2026, 5, 23, 8, 0, 0, tzinfo=UTC)
         issue.sla_deadline = None
         issue.confirmation_count = 2
         issue.status = "open"
@@ -760,7 +760,7 @@ class TestEscalationPredictorBoost:
         db.execute = AsyncMock(return_value=mock_result)
 
         with patch("services.escalation_predictor.datetime") as mock_dt:
-            mock_dt.now.return_value = datetime(2026, 5, 23, 12, 0, 0, tzinfo=timezone.utc)
+            mock_dt.now.return_value = datetime(2026, 5, 23, 12, 0, 0, tzinfo=UTC)
             pred = await EscalationPredictor.predict(db, issue)
 
         assert "Hotspot area" in " ".join(pred.contributing_factors)
@@ -773,7 +773,7 @@ class TestEscalationPredictorBoost:
         issue.uuid = "test-uuid"
         issue.severity = 1
         issue.issue_type = "graffiti"
-        issue.created_at = datetime(2026, 5, 23, 8, 0, 0, tzinfo=timezone.utc)
+        issue.created_at = datetime(2026, 5, 23, 8, 0, 0, tzinfo=UTC)
         issue.sla_deadline = None
         issue.confirmation_count = 0
         issue.status = "open"
@@ -785,7 +785,7 @@ class TestEscalationPredictorBoost:
         db.execute = AsyncMock(return_value=mock_result)
 
         with patch("services.escalation_predictor.datetime") as mock_dt:
-            mock_dt.now.return_value = datetime(2026, 5, 23, 12, 0, 0, tzinfo=timezone.utc)
+            mock_dt.now.return_value = datetime(2026, 5, 23, 12, 0, 0, tzinfo=UTC)
             pred = await EscalationPredictor.predict(db, issue)
 
         assert pred.risk_level == "low"
@@ -798,7 +798,7 @@ class TestEscalationPredictorBoost:
         issue.uuid = "test-uuid"
         issue.severity = 1
         issue.issue_type = "graffiti"
-        issue.created_at = datetime(2026, 5, 23, 8, 0, 0, tzinfo=timezone.utc)
+        issue.created_at = datetime(2026, 5, 23, 8, 0, 0, tzinfo=UTC)
         issue.sla_deadline = None
         issue.confirmation_count = 0
         issue.status = "open"
@@ -810,7 +810,7 @@ class TestEscalationPredictorBoost:
         db.execute = AsyncMock(return_value=mock_result)
 
         with patch("services.escalation_predictor.datetime") as mock_dt:
-            mock_dt.now.return_value = datetime(2026, 5, 23, 12, 0, 0, tzinfo=timezone.utc)
+            mock_dt.now.return_value = datetime(2026, 5, 23, 12, 0, 0, tzinfo=UTC)
             pred = await EscalationPredictor.predict(db, issue)
 
         assert pred.risk_level == "low"
@@ -823,7 +823,7 @@ class TestEscalationPredictorBoost:
         issue.uuid = "test-uuid"
         issue.severity = 1
         issue.issue_type = "graffiti"
-        issue.created_at = datetime(2026, 5, 23, 8, 0, 0, tzinfo=timezone.utc)
+        issue.created_at = datetime(2026, 5, 23, 8, 0, 0, tzinfo=UTC)
         issue.sla_deadline = None
         issue.confirmation_count = 0
         issue.status = "open"
@@ -832,7 +832,7 @@ class TestEscalationPredictorBoost:
         db = _make_mock_db()
 
         with patch("services.escalation_predictor.datetime") as mock_dt:
-            mock_dt.now.return_value = datetime(2026, 5, 23, 12, 0, 0, tzinfo=timezone.utc)
+            mock_dt.now.return_value = datetime(2026, 5, 23, 12, 0, 0, tzinfo=UTC)
             pred = await EscalationPredictor.predict(db, issue)
 
         assert pred.risk_level == "low"
@@ -845,8 +845,8 @@ class TestEscalationPredictorBoost:
         issue.uuid = "test-uuid"
         issue.severity = 5
         issue.issue_type = "road_collapse"
-        issue.created_at = datetime(2026, 5, 1, 8, 0, 0, tzinfo=timezone.utc)
-        issue.sla_deadline = datetime(2026, 5, 2, 8, 0, 0, tzinfo=timezone.utc)
+        issue.created_at = datetime(2026, 5, 1, 8, 0, 0, tzinfo=UTC)
+        issue.sla_deadline = datetime(2026, 5, 2, 8, 0, 0, tzinfo=UTC)
         issue.confirmation_count = 15
         issue.status = "open"
         issue.location = "SOME_LOCATION"
@@ -857,7 +857,7 @@ class TestEscalationPredictorBoost:
         db.execute = AsyncMock(return_value=mock_result)
 
         with patch("services.escalation_predictor.datetime") as mock_dt:
-            mock_dt.now.return_value = datetime(2026, 6, 8, 12, 0, 0, tzinfo=timezone.utc)
+            mock_dt.now.return_value = datetime(2026, 6, 8, 12, 0, 0, tzinfo=UTC)
             pred = await EscalationPredictor.predict(db, issue)
 
         assert pred.risk_level == "critical"
@@ -872,8 +872,8 @@ class TestEscalationPredictorBoost:
         issue.uuid = "batch-uuid"
         issue.severity = 5
         issue.issue_type = "road_collapse"
-        issue.created_at = datetime(2026, 5, 1, 8, 0, 0, tzinfo=timezone.utc)
-        issue.sla_deadline = datetime(2026, 5, 2, 8, 0, 0, tzinfo=timezone.utc)
+        issue.created_at = datetime(2026, 5, 1, 8, 0, 0, tzinfo=UTC)
+        issue.sla_deadline = datetime(2026, 5, 2, 8, 0, 0, tzinfo=UTC)
         issue.confirmation_count = 15
         issue.status = "open"
         issue.location = "SOME_LOCATION"
@@ -889,7 +889,7 @@ class TestEscalationPredictorBoost:
         db.execute = AsyncMock(side_effect=[mock_batch_result, mock_density_result])
 
         with patch("services.escalation_predictor.datetime") as mock_dt:
-            mock_dt.now.return_value = datetime(2026, 6, 8, 12, 0, 0, tzinfo=timezone.utc)
+            mock_dt.now.return_value = datetime(2026, 6, 8, 12, 0, 0, tzinfo=UTC)
             preds = await EscalationPredictor.batch_predict(db, min_risk=0.0)
 
         assert len(preds) >= 1
@@ -958,7 +958,7 @@ class TestWorkloadBalancerBoost:
         db.execute = AsyncMock(side_effect=[mock_officers, mock_workload])
 
         with patch("services.workload_balancer.datetime") as mock_dt:
-            mock_dt.now.return_value = datetime(2026, 6, 8, 12, 0, 0, tzinfo=timezone.utc)
+            mock_dt.now.return_value = datetime(2026, 6, 8, 12, 0, 0, tzinfo=UTC)
             mock_dt.timezone = timezone
             result = await WorkloadBalancer.find_best_officer(
                 db, complaint_lat=13.0, complaint_lon=80.0,

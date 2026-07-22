@@ -10,13 +10,14 @@ from __future__ import annotations
 
 import logging
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from models.road_issue import RoadIssue
-from models.officer import Officer
 from models.complaint_event import ComplaintEvent
+from models.officer import Officer
+from models.road_issue import RoadIssue
 from services.complaint_state_machine import ComplaintStateMachine
 
 logger = logging.getLogger(__name__)
@@ -32,7 +33,7 @@ class ComplaintLifecycle:
         - Severity 3 (Serious): 72 hours
         - Severity 1-2: 7 days (168 hours)
         """
-        now = datetime.now(timezone.utc).replace(tzinfo=None)
+        now = datetime.now(UTC).replace(tzinfo=None)
         if severity >= 5:
             return now + timedelta(hours=4)
         elif severity == 4:
@@ -101,9 +102,7 @@ class ComplaintLifecycle:
         if issue.status == 'open':
             # transition first to acknowledged or assigned
             target_status = 'assigned'
-        elif issue.status == 'reopened':
-            target_status = 'assigned'
-        elif issue.status == 'acknowledged':
+        elif issue.status == 'reopened' or issue.status == 'acknowledged':
             target_status = 'assigned'
 
         # 3. Transition via State Machine

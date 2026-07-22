@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import logging
 import re
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -76,7 +76,7 @@ class FraudDetector:
         if not citizen_phone:
             return True, 0
 
-        one_hour_ago = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(hours=1)
+        one_hour_ago = datetime.now(UTC).replace(tzinfo=None) - timedelta(hours=1)
         stmt = select(func.count(RoadIssue.id)).where(
             RoadIssue.citizen_phone == citizen_phone,
             RoadIssue.created_at > one_hour_ago,

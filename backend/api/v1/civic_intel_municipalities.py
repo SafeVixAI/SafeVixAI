@@ -13,10 +13,10 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy import func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.limiter import limiter
 from core.database import get_async_session
-from models.municipality import Municipality
+from core.limiter import limiter
 from models.municipal_feature import MunicipalFeature
+from models.municipality import Municipality
 
 logger = logging.getLogger(__name__)
 

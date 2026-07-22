@@ -4,19 +4,17 @@
 from __future__ import annotations
 
 import uuid
-from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from pydantic import BaseModel, Field, field_validator
-from sqlalchemy import select, delete as sa_delete
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.database import get_db
 from core.limiter import limiter
 from core.security import get_current_user
 from models.provider_config import UserProviderConfig
-from services.provider_encrypt import encrypt_api_key, decrypt_api_key, mask_api_key
-
+from services.provider_encrypt import decrypt_api_key, encrypt_api_key, mask_api_key
 
 router = APIRouter(prefix="/api/v1/providers", tags=["Providers"])
 
@@ -298,8 +296,8 @@ async def test_provider_connection(
     data: ProviderTestRequest,
 ):
     """Test a provider connection by making a lightweight API call."""
+
     import httpx
-    import json
 
     headers = {
         "Authorization": f"Bearer {data.api_key}",

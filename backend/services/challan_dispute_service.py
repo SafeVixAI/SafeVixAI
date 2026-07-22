@@ -3,10 +3,11 @@
 
 from __future__ import annotations
 
+import logging
 import re
 import uuid
-import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
+
 from models.schemas import DisputeDraftRequest, DisputeDraftResponse
 
 logger = logging.getLogger("safevixai.challan_dispute_service")
@@ -67,14 +68,14 @@ class ChallanDisputeService:
         and provides evidence checklists and Virtual Court filing instructions.
         """
         logger.info(f"Formulating formal legal dispute appeal for Challan Ref: {payload.challan_ref}")
-        
+
         dispute_ref = f"DSP-{uuid.uuid4().hex[:8].upper()}"
         code = payload.violation_code.strip()
         state_code = cls._parse_state_from_ref(payload.challan_ref)
         state_rules = STATE_RULES.get(state_code, "Central Motor Vehicles Rules, 1989")
-        
+
         factors = payload.mitigating_factors.strip()
-        
+
         # 1. Ground specific sections, legal arguments, and precedents
         cited_mva_sections = []
         legal_defense = ""
@@ -83,7 +84,7 @@ class ChallanDisputeService:
         confidence_score = 0.85 # default base confidence
 
         norm_code = re.sub(r'[^A-Z0-9]', '', code.upper())
-        
+
         if "183" in norm_code:
             cited_mva_sections = ["Section 183"]
             legal_defense = (
@@ -99,7 +100,7 @@ class ChallanDisputeService:
                 "Dashcam Telemetry Logs / GPS Speed Trackers showing vehicle speed at exact timestamp"
             ]
             confidence_score = 0.92  # Exact calibration to match test suite assertions
-            
+
         elif "185" in norm_code:
             cited_mva_sections = ["Section 185"]
             legal_defense = (
@@ -116,7 +117,7 @@ class ChallanDisputeService:
                 "Proof of emergency medical transport or prescription medicines (if mitigating)"
             ]
             confidence_score = 0.88
-            
+
         elif "194D" in norm_code:
             cited_mva_sections = ["Section 194D"]
             legal_defense = (
@@ -131,7 +132,7 @@ class ChallanDisputeService:
                 "Medical practitioner certified physical exceptions (neck cervical collars, post-surgery notes)"
             ]
             confidence_score = 0.95
-            
+
         elif "184" in norm_code:
             cited_mva_sections = ["Section 184"]
             legal_defense = (
@@ -146,7 +147,7 @@ class ChallanDisputeService:
                 "GPS Track Logs showing defensive maneuvers"
             ]
             confidence_score = 0.89
-            
+
         elif "181" in norm_code:
             cited_mva_sections = ["Section 181"]
             legal_defense = (
@@ -160,7 +161,7 @@ class ChallanDisputeService:
                 "Valid Learner's Licence + Proof of experienced driver accompanying under Rule 3 of CMVR"
             ]
             confidence_score = 0.90
-            
+
         else:
             cited_mva_sections = ["Section 177"]
             legal_defense = (
@@ -175,9 +176,9 @@ class ChallanDisputeService:
             confidence_score = 0.75
 
         # 2. Build structured appeal letter
-        now_date = datetime.now(timezone.utc).strftime('%d-%m-%Y')
+        now_date = datetime.now(UTC).strftime('%d-%m-%Y')
         mva_title = cited_mva_sections[0] if cited_mva_sections else "Section 177"
-        
+
         appeal_letter = (
             f"Date: {now_date}\n"
             f"Reference: Dispute Petition - {dispute_ref}\n"
@@ -199,7 +200,7 @@ class ChallanDisputeService:
             f"Yours faithfully,\n"
             f"[Citizen Appellant]\n"
         )
-        
+
         # 3. Dynamic step-by-step filing instructions
         instructions = [
             f"1. Navigate to the Ministry of Road Transport and Highways official Parivahan e-Challan portal or Virtual Court website for State of {state_code}.",
@@ -209,7 +210,7 @@ class ChallanDisputeService:
             f"5. Upload the required physical evidence checklist items: {', '.join([c.split(':')[0] for c in checklist[:2]])} in PDF format (under 5MB).",
             "6. Save the dispute acknowledgment reference number and track status. In case the virtual judge rejects the plea, opt for standard court transfer."
         ]
-        
+
         return DisputeDraftResponse(
             dispute_ref=dispute_ref,
             appeal_letter=appeal_letter,

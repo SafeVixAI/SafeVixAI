@@ -5,8 +5,8 @@ from __future__ import annotations
 
 import pytest
 
-from services.geocoding_service import GeocodingService
 from core.config import Settings
+from services.geocoding_service import GeocodingService
 
 
 class FakePhotonClient:

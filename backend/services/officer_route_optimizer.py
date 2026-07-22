@@ -167,14 +167,14 @@ class OfficerRouteOptimizer:
             try:
                 lat = issue.latitude or (func.ST_Y(issue.location) if issue.location else None)
                 lon = issue.longitude or (func.ST_X(issue.location) if issue.location else None)
-                
+
                 # Fallback: use issue's stored coordinates
                 if hasattr(issue, 'latitude') and issue.latitude:
                     lat = issue.latitude
                     lon = issue.longitude
                 else:
                     continue  # skip if no coordinates
-                    
+
                 points.append({
                     'complaint_ref': issue.complaint_ref,
                     'issue_type': issue.issue_type or 'unknown',

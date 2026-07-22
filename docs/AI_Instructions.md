@@ -1,11 +1,11 @@
-# SafeVixAI — AI Instructions
+﻿# SafeVixAI — AI Instructions
 
 > **Version 2.1** | IIT Madras Road Safety Hackathon 2026  
 > Reflects the current chatbot/agent architecture.
 
 ---
 
-## Chatbot Agent Architecture v2.0
+## Chatbot Agent Architecture v1.0.0
 
 ### Execution Flow
 
@@ -75,7 +75,7 @@ Defined in `chatbot_service/agent/intent_detector.py`. Uses keyword matching + r
 
 ---
 
-## 9 LLM Providers
+## 10 LLM Providers
 
 Located in `chatbot_service/providers/`.
 
@@ -86,7 +86,7 @@ Groq (fastest, 300+ tok/s) → Cerebras → Gemini → GitHub Models
     → NVIDIA NIM → OpenRouter → Mistral → Together → Template (deterministic fallback)
 ```
 
-If all 9 providers fail, `alert_service.py` (project root) sends an email with 3 diagnostic solutions (5-minute cooldown).
+If all 10 providers fail, `alert_service.py` (project root) sends an email with 3 diagnostic solutions (5-minute cooldown).
 
 ### Indian Language Auto-Routing (Separate Path, Not in Chain)
 
@@ -263,7 +263,7 @@ Only activates in production (`npm run build && npm start`), not in dev mode.
 | Decision | Why |
 |----------|-----|
 | Two separate FastAPI services | Chatbot has heavy ML deps (torch ~2GB); backend stays lightweight |
-| 9-provider LLM fallback | Zero downtime — if one API rate-limits, next takes over |
+| 10-provider LLM fallback | Zero downtime — if one API rate-limits, next takes over |
 | Sarvam AI for Indian languages | Trained on 4 trillion Indic tokens; best Hindi/Tamil legal accuracy |
 | DuckDB for challans (not LLM) | Deterministic SQL; LLMs hallucinate fine amounts |
 | ChromaDB committed to git | Render cold-starts need pre-built vectorstore; rebuild takes 10 min |

@@ -6,7 +6,6 @@ from __future__ import annotations
 from fastapi.testclient import TestClient
 
 
-
 def _get_openapi(app):
     """Fetch and unwrap the OpenAPI schema from the response envelope."""
     tc = TestClient(app)

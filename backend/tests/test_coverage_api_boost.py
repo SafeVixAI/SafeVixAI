@@ -7,22 +7,27 @@ user, roadwatch, waze_feed, routing, challan, circuit_breaker_api, wards, tracki
 from __future__ import annotations
 
 import uuid
-import pytest
+from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock, patch
-from datetime import datetime, timezone
+
+import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.database import get_db
-from core.security import create_access_token, get_current_user, get_current_user_optional
-from core.rbac import require_role, Role
 from core.circuit_breaker import CircuitBreakerRegistry
+from core.database import get_db
+from core.rbac import Role, require_role
+from core.security import create_access_token, get_current_user, get_current_user_optional
 from models.schemas import (
-    ChallanResponse, AuthorityPreviewResponse,
-    RoadInfrastructureResponse, RoadIssuesResponse,
+    AuthorityPreviewResponse,
+    ChallanResponse,
+    RoadInfrastructureResponse,
+    RoadIssuesResponse,
     RoadReportResponse,
-    RoutePreviewResponse, RoutePoint, RouteBounds,
+    RouteBounds,
+    RoutePoint,
+    RoutePreviewResponse,
 )
 
 
@@ -466,7 +471,7 @@ class TestWazeFeed:
 
     def test_feed_with_rows(self):
         from api.v1.waze_feed import router
-        recent = datetime.now(timezone.utc).isoformat()
+        recent = datetime.now(UTC).isoformat()
         row = MagicMock()
         row._mapping = {
             "id": str(uuid.uuid4()),
@@ -491,12 +496,12 @@ class TestWazeFeed:
         assert r.json()["count"] >= 1
 
     def test_cifs_type(self):
-        from api.v1.waze_feed import _to_cifs_type, _to_cifs_subtype
+        from api.v1.waze_feed import _to_cifs_subtype, _to_cifs_type
         assert _to_cifs_type("pothole") == "HAZARD_ON_ROAD"
         assert _to_cifs_subtype("pothole") == "HAZARD_ON_ROAD_POT_HOLE"
 
     def test_cifs_unknown(self):
-        from api.v1.waze_feed import _to_cifs_type, _to_cifs_subtype
+        from api.v1.waze_feed import _to_cifs_subtype, _to_cifs_type
         assert _to_cifs_type("x") == "HAZARD_ON_ROAD"
         assert _to_cifs_subtype("x") == "HAZARD_ON_ROAD_OBJECT"
 
@@ -591,7 +596,7 @@ class TestRouting:
 class TestChallanRoutes:
 
     def test_calc_ok(self):
-        from api.v1.challan import router, get_challan_service
+        from api.v1.challan import get_challan_service, router
         app = _mkapp(router)
         f = MagicMock()
         f.calculate_with_db = AsyncMock(return_value=ChallanResponse(
@@ -605,7 +610,7 @@ class TestChallanRoutes:
         assert r.status_code == 200 and r.json()["base_fine"] == 10000
 
     def test_calc_missing(self):
-        from api.v1.challan import router, get_challan_service
+        from api.v1.challan import get_challan_service, router
         app = _mkapp(router)
         app.dependency_overrides[get_challan_service] = lambda: MagicMock()
         from core.limiter import limiter
@@ -847,14 +852,14 @@ class TestTracking:
         await RedisConnectionManager().broadcast({"lat": 10.0}, "test")
 
     def test_ws_missing_token(self):
-        from api.v1.tracking import router
         from starlette.websockets import WebSocketDisconnect
+
+        from api.v1.tracking import router
         app = FastAPI()
         app.include_router(router)
-        with pytest.raises(WebSocketDisconnect) as exc:
-            with TestClient(app).websocket_connect(
-                "/api/v1/tracking/group", headers={"origin": "http://localhost:3000"}):
-                pass
+        with pytest.raises(WebSocketDisconnect) as exc, TestClient(app).websocket_connect(
+            "/api/v1/tracking/group", headers={"origin": "http://localhost:3000"}):
+            pass
         assert exc.value.code == 1008
 
     def test_ws_bad_json(self, monkeypatch):

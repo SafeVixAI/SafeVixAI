@@ -48,7 +48,7 @@ class IdempotencyMiddleware(BaseHTTPMiddleware):
             cached = await cache.get(cache_key)
             if cached:
                 logger.info("Idempotency cache hit for key: %s", idempotency_key)
-                from core.audit import AuditLog, AuditEvent
+                from core.audit import AuditEvent, AuditLog
                 AuditLog.log(
                     AuditEvent.ADMIN_ACTION,
                     user_id=request.client.host if request.client else "unknown",
@@ -70,7 +70,7 @@ class IdempotencyMiddleware(BaseHTTPMiddleware):
                 body = b""
                 async for chunk in response.body_iterator:
                     body += chunk
-                
+
                 try:
                     body_str = body.decode("utf-8")
                     await cache.setex(
@@ -83,7 +83,7 @@ class IdempotencyMiddleware(BaseHTTPMiddleware):
                     )
                 except (json.JSONDecodeError, UnicodeDecodeError):
                     logger.warning("Failed to cache idempotency response: non-JSON body")
-                
+
                 return JSONResponse(
                     content=json.loads(body) if body else None,
                     status_code=response.status_code,

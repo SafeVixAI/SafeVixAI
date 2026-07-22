@@ -14,11 +14,10 @@ from models.schemas import (
     FinePredictionRequest,
     FinePredictionResponse,
 )
-from services.challan_service import ChallanService
 from services.challan_dispute_service import ChallanDisputeService
-from services.fine_prediction_service import FinePredictionService
+from services.challan_service import ChallanService
 from services.exceptions import ExternalServiceError, ServiceValidationError
-
+from services.fine_prediction_service import FinePredictionService
 
 router = APIRouter(prefix='/api/v1/challan', tags=['Challan'])
 

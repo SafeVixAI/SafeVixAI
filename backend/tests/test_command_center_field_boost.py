@@ -16,7 +16,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.circuit_breaker import CircuitBreakerRegistry
 from core.database import get_db
-from core.limiter import limiter
 from core.rbac import Role, require_role
 from core.security import create_access_token, get_current_user
 
@@ -774,17 +773,16 @@ class TestStartFieldWork:
             "api.v1.field_workflow._get_issue_coords",
             new_callable=AsyncMock,
             return_value=(None, None),
+        ), patch(
+            "api.v1.field_workflow.ComplaintStateMachine.transition",
+            new_callable=AsyncMock,
+            return_value=_transition_result(),
         ):
-            with patch(
-                "api.v1.field_workflow.ComplaintStateMachine.transition",
-                new_callable=AsyncMock,
-                return_value=_transition_result(),
-            ):
-                resp = TestClient(app).post(
-                    f"/api/v1/field/complaints/{issue.uuid}/start-work",
-                    json={"officer_lat": 13.0, "officer_lon": 80.0},
-                    headers=_hdr(sub=self._FW_SUB, role="field_officer"),
-                )
+            resp = TestClient(app).post(
+                f"/api/v1/field/complaints/{issue.uuid}/start-work",
+                json={"officer_lat": 13.0, "officer_lon": 80.0},
+                headers=_hdr(sub=self._FW_SUB, role="field_officer"),
+            )
 
         assert resp.status_code == 200
         data = resp.json()
@@ -802,17 +800,16 @@ class TestStartFieldWork:
             "api.v1.field_workflow._get_issue_coords",
             new_callable=AsyncMock,
             return_value=(13.0827, 80.2707),
+        ), patch(
+            "api.v1.field_workflow.ComplaintStateMachine.transition",
+            new_callable=AsyncMock,
+            return_value=_transition_result(),
         ):
-            with patch(
-                "api.v1.field_workflow.ComplaintStateMachine.transition",
-                new_callable=AsyncMock,
-                return_value=_transition_result(),
-            ):
-                resp = TestClient(app).post(
-                    f"/api/v1/field/complaints/{issue.uuid}/start-work",
-                    json={"officer_lat": 28.6139, "officer_lon": 77.2090},
-                    headers=_hdr(sub=self._FW_SUB, role="field_officer"),
-                )
+            resp = TestClient(app).post(
+                f"/api/v1/field/complaints/{issue.uuid}/start-work",
+                json={"officer_lat": 28.6139, "officer_lon": 77.2090},
+                headers=_hdr(sub=self._FW_SUB, role="field_officer"),
+            )
 
         assert resp.status_code == 200
         data = resp.json()
@@ -828,17 +825,16 @@ class TestStartFieldWork:
             "api.v1.field_workflow._get_issue_coords",
             new_callable=AsyncMock,
             return_value=(13.08271, 80.27070),
+        ), patch(
+            "api.v1.field_workflow.ComplaintStateMachine.transition",
+            new_callable=AsyncMock,
+            return_value=_transition_result(),
         ):
-            with patch(
-                "api.v1.field_workflow.ComplaintStateMachine.transition",
-                new_callable=AsyncMock,
-                return_value=_transition_result(),
-            ):
-                resp = TestClient(app).post(
-                    f"/api/v1/field/complaints/{issue.uuid}/start-work",
-                    json={"officer_lat": 13.08272, "officer_lon": 80.27071},
-                    headers=_hdr(sub=self._FW_SUB, role="field_officer"),
-                )
+            resp = TestClient(app).post(
+                f"/api/v1/field/complaints/{issue.uuid}/start-work",
+                json={"officer_lat": 13.08272, "officer_lon": 80.27071},
+                headers=_hdr(sub=self._FW_SUB, role="field_officer"),
+            )
 
         assert resp.status_code == 200
         assert resp.json()["geo_verified"] is True
@@ -854,17 +850,16 @@ class TestStartFieldWork:
             "api.v1.field_workflow._get_issue_coords",
             new_callable=AsyncMock,
             return_value=(None, None),
+        ), patch(
+            "api.v1.field_workflow.ComplaintStateMachine.transition",
+            new_callable=AsyncMock,
+            side_effect=InvalidTransitionError("open", "in_progress", "RS-001"),
         ):
-            with patch(
-                "api.v1.field_workflow.ComplaintStateMachine.transition",
-                new_callable=AsyncMock,
-                side_effect=InvalidTransitionError("open", "in_progress", "RS-001"),
-            ):
-                resp = TestClient(app).post(
-                    f"/api/v1/field/complaints/{issue.uuid}/start-work",
-                    json={"officer_lat": 13.0, "officer_lon": 80.0},
-                    headers=_hdr(sub=self._FW_SUB, role="field_officer"),
-                )
+            resp = TestClient(app).post(
+                f"/api/v1/field/complaints/{issue.uuid}/start-work",
+                json={"officer_lat": 13.0, "officer_lon": 80.0},
+                headers=_hdr(sub=self._FW_SUB, role="field_officer"),
+            )
 
         assert resp.status_code == 409
 
@@ -901,22 +896,21 @@ class TestCompleteFieldWork:
             "api.v1.field_workflow._get_issue_coords",
             new_callable=AsyncMock,
             return_value=(None, None),
+        ), patch(
+            "api.v1.field_workflow.ComplaintStateMachine.transition",
+            new_callable=AsyncMock,
+            return_value=_transition_result(),
         ):
-            with patch(
-                "api.v1.field_workflow.ComplaintStateMachine.transition",
-                new_callable=AsyncMock,
-                return_value=_transition_result(),
-            ):
-                resp = TestClient(app).post(
-                    f"/api/v1/field/complaints/{issue.uuid}/complete",
-                    json={
-                        "officer_lat": 13.0,
-                        "officer_lon": 80.0,
-                        "resolution_notes": "Pothole filled with concrete",
-                        "after_photo_url": None,
-                    },
-                    headers=_hdr(sub=self._FW_SUB, role="field_officer"),
-                )
+            resp = TestClient(app).post(
+                f"/api/v1/field/complaints/{issue.uuid}/complete",
+                json={
+                    "officer_lat": 13.0,
+                    "officer_lon": 80.0,
+                    "resolution_notes": "Pothole filled with concrete",
+                    "after_photo_url": None,
+                },
+                headers=_hdr(sub=self._FW_SUB, role="field_officer"),
+            )
 
         assert resp.status_code == 200
         data = resp.json()
@@ -936,22 +930,21 @@ class TestCompleteFieldWork:
             "api.v1.field_workflow._get_issue_coords",
             new_callable=AsyncMock,
             return_value=(None, None),
+        ), patch(
+            "api.v1.field_workflow.ComplaintStateMachine.transition",
+            new_callable=AsyncMock,
+            return_value=_transition_result(),
         ):
-            with patch(
-                "api.v1.field_workflow.ComplaintStateMachine.transition",
-                new_callable=AsyncMock,
-                return_value=_transition_result(),
-            ):
-                resp = TestClient(app).post(
-                    f"/api/v1/field/complaints/{issue.uuid}/complete",
-                    json={
-                        "officer_lat": 13.0,
-                        "officer_lon": 80.0,
-                        "resolution_notes": "Road marking repainted",
-                        "after_photo_url": photo_url,
-                    },
-                    headers=_hdr(sub=self._FW_SUB, role="field_officer"),
-                )
+            resp = TestClient(app).post(
+                f"/api/v1/field/complaints/{issue.uuid}/complete",
+                json={
+                    "officer_lat": 13.0,
+                    "officer_lon": 80.0,
+                    "resolution_notes": "Road marking repainted",
+                    "after_photo_url": photo_url,
+                },
+                headers=_hdr(sub=self._FW_SUB, role="field_officer"),
+            )
 
         assert resp.status_code == 200
         assert issue.after_photo_url == photo_url
@@ -967,21 +960,20 @@ class TestCompleteFieldWork:
             "api.v1.field_workflow._get_issue_coords",
             new_callable=AsyncMock,
             return_value=(None, None),
+        ), patch(
+            "api.v1.field_workflow.ComplaintStateMachine.transition",
+            new_callable=AsyncMock,
+            side_effect=InvalidTransitionError("open", "resolved", "RS-BOOST-001"),
         ):
-            with patch(
-                "api.v1.field_workflow.ComplaintStateMachine.transition",
-                new_callable=AsyncMock,
-                side_effect=InvalidTransitionError("open", "resolved", "RS-BOOST-001"),
-            ):
-                resp = TestClient(app).post(
-                    f"/api/v1/field/complaints/{issue.uuid}/complete",
-                    json={
-                        "officer_lat": 13.0,
-                        "officer_lon": 80.0,
-                        "resolution_notes": "Work completed on site",
-                    },
-                    headers=_hdr(sub=self._FW_SUB, role="field_officer"),
-                )
+            resp = TestClient(app).post(
+                f"/api/v1/field/complaints/{issue.uuid}/complete",
+                json={
+                    "officer_lat": 13.0,
+                    "officer_lon": 80.0,
+                    "resolution_notes": "Work completed on site",
+                },
+                headers=_hdr(sub=self._FW_SUB, role="field_officer"),
+            )
 
         assert resp.status_code == 409
         assert "Invalid transition" in resp.json()["detail"]
@@ -995,21 +987,20 @@ class TestCompleteFieldWork:
             "api.v1.field_workflow._get_issue_coords",
             new_callable=AsyncMock,
             return_value=(13.0, 80.0),
+        ), patch(
+            "api.v1.field_workflow.ComplaintStateMachine.transition",
+            new_callable=AsyncMock,
+            return_value=_transition_result(),
         ):
-            with patch(
-                "api.v1.field_workflow.ComplaintStateMachine.transition",
-                new_callable=AsyncMock,
-                return_value=_transition_result(),
-            ):
-                resp = TestClient(app).post(
-                    f"/api/v1/field/complaints/{issue.uuid}/complete",
-                    json={
-                        "officer_lat": 28.61,
-                        "officer_lon": 77.21,
-                        "resolution_notes": "Remote update by supervisor",
-                    },
-                    headers=_hdr(sub=self._FW_SUB, role="field_officer"),
-                )
+            resp = TestClient(app).post(
+                f"/api/v1/field/complaints/{issue.uuid}/complete",
+                json={
+                    "officer_lat": 28.61,
+                    "officer_lon": 77.21,
+                    "resolution_notes": "Remote update by supervisor",
+                },
+                headers=_hdr(sub=self._FW_SUB, role="field_officer"),
+            )
 
         assert resp.status_code == 200
         assert resp.json()["geo_verified"] is False

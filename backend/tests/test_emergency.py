@@ -7,8 +7,8 @@ from fastapi.testclient import TestClient
 
 from core.redis_client import CacheHelper
 from models.schemas import EmergencyResponse, EmergencyServiceItem, SosResponse
-from services.exceptions import ExternalServiceError
 from services.emergency_locator import EmergencyLocatorService
+from services.exceptions import ExternalServiceError
 from services.local_emergency_catalog import LocalEmergencyEntry
 
 

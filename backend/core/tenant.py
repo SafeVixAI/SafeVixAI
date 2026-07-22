@@ -71,16 +71,16 @@ class TenantAwareQuery:
             query = TenantAwareQuery(session, tenant_id)
             results = await query.execute(select(User))
     """
-    
+
     def __init__(self, session: AsyncSession, tenant_id: str | None) -> None:
         self.session = session
         self.tenant_id = tenant_id
-    
+
     def filter_by_tenant(self, stmt: Any) -> Any:
         """Add org_id filter to a SQLAlchemy statement."""
         if not self.tenant_id:
             return stmt
-        
+
         # Get the entity from the statement
         if hasattr(stmt, 'column_descriptions'):
             for desc in stmt.column_descriptions:
@@ -89,9 +89,9 @@ class TenantAwareQuery:
                     table_name = entity.__tablename__
                     if table_name in TENANT_AWARE_TABLES and hasattr(entity, 'org_id'):
                         stmt = stmt.where(entity.org_id == self.tenant_id)
-        
+
         return stmt
-    
+
     async def execute(self, stmt: Any) -> Any:
         """Execute a statement with tenant filtering applied."""
         filtered_stmt = self.filter_by_tenant(stmt)

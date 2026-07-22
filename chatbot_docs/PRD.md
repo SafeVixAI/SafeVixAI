@@ -1,4 +1,4 @@
-# Product Requirements Document (PRD) — SafeVixAI Chatbot
+﻿# Product Requirements Document (PRD) — SafeVixAI Chatbot
 
 The SafeVixAI AI Chatbot is a core component of the SafeVixAI safety platform, designed to provide real-time, authoritative assistant services for road users in India.
 
@@ -19,7 +19,7 @@ Road accidents in India are often followed by critical delays in locating emerge
 
 ## System Performance Goals
 - **Response Latency**: Under 3 seconds for initial token generation (Groq 300+ tok/s).
-- **Availability**: 99.9% uptime through 9-provider LLM fallback chain + Sarvam Indian language path.
+- **Availability**: 99.9% uptime through 10-provider LLM fallback chain + Sarvam Indian language path.
 - **Accuracy**: Minimal hallucination by strictly using RAG-backed facts (top_k=5, min_score=0.55) and deterministic DuckDB SQL for fines.
 - **Multi-language**: Seamless interaction in 14 Indian languages via Sarvam AI auto-routing (Unicode script detection).
 - **Offline**: First-aid and basic legal info available via WebLLM Phi-3 Mini when offline.

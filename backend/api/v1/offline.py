@@ -11,7 +11,6 @@ from core.limiter import limiter
 from services.emergency_locator import EmergencyLocatorService
 from services.exceptions import ServiceValidationError
 
-
 router = APIRouter(prefix='/api/v1/offline', tags=['Offline'])
 
 

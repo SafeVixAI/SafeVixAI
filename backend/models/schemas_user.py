@@ -7,10 +7,8 @@ from __future__ import annotations
 
 from datetime import date
 from typing import Literal
-from uuid import UUID
 
 from pydantic import BaseModel, Field
-
 
 BloodGroup = Literal['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']
 

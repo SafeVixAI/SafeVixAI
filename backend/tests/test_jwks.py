@@ -4,11 +4,17 @@
 """JWKS Manager tests for SafeVixAI backend."""
 from __future__ import annotations
 
-import pytest
 import time
 from unittest.mock import MagicMock, patch
-from core.jwks import JWKSManager, ROTATION_INTERVAL_SECONDS, ROTATION_WINDOW_SECONDS, JWKS_CACHE_TTL_SECONDS
 
+import pytest
+
+from core.jwks import (
+    JWKS_CACHE_TTL_SECONDS,
+    ROTATION_INTERVAL_SECONDS,
+    ROTATION_WINDOW_SECONDS,
+    JWKSManager,
+)
 
 # ── JWKS Manager Tests ──────────────────────────────────────────────────────
 
@@ -41,7 +47,7 @@ class TestJWKSManagerGetSigningKey:
     async def test_get_signing_key_with_jwks(self):
         """Test getting signing key returns fallback when no JWKS client."""
         manager = JWKSManager(jwks_url="https://example.com/jwks")
-        
+
         # Without a working JWKS client, it should fall back to static
         with patch("core.security.SECRET_KEY", "static-secret"):
             key, kid = await manager.get_signing_key()
@@ -52,7 +58,7 @@ class TestJWKSManagerGetSigningKey:
     async def test_get_signing_key_fallback(self):
         """Test fallback to static secret."""
         manager = JWKSManager()
-        
+
         with patch("core.security.SECRET_KEY", "static-secret"):
             key, kid = await manager.get_signing_key()
             assert key == "static-secret"
@@ -66,23 +72,24 @@ class TestJWKSManagerVerifyToken:
     async def test_verify_token_with_jwks_client(self):
         """Test token verification with JWKS client."""
         import jwt
-        from core.security import SECRET_KEY, ALGORITHM
-        
+
+        from core.security import ALGORITHM, SECRET_KEY
+
         manager = JWKSManager(jwks_url="https://example.com/jwks")
         manager._jwks_client = MagicMock()
-        
+
         # Create a valid token
         token = jwt.encode(
             {"sub": "test-user", "exp": time.time() + 3600},
             SECRET_KEY,
             algorithm=ALGORITHM,
         )
-        
+
         # Mock the JWKS client to use static key
         mock_key = MagicMock()
         mock_key.key = SECRET_KEY
         manager._jwks_client.get_signing_key_from_jwt = MagicMock(return_value=mock_key)
-        
+
         payload = await manager.verify_token(token)
         assert payload["sub"] == "test-user"
 
@@ -90,16 +97,17 @@ class TestJWKSManagerVerifyToken:
     async def test_verify_token_fallback_to_static(self):
         """Test token verification falls back to static secret."""
         import jwt
-        from core.security import SECRET_KEY, ALGORITHM
-        
+
+        from core.security import ALGORITHM, SECRET_KEY
+
         manager = JWKSManager()
-        
+
         token = jwt.encode(
             {"sub": "test-user", "exp": time.time() + 3600},
             SECRET_KEY,
             algorithm=ALGORITHM,
         )
-        
+
         payload = await manager.verify_token(token)
         assert payload["sub"] == "test-user"
 
@@ -107,16 +115,17 @@ class TestJWKSManagerVerifyToken:
     async def test_verify_token_expired(self):
         """Test expired token rejection."""
         import jwt
-        from core.security import SECRET_KEY, ALGORITHM
-        
+
+        from core.security import ALGORITHM, SECRET_KEY
+
         manager = JWKSManager()
-        
+
         token = jwt.encode(
             {"sub": "test-user", "exp": time.time() - 3600},
             SECRET_KEY,
             algorithm=ALGORITHM,
         )
-        
+
         with pytest.raises(jwt.ExpiredSignatureError):
             await manager.verify_token(token)
 
@@ -127,16 +136,16 @@ class TestJWKSManagerKeyHistory:
     def test_key_history_cleanup(self):
         """Test expired key cleanup."""
         manager = JWKSManager()
-        
+
         # Add expired key
         manager._key_history.append(("old-key", time.time() - 100))
         # Add valid key
         manager._key_history.append(("new-key", time.time() + 3600))
-        
+
         # Clean up expired keys
         now = time.time()
         manager._key_history = [(kid, exp) for kid, exp in manager._key_history if now < exp]
-        
+
         assert len(manager._key_history) == 1
         assert manager._key_history[0][0] == "new-key"
 
@@ -147,7 +156,7 @@ class TestJWKSManagerKeyInfo:
     def test_get_key_info_default(self):
         """Test key info with default values."""
         manager = JWKSManager()
-        
+
         info = manager.get_key_info()
         assert info["current_key_id"] is None
         assert info["key_history_count"] == 0
@@ -157,7 +166,7 @@ class TestJWKSManagerKeyInfo:
     def test_get_key_info_with_url(self):
         """Test key info with JWKS URL."""
         manager = JWKSManager(jwks_url="https://example.com/jwks")
-        
+
         info = manager.get_key_info()
         assert info["jwks_url"] == "https://example.com/jwks"
 

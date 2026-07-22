@@ -8,7 +8,7 @@ from __future__ import annotations
 import json
 import logging
 
-from core.audit import AuditLog, AuditEvent
+from core.audit import AuditEvent, AuditLog
 
 
 class TestAuditEvent:

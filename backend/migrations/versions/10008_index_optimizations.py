@@ -18,9 +18,8 @@ Create Date: 2026-05-22
 
 from __future__ import annotations
 
-from alembic import op
 import sqlalchemy as sa
-
+from alembic import op
 
 revision = '10008_index_optimizations'
 down_revision = '10007'
@@ -74,7 +73,7 @@ def downgrade() -> None:
     op.drop_index('ix_road_issues_status_issue_type', table_name='road_issues')
     op.drop_index('ix_road_issues_status_created_at', table_name='road_issues')
     op.execute('DROP INDEX IF EXISTS ix_road_issues_location_status_gist')
-    
+
     conn = op.get_bind()
     has_live_tracking_groups = conn.execute(
         sa.text("SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'live_tracking_groups')")

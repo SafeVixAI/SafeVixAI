@@ -11,8 +11,8 @@ Usage:
 from __future__ import annotations
 
 import argparse
-import json
 import csv
+import json
 import sys
 from pathlib import Path
 
@@ -23,7 +23,7 @@ DATA_DIR = PROJECT_ROOT / 'data' / 'civic_intel'
 def validate_json(filepath: Path) -> dict:
     """Validate a JSON file and return stats."""
     try:
-        with open(filepath, 'r', encoding='utf-8') as f:
+        with open(filepath, encoding='utf-8') as f:
             data = json.load(f)
         if isinstance(data, list):
             return {'valid': True, 'records': len(data), 'type': 'array'}
@@ -39,7 +39,7 @@ def validate_json(filepath: Path) -> dict:
 def validate_csv(filepath: Path) -> dict:
     """Validate a CSV file and return stats."""
     try:
-        with open(filepath, 'r', encoding='utf-8') as f:
+        with open(filepath, encoding='utf-8') as f:
             reader = csv.DictReader(f)
             rows = list(reader)
             return {'valid': True, 'records': len(rows), 'columns': len(reader.fieldnames or []),
@@ -51,7 +51,7 @@ def validate_csv(filepath: Path) -> dict:
 def validate_geojson(filepath: Path) -> dict:
     """Validate a GeoJSON file."""
     try:
-        with open(filepath, 'r', encoding='utf-8') as f:
+        with open(filepath, encoding='utf-8') as f:
             data = json.load(f)
         if data.get('type') == 'FeatureCollection':
             features = data.get('features', [])
@@ -65,7 +65,7 @@ def validate_municipalities(filepath: Path) -> list[str]:
     """Validate municipalities_seed.json for data quality."""
     issues = []
     try:
-        with open(filepath, 'r', encoding='utf-8') as f:
+        with open(filepath, encoding='utf-8') as f:
             data = json.load(f)
 
         slugs = set()

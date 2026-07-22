@@ -7,6 +7,7 @@ Requires Docker to be running locally. Skipped automatically in CI-less envs.
 """
 
 import os
+
 import pytest
 from sqlalchemy import create_engine, text
 

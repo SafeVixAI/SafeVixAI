@@ -8,11 +8,11 @@ import json
 import pytest
 
 from api.v1.tracking import (
+    RedisConnectionManager,
     _is_valid_location,
     _is_valid_tracking_payload,
-    _origin_allowed,
     _is_valid_ws_token,
-    RedisConnectionManager,
+    _origin_allowed,
 )
 
 

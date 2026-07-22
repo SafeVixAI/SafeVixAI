@@ -9,7 +9,6 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-
 EmergencyCategory = Literal['hospital', 'police', 'ambulance', 'fire', 'towing', 'pharmacy', 'puncture', 'showroom']
 RoadIssueStatus = Literal['open', 'acknowledged', 'in_progress', 'resolved', 'rejected', 'pending_processing', 'verified']
 RouteProfile = Literal['driving-car', 'cycling-regular', 'foot-walking']
@@ -202,7 +201,7 @@ class RoadReportResponse(BaseModel):
     photo_url: str | None = None
     status: RoadIssueStatus
     ai_detection: dict | None = None
-    
+
     # Enterprise fields
     category: str | None = None
     sub_category: str | None = None

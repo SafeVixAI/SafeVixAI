@@ -7,11 +7,12 @@ from __future__ import annotations
 import hashlib
 import os
 import uuid as _uuid
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock, patch
 
 os.environ.setdefault("APP_ENV", "test")
 import core.limiter
+
 core.limiter.limiter.enabled = False
 
 import jwt
@@ -212,7 +213,7 @@ class TestAuthRefresh:
         expired = jwt.encode(
             {
                 "sub": "test@example.com",
-                "exp": datetime.now(timezone.utc) - timedelta(hours=1),
+                "exp": datetime.now(UTC) - timedelta(hours=1),
                 "aud": APP_JWT_AUDIENCE,
                 "iss": APP_JWT_ISSUER,
                 "purpose": "refresh",
@@ -330,7 +331,7 @@ def _make_issue_mock(idx=1):
     issue.road_number = "NH-48"
     issue.authority_name = "PWD"
     issue.status = "open"
-    issue.created_at = datetime.now(timezone.utc)
+    issue.created_at = datetime.now(UTC)
     issue.category = "roads"
     issue.sub_category = "pothole"
     issue.ward_id = "ward-01"
@@ -445,7 +446,7 @@ class TestAdminAssignComplaint:
         mock_issue = MagicMock()
         mock_issue.complaint_ref = "REF-001"
         mock_issue.assigned_officer_id = self.VALID_UUID
-        mock_issue.sla_deadline = datetime.now(timezone.utc)
+        mock_issue.sla_deadline = datetime.now(UTC)
         mock_lifecycle.assign_officer = AsyncMock(return_value=mock_issue)
         resp = client.post(
             f"/api/v1/admin/complaints/{self.VALID_UUID}/assign?officer_id={self.VALID_UUID}",
@@ -506,8 +507,8 @@ class TestAdminOfficers:
         officer.ward_id = "ward-01"
         officer.department = "PWD"
         officer.is_active = True
-        officer.last_checkin = datetime.now(timezone.utc)
-        officer.created_at = datetime.now(timezone.utc)
+        officer.last_checkin = datetime.now(UTC)
+        officer.created_at = datetime.now(UTC)
         scalars_mock = MagicMock()
         scalars_mock.all.return_value = [officer]
         result_mock = MagicMock()

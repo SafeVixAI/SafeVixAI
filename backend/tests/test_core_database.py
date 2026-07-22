@@ -12,15 +12,15 @@ import pytest
 from sqlalchemy.ext.asyncio import AsyncEngine
 
 from core.database import (
+    AsyncReadSessionLocal,
+    AsyncSessionLocal,
     _build_engine,
-    get_replica_engine,
-    get_db,
-    get_read_db,
-    replica_aware_session,
     check_database,
     check_replica_database,
-    AsyncSessionLocal,
-    AsyncReadSessionLocal,
+    get_db,
+    get_read_db,
+    get_replica_engine,
+    replica_aware_session,
 )
 
 
@@ -423,7 +423,8 @@ class TestBaseModel:
         assert Base is not None
 
     def test_base_is_declarative(self):
-        from core.database import Base
         from sqlalchemy.orm import DeclarativeBase
+
+        from core.database import Base
         assert isinstance(Base, type)
         assert issubclass(Base, DeclarativeBase)

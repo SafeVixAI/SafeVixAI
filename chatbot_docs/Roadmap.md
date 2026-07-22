@@ -1,10 +1,10 @@
-# SafeVixAI Chatbot — Implementation Roadmap
+﻿# SafeVixAI Chatbot — Implementation Roadmap
 
 The development of the chatbot service was divided into nine phases to ensure build consistency and avoid conflicts.
 
 ## Phase 1: Foundation ✅
 - Created `chatbot_service/` folder and setup base directories.
-- Configured all 9 LLM provider API wrappers with auto-fallback.
+- Configured all 10 LLM provider API wrappers with auto-fallback.
 - Configured Sarvam AI Indian language path (separate from main fallback chain).
 - Verified health checks for all providers.
 
@@ -30,7 +30,7 @@ The development of the chatbot service was divided into nine phases to ensure bu
 - Built `ContextAssembler` to orchestrate parallel tool calls.
 
 ## Phase 6: Multi-Provider Routing ✅
-- Implemented `ProviderRouter` with 9-provider fallback chain: Groq → Cerebras → Gemini → GitHub Models → NVIDIA NIM → OpenRouter → Mistral → Together → Template.
+- Implemented `ProviderRouter` with 10-provider fallback chain: Groq → Cerebras → Gemini → GitHub Models → NVIDIA NIM → OpenRouter → Mistral → Together → Template.
 - 13 provider files: base.py, cerebras, gemini, github_models, groq, mistral, nvidia_nim, openrouter, router.py, sarvam, together, __init__.py.
 - Added Sarvam AI auto-routing for Indian languages (regex Unicode detection).
 - Added `TemplateProvider` as always-works deterministic fallback.

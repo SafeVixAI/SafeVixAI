@@ -14,7 +14,6 @@ from core.redis_client import CacheHelper
 from models.schemas import GeocodeResult
 from services.geocoding_service import GeocodingError, GeocodingService
 
-
 # ── Fixtures ────────────────────────────────────────────────────────────
 
 @pytest.fixture

@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2026 SafeVixAI Team
 
-import math
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import httpx
@@ -9,10 +8,9 @@ import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from models.city_center import CityCenter
-from models.values import Coordinates, Severity, Distance
+from models.values import Coordinates, Distance, Severity
 from services.city_center_repo import get_all_city_centers, get_city_center, get_offline_centers
-from services.osm_contributor import OSMContributor, OSM_TAG_MAP, get_osm_contributor
-
+from services.osm_contributor import OSM_TAG_MAP, OSMContributor, get_osm_contributor
 
 # ── models/values.py tests ──────────────────────────────────────────────────
 

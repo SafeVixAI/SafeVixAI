@@ -10,7 +10,6 @@ Create Date: 2026-05-22 20:00:00.000000
 
 from alembic import op
 
-
 revision = '10009_sos_retention'
 down_revision = '10008_index_optimizations'
 branch_labels = None

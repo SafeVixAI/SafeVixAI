@@ -3,15 +3,15 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import httpx
 import pytest
 
 from services.sla_notification import (
-    COOLDOWN_MINUTES,
     _NOTIFIED_CACHE,
+    COOLDOWN_MINUTES,
     SLANotificationService,
 )
 
@@ -72,18 +72,18 @@ class TestNotifySLABreach:
     @pytest.mark.asyncio
     async def test_cooldown_returns_false(self):
         svc = self._make_svc()
-        _NOTIFIED_CACHE["REF-001"] = datetime.now(timezone.utc) - timedelta(minutes=5)
+        _NOTIFIED_CACHE["REF-001"] = datetime.now(UTC) - timedelta(minutes=5)
         result = await svc.notify_sla_breach(
             complaint_ref="REF-001", issue_type="pothole", severity=3,
             city="Chennai", ward_id="W1",
-            sla_deadline=datetime.now(timezone.utc) - timedelta(hours=2),
+            sla_deadline=datetime.now(UTC) - timedelta(hours=2),
         )
         assert result is False
 
     @pytest.mark.asyncio
     async def test_cooldown_expired_allows_notification(self):
         svc = self._make_svc()
-        _NOTIFIED_CACHE["REF-002"] = datetime.now(timezone.utc) - timedelta(minutes=COOLDOWN_MINUTES + 1)
+        _NOTIFIED_CACHE["REF-002"] = datetime.now(UTC) - timedelta(minutes=COOLDOWN_MINUTES + 1)
         svc.email_enabled = True
         svc.recipients = ["admin@example.com"]
         with (
@@ -93,7 +93,7 @@ class TestNotifySLABreach:
             result = await svc.notify_sla_breach(
                 complaint_ref="REF-002", issue_type="pothole", severity=4,
                 city="Chennai", ward_id="W1",
-                sla_deadline=datetime.now(timezone.utc) - timedelta(hours=3),
+                sla_deadline=datetime.now(UTC) - timedelta(hours=3),
             )
         assert result is True
         mock_email.assert_called_once()
@@ -105,7 +105,7 @@ class TestNotifySLABreach:
             result = await svc.notify_sla_breach(
                 complaint_ref="REF-003", issue_type="flooding", severity=5,
                 city=None, ward_id=None,
-                sla_deadline=datetime.now(timezone.utc) - timedelta(hours=1),
+                sla_deadline=datetime.now(UTC) - timedelta(hours=1),
             )
         assert result is True
         mock_webhook.assert_awaited_once()
@@ -120,7 +120,7 @@ class TestNotifySLABreach:
             result = await svc.notify_sla_breach(
                 complaint_ref="REF-004", issue_type="pothole", severity=2,
                 city="Delhi", ward_id="W2",
-                sla_deadline=datetime.now(timezone.utc) - timedelta(hours=4),
+                sla_deadline=datetime.now(UTC) - timedelta(hours=4),
             )
         assert result is True
         mock_email.assert_called_once()
@@ -131,7 +131,7 @@ class TestNotifySLABreach:
         result = await svc.notify_sla_breach(
             complaint_ref="REF-005", issue_type="pothole", severity=1,
             city="Mumbai", ward_id="W3",
-            sla_deadline=datetime.now(timezone.utc) - timedelta(hours=2),
+            sla_deadline=datetime.now(UTC) - timedelta(hours=2),
         )
         assert result is False
 
@@ -149,7 +149,7 @@ class TestNotifySLABreach:
             result = await svc.notify_sla_breach(
                 complaint_ref="REF-006", issue_type="flooding", severity=5,
                 city="Kolkata", ward_id="W4",
-                sla_deadline=datetime.now(timezone.utc) - timedelta(hours=6),
+                sla_deadline=datetime.now(UTC) - timedelta(hours=6),
             )
         assert result is True
         mock_email.assert_called_once()
@@ -170,7 +170,7 @@ class TestNotifySLABreach:
             result = await svc.notify_sla_breach(
                 complaint_ref="REF-007", issue_type="pothole", severity=3,
                 city="Chennai", ward_id="W1",
-                sla_deadline=datetime.now(timezone.utc) - timedelta(hours=2),
+                sla_deadline=datetime.now(UTC) - timedelta(hours=2),
             )
         assert result is True
         mock_webhook.assert_awaited_once()
@@ -190,7 +190,7 @@ class TestNotifySLABreach:
             result = await svc.notify_sla_breach(
                 complaint_ref="REF-008", issue_type="flooding", severity=4,
                 city="Delhi", ward_id="W5",
-                sla_deadline=datetime.now(timezone.utc) - timedelta(hours=3),
+                sla_deadline=datetime.now(UTC) - timedelta(hours=3),
             )
         assert result is True
         mock_email.assert_called_once()
@@ -211,7 +211,7 @@ class TestNotifySLABreach:
             result = await svc.notify_sla_breach(
                 complaint_ref="REF-009", issue_type="pothole", severity=2,
                 city="Mumbai", ward_id="W6",
-                sla_deadline=datetime.now(timezone.utc) - timedelta(hours=5),
+                sla_deadline=datetime.now(UTC) - timedelta(hours=5),
             )
         assert result is False
         assert "REF-009" not in _NOTIFIED_CACHE
@@ -226,7 +226,7 @@ class TestNotifySLABreach:
             result = await svc.notify_sla_breach(
                 complaint_ref="REF-010", issue_type="pothole", severity=3,
                 city="Chennai", ward_id="W7",
-                sla_deadline=datetime.now(timezone.utc) - timedelta(hours=1),
+                sla_deadline=datetime.now(UTC) - timedelta(hours=1),
                 escalation_path="NHAI > Ministry",
             )
         assert result is True
@@ -239,7 +239,7 @@ class TestNotifySLABreach:
             result = await svc.notify_sla_breach(
                 complaint_ref="REF-011", issue_type="pothole", severity=3,
                 city="Chennai", ward_id="W8",
-                sla_deadline=datetime.now(timezone.utc) - timedelta(hours=2),
+                sla_deadline=datetime.now(UTC) - timedelta(hours=2),
             )
         assert result is True
         mock_webhook.assert_awaited_once()

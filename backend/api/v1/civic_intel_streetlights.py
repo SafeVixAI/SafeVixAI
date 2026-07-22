@@ -11,8 +11,8 @@ from typing import Any
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.limiter import limiter
 from core.database import get_async_session
+from core.limiter import limiter
 
 logger = logging.getLogger(__name__)
 

@@ -9,7 +9,6 @@ import sys
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
-
 BACKEND_DIR = Path(__file__).resolve().parents[1]
 PROJECT_ROOT = BACKEND_DIR.parent
 CHATBOT_SERVICE_DIR = PROJECT_ROOT / 'chatbot_service'
@@ -20,7 +19,6 @@ if str(CHATBOT_SERVICE_DIR) not in sys.path:
 
 from rag.document_loader import LoadedDocument, load_documents  # noqa: E402
 from rag.embeddings import normalize_text  # noqa: E402
-
 
 DEFAULT_PERSIST_DIR = BACKEND_DIR / 'data' / 'chroma_db'
 

@@ -21,6 +21,7 @@ from __future__ import annotations
 import logging
 import re
 from dataclasses import dataclass, field
+from datetime import UTC
 from typing import Any
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -66,11 +67,11 @@ class VerificationResult:
     duplicate_cluster_id: str | None
     flags: list[VerificationFlag] = field(default_factory=list)
     classification_details: dict[str, Any] = field(default_factory=dict)
-    
+
     @property
     def needs_human_review(self) -> bool:
         return self.routing_recommendation == "human_review"
-    
+
     @property
     def should_reject(self) -> bool:
         return self.routing_recommendation == "reject"
@@ -324,10 +325,12 @@ class AIVerificationPipeline:
         flags = []
         try:
             from datetime import timedelta
+
             from sqlalchemy import func, select
+
             from models.road_issue import RoadIssue
 
-            one_hour_ago = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(hours=1)
+            one_hour_ago = datetime.now(UTC).replace(tzinfo=None) - timedelta(hours=1)
             stmt = select(func.count(RoadIssue.id)).where(
                 RoadIssue.citizen_phone == phone,
                 RoadIssue.created_at > one_hour_ago,
@@ -356,7 +359,7 @@ class AIVerificationPipeline:
         """Assess description quality for better routing."""
         flags = []
         words = text.strip().split()
-        
+
         if len(words) >= 10:
             # Good quality description — boost confidence
             pass
@@ -374,4 +377,4 @@ class AIVerificationPipeline:
 
 
 # Import for rate limit check
-from datetime import datetime, timezone
+from datetime import datetime

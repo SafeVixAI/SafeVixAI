@@ -9,9 +9,9 @@ Usage:
 
 from __future__ import annotations
 
-import json
 import csv
-from datetime import datetime, timezone
+import json
+from datetime import UTC, datetime
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -39,7 +39,7 @@ def count_records(filepath: Path) -> int:
                     return len(data['features'])
                 return len(data)
         elif filepath.suffix == '.csv':
-            with open(filepath, 'r', encoding='utf-8') as f:
+            with open(filepath, encoding='utf-8') as f:
                 return sum(1 for _ in csv.reader(f)) - 1
         elif filepath.suffix == '.geojson':
             data = json.loads(filepath.read_text(encoding='utf-8'))
@@ -64,7 +64,7 @@ def main():
         'version': '1.0.0',
         'description': 'Comprehensive Indian civic infrastructure and municipal data for AI-powered road safety and citizen grievance systems.',
         'license': 'MIT',
-        'exported_at': datetime.now(timezone.utc).isoformat(),
+        'exported_at': datetime.now(UTC).isoformat(),
         'source': 'SafeVixAI Project (IIT Madras Road Safety Hackathon 2026)',
         'categories': {},
         'files': {},

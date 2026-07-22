@@ -1,4 +1,4 @@
-# SafeVixAI — Tech Stack
+﻿# SafeVixAI — Tech Stack
 
 ## Overview
 
@@ -9,7 +9,7 @@ Layer                      Technology                              Cost
 ---                        ---                                     ---
 Frontend                   Next.js 15 + React 19 + Tailwind        Free (Vercel)
 Backend                    FastAPI + Python 3.11 + Uvicorn         Free (Render.com)
-Chatbot Service            FastAPI + 9 LLM providers + RAG        Free (Render.com)
+Chatbot Service            FastAPI + 10 LLM providers + RAG        Free (Render.com)
 Online LLM                 Groq / Gemini / Sarvam AI (chain)       Free (multi-provider)
 Offline LLM                WebLLM Phi-3 Mini 4-bit (WebGPU)       Free (device compute)
 Vector Store               ChromaDB (local persistent)             Free (server disk)
@@ -136,7 +136,7 @@ A **separate FastAPI service** with its own Python environment & heavy ML depend
 | **redis** | Conversation memory |
 | **httpx / requests** | HTTP API clients |
 
-### 9-Provider LLM Fallback Chain
+### 10-provider LLM Fallback Chain
 
 | Provider | Model | Speed | Use Case |
 |----------|-------|-------|----------|
@@ -203,7 +203,7 @@ A **separate FastAPI service** with its own Python environment & heavy ML depend
 | Maps | MapLibre GL + OSM | Free (open source) | Vector tiles |
 | Geocoding | Nominatim | 1 req/sec | Address lookup |
 | POI data | Overpass API | Fair use | Emergency services |
-| CI/CD | GitHub Actions | 2,000 min/month | 19 workflows |
+| CI/CD | GitHub Actions | 2,000 min/month | 40 workflows |
 | Container | Docker + docker-compose | Free | 5 services |
 
 ---

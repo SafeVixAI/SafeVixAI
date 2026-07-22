@@ -1,4 +1,4 @@
-# Runbooks
+﻿# Runbooks
 
 This directory contains operational runbooks for SafeVixAI production incidents.
 
@@ -6,7 +6,7 @@ This directory contains operational runbooks for SafeVixAI production incidents.
 
 | Runbook | Description | Severity |
 |---------|-------------|----------|
-| [RB-001: LLM Provider Outage](./RB-001-llm-outage.md) | All 9 providers down | P0 |
+| [RB-001: LLM Provider Outage](./RB-001-llm-outage.md) | All 10 providers down | P0 |
 | [RB-002: Database Failover](./RB-002-db-failover.md) | Primary RDS unavailable | P0 |
 | [RB-003: Redis Cache Failure](./RB-003-redis-failure.md) | Redis unreachable | P1 |
 | [RB-004: Service Degradation](./RB-004-service-degradation.md) | High latency / 5xx errors | P1 |

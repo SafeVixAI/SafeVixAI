@@ -8,7 +8,7 @@ Enforces clean separation between Command (write/mutate) and Query (read/filter)
 from __future__ import annotations
 
 import abc
-from typing import Any, Generic, TypeVar
+from typing import Generic, TypeVar
 
 from fastapi import Request
 
@@ -18,12 +18,10 @@ R = TypeVar("R")
 
 class Command(Generic[R]):
     """Base class for all CQRS Commands (mutating state)."""
-    pass
 
 
 class Query(Generic[R]):
     """Base class for all CQRS Queries (non-mutating reading)."""
-    pass
 
 
 class CommandHandler(Generic[T, R], metaclass=abc.ABCMeta):
@@ -32,7 +30,6 @@ class CommandHandler(Generic[T, R], metaclass=abc.ABCMeta):
     @abc.abstractmethod
     async def handle(self, command: T) -> R:
         """Execute the command."""
-        pass
 
 
 class QueryHandler(Generic[T, R], metaclass=abc.ABCMeta):
@@ -41,7 +38,6 @@ class QueryHandler(Generic[T, R], metaclass=abc.ABCMeta):
     @abc.abstractmethod
     async def handle(self, query: T) -> R:
         """Execute the query."""
-        pass
 
 
 class CQRSBus:
@@ -85,8 +81,12 @@ def get_cqrs_bus(request: Request) -> CQRSBus:
 
 def init_cqrs_bus(app: FastAPI) -> CQRSBus:
     """Factory: creates a per-app CQRSBus, registers handlers, stores on app.state."""
-    from fastapi import FastAPI
-    from services.roadwatch_service import SubmitReportHandler, VerifyReportHandler, SubmitReportCommand, VerifyReportCommand
+    from services.roadwatch_service import (
+        SubmitReportCommand,
+        SubmitReportHandler,
+        VerifyReportCommand,
+        VerifyReportHandler,
+    )
 
     bus = CQRSBus()
     bus.register_command_handler(SubmitReportCommand, SubmitReportHandler())

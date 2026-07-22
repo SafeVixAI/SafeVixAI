@@ -1,4 +1,4 @@
-# SafeVixAI — Production Readiness Report
+﻿# SafeVixAI — Production Readiness Report
 
 > **SNAPSHOT**: This document reflects the state as of 2026-05-26. For current state see [AGENTS.md](../../AGENTS.md).
 
@@ -35,7 +35,7 @@ All 27 CoERS hackathon criteria must be demonstrably met:
 | SOS/Emergency | /sos, /emergency pages, IndexedDB queue | ✅ |
 | Crash Detection | Accelerometer + 20s countdown + auto-dispatch | ✅ |
 | Family Tracking | WebSocket + signed JWT tracking URLs | ✅ |
-| AI Chatbot | 9-provider LLM, ChromaDB RAG, 13 tools | ✅ |
+| AI Chatbot | 10-provider LLM, ChromaDB RAG, 13 tools | ✅ |
 | Challan Calculator | DuckDB-Wasm + server-side DB | ✅ |
 | Road Reporter | Form + photo + authority routing + Waze feed | ✅ |
 | Indian Languages | 14 hreflang, Sarvam LLM, IndicSeamless | ✅ |
@@ -69,7 +69,7 @@ All 27 CoERS hackathon criteria must be demonstrably met:
 - Accept credential-in-git risk (private repo + rotate after event)
 - All 25 features are demonstrable
 - Core safety features (SOS, crash detection, offline queue) fully functional
-- Chatbot works with any of 9 providers
+- Chatbot works with any of 10 providers
 
 **For Real Production:** ❌ NO-GO until:
 1. All .env credentials rotated and git-cleaned

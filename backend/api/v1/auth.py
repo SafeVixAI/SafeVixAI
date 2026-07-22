@@ -7,16 +7,19 @@ import hashlib
 import hmac
 import os
 
+import jwt
 from fastapi import APIRouter, Depends, HTTPException, Request
-from core.audit import AuditLog, AuditEvent
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from core.audit import AuditEvent, AuditLog
+from core.database import get_db
 from core.limiter import limiter
 from core.security import (
+    ALGORITHM,
     APP_JWT_AUDIENCE,
     APP_JWT_ISSUER,
-    ALGORITHM,
     SECRET_KEY,
     create_access_token,
     create_secure_cookie_response,
@@ -24,10 +27,6 @@ from core.security import (
     is_token_revoked,
     revoke_token,
 )
-import jwt
-
-from sqlalchemy.ext.asyncio import AsyncSession
-from core.database import get_db
 
 router = APIRouter(prefix="/api/v1/auth", tags=["auth"])
 
@@ -130,15 +129,16 @@ async def register(
         HTTPException (400): If an operator account with the same email already exists.
     """
     from sqlalchemy import select
+
     from models.user import OperatorUser
 
     email = body.email.strip().lower()
-    
+
     # Check if user already exists
     stmt = select(OperatorUser).where(OperatorUser.email == email)
     result = await db.execute(stmt)
     existing_user = result.scalar_one_or_none()
-    
+
     if existing_user is not None:
         raise HTTPException(status_code=400, detail="Operator with this email already exists")
 
@@ -150,12 +150,12 @@ async def register(
         role=body.role,
         is_active=True
     )
-    
+
     db.add(new_operator)
     await db.commit()
     await db.refresh(new_operator)
     AuditLog.log_auth_login(str(new_operator.id), request.client.host if request.client else "unknown", new_operator.name)
-    
+
     return JSONResponse(
         status_code=201,
         content={
@@ -192,15 +192,16 @@ async def login(
         HTTPException (401): If credentials are invalid or user is inactive.
     """
     from sqlalchemy import select
+
     from models.user import OperatorUser
 
     email = body.email.strip().lower()
-    
+
     # 1. Try database-backed operator authentication
     stmt = select(OperatorUser).where(OperatorUser.email == email, OperatorUser.is_active)
     result = await db.execute(stmt)
     db_operator = result.scalar_one_or_none()
-    
+
     if db_operator is not None:
         if _verify_pbkdf2_password(body.password, db_operator.hashed_password):
             token = create_access_token(
@@ -252,7 +253,7 @@ async def logout(request: Request) -> JSONResponse:
     Returns:
         JSONResponse confirming successful session termination.
     """
-    from core.security import COOKIE_HTTPONLY, COOKIE_SECURE, COOKIE_SAMESITE, COOKIE_PATH
+    from core.security import COOKIE_HTTPONLY, COOKIE_PATH, COOKIE_SAMESITE, COOKIE_SECURE
     ip = request.client.host if request.client else "unknown"
     AuditLog.log(AuditEvent.AUTH_LOGOUT, ip_address=ip)
     response = JSONResponse(content={"message": "Logged out successfully"})

@@ -7,7 +7,6 @@ import math
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import httpx
-
 import pytest
 
 from core.config import Settings
@@ -31,7 +30,6 @@ from services.emergency_locator import (
 from services.exceptions import ExternalServiceError, ServiceValidationError
 from services.local_emergency_catalog import LocalEmergencyEntry
 from services.overpass_service import OverpassService
-
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 

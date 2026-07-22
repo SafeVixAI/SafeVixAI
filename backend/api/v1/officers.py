@@ -5,11 +5,12 @@ from __future__ import annotations
 
 import logging
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
+
 from fastapi import APIRouter, Depends, HTTPException, Request
+from geoalchemy2 import WKTElement
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from geoalchemy2 import WKTElement
 
 from core.config import get_settings
 from core.database import get_db
@@ -17,7 +18,12 @@ from core.limiter import limiter
 from core.security import get_current_user
 from models.officer import Officer
 from models.road_issue import RoadIssue
-from models.schemas import OfficerResponse, OfficerCheckinRequest, OfficerCheckinResponse, RoadIssueItem
+from models.schemas import (
+    OfficerCheckinRequest,
+    OfficerCheckinResponse,
+    OfficerResponse,
+    RoadIssueItem,
+)
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix='/api/v1/officers', tags=['Officers'])
@@ -31,12 +37,12 @@ async def get_or_create_officer(db: AsyncSession, current_user: dict) -> Officer
 
     stmt = select(Officer).where(Officer.id == user_id)
     officer = (await db.execute(stmt)).scalar_one_or_none()
-    
+
     if not officer:
         # Auto-provision field officer profile
         email = current_user.get("email") or f"officer_{user_id.hex[:6]}@safevix.ai"
         name = current_user.get("name") or current_user.get("username") or f"Officer {user_id.hex[:6].upper()}"
-        
+
         settings = get_settings()
         officer = Officer(
             id=user_id,
@@ -88,13 +94,13 @@ async def officer_gps_checkin(
 ) -> OfficerCheckinResponse:
     """Submit GPS coordinates to check-in and update officer's real-time field location."""
     officer = await get_or_create_officer(db, current_user)
-    
-    officer.last_checkin = datetime.now(timezone.utc).replace(tzinfo=None)
+
+    officer.last_checkin = datetime.now(UTC).replace(tzinfo=None)
     officer.last_location = WKTElement(f"POINT({payload.lon} {payload.lat})", srid=4326)
-    
+
     await db.commit()
     await db.refresh(officer)
-    
+
     return OfficerCheckinResponse(
         status="success",
         last_checkin=officer.last_checkin
@@ -110,19 +116,19 @@ async def get_my_workload(
 ) -> list[RoadIssueItem]:
     """Get active complaints assigned to the logged-in field officer."""
     officer = await get_or_create_officer(db, current_user)
-    
+
     lat_expr = func.ST_Y(RoadIssue.location).label('lat')
     lon_expr = func.ST_X(RoadIssue.location).label('lon')
-    
+
     stmt = (
         select(RoadIssue, lat_expr, lon_expr)
         .where(RoadIssue.assigned_officer_id == officer.id)
         .where(RoadIssue.status.in_(["open", "acknowledged", "in_progress"]))
         .order_by(RoadIssue.severity.desc(), RoadIssue.created_at.desc())
     )
-    
+
     rows = (await db.execute(stmt)).all()
-    
+
     return [
         RoadIssueItem(
             uuid=issue.uuid,

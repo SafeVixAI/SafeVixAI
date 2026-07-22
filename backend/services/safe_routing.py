@@ -10,9 +10,8 @@ from datetime import datetime
 
 import httpx
 
-from core.circuit_breaker import CircuitBreakerRegistry, CircuitBreakerOpenError
+from core.circuit_breaker import CircuitBreakerOpenError, CircuitBreakerRegistry
 from services.exceptions import ExternalServiceError, ServiceValidationError
-
 
 logger = logging.getLogger("safevixai.backend.safe_routing")
 

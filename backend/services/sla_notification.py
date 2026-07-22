@@ -12,7 +12,7 @@ from __future__ import annotations
 import logging
 import os
 import smtplib
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from email.message import EmailMessage
 from typing import Any
 
@@ -53,14 +53,14 @@ class SLANotificationService:
     ) -> bool:
         """Send SLA breach notification. Returns True if any notification was sent."""
         # Cooldown check
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         if complaint_ref in _NOTIFIED_CACHE:
             last = _NOTIFIED_CACHE[complaint_ref]
             if (now - last).total_seconds() < COOLDOWN_MINUTES * 60:
                 return False
 
         overdue_hours = (now - sla_deadline).total_seconds() / 3600 if sla_deadline.tzinfo else 0
-        
+
         subject = f"⚠️ SLA BREACH: {complaint_ref} ({issue_type}, severity {severity})"
         body = self._format_body(
             complaint_ref=complaint_ref,
@@ -107,7 +107,7 @@ class SLANotificationService:
         deadline = kwargs.get('sla_deadline', '')
         if isinstance(deadline, datetime):
             deadline = deadline.strftime('%Y-%m-%d %H:%M UTC')
-        
+
         return f"""🚨 SLA BREACH ALERT — SafeVixAI
 
 Complaint Reference: {kwargs.get('complaint_ref')}

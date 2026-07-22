@@ -10,6 +10,7 @@ maintenance history, and operational status.
 from __future__ import annotations
 
 from datetime import datetime
+
 from geoalchemy2 import Geometry
 from sqlalchemy import BigInteger, Boolean, DateTime, Float, Integer, String, Text, func
 from sqlalchemy.dialects.postgresql import JSONB

@@ -10,7 +10,6 @@ Create Date: 2026-05-16 00:05:00.000000
 
 from alembic import op
 
-
 revision = '10005_data_retention'
 down_revision = '10004_chat_logs_vector'
 branch_labels = None

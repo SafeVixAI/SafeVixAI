@@ -5,7 +5,13 @@ from __future__ import annotations
 
 from fastapi.testclient import TestClient
 
-from models.schemas import RouteBounds, RouteInstruction, RouteOption, RoutePoint, RoutePreviewResponse
+from models.schemas import (
+    RouteBounds,
+    RouteInstruction,
+    RouteOption,
+    RoutePoint,
+    RoutePreviewResponse,
+)
 from services.exceptions import ExternalServiceError, ServiceValidationError
 
 

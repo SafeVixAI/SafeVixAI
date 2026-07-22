@@ -18,7 +18,7 @@ from __future__ import annotations
 
 import logging
 import os
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from fastapi import APIRouter, Depends, Request
@@ -83,18 +83,19 @@ def _to_cifs_subtype(issue_type: str) -> str:
 def _format_timestamp(iso_str: str | None) -> str:
     """Convert ISO timestamp to CIFS-compatible format."""
     if not iso_str:
-        return datetime.now(timezone.utc).strftime("%m/%d/%Y %H:%M:%S")
+        return datetime.now(UTC).strftime("%m/%d/%Y %H:%M:%S")
     try:
         dt = datetime.fromisoformat(iso_str.replace("Z", "+00:00"))
         return dt.strftime("%m/%d/%Y %H:%M:%S")
     except (ValueError, AttributeError):
-        return datetime.now(timezone.utc).strftime("%m/%d/%Y %H:%M:%S")
+        return datetime.now(UTC).strftime("%m/%d/%Y %H:%M:%S")
 
 
 # ── CIFS Feed Endpoint ────────────────────────────────────────────────────────
 
 import time
 from collections import defaultdict
+
 
 class TokenBucket:
     """Explicit Token Bucket rate limiter for Waze feed polling."""
@@ -137,7 +138,7 @@ async def get_waze_cifs_feed(
         return _empty_feed("Rate limit exceeded. Token bucket depleted.")
 
     settings = get_settings()
-    cutoff = datetime.now(timezone.utc) - timedelta(hours=24)
+    cutoff = datetime.now(UTC) - timedelta(hours=24)
     result = await db.execute(
         text("""
             SELECT
@@ -163,7 +164,7 @@ async def get_waze_cifs_feed(
 
     # Build CIFS incidents array
     incidents: list[dict[str, Any]] = []
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
 
     for r in reports:
         lat = r.get("lat")
@@ -220,7 +221,7 @@ def _empty_feed(reason: str) -> dict[str, Any]:
     """Return an empty but valid CIFS feed."""
     return {
         "incidents": [],
-        "timestamp": datetime.now(timezone.utc).strftime("%m/%d/%Y %H:%M:%S"),
+        "timestamp": datetime.now(UTC).strftime("%m/%d/%Y %H:%M:%S"),
         "source": "SafeVixAI RoadWatch Community Reports",
         "version": "1.0",
         "count": 0,

@@ -16,9 +16,8 @@ Covers:
 
 from __future__ import annotations
 
-import sys
 import importlib
-import time
+import sys
 from unittest.mock import MagicMock, patch
 
 import pytest

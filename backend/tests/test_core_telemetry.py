@@ -101,12 +101,11 @@ class TestSetupTelemetry:
         with patch(
             "core.telemetry.TracerProvider",
             side_effect=RuntimeError("OTEL failed"),
-        ):
-            with patch("core.telemetry.logger") as mock_log:
-                from core.telemetry import setup_telemetry
+        ), patch("core.telemetry.logger") as mock_log:
+            from core.telemetry import setup_telemetry
 
-                setup_telemetry(app)
-                mock_log.warning.assert_called_once()
+            setup_telemetry(app)
+            mock_log.warning.assert_called_once()
 
     def test_default_service_name(self):
         app = MagicMock(spec=FastAPI)

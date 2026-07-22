@@ -14,7 +14,6 @@ import sqlalchemy as sa
 from alembic import op
 from geoalchemy2 import Geometry
 
-
 revision = '10010_enterprise_roads'
 down_revision = '10009_sos_retention'
 branch_labels = None
@@ -47,7 +46,7 @@ def _column_exists(conn, table_name: str, column_name: str) -> bool:
 
 def upgrade() -> None:
     conn = op.get_bind()
-    
+
     # 1. Add new columns to road_issues table
     if _table_exists(conn, "road_issues"):
         if not _column_exists(conn, "road_issues", "category"):
@@ -144,7 +143,7 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     conn = op.get_bind()
-    
+
     # 1. Drop complaint_events table
     if _table_exists(conn, "complaint_events"):
         op.drop_table("complaint_events")
@@ -161,12 +160,12 @@ def downgrade() -> None:
     if _table_exists(conn, "road_issues"):
         op.drop_index("ix_road_issues_category", table_name="road_issues", if_exists=True)
         op.drop_index("ix_road_issues_ward_id", table_name="road_issues", if_exists=True)
-        
+
         columns_to_drop = [
-            "category", "sub_category", "ward_id", "ward_name", 
-            "assigned_officer_id", "sla_deadline", "resolved_at", 
-            "duplicate_of_uuid", "citizen_phone", "confirmation_count", 
-            "before_photo_url", "after_photo_url", "ai_confidence", 
+            "category", "sub_category", "ward_id", "ward_name",
+            "assigned_officer_id", "sla_deadline", "resolved_at",
+            "duplicate_of_uuid", "citizen_phone", "confirmation_count",
+            "before_photo_url", "after_photo_url", "ai_confidence",
             "ai_model_version"
         ]
         for col in columns_to_drop:

@@ -4,13 +4,13 @@
 import gzip
 import json
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse
 
-from models.schemas import ApiResponse, ApiErrorResponse
+from models.schemas import ApiErrorResponse, ApiResponse
 
 logger = logging.getLogger("safevixai.response_wrapper")
 
@@ -49,7 +49,7 @@ class ApiResponseMiddleware(BaseHTTPMiddleware):
                 success=True,
                 data=data,
                 error=None,
-                timestamp=datetime.now(timezone.utc).isoformat(),
+                timestamp=datetime.now(UTC).isoformat(),
             )
             new_headers.pop("content-length", None)
             new_headers.pop("Content-Length", None)
@@ -63,6 +63,6 @@ class ApiResponseMiddleware(BaseHTTPMiddleware):
                 status_code=500,
                 content=ApiErrorResponse(
                     error={"code": "INTERNAL_ERROR", "message": str(exc)},
-                    timestamp=datetime.now(timezone.utc).isoformat(),
+                    timestamp=datetime.now(UTC).isoformat(),
                 ).model_dump(),
             )

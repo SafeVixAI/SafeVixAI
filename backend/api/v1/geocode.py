@@ -9,7 +9,6 @@ from core.limiter import limiter
 from models.schemas import GeocodeResult, GeocodeSearchResponse
 from services.geocoding_service import GeocodingError, GeocodingService
 
-
 router = APIRouter(prefix='/api/v1/geocode', tags=['Geocode'])
 
 

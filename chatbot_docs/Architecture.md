@@ -1,4 +1,4 @@
-# SafeVixAI Chatbot — Architecture
+﻿# SafeVixAI Chatbot — Architecture
 
 The SafeVixAI AI chatbot is a **separate Python service** (port 8010) that connects the frontend to advanced LLM behavior and real-time backend data.
 
@@ -18,7 +18,7 @@ The SafeVixAI AI chatbot is a **separate Python service** (port 8010) that conne
 6. **Response Generation**: LLM generates grounded response with tool context.
 7. **Persistence**: The turn is saved to the Redis memory store (24hr TTL).
 
-## Reliability: 9-Provider Fallback Chain
+## Reliability: 10-provider Fallback Chain
 
 To maintain maximum uptime, the service automatically cycles through **nine** LLM providers:
 

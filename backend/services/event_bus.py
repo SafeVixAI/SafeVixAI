@@ -35,9 +35,10 @@ import json
 import logging
 import uuid
 from collections import defaultdict
-from dataclasses import dataclass, asdict
-from datetime import datetime, timezone
-from typing import Any, Awaitable, Callable
+from collections.abc import Awaitable, Callable
+from dataclasses import asdict, dataclass
+from datetime import UTC, datetime
+from typing import Any
 
 logger = logging.getLogger("safevixai.event_bus")
 
@@ -77,7 +78,7 @@ class DomainEvent:
         return cls(
             event_id=str(uuid.uuid4()),
             event_type=event_type,
-            timestamp=datetime.now(timezone.utc).isoformat(),
+            timestamp=datetime.now(UTC).isoformat(),
             payload=payload,
             correlation_id=correlation_id or str(uuid.uuid4()),
             causation_id=causation_id,
@@ -157,7 +158,7 @@ class EventBus:
         try:
             await asyncio.wait_for(handler(event), timeout=30.0)
             self._metrics["handlers_executed"] += 1
-        except asyncio.TimeoutError:
+        except TimeoutError:
             self._metrics["handler_failures"] += 1
             logger.error(
                 "Handler %s timed out for event %s",
@@ -167,7 +168,7 @@ class EventBus:
                 "event": event.to_dict(),
                 "handler": handler.__name__,
                 "error": "TimeoutError",
-                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "timestamp": datetime.now(UTC).isoformat(),
             })
         except Exception as e:
             self._metrics["handler_failures"] += 1
@@ -180,7 +181,7 @@ class EventBus:
                 "event": event.to_dict(),
                 "handler": handler.__name__,
                 "error": str(e),
-                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "timestamp": datetime.now(UTC).isoformat(),
             })
 
     def get_recent_events(self, event_type: str | None = None, limit: int = 50) -> list[DomainEvent]:

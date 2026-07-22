@@ -1,4 +1,4 @@
-# SafeVixAI — Runbook: All LLM Providers Down
+﻿# SafeVixAI — Runbook: All LLM Providers Down
 
 > **SNAPSHOT**: This document reflects the state as of its creation date. For current state see [AGENTS.md](../../AGENTS.md).
 
@@ -15,7 +15,7 @@
 
 ## Provider Fallback Chain (Groq → Cerebras → Gemini → GitHub Models → NVIDIA NIM → OpenRouter → Mistral → Together → Template)
 
-The system has a **9-provider fallback chain** + a **template provider** of last resort that returns a static message. Complete failure (all providers + template returning errors) should not occur in normal operation.
+The system has a **10-provider fallback chain** + a **template provider** of last resort that returns a static message. Complete failure (all providers + template returning errors) should not occur in normal operation.
 
 ## Immediate Response
 

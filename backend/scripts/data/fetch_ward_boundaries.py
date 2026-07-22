@@ -129,7 +129,7 @@ def main():
         print(f"ERROR: {BBOXES_FILE} not found")
         sys.exit(1)
 
-    with open(BBOXES_FILE, 'r', encoding='utf-8') as f:
+    with open(BBOXES_FILE, encoding='utf-8') as f:
         raw_bboxes = json.load(f)
 
     metro_data = raw_bboxes.get('metros', raw_bboxes)

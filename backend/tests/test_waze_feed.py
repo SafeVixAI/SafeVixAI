@@ -4,10 +4,10 @@
 from __future__ import annotations
 
 from api.v1.waze_feed import (
-    _to_cifs_type,
-    _to_cifs_subtype,
-    _format_timestamp,
     _empty_feed,
+    _format_timestamp,
+    _to_cifs_subtype,
+    _to_cifs_type,
 )
 
 

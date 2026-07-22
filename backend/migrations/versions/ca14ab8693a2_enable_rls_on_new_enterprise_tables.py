@@ -13,7 +13,6 @@ from __future__ import annotations
 from alembic import op
 from sqlalchemy import text
 
-
 # revision identifiers, used by Alembic.
 revision = 'ca14ab8693a2'
 down_revision = '10012_workflow_cols'
@@ -29,7 +28,7 @@ def upgrade() -> None:
     )
     if not result.fetchone():
         return  # Skip RLS setup in non-Supabase environments
-    
+
     op.execute(
         """
         DO $$

@@ -232,7 +232,6 @@ class PhotoService:
 
     async def validate_ai(self, photo: UploadFile) -> dict:
         """Run AI-powered validation on a photo upload."""
-        import json
         header = await photo.read(64)
         await photo.seek(0)
         if not is_valid_image_magic(header):

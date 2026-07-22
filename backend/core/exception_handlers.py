@@ -8,6 +8,7 @@ Catches unhandled domain and database errors and formats them into standard JSON
 from __future__ import annotations
 
 import logging
+
 from fastapi import FastAPI, Request
 from starlette.responses import JSONResponse
 

@@ -13,7 +13,8 @@ Public-facing endpoints for citizens to:
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
+
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, Field
 from sqlalchemy import func, select
@@ -21,8 +22,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.database import get_db
 from core.limiter import limiter
-from models.road_issue import RoadIssue
 from models.complaint_event import ComplaintEvent
+from models.road_issue import RoadIssue
 from services.complaint_state_machine import ComplaintStateMachine, InvalidTransitionError
 
 logger = logging.getLogger("safevixai.citizen")
@@ -78,7 +79,7 @@ async def track_complaint(
     sla_status = "on_track"
     sla_hours_remaining = None
     if issue.sla_deadline:
-        now = datetime.now(timezone.utc).replace(tzinfo=None)
+        now = datetime.now(UTC).replace(tzinfo=None)
         diff = (issue.sla_deadline - now).total_seconds() / 3600
         if diff < 0:
             sla_status = "breached"
@@ -264,7 +265,7 @@ async def rate_resolution(
 
     if hasattr(issue, 'citizen_rating'):
         issue.citizen_rating = body.rating
-    
+
     await db.commit()
 
     # Log rating event

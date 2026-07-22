@@ -10,9 +10,9 @@ from the 1M-row Kaggle India road accidents CSV.
 """
 from __future__ import annotations
 
+import io
 import json
 import sys
-import io
 from pathlib import Path
 
 # Windows-safe UTF-8 output
@@ -137,7 +137,7 @@ hotspots = (
 # Only keep clusters with at least 2 accidents (removes noise)
 hotspots = hotspots[hotspots["accident_count"] >= 2].copy()
 
-# Risk score = accident_count * (1 + casualties / 10) 
+# Risk score = accident_count * (1 + casualties / 10)
 if "total_casualties" in hotspots.columns:
     hotspots["risk_score"] = (
         hotspots["accident_count"] * (1 + hotspots["total_casualties"] / 10)

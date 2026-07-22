@@ -2,26 +2,28 @@
 # Copyright (c) 2026 SafeVixAI Team
 
 """Tests for idempotency middleware."""
-import pytest
-from unittest.mock import AsyncMock, patch, MagicMock
 import json
-from core.idempotency import (
-    IdempotencyMiddleware,
-    _IDEMPOTENCY_TTL,
-    _IDEMPOTENCY_PREFIX,
-)
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 from fastapi import Request, Response
 from starlette.responses import JSONResponse
+
+from core.idempotency import (
+    _IDEMPOTENCY_PREFIX,
+    _IDEMPOTENCY_TTL,
+    IdempotencyMiddleware,
+)
 
 
 class AsyncIterator:
     """Helper class to create async iterators for testing."""
     def __init__(self, items):
         self.items = items
-    
+
     def __aiter__(self):
         return self
-    
+
     async def __anext__(self):
         if not self.items:
             raise StopAsyncIteration
@@ -64,12 +66,12 @@ def mock_call_next():
 async def test_idempotency_middleware_get_request(mock_request, mock_call_next, mock_cache):
     """Test that GET requests bypass idempotency."""
     mock_request.method = "GET"
-    
+
     middleware = IdempotencyMiddleware(app=MagicMock())
-    
+
     with patch('core.idempotency.create_cache', return_value=mock_cache):
         response = await middleware.dispatch(mock_request, mock_call_next)
-        
+
         assert response is not None
         mock_cache.get.assert_not_called()
 
@@ -78,12 +80,12 @@ async def test_idempotency_middleware_get_request(mock_request, mock_call_next, 
 async def test_idempotency_middleware_delete_request(mock_request, mock_call_next, mock_cache):
     """Test that DELETE requests bypass idempotency."""
     mock_request.method = "DELETE"
-    
+
     middleware = IdempotencyMiddleware(app=MagicMock())
-    
+
     with patch('core.idempotency.create_cache', return_value=mock_cache):
         response = await middleware.dispatch(mock_request, mock_call_next)
-        
+
         assert response is not None
         mock_cache.get.assert_not_called()
 
@@ -93,12 +95,12 @@ async def test_idempotency_middleware_no_idempotency_key(mock_request, mock_call
     """Test that requests without Idempotency-Key bypass idempotency."""
     mock_request.method = "POST"
     mock_request.headers = {}
-    
+
     middleware = IdempotencyMiddleware(app=MagicMock())
-    
+
     with patch('core.idempotency.create_cache', return_value=mock_cache):
         response = await middleware.dispatch(mock_request, mock_call_next)
-        
+
         assert response is not None
         mock_cache.get.assert_not_called()
 
@@ -108,18 +110,18 @@ async def test_idempotency_middleware_cache_hit(mock_request, mock_call_next, mo
     """Test idempotency cache hit."""
     mock_request.method = "POST"
     mock_request.headers = {"Idempotency-Key": "test-key-123"}
-    
+
     cached_data = json.dumps({
         "status_code": 200,
         "body": {"message": "cached response"}
     })
     mock_cache.get = AsyncMock(return_value=cached_data)
-    
+
     middleware = IdempotencyMiddleware(app=MagicMock())
-    
+
     with patch('core.idempotency.create_cache', return_value=mock_cache):
         response = await middleware.dispatch(mock_request, mock_call_next)
-        
+
         assert response.status_code == 200
         assert response.body == b'{"message":"cached response"}'
         assert response.headers.get("X-Idempotency-Cached") == "true"
@@ -132,12 +134,12 @@ async def test_idempotency_middleware_cache_miss(mock_request, mock_call_next, m
     mock_request.method = "POST"
     mock_request.headers = {"Idempotency-Key": "test-key-456"}
     mock_cache.get = AsyncMock(return_value=None)
-    
+
     middleware = IdempotencyMiddleware(app=MagicMock())
-    
+
     with patch('core.idempotency.create_cache', return_value=mock_cache):
         response = await middleware.dispatch(mock_request, mock_call_next)
-        
+
         assert response.status_code == 200
         assert response.headers.get("X-Idempotency-Cached") == "false"
         mock_cache.get.assert_called_once()
@@ -150,12 +152,12 @@ async def test_idempotency_middleware_put_request(mock_request, mock_call_next, 
     mock_request.method = "PUT"
     mock_request.headers = {"Idempotency-Key": "test-key-789"}
     mock_cache.get = AsyncMock(return_value=None)
-    
+
     middleware = IdempotencyMiddleware(app=MagicMock())
-    
+
     with patch('core.idempotency.create_cache', return_value=mock_cache):
         response = await middleware.dispatch(mock_request, mock_call_next)
-        
+
         assert response.status_code == 200
         mock_cache.get.assert_called_once()
         mock_cache.setex.assert_called_once()
@@ -167,12 +169,12 @@ async def test_idempotency_middleware_patch_request(mock_request, mock_call_next
     mock_request.method = "PATCH"
     mock_request.headers = {"Idempotency-Key": "test-key-012"}
     mock_cache.get = AsyncMock(return_value=None)
-    
+
     middleware = IdempotencyMiddleware(app=MagicMock())
-    
+
     with patch('core.idempotency.create_cache', return_value=mock_cache):
         response = await middleware.dispatch(mock_request, mock_call_next)
-        
+
         assert response.status_code == 200
         mock_cache.get.assert_called_once()
         mock_cache.setex.assert_called_once()
@@ -184,15 +186,15 @@ async def test_idempotency_middleware_error_response_not_cached(mock_request, mo
     mock_request.method = "POST"
     mock_request.headers = {"Idempotency-Key": "test-key-error"}
     mock_cache.get = AsyncMock(return_value=None)
-    
+
     async def error_call_next(request):
         return JSONResponse(content={"error": "Bad request"}, status_code=400)
-    
+
     middleware = IdempotencyMiddleware(app=MagicMock())
-    
+
     with patch('core.idempotency.create_cache', return_value=mock_cache):
         response = await middleware.dispatch(mock_request, error_call_next)
-        
+
         assert response.status_code == 400
         mock_cache.setex.assert_not_called()
 
@@ -203,18 +205,18 @@ async def test_idempotency_middleware_redirect_response_cached(mock_request, moc
     mock_request.method = "POST"
     mock_request.headers = {"Idempotency-Key": "test-key-redirect"}
     mock_cache.get = AsyncMock(return_value=None)
-    
+
     async def redirect_call_next(request):
         response = MagicMock()
         response.status_code = 302
         response.body_iterator = AsyncIterator([b'{"url": "/new-location"}'])
         return response
-    
+
     middleware = IdempotencyMiddleware(app=MagicMock())
-    
+
     with patch('core.idempotency.create_cache', return_value=mock_cache):
         response = await middleware.dispatch(mock_request, redirect_call_next)
-        
+
         assert response.status_code == 302
         mock_cache.setex.assert_called_once()
 
@@ -225,18 +227,18 @@ async def test_idempotency_middleware_non_json_body(mock_request, mock_call_next
     mock_request.method = "POST"
     mock_request.headers = {"Idempotency-Key": "test-key-nonjson"}
     mock_cache.get = AsyncMock(return_value=None)
-    
+
     async def non_json_call_next(request):
         response = MagicMock()
         response.status_code = 200
         response.body_iterator = AsyncIterator([b'{"message": "valid json"}'])
         return response
-    
+
     middleware = IdempotencyMiddleware(app=MagicMock())
-    
+
     with patch('core.idempotency.create_cache', return_value=mock_cache):
         response = await middleware.dispatch(mock_request, non_json_call_next)
-        
+
         assert response.status_code == 200
         # Should cache the response
         mock_cache.setex.assert_called_once()
@@ -248,12 +250,12 @@ async def test_idempotency_middleware_exception_handling(mock_request, mock_call
     mock_request.method = "POST"
     mock_request.headers = {"Idempotency-Key": "test-key-exception"}
     mock_cache.get = AsyncMock(side_effect=Exception("Cache error"))
-    
+
     middleware = IdempotencyMiddleware(app=MagicMock())
-    
+
     with patch('core.idempotency.create_cache', return_value=mock_cache):
         response = await middleware.dispatch(mock_request, mock_call_next)
-        
+
         # Should fallback to call_next on exception
         assert response is not None
 
@@ -264,12 +266,12 @@ async def test_idempotency_middleware_cache_close(mock_request, mock_call_next, 
     mock_request.method = "POST"
     mock_request.headers = {"Idempotency-Key": "test-key-close"}
     mock_cache.get = AsyncMock(return_value=None)
-    
+
     middleware = IdempotencyMiddleware(app=MagicMock())
-    
+
     with patch('core.idempotency.create_cache', return_value=mock_cache):
         await middleware.dispatch(mock_request, mock_call_next)
-        
+
         mock_cache.close.assert_called_once()
 
 
@@ -279,12 +281,12 @@ async def test_idempotency_middleware_cache_key_format(mock_request, mock_call_n
     mock_request.method = "POST"
     mock_request.headers = {"Idempotency-Key": "unique-key-123"}
     mock_cache.get = AsyncMock(return_value=None)
-    
+
     middleware = IdempotencyMiddleware(app=MagicMock())
-    
+
     with patch('core.idempotency.create_cache', return_value=mock_cache):
         await middleware.dispatch(mock_request, mock_call_next)
-        
+
         expected_key = f"{_IDEMPOTENCY_PREFIX}unique-key-123"
         mock_cache.get.assert_called_once_with(expected_key)
 
@@ -295,12 +297,12 @@ async def test_idempotency_middleware_ttl_value(mock_request, mock_call_next, mo
     mock_request.method = "POST"
     mock_request.headers = {"Idempotency-Key": "test-key-ttl"}
     mock_cache.get = AsyncMock(return_value=None)
-    
+
     middleware = IdempotencyMiddleware(app=MagicMock())
-    
+
     with patch('core.idempotency.create_cache', return_value=mock_cache):
         await middleware.dispatch(mock_request, mock_call_next)
-        
+
         # Verify TTL is 24 hours (86400 seconds)
         call_args = mock_cache.setex.call_args
         assert call_args[0][1] == _IDEMPOTENCY_TTL
@@ -313,16 +315,16 @@ async def test_idempotency_middleware_empty_body(mock_request, mock_call_next, m
     mock_request.method = "POST"
     mock_request.headers = {"Idempotency-Key": "test-key-empty"}
     mock_cache.get = AsyncMock(return_value=None)
-    
+
     async def empty_call_next(request):
         response = Response(status_code=204)
         return response
-    
+
     middleware = IdempotencyMiddleware(app=MagicMock())
-    
+
     with patch('core.idempotency.create_cache', return_value=mock_cache):
         response = await middleware.dispatch(mock_request, empty_call_next)
-        
+
         assert response.status_code == 204
 
 

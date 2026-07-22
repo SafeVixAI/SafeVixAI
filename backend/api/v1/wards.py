@@ -48,7 +48,7 @@ async def locate_ward_by_coordinates(
     ward = await WardService.find_ward_by_coordinates(db, lat=lat, lon=lon)
     if not ward:
         raise HTTPException(status_code=404, detail="No ward found at these coordinates.")
-    
+
     return WardResponse(
         ward_id=ward.ward_id,
         ward_name=ward.ward_name,
@@ -70,11 +70,12 @@ async def get_ward_stats(
     """Get metrics and resolution rates for a ward."""
     # Verify ward exists
     from sqlalchemy import select
+
     from models.ward import Ward
     stmt = select(Ward).where(Ward.ward_id == ward_id)
     ward = (await db.execute(stmt)).scalar_one_or_none()
     if not ward:
         raise HTTPException(status_code=404, detail="Ward not found.")
-        
+
     stats = await WardService.get_ward_stats(db, ward_id)
     return WardStatsResponse(**stats)

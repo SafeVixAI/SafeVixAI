@@ -4,7 +4,8 @@
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
+
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -12,10 +13,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from core.audit import AuditLog
 from core.database import get_db
 from core.limiter import limiter
-from core.rbac import require_role, Role
-from models.road_issue import RoadIssue
+from core.rbac import Role, require_role
 from models.officer import Officer
-from models.schemas import RoadIssuesResponse, RoadIssueItem, OfficerResponse
+from models.road_issue import RoadIssue
+from models.schemas import OfficerResponse, RoadIssueItem, RoadIssuesResponse
 from services.complaint_lifecycle import ComplaintLifecycle
 
 router = APIRouter(prefix='/api/v1/admin', tags=['Admin Operations'])
@@ -36,16 +37,16 @@ async def get_all_complaints_admin(
     """Administrator lists, searches, and filters all complaints with pagination."""
     lat_expr = func.ST_Y(RoadIssue.location).label('lat')
     lon_expr = func.ST_X(RoadIssue.location).label('lon')
-    
+
     base_stmt = select(RoadIssue)
-    
+
     if status:
         base_stmt = base_stmt.where(RoadIssue.status == status)
     if category:
         base_stmt = base_stmt.where(RoadIssue.category == category)
     if ward_id:
         base_stmt = base_stmt.where(RoadIssue.ward_id == ward_id)
-        
+
     # Get total count
     count_stmt = select(func.count(RoadIssue.id))
     if status:
@@ -54,16 +55,16 @@ async def get_all_complaints_admin(
         count_stmt = count_stmt.where(RoadIssue.category == category)
     if ward_id:
         count_stmt = count_stmt.where(RoadIssue.ward_id == ward_id)
-        
+
     total_count = (await db.execute(count_stmt)).scalar() or 0
-    
+
     stmt = (
         base_stmt.add_columns(lat_expr, lon_expr)
         .order_by(RoadIssue.created_at.desc())
         .limit(limit)
         .offset(offset)
     )
-    
+
     rows = (await db.execute(stmt)).all()
     issues = [
         RoadIssueItem(
@@ -95,7 +96,7 @@ async def get_all_complaints_admin(
         )
         for issue, lat, lon in rows
     ]
-    
+
     next_offset = offset + limit if (offset + limit) < total_count else None
     return RoadIssuesResponse(
         issues=issues,
@@ -123,7 +124,7 @@ async def assign_complaint_to_officer(
         raise HTTPException(status_code=422, detail="Invalid UUID format") from exc
 
     actor_id = uuid.UUID(current_user["sub"]) if "sub" in current_user else None
-    
+
     try:
         issue = await ComplaintLifecycle.assign_officer(
             db=db,
@@ -161,7 +162,7 @@ async def list_officers_admin(
     stmt = select(Officer).order_by(Officer.name.asc())
     result = await db.execute(stmt)
     officers = result.scalars().all()
-    
+
     return [
         OfficerResponse(
             id=o.id,
@@ -200,7 +201,7 @@ async def get_dashboard_summary_admin(
     total_count = (await db.execute(total_stmt)).scalar() or 0
 
     # 4. SLA breaches
-    now = datetime.now(timezone.utc).replace(tzinfo=None)
+    now = datetime.now(UTC).replace(tzinfo=None)
     breached_stmt = select(func.count(RoadIssue.id)).where(
         RoadIssue.status.in_(["open", "acknowledged", "in_progress"]),
         RoadIssue.sla_deadline.is_not(None),
@@ -248,7 +249,7 @@ async def trigger_data_retention_cleanup(
         # Call the cleanup function defined in migrations
         await db.execute("SELECT safevixai_cleanup_expired_data()")
         await db.commit()
-        
+
         ip = request.client.host if request.client else "unknown"
         AuditLog.log_admin_action(
             str(current_user.get("sub", "unknown")),

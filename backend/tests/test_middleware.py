@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+from datetime import UTC
 
 import pytest
 from fastapi import FastAPI
@@ -57,8 +58,9 @@ def plain_app():
 
     # Exception handler must be registered BEFORE middleware so it catches errors
     # before the middleware layer processes the response
+    from datetime import datetime
+
     from models.schemas import ApiErrorResponse
-    from datetime import datetime, timezone
 
     @app.exception_handler(Exception)
     async def test_exception_handler(request, exc):
@@ -66,7 +68,7 @@ def plain_app():
             status_code=500,
             content=ApiErrorResponse(
                 error={"code": "INTERNAL_ERROR", "message": "Internal server error"},
-                timestamp=datetime.now(timezone.utc).isoformat(),
+                timestamp=datetime.now(UTC).isoformat(),
             ).model_dump(),
         )
 

@@ -34,7 +34,7 @@ def setup_tracing(app: FastAPI) -> trace.TracerProvider:
     )
 
     provider = TracerProvider(resource=resource)
-    
+
     # Always export to console for development
     console_exporter = ConsoleSpanExporter()
     provider.add_span_processor(BatchSpanProcessor(console_exporter))

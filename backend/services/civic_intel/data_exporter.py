@@ -8,7 +8,7 @@ from __future__ import annotations
 import csv
 import json
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -57,7 +57,7 @@ class CivicDataExporter:
         """Export ALL civic intelligence tables. Returns manifest."""
         logger.info('[Export] Starting full civic data export to %s', self.export_dir)
         manifest: dict[str, Any] = {
-            'exported_at': datetime.now(timezone.utc).isoformat(),
+            'exported_at': datetime.now(UTC).isoformat(),
             'version': '1.0.0',
             'project': 'SafeVixAI',
             'description': 'Pan-India civic intelligence dataset for road safety',
@@ -403,7 +403,7 @@ class CivicDataExporter:
         output = {
             'type': 'municipality_directory',
             'count': len(data),
-            'exported_at': datetime.now(timezone.utc).isoformat(),
+            'exported_at': datetime.now(UTC).isoformat(),
             'municipalities': data,
         }
 

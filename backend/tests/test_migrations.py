@@ -8,7 +8,6 @@ from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 
-
 MIGRATIONS_DIR = Path(__file__).resolve().parents[1] / "migrations" / "versions"
 
 

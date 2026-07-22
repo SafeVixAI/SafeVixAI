@@ -4,8 +4,6 @@
 
 from __future__ import annotations
 
-import asyncio
-import uuid
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import httpx
@@ -486,14 +484,13 @@ async def test_preview_osrm_http_error_raises(service, mock_cache):
             "get",
             new_callable=AsyncMock,
             side_effect=httpx.ConnectError("refused"),
-        ):
-            with pytest.raises(ExternalServiceError, match="OSRM"):
-                await service.preview_route(
-                    origin_lat=13.0,
-                    origin_lon=80.0,
-                    destination_lat=13.1,
-                    destination_lon=80.1,
-                )
+        ), pytest.raises(ExternalServiceError, match="OSRM"):
+            await service.preview_route(
+                origin_lat=13.0,
+                origin_lon=80.0,
+                destination_lat=13.1,
+                destination_lon=80.1,
+            )
 
 
 @pytest.mark.asyncio
@@ -551,14 +548,13 @@ async def test_preview_ors_http_error_raises(service, mock_cache, mock_settings)
             "post",
             new_callable=AsyncMock,
             side_effect=httpx.TimeoutException("timeout"),
-        ):
-            with pytest.raises(ExternalServiceError, match="ORS"):
-                await service.preview_route(
-                    origin_lat=13.0,
-                    origin_lon=80.0,
-                    destination_lat=13.1,
-                    destination_lon=80.1,
-                )
+        ), pytest.raises(ExternalServiceError, match="ORS"):
+            await service.preview_route(
+                origin_lat=13.0,
+                origin_lon=80.0,
+                destination_lat=13.1,
+                destination_lon=80.1,
+            )
 
 
 @pytest.mark.asyncio

@@ -106,8 +106,9 @@ class TestCoreLimiterBehavior:
 
     def test_limiter_over_limit_raises(self):
         import asyncio
-        from starlette.requests import Request as StarletteRequest
+
         from slowapi.errors import RateLimitExceeded
+        from starlette.requests import Request as StarletteRequest
 
         lim = Limiter(key_func=lambda request: "test")
         limited = lim.limit("0/minute")

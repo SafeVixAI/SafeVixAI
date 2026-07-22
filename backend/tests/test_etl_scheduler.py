@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 import asyncio
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -32,7 +32,7 @@ def _mock_etl_run_log(pipeline_name, status="success", records=10, age_hours=0):
     log.pipeline_name = pipeline_name
     log.status = status
     log.records_inserted = records
-    log.started_at = datetime.now(timezone.utc) - timedelta(hours=age_hours)
+    log.started_at = datetime.now(UTC) - timedelta(hours=age_hours)
     return log
 
 

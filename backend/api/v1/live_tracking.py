@@ -3,20 +3,19 @@
 
 from __future__ import annotations
 
-import uuid
 import logging
-from datetime import datetime, timedelta, timezone
-from typing import Optional
+import uuid
+from datetime import UTC, datetime, timedelta
 
-from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request
 import jwt
+from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request
 from pydantic import BaseModel, Field
+from sqlalchemy import text
 
 from core.config import get_settings
 from core.database import get_async_session
 from core.limiter import limiter
 from core.security import ALGORITHM, SECRET_KEY, create_access_token, get_current_user
-from sqlalchemy import text
 
 logger = logging.getLogger("safevixai.live_tracking")
 router = APIRouter(prefix="/api/v1/live-tracking", tags=["Live Tracking"])
@@ -26,11 +25,11 @@ router = APIRouter(prefix="/api/v1/live-tracking", tags=["Live Tracking"])
 
 class StartTrackingRequest(BaseModel):
     user_name: str = Field(min_length=1, max_length=80)
-    blood_group: Optional[str] = Field(default=None, max_length=12, pattern=r"^(A|B|AB|O)[+-]$")
-    vehicle_number: Optional[str] = Field(default=None, max_length=20, pattern=r"^[A-Za-z0-9 -]+$")
+    blood_group: str | None = Field(default=None, max_length=12, pattern=r"^(A|B|AB|O)[+-]$")
+    vehicle_number: str | None = Field(default=None, max_length=20, pattern=r"^[A-Za-z0-9 -]+$")
     latitude: float = Field(ge=-90, le=90)
     longitude: float = Field(ge=-180, le=180)
-    battery_percent: Optional[int] = Field(default=None, ge=0, le=100)
+    battery_percent: int | None = Field(default=None, ge=0, le=100)
 
 
 class StartTrackingResponse(BaseModel):
@@ -43,21 +42,21 @@ class UpdateLocationRequest(BaseModel):
     session_id: uuid.UUID
     latitude: float = Field(ge=-90, le=90)
     longitude: float = Field(ge=-180, le=180)
-    accuracy: Optional[float] = Field(default=None, ge=0, le=10000)
-    speed_kmh: Optional[float] = Field(default=None, ge=0, le=300)
-    battery_percent: Optional[int] = Field(default=None, ge=0, le=100)
+    accuracy: float | None = Field(default=None, ge=0, le=10000)
+    speed_kmh: float | None = Field(default=None, ge=0, le=300)
+    battery_percent: int | None = Field(default=None, ge=0, le=100)
 
 
 class TrackingSessionResponse(BaseModel):
     session_id: str
     user_name: str
-    blood_group: Optional[str]
-    vehicle_number: Optional[str]
+    blood_group: str | None
+    vehicle_number: str | None
     latitude: float
     longitude: float
-    accuracy: Optional[float]
-    speed_kmh: Optional[float]
-    battery_percent: Optional[int]
+    accuracy: float | None
+    speed_kmh: float | None
+    battery_percent: int | None
     is_active: bool
     updated_at: str
 
@@ -77,7 +76,7 @@ async def start_tracking(
     The returned URL works WITHOUT login for family members.
     """
     session_id = str(uuid.uuid4())
-    expires_at = datetime.now(timezone.utc) + timedelta(hours=4)
+    expires_at = datetime.now(UTC) + timedelta(hours=4)
 
     async for session in get_async_session():
         await session.execute(

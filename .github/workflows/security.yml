@@ -46,7 +46,7 @@ jobs:
       - name: Set up Node 20
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
 
       - name: Frontend dependency audit
         working-directory: frontend

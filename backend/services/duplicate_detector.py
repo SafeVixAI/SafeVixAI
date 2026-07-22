@@ -5,9 +5,10 @@ from __future__ import annotations
 
 import logging
 import uuid
+
+from geoalchemy2 import Geography
 from sqlalchemy import cast, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from geoalchemy2 import Geography
 
 from models.road_issue import RoadIssue
 
@@ -52,7 +53,7 @@ class DuplicateDetector:
         stmt = select(RoadIssue).where(RoadIssue.uuid == issue_uuid)
         result = await db.execute(stmt)
         issue = result.scalar_one_or_none()
-        
+
         if issue:
             issue.confirmation_count += 1
             # Autoacknowledged if confirmation count exceeds threshold (e.g. 5 upvotes)
@@ -60,5 +61,5 @@ class DuplicateDetector:
                 issue.status = "acknowledged"
             await db.commit()
             await db.refresh(issue)
-            
+
         return issue

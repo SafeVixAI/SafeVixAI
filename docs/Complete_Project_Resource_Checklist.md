@@ -371,7 +371,7 @@ Already wired in current code:
 - openrouteservice route plumbing
 - emergency seeding scaffold
 - road infrastructure import scaffold
-- **Chatbot provider chain** (9 providers: Groq→Cerebras→Gemini→GitHub→NVIDIA→OpenRouter→Mistral→Together→Template)
+- **Chatbot provider chain** (10 providers: Groq→Cerebras→Gemini→GitHub→NVIDIA→OpenRouter→Mistral→Together→Template)
 - **Intent detector** (9 intent classes)
 - **All 13 agent tools** (SOS, Challan, LegalSearch, FirstAid, Weather, OpenMeteo, RoadInfra, RoadIssues, SubmitReport, Geocoding, DrugInfo, What3Words, Emergency)
 - **Conversation memory** (Redis, 24-hour TTL)

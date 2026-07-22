@@ -11,7 +11,6 @@ Create Date: 2026-05-16 00:00:00.000000
 from alembic import op
 from sqlalchemy import text
 
-
 revision = '10004_chat_logs_vector'
 down_revision = '10003_rls_alignment'
 branch_labels = None

@@ -10,12 +10,12 @@ and simple predictive maintenance scoring.
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
+from geoalchemy2 import Geography
 from sqlalchemy import cast, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from geoalchemy2 import Geography
 
 from models.streetlight_pole import StreetlightPole
 
@@ -87,17 +87,17 @@ class StreetlightService:
         if pole:
             pole.is_operational = False
             pole.failure_count += 1
-            pole.last_failure_at = datetime.now(timezone.utc)
-            
+            pole.last_failure_at = datetime.now(UTC)
+
             # Append to maintenance history
             history = pole.maintenance_history or []
             history.append({
-                'date': datetime.now(timezone.utc).isoformat(),
+                'date': datetime.now(UTC).isoformat(),
                 'type': 'outage_reported',
                 'notes': reporter_notes or 'Citizen reported via QR scan',
             })
             pole.maintenance_history = history
-            
+
             await db.commit()
             await db.refresh(pole)
             logger.info("Outage reported for pole %s (failure #%d)", pole_id, pole.failure_count)
@@ -118,13 +118,13 @@ class StreetlightService:
 
         if pole:
             pole.is_operational = True
-            pole.last_maintenance = datetime.now(timezone.utc)
+            pole.last_maintenance = datetime.now(UTC)
             # Schedule next maintenance 6 months out
-            pole.next_maintenance_due = datetime.now(timezone.utc) + timedelta(days=180)
+            pole.next_maintenance_due = datetime.now(UTC) + timedelta(days=180)
 
             history = pole.maintenance_history or []
             entry: dict[str, Any] = {
-                'date': datetime.now(timezone.utc).isoformat(),
+                'date': datetime.now(UTC).isoformat(),
                 'type': 'repair',
                 'notes': repair_notes or 'Repair completed',
             }
@@ -164,7 +164,7 @@ class StreetlightService:
         poles = result.scalars().all()
 
         scored: list[dict[str, Any]] = []
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
 
         for pole in poles:
             risk = 0.0
@@ -181,7 +181,7 @@ class StreetlightService:
             if pole.next_maintenance_due:
                 due = pole.next_maintenance_due
                 if due.tzinfo is None:
-                    due = due.replace(tzinfo=timezone.utc)
+                    due = due.replace(tzinfo=UTC)
                 if now > due:
                     overdue_days = (now - due).days
                     risk += min(0.30, overdue_days * 0.01)
@@ -190,7 +190,7 @@ class StreetlightService:
             if pole.last_maintenance:
                 lm = pole.last_maintenance
                 if lm.tzinfo is None:
-                    lm = lm.replace(tzinfo=timezone.utc)
+                    lm = lm.replace(tzinfo=UTC)
                 days_since = (now - lm).days
                 if days_since > 365:
                     risk += 0.20
@@ -201,7 +201,7 @@ class StreetlightService:
             if pole.installation_date:
                 inst = pole.installation_date
                 if inst.tzinfo is None:
-                    inst = inst.replace(tzinfo=timezone.utc)
+                    inst = inst.replace(tzinfo=UTC)
                 age_years = (now - inst).days / 365
                 if age_years > 10:
                     risk += 0.15
@@ -229,7 +229,7 @@ class StreetlightService:
     async def get_city_stats(db: AsyncSession, city: str) -> dict[str, Any]:
         """Get aggregate streetlight statistics for a city."""
         base = select(func.count(StreetlightPole.id)).where(StreetlightPole.city == city)
-        
+
         total = (await db.execute(base)).scalar() or 0
         operational = (await db.execute(
             base.where(StreetlightPole.is_operational)

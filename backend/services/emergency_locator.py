@@ -3,10 +3,10 @@
 
 from __future__ import annotations
 
-import logging
-from collections.abc import Iterable
 import json
+import logging
 import math
+from collections.abc import Iterable
 from pathlib import Path
 
 from geoalchemy2 import Geography
@@ -46,9 +46,6 @@ SUPPORTED_CATEGORIES = {
 from services.city_center_repo import (
     _HARDCODED_CENTERS,
     _OFFLINE_CENTERS,
-    get_all_city_centers,
-    get_city_center,
-    get_offline_centers,
 )
 
 # Backward-compatible aliases (used by scripts and tests).

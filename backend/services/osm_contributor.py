@@ -19,7 +19,7 @@ OSM API Docs: https://wiki.openstreetmap.org/wiki/API_v0.6
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 import httpx
@@ -158,7 +158,7 @@ class OSMContributor:
         tags: dict[str, str] = {
             **base_tags,
             "source": "SafeVixAI_RoadWatch_v1",
-            "source:date": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
+            "source:date": datetime.now(UTC).strftime("%Y-%m-%d"),
             "note": f"Community-reported via SafeVixAI RoadWatch (ID: {report.get('id', 'N/A')})",
             "fixme": "Verify on ground — community report",
         }

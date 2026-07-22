@@ -1,4 +1,4 @@
-# ADR-002: 9-Provider LLM Fallback Chain
+﻿# ADR-002: 10-provider LLM Fallback Chain
 
 **Date:** 2026-05-20  
 **Status:** ✅ Accepted  
@@ -20,7 +20,7 @@ If a single provider is chosen and it goes down, the entire chatbot becomes unav
 
 ## Decision
 
-Implement a 9-provider fallback chain:
+Implement a 10-provider fallback chain:
 
 ```
 Groq → Cerebras → Gemini → GitHub Models → NVIDIA NIM → OpenRouter → Mistral → Together → Template
@@ -38,6 +38,6 @@ The final fallback (`TemplateProvider`) is a deterministic, zero-dependency prov
 
 - ~100ms overhead per failed provider (non-blocking timeout)
 - Email alert on complete chain failure (all 9 down)
-- `< 0.01% chance of all 9 providers being simultaneously unavailable`
+- `< 0.01% chance of all 10 providers being simultaneously unavailable`
 - Each provider needs its own API key in Secrets Manager
 - Provider health is monitored via circuit breaker pattern

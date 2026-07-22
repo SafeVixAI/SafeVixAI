@@ -7,19 +7,19 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
-from sqlalchemy import select, desc
+from sqlalchemy import desc, select
 
 from core.config import get_settings
 from models.etl_run_log import ETLRunLog
-from services.civic_intel.lgd_ingestor import LGDIngestor
 from services.civic_intel.boundary_ingestor import BoundaryIngestor
-from services.civic_intel.osm_bulk_ingestor import OSMBulkIngestor
 from services.civic_intel.datagov_ingestor import DataGovIngestor
-from services.civic_intel.municipal_ingestor import MunicipalIngestor
 from services.civic_intel.grievance_ingestor import GrievanceIngestor
+from services.civic_intel.lgd_ingestor import LGDIngestor
+from services.civic_intel.municipal_ingestor import MunicipalIngestor
+from services.civic_intel.osm_bulk_ingestor import OSMBulkIngestor
 
 logger = logging.getLogger(__name__)
 
@@ -109,10 +109,10 @@ class ETLScheduler:
             if last_run is None:
                 return True  # Never run before
 
-            now = datetime.now(timezone.utc)
+            now = datetime.now(UTC)
             last_time = last_run.started_at
             if last_time.tzinfo is None:
-                last_time = last_time.replace(tzinfo=timezone.utc)
+                last_time = last_time.replace(tzinfo=UTC)
 
             return (now - last_time) > interval
 

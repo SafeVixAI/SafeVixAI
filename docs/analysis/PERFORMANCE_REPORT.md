@@ -1,4 +1,4 @@
-# SafeVixAI — Performance Report
+﻿# SafeVixAI — Performance Report
 
 > **SNAPSHOT**: This document reflects the state as of 2026-05-26. For current state see [AGENTS.md](../../AGENTS.md).
 
@@ -68,7 +68,7 @@
 
 ### LLM Fallback Timing
 When all providers fail (worst case): ~45-60s total before Template response
-- 30s timeout × 9 providers = 270s theoretical max
+- 30s timeout × 10 providers = 270s theoretical max
 - Circuit breakers + skip-on-error reduce to ~45-60s actual
 
 ### ChromaDB RAG

@@ -11,13 +11,16 @@ from pathlib import Path, PosixPath, WindowsPath
 # Prevent real database connections — set dummy URL before any module imports engine
 os.environ.setdefault("DATABASE_URL", "postgresql+asyncpg://test:test@localhost:99999/test_db")
 
-# Python 3.11.9 removed Path._flavour which some libraries (PIL) depend on.
-# Monkey-patch it back so Path() calls work without AttributeError.
+# Python 3.12 removed Path._flavour which some older libraries depend on.
+# Monkey-patch a dummy fallback so Path() calls don't raise AttributeError.
 if not hasattr(Path, '_flavour'):
-    Path._flavour = PosixPath._flavour if os.name != 'nt' else WindowsPath._flavour
+    try:
+        Path._flavour = PosixPath._flavour if os.name != 'nt' else WindowsPath._flavour
+    except AttributeError:
+        from types import SimpleNamespace
+        Path._flavour = SimpleNamespace()
 
 import pytest
-
 
 BACKEND_ROOT = Path(__file__).resolve().parents[1]
 if str(BACKEND_ROOT) not in sys.path:

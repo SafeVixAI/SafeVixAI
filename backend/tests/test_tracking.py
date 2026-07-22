@@ -3,7 +3,8 @@
 
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
-from api.v1.tracking import router, _is_valid_location, _is_valid_tracking_payload
+
+from api.v1.tracking import _is_valid_location, _is_valid_tracking_payload, router
 from core.security import create_access_token
 
 app = FastAPI()
@@ -35,14 +36,14 @@ def test_websocket_invalid_payload(monkeypatch):
     monkeypatch.setattr("api.v1.tracking._origin_allowed", lambda x: True)
     # Generate a valid token
     token = create_access_token({"sub": "testuser"})
-    
+
     with client.websocket_connect(f"/api/v1/tracking/test-group?token={token}") as websocket:
         # Send invalid JSON
         websocket.send_text("invalid json")
         response = websocket.receive_json()
         assert response["type"] == "error"
         assert response["message"] == "Invalid JSON"
-        
+
         # Send invalid payload
         websocket.send_json({"lat": 100.0, "lon": 20.0})
         response = websocket.receive_json()
@@ -52,7 +53,7 @@ def test_websocket_invalid_payload(monkeypatch):
 def test_websocket_valid_payload(monkeypatch):
     monkeypatch.setattr("api.v1.tracking._origin_allowed", lambda x: True)
     token = create_access_token({"sub": "testuser"})
-    
+
     with client.websocket_connect(f"/api/v1/tracking/test-group?token={token}") as websocket:
         payload = {"lat": 10.0, "lon": 20.0}
         websocket.send_json(payload)

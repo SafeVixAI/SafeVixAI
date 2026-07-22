@@ -1,4 +1,4 @@
-# SafeVixAI API Reference
+﻿# SafeVixAI API Reference
 
 ## Base URLs
 
@@ -689,7 +689,7 @@ Speech service health and available language pairs.
 
 | Service | Limit | Our Handling |
 |---|---|---|
-| Main LLM APIs | Varies per provider | 9-provider fallback chain + offline AI |
+| Main LLM APIs | Varies per provider | 10-provider fallback chain + offline AI |
 | Nominatim geocoder | 1 req/sec | Redis cache (86400s TTL) + rate limiter |
 | Overpass API | Fair use ~1 req/sec | Redis cache (3600s TTL) per coordinate |
 | OpenRouteService | Varies per plan | Circuit breaker + Redis cache |
@@ -708,7 +708,7 @@ Speech service health and available language pairs.
 | 422 | Validation error |
 | 429 | Rate limited (slowapi) |
 | 500 | Internal server error |
-| 503 | LLM service unavailable (all 9 providers down) |
+| 503 | LLM service unavailable (all 10 providers down) |
 
 ---
 

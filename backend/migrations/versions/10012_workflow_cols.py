@@ -14,7 +14,6 @@ import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
 
-
 revision = '10012_workflow_cols'
 down_revision = '10011_civic_intel_tables'
 branch_labels = None

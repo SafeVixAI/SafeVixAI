@@ -12,27 +12,25 @@ for parent in Path(__file__).resolve().parents:
         if str(parent) not in sys.path:
             sys.path.insert(0, str(parent))
         break
-from core.alert import get_alert_service
-
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
-from core.audit import AuditLog
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from core.alert import get_alert_service
+from core.audit import AuditLog
 from core.database import get_db
 from core.limiter import limiter
-from core.security import get_current_user_optional
 from core.metrics import (
+    emergency_lookup_time,
+    emergency_lookup_total,
+    emergency_services_found,
     sos_dispatch_total,
     sos_response_time,
-    emergency_lookup_total,
-    emergency_lookup_time,
-    emergency_services_found,
 )
+from core.security import get_current_user_optional
 from models.schemas import EmergencyNumbersResponse, EmergencyResponse, SosResponse
 from models.sos_incident import SosIncident
 from services.emergency_locator import EMERGENCY_NUMBERS, EmergencyLocatorService
 from services.exceptions import ExternalServiceError
-
 
 router = APIRouter(prefix='/api/v1/emergency', tags=['Emergency'])
 
@@ -168,28 +166,28 @@ async def create_sos_incident(
         user_id = str(current_user["sub"]) if current_user else None
         ip = request.client.host if request.client else "unknown"
         AuditLog.log_sos_trigger(user_id, lat, lon, ip)
-        
+
         result = await emergency_service.build_sos_payload(db=db, lat=lat, lon=lon)
-        
+
         # Record SOS metrics
         duration = time.monotonic() - start
         sos_response_time.observe(duration)
         sos_dispatch_total.labels(status="success", mode="online").inc()
-        
+
         # Record emergency lookup metrics
         emergency_lookup_total.labels(
             service_type="all",
             source="overpass",
         ).inc()
         emergency_lookup_time.labels(service_type="all").observe(duration)
-        
+
         # Record services found
         if hasattr(result, 'count'):
             emergency_services_found.labels(
                 service_type="all",
                 radius_meters=5000,
             ).set(result.count)
-        
+
         return result
     except ExternalServiceError as exc:
         sos_dispatch_total.labels(status="failed", mode="online").inc()

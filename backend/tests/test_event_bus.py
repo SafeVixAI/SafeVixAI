@@ -6,32 +6,33 @@ from __future__ import annotations
 import asyncio
 import json
 from unittest.mock import AsyncMock, MagicMock, patch
+
 import pytest
 
-from services.event_bus import EventBus, DomainEvent, get_event_bus, reset_event_bus
+from services.event_bus import DomainEvent, EventBus, get_event_bus, reset_event_bus
 
 
 @pytest.mark.asyncio
 async def test_event_bus_publish_subscribe():
     bus = EventBus()
-    
+
     received_events = []
-    
+
     async def test_handler(event: DomainEvent):
         received_events.append(event)
 
     bus.subscribe("complaint.created", test_handler)
-    
+
     event = DomainEvent.create(
         event_type="complaint.created",
         payload={"ref": "REF-1"}
     )
-    
+
     await bus.publish(event)
-    
+
     # Wait briefly for async task execution
     await asyncio.sleep(0.05)
-    
+
     assert len(received_events) == 1
     assert received_events[0].event_type == "complaint.created"
     assert received_events[0].payload["ref"] == "REF-1"
@@ -41,40 +42,40 @@ async def test_event_bus_publish_subscribe():
 async def test_event_bus_wildcard_subscription():
     bus = EventBus()
     received_events = []
-    
+
     async def wildcard_handler(event: DomainEvent):
         received_events.append(event)
-        
+
     bus.subscribe("*", wildcard_handler)
-    
+
     event1 = DomainEvent.create("complaint.created", {})
     event2 = DomainEvent.create("complaint.assigned", {})
-    
+
     await bus.publish(event1)
     await bus.publish(event2)
-    
+
     await asyncio.sleep(0.05)
-    
+
     assert len(received_events) == 2
 
 
 @pytest.mark.asyncio
 async def test_event_bus_dead_letter_queue():
     bus = EventBus()
-    
+
     async def failing_handler(event: DomainEvent):
         raise ValueError("Handler execution failed intentionally")
-        
+
     bus.subscribe("complaint.created", failing_handler)
-    
+
     event = DomainEvent.create("complaint.created", {})
     await bus.publish(event)
-    
+
     await asyncio.sleep(0.05)
-    
+
     metrics = bus.get_metrics()
     assert metrics["dead_letter_count"] == 1
-    
+
     dead_letters = bus.get_dead_letters()
     assert len(dead_letters) == 1
     assert "intentionally" in dead_letters[0]["error"]
@@ -250,7 +251,7 @@ async def test_handler_timeout_error_fires():
     bus.subscribe("test.event", any_handler)
     event = DomainEvent.create("test.event", {})
 
-    with patch("services.event_bus.asyncio.wait_for", side_effect=asyncio.TimeoutError()):
+    with patch("services.event_bus.asyncio.wait_for", side_effect=TimeoutError()):
         await bus.publish(event)
         await asyncio.sleep(0.05)
 

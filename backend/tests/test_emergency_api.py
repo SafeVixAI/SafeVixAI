@@ -4,12 +4,13 @@
 """Emergency API tests for SafeVixAI backend."""
 from __future__ import annotations
 
-import pytest
+from datetime import UTC
 from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 from fastapi.testclient import TestClient
 
 from api.v1 import emergency
-
 
 # ── Fixtures ─────────────────────────────────────────────────────────────────
 
@@ -36,20 +37,21 @@ def mock_db_session():
 def test_client(mock_emergency_service, mock_db_session):
     """Create test client with service overrides."""
     from fastapi import FastAPI
+
     from core.database import get_db
-    
+
     app = FastAPI()
-    
+
     # Mock app state
     app.state.emergency_service = mock_emergency_service
-    
+
     async def override_db():
         yield mock_db_session
-        
+
     app.dependency_overrides[get_db] = override_db
-    
+
     app.include_router(emergency.router)
-    
+
     return TestClient(app)
 
 
@@ -61,7 +63,7 @@ class TestGetNearbyServices:
     def test_get_nearby_services_success(self, test_client, mock_emergency_service):
         """Test successful nearby services lookup."""
         from models.schemas import EmergencyResponse, EmergencyServiceItem
-        
+
         mock_result = EmergencyResponse(
             services=[
                 EmergencyServiceItem(
@@ -87,14 +89,14 @@ class TestGetNearbyServices:
             radius_used=5000,
             source="overpass",
         )
-        
+
         mock_emergency_service.find_nearby = AsyncMock(return_value=mock_result)
-        
+
         response = test_client.get(
             "/api/v1/emergency/nearby",
             params={"lat": 13.0827, "lon": 80.2707}
         )
-        
+
         assert response.status_code == 200
         body = response.json()
         data = body.get("data", body)
@@ -105,16 +107,16 @@ class TestGetNearbyServices:
     def test_get_nearby_services_with_categories(self, test_client, mock_emergency_service):
         """Test nearby services with category filter."""
         from models.schemas import EmergencyResponse
-        
+
         mock_result = EmergencyResponse(
             services=[],
             count=1,
             radius_used=5000,
             source="overpass",
         )
-        
+
         mock_emergency_service.find_nearby = AsyncMock(return_value=mock_result)
-        
+
         response = test_client.get(
             "/api/v1/emergency/nearby",
             params={
@@ -123,7 +125,7 @@ class TestGetNearbyServices:
                 "categories": "hospital,pharmacy",
             }
         )
-        
+
         assert response.status_code == 200
         mock_emergency_service.find_nearby.assert_called_once()
         call_kwargs = mock_emergency_service.find_nearby.call_args[1]
@@ -132,16 +134,16 @@ class TestGetNearbyServices:
     def test_get_nearby_services_with_radius(self, test_client, mock_emergency_service):
         """Test nearby services with custom radius."""
         from models.schemas import EmergencyResponse
-        
+
         mock_result = EmergencyResponse(
             services=[],
             count=0,
             radius_used=10000,
             source="overpass",
         )
-        
+
         mock_emergency_service.find_nearby = AsyncMock(return_value=mock_result)
-        
+
         response = test_client.get(
             "/api/v1/emergency/nearby",
             params={
@@ -150,7 +152,7 @@ class TestGetNearbyServices:
                 "radius": 10000,
             }
         )
-        
+
         assert response.status_code == 200
         call_kwargs = mock_emergency_service.find_nearby.call_args[1]
         assert call_kwargs["radius"] == 10000
@@ -178,16 +180,16 @@ class TestGetNearbyServices:
     def test_get_nearby_services_external_error(self, test_client, mock_emergency_service):
         """Test handling of external service errors."""
         from services.exceptions import ExternalServiceError
-        
+
         mock_emergency_service.find_nearby = AsyncMock(
             side_effect=ExternalServiceError("Overpass API unavailable")
         )
-        
+
         response = test_client.get(
             "/api/v1/emergency/nearby",
             params={"lat": 13.0827, "lon": 80.2707}
         )
-        
+
         assert response.status_code == 503
         assert "Overpass API unavailable" in response.json()["detail"]
 
@@ -199,8 +201,8 @@ class TestGetSOSPayload:
 
     def test_get_sos_payload_success(self, test_client, mock_emergency_service):
         """Test successful SOS payload generation."""
-        from models.schemas import SosResponse, EmergencyNumber
-        
+        from models.schemas import EmergencyNumber, SosResponse
+
         mock_result = SosResponse(
             services=[],
             count=0,
@@ -211,14 +213,14 @@ class TestGetSOSPayload:
                 "police": EmergencyNumber(service="100", coverage="Pan-India", notes="Police emergency"),
             },
         )
-        
+
         mock_emergency_service.build_sos_payload = AsyncMock(return_value=mock_result)
-        
+
         response = test_client.get(
             "/api/v1/emergency/sos",
             params={"lat": 13.0827, "lon": 80.2707}
         )
-        
+
         assert response.status_code == 200
         body = response.json()
         data = body.get("data", body)
@@ -236,16 +238,16 @@ class TestGetSOSPayload:
     def test_get_sos_payload_external_error(self, test_client, mock_emergency_service):
         """Test handling of external service errors."""
         from services.exceptions import ExternalServiceError
-        
+
         mock_emergency_service.build_sos_payload = AsyncMock(
             side_effect=ExternalServiceError("Service unavailable")
         )
-        
+
         response = test_client.get(
             "/api/v1/emergency/sos",
             params={"lat": 13.0827, "lon": 80.2707}
         )
-        
+
         assert response.status_code == 503
 
 
@@ -256,8 +258,8 @@ class TestCreateSOSIncident:
 
     def test_create_sos_incident_success(self, test_client, mock_emergency_service, mock_db_session):
         """Test successful SOS incident creation."""
-        from models.schemas import SosResponse, EmergencyNumber
-        
+        from models.schemas import EmergencyNumber, SosResponse
+
         mock_result = SosResponse(
             services=[],
             count=0,
@@ -268,14 +270,14 @@ class TestCreateSOSIncident:
                 "police": EmergencyNumber(service="100", coverage="Pan-India", notes="Police emergency"),
             },
         )
-        
+
         mock_emergency_service.build_sos_payload = AsyncMock(return_value=mock_result)
-        
+
         response = test_client.post(
             "/api/v1/emergency/sos",
             params={"lat": 13.0827, "lon": 80.2707}
         )
-        
+
         assert response.status_code == 200
         body = response.json()
         data = body.get("data", body)
@@ -284,11 +286,13 @@ class TestCreateSOSIncident:
 
     def test_create_sos_incident_with_user(self, test_client, mock_emergency_service, mock_db_session):
         """Test SOS creation with authenticated user."""
-        from models.schemas import SosResponse, EmergencyNumber
-        from core.security import SECRET_KEY, ALGORITHM, APP_JWT_AUDIENCE, APP_JWT_ISSUER
+        from datetime import datetime, timedelta
+
         import jwt
-        from datetime import timedelta, datetime, timezone
-        
+
+        from core.security import ALGORITHM, APP_JWT_AUDIENCE, APP_JWT_ISSUER, SECRET_KEY
+        from models.schemas import EmergencyNumber, SosResponse
+
         mock_result = SosResponse(
             services=[],
             count=0,
@@ -298,42 +302,42 @@ class TestCreateSOSIncident:
                 "ambulance": EmergencyNumber(service="102", coverage="Pan-India", notes="Public ambulance"),
             },
         )
-        
+
         mock_emergency_service.build_sos_payload = AsyncMock(return_value=mock_result)
-        
+
         token = jwt.encode(
             {
                 "sub": "test-user-id",
                 "aud": APP_JWT_AUDIENCE,
                 "iss": APP_JWT_ISSUER,
-                "exp": datetime.now(timezone.utc) + timedelta(hours=1),
+                "exp": datetime.now(UTC) + timedelta(hours=1),
             },
             SECRET_KEY,
             algorithm=ALGORITHM,
         )
-        
+
         response = test_client.post(
             "/api/v1/emergency/sos",
             params={"lat": 13.0827, "lon": 80.2707},
             headers={"Authorization": f"Bearer {token}"},
         )
-        
+
         assert response.status_code == 200
 
     def test_create_sos_incident_external_error(self, test_client, mock_emergency_service, mock_db_session):
         """Test SOS creation with external service failure."""
         from services.exceptions import ExternalServiceError
-        
+
         mock_emergency_service.build_sos_payload = AsyncMock(
             side_effect=ExternalServiceError("Service down")
         )
-        
+
         with patch("api.v1.emergency.get_alert_service"):
             response = test_client.post(
                 "/api/v1/emergency/sos",
                 params={"lat": 13.0827, "lon": 80.2707}
             )
-        
+
         assert response.status_code == 503
 
     def test_create_sos_incident_general_exception(self, test_client, mock_emergency_service, mock_db_session):
@@ -341,13 +345,13 @@ class TestCreateSOSIncident:
         mock_emergency_service.build_sos_payload = AsyncMock(
             side_effect=RuntimeError("Unexpected internal error")
         )
-        
+
         with patch("api.v1.emergency.get_alert_service"):
             response = test_client.post(
                 "/api/v1/emergency/sos",
                 params={"lat": 13.0827, "lon": 80.2707}
             )
-        
+
         assert response.status_code == 503
         mock_db_session.rollback.assert_called_once()
 
@@ -359,7 +363,7 @@ class TestGetEmergencyNumbers:
     def test_get_emergency_numbers(self, test_client):
         """Test emergency numbers endpoint."""
         response = test_client.get("/api/v1/emergency/numbers")
-        
+
         assert response.status_code == 200
         body = response.json()
         data = body.get("data", body)
@@ -386,12 +390,12 @@ class TestSafeSpaces:
                 ],
                 "count": 1,
             }
-            
+
             response = test_client.get(
                 "/api/v1/emergency/safe-spaces",
                 params={"lat": 13.0827, "lon": 80.2707}
             )
-            
+
             assert response.status_code == 200
             body = response.json()
             data = body.get("data", body)
@@ -427,7 +431,7 @@ class TestServiceDependency:
         """Test emergency service dependency."""
         mock_request = MagicMock()
         mock_request.app.state.emergency_service = MagicMock()
-        
+
         result = emergency.get_emergency_service(mock_request)
-        
+
         assert result == mock_request.app.state.emergency_service

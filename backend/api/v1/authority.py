@@ -10,7 +10,8 @@ or request clarification on assigned complaints.
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
+
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, Field
 from sqlalchemy import func, select
@@ -18,7 +19,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.database import get_db
 from core.limiter import limiter
-from core.rbac import require_role, Role
+from core.rbac import Role, require_role
 from models.road_issue import RoadIssue
 from services.complaint_state_machine import ComplaintStateMachine, InvalidTransitionError
 
@@ -78,7 +79,7 @@ async def accept_complaint(
         "status": "accepted",
         "complaint_ref": result.issue.complaint_ref if result.issue else None,
         "new_status": result.new_status,
-        "accepted_at": datetime.now(timezone.utc).isoformat(),
+        "accepted_at": datetime.now(UTC).isoformat(),
     }
 
 
@@ -133,7 +134,7 @@ async def reject_complaint(
             lon = float((await db.execute(
                 select(func.ST_X(result.issue.location))
             )).scalar() or 0)
-            
+
             best = await WorkloadBalancer.find_best_officer(
                 db,
                 complaint_lat=lat,
@@ -236,4 +237,5 @@ async def get_pending_complaints(
 
 
 import logging
+
 logger = logging.getLogger(__name__)

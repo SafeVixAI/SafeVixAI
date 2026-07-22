@@ -8,9 +8,8 @@ Revises: 10000_live_tracking
 Create Date: 2026-05-06 00:00:00.000000
 """
 
-from alembic import op
 import sqlalchemy as sa
-
+from alembic import op
 
 revision = '10001_profiles_sos'
 down_revision = '10000_live_tracking'
@@ -27,17 +26,17 @@ def upgrade() -> None:
             WHERE table_schema = 'public' AND table_name = 'user_profiles' AND column_name = 'user_id'
         """)
     )
-    
+
     if not result.fetchone():
         # Column doesn't exist, add it
         op.add_column('user_profiles', sa.Column('user_id', sa.String(length=255), nullable=True))
-    
+
     # Update user_id from id if NULL (UUID to string conversion)
     op.execute(sa.text("UPDATE user_profiles SET user_id = id::text WHERE user_id IS NULL"))
-    
+
     # Make column NOT NULL after populating
     op.alter_column('user_profiles', 'user_id', nullable=False)
-    
+
     # Create index if it doesn't exist
     op.create_index('ix_user_profiles_user_id', 'user_profiles', ['user_id'], if_not_exists=True)
 

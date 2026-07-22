@@ -5,9 +5,8 @@ Revises: eb59ee6949aa
 Create Date: 2026-07-04 12:00:00.000000
 """
 
-from alembic import op
 import sqlalchemy as sa
-from sqlalchemy.dialects import postgresql
+from alembic import op
 
 revision = '10016_city_centers'
 down_revision = 'eb59ee6949aa'

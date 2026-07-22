@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -203,7 +203,7 @@ class TestSettingsGetSettings:
         with patch("core.config.Settings") as MockSettings:
             mock = MagicMock()
             mock.environment = "production"
-            setattr(mock, "cors_origins_env", "*")
+            mock.cors_origins_env = "*"
             MockSettings.return_value = mock
             with pytest.raises(RuntimeError, match="CORS_ORIGINS must list explicit origins"):
                 get_settings()

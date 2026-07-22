@@ -1,4 +1,4 @@
-# Security and Safety — SafeVixAI Chatbot
+﻿# Security and Safety — SafeVixAI Chatbot
 
 Since the SafeVixAI Chatbot operates in emergency and legal contexts, security and safety are non-negotiable.
 
@@ -12,7 +12,7 @@ The `ChatEngine` includes a mandatory `SafetyChecker` node (`agent/safety_checke
 
 ## LLM Provider Security
 - **API Keys**: All keys are stored in environment variables (`.env`), never in code or committed to Git.
-- **Fallback Logic**: 9 providers in fallback chain + Sarvam Indian language path ensure that downtime on one platform doesn't affect the user.
+- **Fallback Logic**: 10 providers in fallback chain + Sarvam Indian language path ensure that downtime on one platform doesn't affect the user.
 - **Rate Limiting**: Users are capped at 30 messages per session per hour to prevent abuse while ensuring availability for legitimate emergencies.
 - **Provider Isolation**: Each provider has its own SDK wrapper — a vulnerability in one doesn't cascade.
 

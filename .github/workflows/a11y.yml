@@ -53,7 +53,7 @@ jobs:
       - name: Setup Node (for pa11y-ci)
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22"
 
       - name: Install pa11y-ci
         run: npm install -g pa11y-ci@3

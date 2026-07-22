@@ -47,7 +47,7 @@ class GeoVerifier:
         """
         distance = _haversine_m(complaint_lat, complaint_lon, officer_lat, officer_lon)
         is_valid = distance <= cls.MAX_RESOLUTION_DISTANCE_M
-        
+
         if not is_valid:
             logger.warning(
                 "Geo-verification failed: officer is %.1fm away from complaint (limit: %.1fm)",
@@ -55,7 +55,7 @@ class GeoVerifier:
             )
         else:
             logger.info("Geo-verification successful: officer is %.1fm away", distance)
-            
+
         return is_valid, distance
 
     @classmethod

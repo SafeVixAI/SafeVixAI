@@ -17,19 +17,19 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
-from datetime import datetime, timezone
-from typing import AsyncGenerator
+from collections.abc import AsyncGenerator
+from datetime import UTC, datetime
 
 from fastapi import APIRouter, Depends, Query, Request
 from fastapi.responses import StreamingResponse
-from sqlalchemy import case, extract, func, select, literal_column
+from sqlalchemy import case, extract, func, literal_column, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.database import get_db
 from core.limiter import limiter
-from core.rbac import require_role, Role
-from models.road_issue import RoadIssue
+from core.rbac import Role, require_role
 from models.officer import Officer
+from models.road_issue import RoadIssue
 from services.event_bus import get_event_bus
 
 logger = logging.getLogger("safevixai.command_center")
@@ -70,9 +70,9 @@ async def live_feed(
                 try:
                     event = await asyncio.wait_for(queue.get(), timeout=30.0)
                     yield _sse_format(event.event_type, event.payload)
-                except asyncio.TimeoutError:
+                except TimeoutError:
                     # Send keepalive
-                    yield _sse_format("heartbeat", {"timestamp": datetime.now(timezone.utc).isoformat()})
+                    yield _sse_format("heartbeat", {"timestamp": datetime.now(UTC).isoformat()})
                 except asyncio.CancelledError:
                     break
         finally:
@@ -135,7 +135,7 @@ async def get_officer_locations(
     return {
         "officers": locations,
         "total": len(locations),
-        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "generated_at": datetime.now(UTC).isoformat(),
     }
 
 
@@ -167,7 +167,7 @@ async def get_escalation_board(
         "total": len(predictions),
         "critical_count": sum(1 for p in predictions if p.risk_level == "critical"),
         "high_count": sum(1 for p in predictions if p.risk_level == "high"),
-        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "generated_at": datetime.now(UTC).isoformat(),
     }
 
 
@@ -222,7 +222,7 @@ async def get_hotspots(
         ],
         "total_hotspots": len(clusters),
         "total_complaints_analyzed": len(points),
-        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "generated_at": datetime.now(UTC).isoformat(),
     }
 
 
@@ -302,7 +302,7 @@ async def get_resolution_metrics(
     return {
         "by_category": cat_metrics,
         "by_severity": sev_metrics,
-        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "generated_at": datetime.now(UTC).isoformat(),
     }
 
 
@@ -317,7 +317,7 @@ async def event_bus_health(
     return {
         "metrics": bus.get_metrics(),
         "dead_letters": bus.get_dead_letters(limit=5),
-        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "generated_at": datetime.now(UTC).isoformat(),
     }
 
 

@@ -15,11 +15,12 @@ Phase 3: Performance optimization layer.
 """
 from __future__ import annotations
 
-import time
 import hashlib
 import logging
-from typing import Any, Callable
+import time
+from collections.abc import Callable
 from functools import wraps
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -40,13 +41,13 @@ class ResponseCache:
         if entry is None:
             self._misses += 1
             return None
-        
+
         expires_at, value = entry
         if time.time() > expires_at:
             del self._cache[key]
             self._misses += 1
             return None
-        
+
         self._hits += 1
         return value
 
@@ -54,12 +55,12 @@ class ResponseCache:
         """Set cache value with TTL."""
         if len(self._cache) >= self._max_size:
             self._evict_expired()
-        
+
         if len(self._cache) >= self._max_size:
             # Evict oldest entry
             oldest_key = min(self._cache.keys(), key=lambda k: self._cache[k][0])
             del self._cache[oldest_key]
-        
+
         ttl = ttl or self._default_ttl
         expires_at = time.time() + ttl
         self._cache[key] = (expires_at, value)
@@ -114,7 +115,7 @@ def generate_cache_key(prefix: str, **kwargs: Any) -> str:
     for k, v in sorted(kwargs.items()):
         if v is not None:
             key_parts.append(f"{k}={v}")
-    
+
     key_string = "|".join(key_parts)
     key_hash = hashlib.md5(key_string.encode()).hexdigest()[:16]
     return f"{prefix}:{key_hash}"
@@ -139,20 +140,20 @@ def cache_response(ttl: int = 300, key_prefix: str = "api"):
                 f"{key_prefix}:{func.__name__}",
                 **{k: v for k, v in kwargs.items() if v is not None}
             )
-            
+
             # Check cache
             cached = response_cache.get(cache_key)
             if cached is not None:
                 logger.debug("Cache hit for %s", cache_key)
                 return cached
-            
+
             # Execute function
             result = await func(*args, **kwargs)
-            
+
             # Cache result
             response_cache.set(cache_key, result, ttl=ttl)
             logger.debug("Cache set for %s (ttl=%d)", cache_key, ttl)
-            
+
             return result
         return wrapper
     return decorator

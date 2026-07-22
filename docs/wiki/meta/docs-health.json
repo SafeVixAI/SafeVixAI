@@ -1,24 +1,24 @@
 {
-  "generated_at": "2026-07-22T10:00:00.000000+00:00",
+  "generated_at": "2026-07-22T15:23:01.918830+00:00",
   "schema_version": 2,
   "wiki": {
-    "total_files": 394,
-    "coverage_pct": 105.1,
+    "total_files": 415,
+    "coverage_pct": 110.7,
     "coverage_target": 375,
-    "fresh": 394,
+    "fresh": 415,
     "stale": 0,
     "undated": 232,
     "freshness_pct": 100.0,
     "stale_pct": 0.0,
     "stale_threshold_days": 90,
     "mermaid_blocks": 781,
-    "ownership_pct": 4.6,
-    "owned_files": 18,
+    "ownership_pct": 9.4,
+    "owned_files": 39,
     "owners": {
-      "frontend-team": 12,
-      "docs-team": 3,
-      "data-team": 1,
-      "chatbot-team": 2
+      "data-team": 12,
+      "frontend-team": 18,
+      "chatbot-team": 4,
+      "docs-team": 5
     }
   },
   "links": {
@@ -28,6 +28,6 @@
   },
   "git": {
     "branch": "main",
-    "sha": "HEAD"
+    "sha": "3bc0d386dfa32199b425dca5332973d6e3f40763"
   }
 }

@@ -7,15 +7,15 @@ import csv
 import re
 from pathlib import Path
 
+from sqlalchemy import text
+from sqlalchemy.exc import DBAPIError, SQLAlchemyError
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from core.config import Settings
 from core.metrics import challan_calculation_total
 from models.challan import ChallanRule, StateChallanOverride
 from models.schemas import ChallanQuery, ChallanResponse
 from services.exceptions import ExternalServiceError, ServiceValidationError
-from sqlalchemy import text
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.exc import SQLAlchemyError, DBAPIError
-
 
 VEHICLE_CLASS_ALIASES = {
     '2W': 'two_wheeler',

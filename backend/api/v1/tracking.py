@@ -2,11 +2,12 @@
 # Copyright (c) 2026 SafeVixAI Team
 
 import asyncio
-from fastapi import APIRouter, Path, WebSocket, WebSocketDisconnect
-from typing import Any, Dict, Set
 import json
 import logging
 import time
+from typing import Any
+
+from fastapi import APIRouter, Path, WebSocket, WebSocketDisconnect
 from redis.asyncio import Redis
 
 from core.config import get_settings
@@ -23,7 +24,8 @@ STALE_CONNECTION_TIMEOUT_SECONDS = 60
 STALE_CLEANUP_INTERVAL_SECONDS = 30
 MAX_CONNECTIONS = 500
 
-from pydantic import BaseModel, Field, model_validator, ValidationError
+from pydantic import BaseModel, Field, ValidationError, model_validator
+
 
 class WSLocationUpdate(BaseModel):
     lat: float = Field(..., ge=-90.0, le=90.0)
@@ -90,7 +92,7 @@ def _is_valid_ws_token(token: str | None) -> bool:
 class ConnectionHealth:
     """Tracks last activity time per WebSocket for stale connection detection."""
     def __init__(self):
-        self._last_activity: Dict[int, float] = {}  # id(websocket) -> timestamp
+        self._last_activity: dict[int, float] = {}  # id(websocket) -> timestamp
 
     def mark_activity(self, ws: WebSocket):
         self._last_activity[id(ws)] = time.monotonic()
@@ -98,7 +100,7 @@ class ConnectionHealth:
     def remove(self, ws: WebSocket):
         self._last_activity.pop(id(ws), None)
 
-    def stale_connections(self, connections: Set[WebSocket], timeout: float) -> list[WebSocket]:
+    def stale_connections(self, connections: set[WebSocket], timeout: float) -> list[WebSocket]:
         now = time.monotonic()
         stale = []
         for ws in connections:
@@ -113,9 +115,9 @@ connection_health = ConnectionHealth()
 
 class RedisConnectionManager:
     def __init__(self):
-        self.active_connections: Dict[str, Set[WebSocket]] = {}
-        self.pubsub_tasks: Dict[str, asyncio.Task] = {}
-        self.heartbeat_tasks: Dict[str, asyncio.Task] = {}
+        self.active_connections: dict[str, set[WebSocket]] = {}
+        self.pubsub_tasks: dict[str, asyncio.Task] = {}
+        self.heartbeat_tasks: dict[str, asyncio.Task] = {}
         self.cleanup_task: asyncio.Task | None = None
         self.redis: Redis | None = None
 

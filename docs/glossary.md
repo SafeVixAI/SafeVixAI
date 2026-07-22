@@ -1,4 +1,4 @@
-# Glossary
+﻿# Glossary
 
 Key terms used across the SafeVixAI documentation.
 
@@ -14,7 +14,7 @@ Key terms used across the SafeVixAI documentation.
 
 ## C
 
-**Chatbot Service** — Separate FastAPI service on port 8010. Agentic RAG system with 9-provider LLM fallback chain.
+**Chatbot Service** — Separate FastAPI service on port 8010. Agentic RAG system with 10-provider LLM fallback chain.
 
 **ChromaDB** — Vector database used for RAG (Retrieval-Augmented Generation) in the chatbot service. Stores embeddings of traffic law and first-aid documents.
 
@@ -34,7 +34,7 @@ Key terms used across the SafeVixAI documentation.
 
 ## F
 
-**Fallback Chain** — Sequence of 9 LLM providers tried in order: Groq → Cerebras → Gemini → GitHub Models → NVIDIA NIM → OpenRouter → Mistral → Together → Template.
+**Fallback Chain** — Sequence of 10 LLM providers tried in order: Groq → Cerebras → Gemini → GitHub Models → NVIDIA NIM → OpenRouter → Mistral → Together → Template.
 
 **FastAPI** — Python web framework used by both backend and chatbot service.
 
@@ -62,7 +62,7 @@ Key terms used across the SafeVixAI documentation.
 
 **Live Tracking** — WebSocket-based real-time family member location sharing.
 
-**LLM (Large Language Model)** — AI model used by the chatbot. SafeVixAI supports 9 providers.
+**LLM (Large Language Model)** — AI model used by the chatbot. SafeVixAI supports 10 providers.
 
 **LocalHashEmbeddingFunction** — Zero-dependency embedding function using SHA-256 hashing. Replaced `LocalHashEmbeddingFunction (zero-dependency)`.
 

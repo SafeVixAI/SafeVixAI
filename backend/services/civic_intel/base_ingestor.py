@@ -8,7 +8,7 @@ from __future__ import annotations
 import logging
 import time
 from abc import ABC, abstractmethod
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 import httpx
@@ -58,7 +58,7 @@ class BaseIngestor(ABC):
         settings = get_settings()
         log_entry = ETLRunLog(
             pipeline_name=self.name,
-            started_at=datetime.now(timezone.utc),
+            started_at=datetime.now(UTC),
             status='running',
         )
         db.add(log_entry)
@@ -108,7 +108,7 @@ class BaseIngestor(ABC):
             logger.exception('[ETL:%s] Pipeline failed', self.name)
 
         finally:
-            log_entry.finished_at = datetime.now(timezone.utc)
+            log_entry.finished_at = datetime.now(UTC)
             await db.commit()
 
         return log_entry

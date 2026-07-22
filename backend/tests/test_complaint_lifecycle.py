@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -17,32 +17,32 @@ FROZEN = datetime(2026, 5, 23, 10, 0, 0)
 class TestCalculateSLADeadline:
     def test_severity_5_extreme_4_hours(self):
         with patch('services.complaint_lifecycle.datetime') as mock_dt:
-            mock_dt.now.return_value = FROZEN.replace(tzinfo=timezone.utc)
+            mock_dt.now.return_value = FROZEN.replace(tzinfo=UTC)
             deadline = ComplaintLifecycle.calculate_sla_deadline(5)
         assert deadline == FROZEN + timedelta(hours=4)
 
     def test_severity_4_critical_24_hours(self):
         with patch('services.complaint_lifecycle.datetime') as mock_dt:
-            mock_dt.now.return_value = FROZEN.replace(tzinfo=timezone.utc)
+            mock_dt.now.return_value = FROZEN.replace(tzinfo=UTC)
             deadline = ComplaintLifecycle.calculate_sla_deadline(4)
         assert deadline == FROZEN + timedelta(hours=24)
 
     def test_severity_3_serious_72_hours(self):
         with patch('services.complaint_lifecycle.datetime') as mock_dt:
-            mock_dt.now.return_value = FROZEN.replace(tzinfo=timezone.utc)
+            mock_dt.now.return_value = FROZEN.replace(tzinfo=UTC)
             deadline = ComplaintLifecycle.calculate_sla_deadline(3)
         assert deadline == FROZEN + timedelta(hours=72)
 
     def test_severity_1_or_2_seven_days(self):
         for sev in (1, 2):
             with patch('services.complaint_lifecycle.datetime') as mock_dt:
-                mock_dt.now.return_value = FROZEN.replace(tzinfo=timezone.utc)
+                mock_dt.now.return_value = FROZEN.replace(tzinfo=UTC)
                 deadline = ComplaintLifecycle.calculate_sla_deadline(sev)
             assert deadline == FROZEN + timedelta(days=7)
 
     def test_severity_0_defaults_seven_days(self):
         with patch('services.complaint_lifecycle.datetime') as mock_dt:
-            mock_dt.now.return_value = FROZEN.replace(tzinfo=timezone.utc)
+            mock_dt.now.return_value = FROZEN.replace(tzinfo=UTC)
             deadline = ComplaintLifecycle.calculate_sla_deadline(0)
         assert deadline == FROZEN + timedelta(days=7)
 

@@ -3,17 +3,17 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
 from models.road_issue import RoadIssue
 from services.escalation_predictor import (
-    EscalationPrediction,
-    EscalationPredictor,
     HIGH_RISK_TYPES,
     SEVERITY_WEIGHTS,
+    EscalationPrediction,
+    EscalationPredictor,
 )
 
 
@@ -100,7 +100,7 @@ class TestConstants:
         assert SEVERITY_WEIGHTS[5] <= 1.0
 
 
-NOW = datetime(2026, 5, 23, 10, 0, 0, tzinfo=timezone.utc)
+NOW = datetime(2026, 5, 23, 10, 0, 0, tzinfo=UTC)
 
 
 def _make_issue(**overrides):

@@ -4,11 +4,11 @@
 from __future__ import annotations
 
 import logging
+from collections.abc import Callable
+from typing import Any
 
 from fastapi import FastAPI, Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
-from collections.abc import Callable
-from typing import Any
 
 from core.config import get_settings
 
@@ -55,9 +55,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
                 response.headers["Cache-Control"] = "public, max-age=3600, stale-while-revalidate=600"
             elif path.startswith("/api/v1/public/"):
                 response.headers["Cache-Control"] = "public, max-age=600, stale-while-revalidate=120"
-            elif path.startswith("/api/v1/wards/"):
-                response.headers["Cache-Control"] = "public, max-age=300, stale-while-revalidate=60"
-            elif path in ("/api/v1/emergency/numbers",):
+            elif path.startswith("/api/v1/wards/") or path in ("/api/v1/emergency/numbers",):
                 response.headers["Cache-Control"] = "public, max-age=300, stale-while-revalidate=60"
 
             # ── Short-lived / dynamic public data ──
@@ -65,9 +63,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
                 response.headers["Cache-Control"] = "public, max-age=60, stale-while-revalidate=30"
             elif path.startswith("/api/v1/emergency/sos"):
                 response.headers["Cache-Control"] = "public, max-age=120, stale-while-revalidate=60"
-            elif path.startswith("/api/v1/challan/calculate"):
-                response.headers["Cache-Control"] = "public, max-age=300, stale-while-revalidate=60"
-            elif path.startswith("/api/v1/challan/predict"):
+            elif path.startswith("/api/v1/challan/calculate") or path.startswith("/api/v1/challan/predict"):
                 response.headers["Cache-Control"] = "public, max-age=300, stale-while-revalidate=60"
             elif path.startswith("/api/v1/roadwatch/feed"):
                 response.headers["Cache-Control"] = "public, max-age=120, stale-while-revalidate=60"
@@ -79,11 +75,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
             # ── User-specific / private ──
             elif path.startswith("/api/v1/user/"):
                 response.headers["Cache-Control"] = "private, max-age=60, stale-while-revalidate=30"
-            elif path.startswith("/api/v1/providers/"):
-                response.headers["Cache-Control"] = "private, max-age=30"
-            elif path.startswith("/api/v1/officers/"):
-                response.headers["Cache-Control"] = "private, max-age=30"
-            elif path.startswith("/api/v1/garage/"):
+            elif path.startswith("/api/v1/providers/") or path.startswith("/api/v1/officers/") or path.startswith("/api/v1/garage/"):
                 response.headers["Cache-Control"] = "private, max-age=30"
 
         return response

@@ -11,7 +11,6 @@ Create Date: 2026-05-18 00:00:00.000000
 from alembic import op
 from sqlalchemy import text
 
-
 revision = '10006_sos_rls'
 down_revision = '10005_data_retention'
 branch_labels = None
@@ -28,7 +27,7 @@ def upgrade() -> None:
     )
     if not result.fetchone():
         return  # Skip RLS setup in non-Supabase environments
-    
+
     op.execute(
         """
         DO $$

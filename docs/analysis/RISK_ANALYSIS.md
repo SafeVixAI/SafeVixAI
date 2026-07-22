@@ -1,4 +1,4 @@
-# SafeVixAI — Risk Analysis (2026-05-26)
+﻿# SafeVixAI — Risk Analysis (2026-05-26)
 
 > **SNAPSHOT**: This document reflects the state as of its creation date. For current state see [AGENTS.md](../../AGENTS.md).
 
@@ -57,7 +57,7 @@
 - **Mitigation**: Reduce cache TTLs, batch Redis commands, monitor command usage
 
 ### R8: All LLM Providers Fail Simultaneously
-- **What**: All 9 providers return errors or time out; chain exhausts to TemplateProvider
+- **What**: All 10 providers return errors or time out; chain exhausts to TemplateProvider
 - **Impact**: Chatbot returns deterministic template responses (no semantic answers), user trust degraded
 - **Likelihood**: LOW — but if Groq + Cerebras + Gemini all down, chain shortens to fewer options
 - **Mitigation**: TemplateProvider provides safe fallback; email alert triggers after all fail

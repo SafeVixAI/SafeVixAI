@@ -1,4 +1,4 @@
-# SafeVixAI Chatbot — Agent Documentation
+﻿# SafeVixAI Chatbot — Agent Documentation
 
 The SafeVixAI Chatbot is an **Agentic AI Assistant**, moving beyond simple chat interfaces to a system that can take real-world actions in emergencies.
 
@@ -44,6 +44,6 @@ The agent follows a deterministic yet flexible execution sequence defined in `ag
 
 ## Key Capabilities
 - **Parallel Tool Calling**: Reduces response time for complex queries (e.g., finding both hospitals and police simultaneously).
-- **9-Provider LLM Fallback**: Groq → Cerebras → Gemini → GitHub Models → NVIDIA NIM → OpenRouter → Mistral → Together → Template.
+- **10-provider LLM Fallback**: Groq → Cerebras → Gemini → GitHub Models → NVIDIA NIM → OpenRouter → Mistral → Together → Template.
 - **Indian Language Auto-Routing**: Hindi, Tamil, Telugu, etc. detected via Unicode script range regex and routed to **Sarvam AI** (30B general / 105B legal) — separate path, not in main fallback chain.
 - **14 Indian Languages**: Full support with IndicSeamless speech model for ASR/TTS.

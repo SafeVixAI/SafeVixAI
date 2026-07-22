@@ -2,10 +2,12 @@
 # Copyright (c) 2026 SafeVixAI Team
 
 import asyncio
-import pytest
 from unittest.mock import AsyncMock, patch
-from services.garage_service import GarageService
+
+import pytest
+
 from services.exceptions import ServiceValidationError
+from services.garage_service import GarageService
 
 
 class TestParseStateCode:

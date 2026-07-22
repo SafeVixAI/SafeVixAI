@@ -4,11 +4,11 @@
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
-from httpx import AsyncClient, ASGITransport
+from httpx import ASGITransport, AsyncClient
 
 from core.database import get_db
 
@@ -26,15 +26,15 @@ def _mock_issue(**kwargs):
     issue.ward_name = kwargs.get("ward_name", "Ward 1")
     issue.road_name = kwargs.get("road_name", "MG Road")
     issue.authority_name = kwargs.get("authority_name", "Test Corp")
-    issue.location = kwargs.get("location", None)
-    issue.before_photo_url = kwargs.get("before_photo_url", None)
-    issue.after_photo_url = kwargs.get("after_photo_url", None)
+    issue.location = kwargs.get("location")
+    issue.before_photo_url = kwargs.get("before_photo_url")
+    issue.after_photo_url = kwargs.get("after_photo_url")
     issue.created_at = kwargs.get("created_at", datetime(2026, 6, 1, 12, 0, 0))
-    issue.resolved_at = kwargs.get("resolved_at", None)
-    issue.sla_deadline = kwargs.get("sla_deadline", None)
+    issue.resolved_at = kwargs.get("resolved_at")
+    issue.sla_deadline = kwargs.get("sla_deadline")
     issue.confirmation_count = kwargs.get("confirmation_count", 0)
     issue.reopen_count = kwargs.get("reopen_count", 0)
-    issue.citizen_rating = kwargs.get("citizen_rating", None)
+    issue.citizen_rating = kwargs.get("citizen_rating")
     return issue
 
 
@@ -110,8 +110,7 @@ async def test_track_complaint_sla_breached(app):
 
 @pytest.mark.asyncio
 async def test_track_complaint_sla_critical(app):
-    deadline = datetime.now(timezone.utc).replace(tzinfo=None)
-    import math
+    deadline = datetime.now(UTC).replace(tzinfo=None)
     deadline = deadline.replace(hour=deadline.hour + 2)
     issue = _mock_issue(complaint_ref="RS-TEST-004", status="in_progress", sla_deadline=deadline)
     db = _mock_db(issue=issue)

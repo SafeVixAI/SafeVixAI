@@ -2,7 +2,7 @@
 # Copyright (c) 2026 SafeVixAI Team
 
 import json
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, patch
 
 import pytest
 from fastapi import FastAPI

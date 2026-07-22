@@ -1,4 +1,4 @@
-<!-- SPDX-License-Identifier: MIT -->
+﻿<!-- SPDX-License-Identifier: MIT -->
 <!-- Copyright (c) 2026 SafeVixAI Team -->
 # SafeVixAI Disaster Recovery Runbook
 
@@ -109,7 +109,7 @@ curl -f http://localhost:8000/health | python -c "import json,sys; print(json.lo
 
 ## 4. LLM Provider Outage
 
-SafeVixAI uses a 9-provider fallback chain. A single provider outage is transparent.
+SafeVixAI uses a 10-provider fallback chain. A single provider outage is transparent.
 
 ### Symptoms
 - `/health` shows some providers as `unhealthy`
@@ -121,7 +121,7 @@ SafeVixAI uses a 9-provider fallback chain. A single provider outage is transpar
 # 1. Check which providers are down
 curl -sf http://localhost:8000/health | python -m json.tool
 
-# 2. If ALL 9 providers are down:
+# 2. If ALL 10 providers are down:
 #    - Chatbot falls back to TemplateProvider (deterministic)
 #    - Users get accurate but non-LLM responses
 #    - Fix: check API keys in chatbot_service/.env
@@ -246,5 +246,5 @@ Use this checklist during any incident. Check off items as completed.
 |-----------|-----------|------|-----------------|
 | Database restore | Weekly (Mon) | `scripts/verify-backup.py` | All tables recoverable |
 | Redis failover | Monthly | Chaos engineering workflow | In-memory fallback activates |
-| LLM provider cascade | Monthly | Integration tests | All 9 providers route correctly |
+| LLM provider cascade | Monthly | Integration tests | All 10 providers route correctly |
 | Full DR drill | Quarterly | Manual | < 1hr RTO for P0 services |

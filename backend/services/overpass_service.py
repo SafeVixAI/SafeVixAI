@@ -12,8 +12,8 @@ from pathlib import Path
 
 import httpx
 
+from core.circuit_breaker import CircuitBreakerOpenError, CircuitBreakerRegistry
 from core.config import Settings
-from core.circuit_breaker import CircuitBreakerRegistry, CircuitBreakerOpenError
 from models.schemas import EmergencyServiceItem
 from services.exceptions import ExternalServiceError
 
@@ -166,7 +166,7 @@ class OverpassService:
                     last_error = exc
                     if exc.response.status_code not in (429, 500, 502, 503, 504):
                         break  # Non-retryable error, try next mirror if any
-                    
+
                     logger.warning("Overpass mirror %s failed (attempt %d): %s", url, attempt + 1, exc, extra={"service": "overpass"})
                     if attempt < self.settings.upstream_retry_attempts:
                         backoff = self.settings.upstream_retry_backoff_seconds * (2 ** attempt)
@@ -175,7 +175,7 @@ class OverpassService:
                     last_error = exc
                     logger.warning("Overpass mirror %s connection error: %s", url, exc, extra={"service": "overpass"})
                     break  # Try next mirror
-            
+
             if index < len(self.settings.overpass_urls) - 1:
                 await asyncio.sleep(self.settings.upstream_retry_backoff_seconds)
         # All mirrors exhausted — alert the team

@@ -10,8 +10,9 @@ from __future__ import annotations
 
 import asyncio
 import functools
+from collections.abc import Callable
 from contextlib import contextmanager
-from typing import TYPE_CHECKING, Any, Callable, TypeVar
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from opentelemetry import trace
 

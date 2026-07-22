@@ -6,18 +6,17 @@
 from __future__ import annotations
 
 import time
-from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
 from core.response_cache import (
     ResponseCache,
-    generate_cache_key,
     cache_response,
-    invalidate_cache_pattern,
+    generate_cache_key,
+)
+from core.response_cache import (
     response_cache as global_cache,
 )
-
 
 # ── ResponseCache Basic Operations ─────────────────────────────────────────
 
@@ -306,14 +305,15 @@ class TestInvalidateCachePattern:
     def test_invalidate_by_pattern(self):
         # Test the actual invalidate_cache_pattern function from the module
         # Save global state, set up test data, then restore
-        from core.response_cache import response_cache as global_rc, invalidate_cache_pattern as icp
+        from core.response_cache import invalidate_cache_pattern as icp
+        from core.response_cache import response_cache as global_rc
         old_cache = global_rc._cache.copy()
         global_rc._cache.clear()
         try:
             global_rc.set("api:user:1", "a")
             global_rc.set("api:user:2", "b")
             global_rc.set("api:ward:1", "c")
-            
+
             count = icp("user")
             assert count == 2
             assert global_rc.get("api:user:1") is None
@@ -324,7 +324,8 @@ class TestInvalidateCachePattern:
             global_rc._cache.update(old_cache)
 
     def test_invalidate_no_match(self):
-        from core.response_cache import response_cache as global_rc, invalidate_cache_pattern as icp
+        from core.response_cache import invalidate_cache_pattern as icp
+        from core.response_cache import response_cache as global_rc
         old_cache = global_rc._cache.copy()
         global_rc._cache.clear()
         try:

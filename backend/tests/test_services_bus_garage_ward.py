@@ -15,7 +15,7 @@ from __future__ import annotations
 import asyncio
 import json
 import uuid
-from unittest.mock import AsyncMock, MagicMock, call, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -287,7 +287,7 @@ class TestEventBusSafeExecute:
 
         async def raise_timeout(coro, *a, **kw):
             coro.close()  # discard coroutine cleanly to avoid RuntimeWarning
-            raise asyncio.TimeoutError()
+            raise TimeoutError()
 
         with patch("services.event_bus.asyncio.wait_for", raise_timeout):
             await bus._safe_execute(slow, event)

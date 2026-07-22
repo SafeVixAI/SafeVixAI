@@ -5,8 +5,6 @@ Revises: 10014_road_issues_partitioning, e7b9a1
 Create Date: 2026-06-30 07:47:00.457566
 
 """
-from alembic import op
-import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.

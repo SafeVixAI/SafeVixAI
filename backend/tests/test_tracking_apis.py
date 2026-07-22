@@ -1,21 +1,17 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2026 SafeVixAI Team
 
-import asyncio
-import json
 import uuid
 from datetime import datetime
-from unittest.mock import ANY, AsyncMock, MagicMock, call, patch
+from unittest.mock import ANY, AsyncMock, MagicMock, patch
 
 import pytest
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from fastapi.testclient import TestClient
-from pydantic import ValidationError
 
 from api.v1.tracking import (
     ConnectionHealth,
     RedisConnectionManager,
-    WSLocationUpdate,
     _is_valid_location,
     _is_valid_tracking_payload,
     _origin_allowed,
@@ -51,7 +47,7 @@ async def _async_gen(*args, **kwargs):
 @pytest.fixture
 def live_tracking_app():
     app = FastAPI()
-    from api.v1.live_tracking import router, get_current_user, get_async_session
+    from api.v1.live_tracking import get_current_user, router
     app.include_router(router)
     app.dependency_overrides[get_current_user] = lambda: {"sub": "user-1", "email": "test@test.com"}
     return app

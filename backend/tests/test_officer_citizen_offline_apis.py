@@ -2,13 +2,12 @@
 # Copyright (c) 2026 SafeVixAI Team
 
 import uuid
+from datetime import UTC, datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock, patch
-from datetime import datetime, timezone, timedelta
 
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
-from sqlalchemy import select
 
 from core.database import get_db as core_get_db
 from core.limiter import limiter
@@ -52,7 +51,7 @@ _OFFICER_USER_ID = "00000000-0000-0000-0000-000000000001"
 @pytest.fixture
 def officers_app():
     app = FastAPI()
-    from api.v1.officers import router, get_current_user
+    from api.v1.officers import get_current_user, router
     app.include_router(router)
     app.dependency_overrides[get_current_user] = lambda: {"sub": _OFFICER_USER_ID, "email": "officer@test.com", "name": "John"}
     return app
@@ -159,7 +158,7 @@ class TestOfficersAPI:
 @pytest.fixture
 def citizen_app():
     app = FastAPI()
-    from api.v1.citizen import router, get_db
+    from api.v1.citizen import router
     app.include_router(router)
     return app
 
@@ -170,7 +169,7 @@ class TestCitizenAPI:
         mock_issue = MagicMock(spec=RoadIssue)
         mock_issue.complaint_ref = "CMP-001"
         mock_issue.status = "open"
-        mock_issue.sla_deadline = datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(hours=2)
+        mock_issue.sla_deadline = datetime.now(UTC).replace(tzinfo=None) + timedelta(hours=2)
         mock_issue.created_at = datetime(2026, 1, 1)
         mock_issue.resolved_at = None
         mock_issue.confirmation_count = 0
@@ -199,7 +198,7 @@ class TestCitizenAPI:
         mock_issue = MagicMock(spec=RoadIssue)
         mock_issue.complaint_ref = "CMP-002"
         mock_issue.status = "open"
-        mock_issue.sla_deadline = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(hours=2)
+        mock_issue.sla_deadline = datetime.now(UTC).replace(tzinfo=None) - timedelta(hours=2)
         mock_issue.created_at = datetime(2026, 1, 1)
         mock_issue.resolved_at = None
         mock_issue.confirmation_count = 0

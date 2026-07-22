@@ -10,11 +10,10 @@ Create Date: 2026-04-05
 
 from __future__ import annotations
 
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
 from geoalchemy2 import Geometry
 from sqlalchemy.dialects import postgresql
-
 
 revision = '001_initial_schema'
 down_revision = None

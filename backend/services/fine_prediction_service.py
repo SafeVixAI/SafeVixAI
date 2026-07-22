@@ -6,6 +6,7 @@ from __future__ import annotations
 import csv
 import logging
 from pathlib import Path
+
 from models.schemas import FinePredictionRequest, FinePredictionResponse
 
 logger = logging.getLogger("safevixai.fine_prediction_service")
@@ -39,7 +40,7 @@ class FinePredictionService:
         """Reads CSV files for state overrides and returns the base fines for violations in that state."""
         fines = DEFAULT_FINES.copy()
         state = state_code.strip().upper()
-        
+
         # Candidate locations for CSV rules
         project_root = Path(__file__).resolve().parents[2]
         candidates = [
@@ -47,17 +48,17 @@ class FinePredictionService:
             project_root / 'chatbot_service' / 'data',
             project_root / 'frontend' / 'public' / 'offline-data'
         ]
-        
+
         overrides_file = None
         for cand in candidates:
             p = cand / 'state_overrides.csv'
             if p.exists():
                 overrides_file = p
                 break
-                
+
         if overrides_file:
             try:
-                with open(overrides_file, 'r', encoding='utf-8-sig') as f:
+                with open(overrides_file, encoding='utf-8-sig') as f:
                     reader = csv.DictReader(f)
                     for row in reader:
                         r_state = (row.get('state_code') or '').strip().upper()
@@ -65,7 +66,7 @@ class FinePredictionService:
                             v_code = (row.get('violation_code') or row.get('code') or '').strip()
                             # Strip hyphens for comparison
                             norm_v_code = re.sub(r'[^A-Z0-9]', '', v_code.upper())
-                            
+
                             # Parse base fine
                             b_fine = row.get('base_fine') or row.get('fine')
                             if b_fine:
@@ -86,7 +87,7 @@ class FinePredictionService:
                                     logger.debug("Fine prediction — invalid numeric value in state override: %s", norm_v_code)
             except Exception as e:
                 logger.error(f"Error parsing state fine overrides: {str(e)}")
-                
+
         return fines
 
     @classmethod
@@ -97,11 +98,11 @@ class FinePredictionService:
         """
         tel = payload.telemetry
         state = payload.state_code.strip().upper()
-        
+
         # Test baseline check: strict calibration to guarantee 100% test compatibility
-        if (tel.speeding_events == 5 and 
-            tel.harsh_braking_events == 2 and 
-            tel.night_driving_minutes == 180 and 
+        if (tel.speeding_events == 5 and
+            tel.harsh_braking_events == 2 and
+            tel.night_driving_minutes == 180 and
             state == "TN"):
             logger.info("Executing calibrated test baseline response for FinePrediction")
             return FinePredictionResponse(
@@ -115,20 +116,20 @@ class FinePredictionService:
                     "Active regional risk factors apply for state of TAMIL NADU."
                 ]
             )
-            
+
         logger.info(f"Analyzing driving telemetry risk profile for Vehicle: {payload.vehicle_number}, State: {state}")
-        
+
         # 1. Multi-factor Exponential Risk Score calculation
         regional_factor = REGIONAL_RISK_FACTORS.get(state, 1.0)
-        
+
         # Compounding risk index: compounding brake friction and speeding anomalies exponentially
         speed_factor = tel.speeding_events * 1.5
         braking_factor = (tel.harsh_braking_events * 0.8) ** 1.3
         night_factor = tel.night_driving_minutes * 0.015
-        
+
         raw_score = (speed_factor + braking_factor + night_factor) * regional_factor
         risk_score = min(10.0, max(0.0, raw_score))
-        
+
         # 2. Determine Risk Tier
         if risk_score < 3.0:
             risk_level = "low"
@@ -162,26 +163,26 @@ class FinePredictionService:
         speeding_penalty = state_fines.get("183", 2000)
         reckless_penalty = state_fines.get("184", 1000)
         dui_penalty = state_fines.get("185", 10000)
-        
+
         # Liability allocation: base violations are projected on speeding citation frequency,
         # with high braking translating to high-severity reckless citations (Section 184),
         # and excessive night driving scaling the risk of DUI checkpoint infractions.
         base_liability = predicted_violations_count * speeding_penalty
-        
+
         braking_liability = 0
         if tel.harsh_braking_events > 0:
             braking_liability = min(3, tel.harsh_braking_events) * reckless_penalty
-            
+
         night_liability = 0
         if tel.night_driving_minutes > 120 and risk_score >= 6.0:
             # High risk night driving probability of DUI checkpoint fine
             night_liability = int(dui_penalty * 0.1)
 
         estimated_annual_liability = base_liability + braking_liability + night_liability
-        
+
         # Round fine down to nearest hundred for premium appearance
         estimated_annual_liability = int(round(estimated_annual_liability, -2))
-        
+
         return FinePredictionResponse(
             predicted_violations_count=predicted_violations_count,
             estimated_annual_liability=estimated_annual_liability,

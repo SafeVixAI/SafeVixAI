@@ -1,4 +1,4 @@
-# SafeVixAI Chatbot — Key Features
+﻿# SafeVixAI Chatbot — Key Features
 
 The SafeVixAI AI chatbot provides a robust set of features categorized by module: SafeVixAI (Emergency), DriveLegal (Traffic Law), and RoadWatch (Infrastructure).
 
@@ -23,7 +23,7 @@ The SafeVixAI AI chatbot provides a robust set of features categorized by module
 - **Indian Language Speech**: IndicSeamless model (ai4bharat/indic-seamless) for Indian language ASR/TTS — 14 languages supported.
 - **Speech Endpoints**: `POST /speech/translate` (NOT `/api/v1/speech/translate`) and `GET /speech/status`.
 - **Multilingual Support**: 14 Indian languages — auto-routed to **Sarvam AI** (30B/105B) via Unicode script range detection.
-- **9-Provider Fallback**: Groq → Cerebras → Gemini → GitHub Models → NVIDIA NIM → OpenRouter → Mistral → Together → Template. Zero downtime through automatic LLM provider cascading.
+- **10-provider Fallback**: Groq → Cerebras → Gemini → GitHub Models → NVIDIA NIM → OpenRouter → Mistral → Together → Template. Zero downtime through automatic LLM provider cascading.
 - **Indian Language Path**: Separate from main fallback chain — Sarvam AI direct API or HF Inference API fallback.
 - **Conversation Memory**: Redis-backed session persistence with 24hr TTL (86400s).
 - **Offline RAG**: Browser-native fallback for first-aid information when internet connectivity is lost (WebLLM + HNSWlib.js).

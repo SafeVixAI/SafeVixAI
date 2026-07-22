@@ -5,7 +5,8 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
@@ -25,8 +26,8 @@ class SLAMonitor:
         Scan all active unresolved complaints (status is NOT 'resolved' or 'rejected')
         where sla_deadline is in the past, and escalate them.
         """
-        now = datetime.now(timezone.utc).replace(tzinfo=None)
-        
+        now = datetime.now(UTC).replace(tzinfo=None)
+
         # Query active issues with breached SLA
         stmt = (
             select(RoadIssue)
@@ -34,16 +35,16 @@ class SLAMonitor:
             .where(RoadIssue.sla_deadline.is_not(None))
             .where(RoadIssue.sla_deadline < now)
         )
-        
+
         result = await db.execute(stmt)
         breached_issues = result.scalars().all()
-        
+
         escalated_count = 0
         for issue in breached_issues:
             # Check if already escalated to prevent duplicate event spamming
             timeline = await ComplaintLifecycle.get_timeline(db, issue.uuid)
             already_escalated = any(e.event_type == "escalated" and "SLA breach" in (e.notes or "") for e in timeline)
-            
+
             if not already_escalated:
                 logger.warning(
                     f"Complaint {issue.complaint_ref} breached SLA. SLA Deadline: {issue.sla_deadline}. Escalating...",
@@ -74,7 +75,7 @@ class SLAMonitor:
 
                 except Exception as e:
                     logger.error(f"Failed to escalate {issue.uuid}: {e}", exc_info=True)
-        
+
         return escalated_count
 
     async def start_loop(self, interval_seconds: int = 900) -> None:
@@ -82,10 +83,10 @@ class SLAMonitor:
         if not self.session_maker:
             logger.error("Cannot start SLA loop: session_maker is None")
             return
-            
+
         self.is_running = True
         logger.info(f"SLA Monitor background loop started. Interval: {interval_seconds}s")
-        
+
         while self.is_running:
             try:
                 await asyncio.sleep(interval_seconds)

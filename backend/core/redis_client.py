@@ -8,11 +8,9 @@ import collections
 import json
 import time
 import uuid
-import warnings
 from typing import Any
 
 from redis.asyncio import Redis
-
 
 # Max age for stale cache entries (24 hours) — served when live data unavailable
 STALE_CACHE_MAX_AGE_SECONDS = 86400
@@ -303,7 +301,7 @@ class CacheHelper:
         current = await self.hgetall(key) or {}
         current.update(mapping)
         self._memory_set(key, json.dumps(current, default=str))
-        
+
         if not self._client:
             return
         try:
@@ -312,7 +310,7 @@ class CacheHelper:
         except Exception:
             self._redis_healthy = False
             return
-            
+
     async def hgetall(self, key: str) -> dict[str, Any]:
         """Get all fields from a Redis hash."""
         if self._client:
@@ -323,7 +321,7 @@ class CacheHelper:
                     return {k: json.loads(v) for k, v in raw.items()}
             except Exception:
                 self._redis_healthy = False
-        
+
         # Memory fallback
         payload = self._memory_get(key)
         if payload:

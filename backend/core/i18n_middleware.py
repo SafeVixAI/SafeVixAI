@@ -4,21 +4,22 @@
 # c:\Hackathons\IITM\SafeVixAI\backend\core\i18n_middleware.py
 
 import logging
-import time
 import sys
-from pathlib import Path
+import time
 from collections import defaultdict
+from pathlib import Path
 
 for parent in Path(__file__).resolve().parents:
     if (parent / 'alert_service.py').exists():
         if str(parent) not in sys.path:
             sys.path.insert(0, str(parent))
         break
-from core.alert import get_alert_service
-from fastapi import FastAPI, Request, HTTPException
-from fastapi.responses import JSONResponse
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 from slowapi.errors import RateLimitExceeded
+
+from core.alert import get_alert_service
 from i18n.locales import translate_message
 
 logger = logging.getLogger("safevixai.backend.i18n")
@@ -32,21 +33,21 @@ def get_locale_from_request(request: Request) -> str:
     cookie_locale = request.cookies.get("svai-locale")
     if cookie_locale in SUPPORTED_LOCALES:
         return cookie_locale
-    
+
     # 2. Header check
     accept_lang = request.headers.get("accept-language")
     if accept_lang:
         matched = accept_lang.split(",")[0].split(";")[0].strip()[:2]
         if matched in SUPPORTED_LOCALES:
             return matched
-            
+
     return DEFAULT_LOCALE
 
 async def i18n_middleware(request: Request, call_next):
     """Saves the detected locale into request state for downstream lookup."""
     locale = get_locale_from_request(request)
     request.state.locale = locale
-    
+
     # Sync with request headers so downstreams can read it natively
     response = await call_next(request)
     return response
@@ -55,12 +56,12 @@ async def localized_http_exception_handler(request: Request, exc: HTTPException)
     """Localizes HTTPException details based on request locale."""
     locale = getattr(request.state, "locale", DEFAULT_LOCALE)
     detail = exc.detail
-    
+
     if isinstance(detail, str):
         translated_detail = translate_message(detail, locale)
     else:
         translated_detail = detail
-        
+
     return JSONResponse(
         status_code=exc.status_code,
         content={"detail": translated_detail},
@@ -71,7 +72,7 @@ async def localized_validation_exception_handler(request: Request, exc: RequestV
     """Localizes Pydantic schema validation errors."""
     locale = getattr(request.state, "locale", DEFAULT_LOCALE)
     errors = exc.errors()
-    
+
     localized_errors = []
     for err in errors:
         msg = err.get("msg", "")
@@ -91,11 +92,11 @@ async def localized_validation_exception_handler(request: Request, exc: RequestV
                              "Correo electrónico inválido" if locale == "es" else \
                              "Adresse e-mail invalide" if locale == "fr" else \
                              "Invalid email address"
-                             
+
         localized_err = dict(err)
         localized_err["msg"] = translated_msg
         localized_errors.append(localized_err)
-        
+
     return JSONResponse(
         status_code=422,
         content={"detail": localized_errors}

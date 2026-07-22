@@ -216,8 +216,12 @@ class TestRateLimitHandler:
     @pytest.mark.asyncio
     async def test_rate_limit_alert_triggers_at_threshold(self):
         """Rate limit alert should fire when hits reach threshold (lines 126-130)."""
-        from core.i18n_middleware import _rate_limit_hits, _RATE_LIMIT_ALERT_THRESHOLD, _RATE_LIMIT_WINDOW_SECONDS
         import time
+
+        from core.i18n_middleware import (
+            _RATE_LIMIT_ALERT_THRESHOLD,
+            _rate_limit_hits,
+        )
         endpoint = "/api/v1/test-threshold"
         now = time.time()
         # Fill up to just below threshold

@@ -21,7 +21,6 @@ from sqlalchemy.dialects.postgresql import insert
 from core.database import AsyncSessionLocal
 from models.road_issue import RoadInfrastructure
 
-
 FIELD_ALIASES = {
     'road_id': ['road_id', 'id', 'segment_id', 'project_id', 'road_code'],
     'road_name': ['road_name', 'name', 'road', 'street_name'],

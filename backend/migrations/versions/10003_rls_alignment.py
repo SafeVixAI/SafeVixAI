@@ -11,7 +11,6 @@ Create Date: 2026-05-07 00:00:00.000000
 from alembic import op
 from sqlalchemy import text
 
-
 revision = '10003_rls_alignment'
 down_revision = '10002_challan_tables'
 branch_labels = None

@@ -8,9 +8,8 @@ Revises: 10001_profiles_sos
 Create Date: 2026-05-06 00:10:00.000000
 """
 
-from alembic import op
 import sqlalchemy as sa
-
+from alembic import op
 
 revision = '10002_challan_tables'
 down_revision = '10001_profiles_sos'

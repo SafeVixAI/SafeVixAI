@@ -6,7 +6,7 @@ from __future__ import annotations
 import contextlib
 import logging
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import aiofiles
@@ -17,8 +17,10 @@ from sqlalchemy import cast, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.config import Settings
-from core.redis_client import CacheHelper
+from core.cqrs import Command, CommandHandler, cqrs_bus
+from core.distributed_lock import distributed_lock
 from core.queue import task
+from core.redis_client import CacheHelper
 from models.road_issue import RoadInfrastructure, RoadIssue
 from models.schemas import (
     AuthorityPreviewResponse,
@@ -30,14 +32,11 @@ from models.schemas import (
 from services.authority_router import ROAD_TYPE_LABELS, AuthorityRouter
 from services.exceptions import ExternalServiceError, ServiceValidationError
 from services.geocoding_service import GeocodingService
-from core.cqrs import Command, Query, CommandHandler, QueryHandler, cqrs_bus
-from core.distributed_lock import distributed_lock
 from services.roadwatch_photos import (
     UPLOAD_EXTENSION_BY_CONTENT_TYPE,
     UploadedPhotoUrl,
     cleanup_temp_file,
     compose_photo_url,
-    is_valid_image_magic,
     read_upload_chunks,
     save_photo_to_disk,
     strip_exif,
@@ -207,7 +206,7 @@ class RoadWatchService:
             .where(func.ST_DWithin(issue_geography, point_geography, radius))
             .where(RoadIssue.status.in_(normalized_statuses))
         )
-        
+
         if category:
             base_stmt = base_stmt.where(RoadIssue.category == category)
         if sub_category:
@@ -241,7 +240,7 @@ class RoadWatchService:
                 status=issue.status,
                 created_at=issue.created_at,
                 distance_meters=float(distance),
-                
+
                 # Enterprise fields
                 category=issue.category,
                 sub_category=issue.sub_category,
@@ -308,7 +307,7 @@ class RoadWatchService:
 
         issue_uuid = uuid.uuid4()
         complaint_ref = f'RS-{issue_uuid.hex[:10].upper()}'
-        
+
         # Save temp image if photo provided
         temp_photo_path = None
         original_filename = None
@@ -331,7 +330,7 @@ class RoadWatchService:
         # If background queue is present, run asynchronously!
         if queue is not None:
             preview = await self.get_authority(db=db, lat=lat, lon=lon)
-            
+
             category = "roads"
             if "light" in normalized_issue_type.lower() or normalized_issue_type == "streetlight":
                 category = "streetlight"
@@ -466,14 +465,14 @@ class RoadWatchService:
                 try:
                     with open(temp_photo_path, "rb") as f:
                         payload = f.read()
-                
+
                     # EXIF stripping
                     try:
                         from services.roadwatch_photos import strip_exif
                         payload = strip_exif(payload, content_type)
                     except (ModuleNotFoundError, Exception) as e:
                         logger.warning("EXIF stripping skipped: %s", e)
- 
+
                     # Supabase upload or local save
                     file_name = f'{issue_uuid}{Path(temp_photo_path).suffix}'
                     uploaded_url = await self._upload_photo_to_supabase(
@@ -490,12 +489,12 @@ class RoadWatchService:
                         photo_url = f'{self.settings.local_upload_base_url}/{file_name}' if self.settings.local_upload_base_url else f'/uploads/{file_name}'
                 finally:
                     Path(temp_photo_path).unlink(missing_ok=True)
-        
+
         # Set AI classification / YOLOv8 parameters
         ai_model_version = "v1.0.0-rule"
         ai_detection_payload = ai_classification if 'ai_classification' in locals() else {}
         ai_conf = None
-        
+
         if photo_url and getattr(photo_url, "yolov8_result", None):
             yolov8_detection = photo_url.yolov8_result
             ai_conf = photo_url.ai_confidence
@@ -504,7 +503,7 @@ class RoadWatchService:
                 **(ai_classification if 'ai_classification' in locals() else {}),
                 "yolov8_distress": yolov8_detection
             }
-            
+
             is_anomaly_reported = any(kw in normalized_issue_type.lower() for kw in ["pothole", "hazard", "collapse"])
             if is_anomaly_reported and not yolov8_detection.get("anomaly_detected"):
                 logger.info(
@@ -529,7 +528,7 @@ class RoadWatchService:
             complaint_ref=complaint_ref,
             status='open' if not duplicate_of_uuid else 'acknowledged',
             ai_detection=ai_detection_payload,
-            
+
             category=category,
             sub_category=sub_category,
             ward_id=ward_id,
@@ -620,7 +619,7 @@ class RoadWatchService:
 
         issue, lat, lon = row
         issue.status = 'acknowledged'
-        issue.status_updated = datetime.now(timezone.utc).replace(tzinfo=None)
+        issue.status_updated = datetime.now(UTC).replace(tzinfo=None)
         await db.commit()
         await db.refresh(issue)
         await self.cache.increment(ISSUES_CACHE_VERSION_KEY)
@@ -756,20 +755,22 @@ async def process_road_report_task(
     content_type: str | None,
     citizen_phone: str | None,
 ):
-    from core.database import AsyncSessionLocal
-    from core.config import get_settings
-    from core.redis_client import create_cache
-    from services.roadwatch_service import RoadWatchService
-    from services.geocoding_service import GeocodingService
-    from services.authority_router import AuthorityRouter
-    from services.overpass_service import OverpassService
-    from models.road_issue import RoadIssue
-    from sqlalchemy import select
     import uuid
+
+    from sqlalchemy import select
+
+    from core.config import get_settings
+    from core.database import AsyncSessionLocal
+    from core.redis_client import create_cache
+    from models.road_issue import RoadIssue
+    from services.authority_router import AuthorityRouter
+    from services.geocoding_service import GeocodingService
+    from services.overpass_service import OverpassService
+    from services.roadwatch_service import RoadWatchService
 
     settings = get_settings()
     cache = create_cache(settings.redis_url)
-    
+
     overpass_service = OverpassService(settings)
     geocoding_service = GeocodingService(settings, cache)
     authority_router = AuthorityRouter(settings, overpass_service, cache)

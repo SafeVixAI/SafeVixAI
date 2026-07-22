@@ -5,20 +5,20 @@
 from __future__ import annotations
 
 import json
-import time
 import logging
+import time
+
 from core.structured_logging import (
     CorrelationIdFilter,
     StructuredFormatter,
+    TimingContext,
+    correlation_id_var,
     generate_correlation_id,
     get_correlation_id,
-    set_correlation_id,
-    TimingContext,
-    setup_structured_logging,
     get_logger,
-    correlation_id_var,
+    set_correlation_id,
+    setup_structured_logging,
 )
-
 
 # ── Correlation ID Tests ────────────────────────────────────────────────────
 
@@ -187,9 +187,8 @@ class TestTimingContext:
         logger.setLevel(logging.DEBUG)
         logger.handlers.clear()
         logger.propagate = True
-        with caplog.at_level(logging.DEBUG):
-            with TimingContext(logger, "Test operation"):
-                time.sleep(0.05)
+        with caplog.at_level(logging.DEBUG), TimingContext(logger, "Test operation"):
+            time.sleep(0.05)
 
         assert "completed in" in caplog.text
         assert "ms" in caplog.text

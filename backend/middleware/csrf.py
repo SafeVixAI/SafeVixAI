@@ -3,14 +3,14 @@
 
 from __future__ import annotations
 
-import secrets
 import logging
+import secrets
+from collections.abc import Callable
+from typing import Any
 
 from fastapi import FastAPI, Request, Response
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
-from collections.abc import Callable
-from typing import Any
 
 from core.config import get_settings
 

@@ -3,10 +3,11 @@
 
 import asyncio
 import json
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from core.queue import TaskQueue, BackgroundWorker, _TASK_REGISTRY
+import pytest
+
+from core.queue import _TASK_REGISTRY, BackgroundWorker, TaskQueue
 
 
 @pytest.fixture(autouse=True)

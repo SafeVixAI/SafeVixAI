@@ -2,11 +2,13 @@
 # Copyright (c) 2026 SafeVixAI Team
 
 """Tests for OSM contributor service."""
+import os
+from unittest.mock import AsyncMock, MagicMock, patch
+
 import httpx
 import pytest
-from unittest.mock import AsyncMock, patch, MagicMock
-import os
-from services.osm_contributor import OSMContributor, OSM_TAG_MAP, get_osm_contributor
+
+from services.osm_contributor import OSM_TAG_MAP, OSMContributor, get_osm_contributor
 
 
 @pytest.fixture
@@ -83,9 +85,9 @@ async def test_contribute_report_not_configured(osm_contributor_no_token):
         'issue_type': 'pothole',
         'description': 'Large pothole',
     }
-    
+
     result = await osm_contributor_no_token.contribute_report(report)
-    
+
     assert result['status'] == 'skipped'
     assert 'OSM not configured' in result['reason']
 
@@ -98,9 +100,9 @@ async def test_contribute_report_missing_coordinates(osm_contributor):
         'issue_type': 'pothole',
         'description': 'Large pothole',
     }
-    
+
     result = await osm_contributor.contribute_report(report)
-    
+
     assert result['status'] == 'error'
     assert 'Missing coordinates' in result['reason']
 
@@ -116,25 +118,25 @@ async def test_contribute_report_success(osm_contributor):
         'description': 'Large pothole on main road',
         'road_name': 'Test Road',
     }
-    
+
     # Mock the OSM API calls
     with patch.object(osm_contributor, '_open_changeset', new_callable=AsyncMock) as mock_open:
         mock_open.return_value = 'changeset_456'
-        
+
         with patch.object(osm_contributor, '_create_node', new_callable=AsyncMock) as mock_create:
             mock_create.return_value = 'node_789'
-            
+
             with patch.object(osm_contributor, '_close_changeset', new_callable=AsyncMock) as mock_close:
                 mock_close.return_value = True
-                
+
                 result = await osm_contributor.contribute_report(report)
-                
+
                 assert result['status'] == 'success'
                 assert result['changeset_id'] == 'changeset_456'
                 assert result['node_id'] == 'node_789'
                 assert 'osm_url' in result
                 assert 'node_789' in result['osm_url']
-                
+
                 mock_open.assert_called_once_with('pothole')
                 mock_create.assert_called_once()
                 mock_close.assert_called_once_with('changeset_456')
@@ -149,12 +151,12 @@ async def test_contribute_report_changeset_failure(osm_contributor):
         'lon': 80.2707,
         'issue_type': 'pothole',
     }
-    
+
     with patch.object(osm_contributor, '_open_changeset', new_callable=AsyncMock) as mock_open:
         mock_open.return_value = None
-        
+
         result = await osm_contributor.contribute_report(report)
-        
+
         assert result['status'] == 'error'
         assert 'Failed to open changeset' in result['reason']
 
@@ -168,18 +170,18 @@ async def test_contribute_report_node_creation_failure(osm_contributor):
         'lon': 80.2707,
         'issue_type': 'pothole',
     }
-    
+
     with patch.object(osm_contributor, '_open_changeset', new_callable=AsyncMock) as mock_open:
         mock_open.return_value = 'changeset_456'
-        
+
         with patch.object(osm_contributor, '_create_node', new_callable=AsyncMock) as mock_create:
             mock_create.return_value = None
-            
+
             with patch.object(osm_contributor, '_close_changeset', new_callable=AsyncMock) as mock_close:
                 mock_close.return_value = True
-                
+
                 result = await osm_contributor.contribute_report(report)
-                
+
                 assert result['status'] == 'error'
                 assert 'Failed to create node' in result['reason']
                 mock_close.assert_called_once_with('changeset_456')
@@ -194,12 +196,12 @@ async def test_contribute_report_exception_handling(osm_contributor):
         'lon': 80.2707,
         'issue_type': 'pothole',
     }
-    
+
     with patch.object(osm_contributor, '_open_changeset', new_callable=AsyncMock) as mock_open:
         mock_open.side_effect = httpx.RequestError("Network error")
-        
+
         result = await osm_contributor.contribute_report(report)
-        
+
         assert result['status'] == 'error'
         assert 'Network error' in result['reason']
 
@@ -210,12 +212,12 @@ async def test_open_changeset_success(osm_contributor):
     mock_response = MagicMock()
     mock_response.status_code = 200
     mock_response.text = '12345'
-    
+
     with patch.object(osm_contributor._client, 'put', new_callable=AsyncMock) as mock_put:
         mock_put.return_value = mock_response
-        
+
         result = await osm_contributor._open_changeset('pothole')
-        
+
         assert result == '12345'
         mock_put.assert_called_once()
 
@@ -226,12 +228,12 @@ async def test_open_changeset_failure(osm_contributor):
     mock_response = MagicMock()
     mock_response.status_code = 401
     mock_response.text = 'Unauthorized'
-    
+
     with patch.object(osm_contributor._client, 'put', new_callable=AsyncMock) as mock_put:
         mock_put.return_value = mock_response
-        
+
         result = await osm_contributor._open_changeset('pothole')
-        
+
         assert result is None
 
 
@@ -242,7 +244,7 @@ async def test_open_changeset_exception(osm_contributor):
         mock_put.side_effect = httpx.RequestError("Connection error")
 
         result = await osm_contributor._open_changeset('pothole')
-        
+
         assert result is None
 
 
@@ -252,14 +254,14 @@ async def test_create_node_success(osm_contributor):
     mock_response = MagicMock()
     mock_response.status_code = 200
     mock_response.text = '67890'
-    
+
     tags = {'hazard': 'yes', 'hazard:type': 'pothole'}
-    
+
     with patch.object(osm_contributor._client, 'put', new_callable=AsyncMock) as mock_put:
         mock_put.return_value = mock_response
-        
+
         result = await osm_contributor._create_node('12345', 13.0827, 80.2707, tags)
-        
+
         assert result == '67890'
         mock_put.assert_called_once()
 
@@ -270,14 +272,14 @@ async def test_create_node_failure(osm_contributor):
     mock_response = MagicMock()
     mock_response.status_code = 400
     mock_response.text = 'Bad request'
-    
+
     tags = {'hazard': 'yes'}
-    
+
     with patch.object(osm_contributor._client, 'put', new_callable=AsyncMock) as mock_put:
         mock_put.return_value = mock_response
-        
+
         result = await osm_contributor._create_node('12345', 13.0827, 80.2707, tags)
-        
+
         assert result is None
 
 
@@ -286,12 +288,12 @@ async def test_close_changeset_success(osm_contributor):
     """Test successful changeset closing."""
     mock_response = MagicMock()
     mock_response.status_code = 200
-    
+
     with patch.object(osm_contributor._client, 'put', new_callable=AsyncMock) as mock_put:
         mock_put.return_value = mock_response
-        
+
         result = await osm_contributor._close_changeset('12345')
-        
+
         assert result is True
 
 
@@ -300,12 +302,12 @@ async def test_close_changeset_failure(osm_contributor):
     """Test failed changeset closing."""
     mock_response = MagicMock()
     mock_response.status_code = 404
-    
+
     with patch.object(osm_contributor._client, 'put', new_callable=AsyncMock) as mock_put:
         mock_put.return_value = mock_response
-        
+
         result = await osm_contributor._close_changeset('12345')
-        
+
         assert result is False
 
 
@@ -316,7 +318,7 @@ async def test_close_changeset_exception(osm_contributor):
         mock_put.side_effect = httpx.RequestError("Connection error")
 
         result = await osm_contributor._close_changeset('12345')
-        
+
         assert result is False
 
 
@@ -341,11 +343,11 @@ def test_get_osm_contributor_singleton():
     # Reset singleton
     import services.osm_contributor as osm_module
     osm_module._contributor = None
-    
+
     with patch.object(OSMContributor, '_load_token', return_value='mock_token'):
         contributor1 = get_osm_contributor()
         contributor2 = get_osm_contributor()
-        
+
         assert contributor1 is contributor2
         assert isinstance(contributor1, OSMContributor)
 
@@ -353,9 +355,9 @@ def test_get_osm_contributor_singleton():
 @pytest.mark.asyncio
 async def test_contribute_report_with_different_issue_types(osm_contributor):
     """Test contribution with different issue types."""
-    issue_types = ['pothole', 'damaged_road', 'flooding', 'waterlogging', 
+    issue_types = ['pothole', 'damaged_road', 'flooding', 'waterlogging',
                    'broken_barrier', 'missing_sign', 'accident', 'landslide', 'debris']
-    
+
     for issue_type in issue_types:
         report = {
             'id': '123',
@@ -363,18 +365,18 @@ async def test_contribute_report_with_different_issue_types(osm_contributor):
             'lon': 80.2707,
             'issue_type': issue_type,
         }
-        
+
         with patch.object(osm_contributor, '_open_changeset', new_callable=AsyncMock) as mock_open:
             mock_open.return_value = 'changeset_456'
-            
+
             with patch.object(osm_contributor, '_create_node', new_callable=AsyncMock) as mock_create:
                 mock_create.return_value = 'node_789'
-                
+
                 with patch.object(osm_contributor, '_close_changeset', new_callable=AsyncMock) as mock_close:
                     mock_close.return_value = True
-                    
+
                     result = await osm_contributor.contribute_report(report)
-                    
+
                     assert result['status'] == 'success'
                     mock_open.assert_called_once_with(issue_type)
 
@@ -392,18 +394,18 @@ async def test_contribute_report_with_optional_fields(osm_contributor):
         'city': 'Chennai',
         'severity': 'high',
     }
-    
+
     with patch.object(osm_contributor, '_open_changeset', new_callable=AsyncMock) as mock_open:
         mock_open.return_value = 'changeset_456'
-        
+
         with patch.object(osm_contributor, '_create_node', new_callable=AsyncMock) as mock_create:
             mock_create.return_value = 'node_789'
-            
+
             with patch.object(osm_contributor, '_close_changeset', new_callable=AsyncMock) as mock_close:
                 mock_close.return_value = True
-                
+
                 result = await osm_contributor.contribute_report(report)
-                
+
                 assert result['status'] == 'success'
                 # Verify description was truncated if needed
                 call_args = mock_create.call_args
@@ -419,18 +421,18 @@ async def test_contribute_report_with_unknown_issue_type(osm_contributor):
         'lon': 80.2707,
         'issue_type': 'unknown_type',
     }
-    
+
     with patch.object(osm_contributor, '_open_changeset', new_callable=AsyncMock) as mock_open:
         mock_open.return_value = 'changeset_456'
-        
+
         with patch.object(osm_contributor, '_create_node', new_callable=AsyncMock) as mock_create:
             mock_create.return_value = 'node_789'
-            
+
             with patch.object(osm_contributor, '_close_changeset', new_callable=AsyncMock) as mock_close:
                 mock_close.return_value = True
-                
+
                 result = await osm_contributor.contribute_report(report)
-                
+
                 assert result['status'] == 'success'
                 # Should use default hazard tags
                 mock_open.assert_called_once_with('unknown_type')

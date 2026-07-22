@@ -5,14 +5,14 @@
 
 from __future__ import annotations
 
-import pytest
-import json
+from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
-from datetime import datetime, timezone
 
-from services.provider_encrypt import encrypt_api_key, decrypt_api_key, mask_api_key
+import pytest
+
 from core.security import get_current_user
+from services.provider_encrypt import decrypt_api_key, encrypt_api_key, mask_api_key
 
 
 class MockResult:
@@ -50,7 +50,7 @@ def mock_db():
 
 @pytest.fixture
 def sample_config():
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     config = MagicMock()
     config.id = uuid4()
     config.user_id = "test-user"
@@ -124,9 +124,10 @@ async def test_builtins_endpoint(monkeypatch):
 
     from core.config import get_settings
     get_settings.cache_clear()
-    from main import create_app
+    from httpx import ASGITransport, AsyncClient
+
     from core.database import get_db
-    from httpx import AsyncClient, ASGITransport
+    from main import create_app
 
     app = create_app()
 
@@ -160,9 +161,10 @@ async def test_test_connection_routes_have_sync_attr(monkeypatch):
 
     from core.config import get_settings
     get_settings.cache_clear()
-    from main import create_app
+    from httpx import ASGITransport
+
     from core.database import get_db
-    from httpx import AsyncClient, ASGITransport
+    from main import create_app
 
     app = create_app()
 
@@ -175,7 +177,7 @@ async def test_test_connection_routes_have_sync_attr(monkeypatch):
     app.dependency_overrides[get_db] = override_db
     transport = ASGITransport(app=app)
 
-    # Use app.test_client or direct route access? 
+    # Use app.test_client or direct route access?
     # Instead, verify the route is registered
     routes = [r.path for r in app.routes]
     assert "/api/v1/providers/test" in routes
@@ -190,8 +192,8 @@ async def test_sync_route_is_registered(monkeypatch):
 
     from core.config import get_settings
     get_settings.cache_clear()
-    from main import create_app
     from core.database import get_db
+    from main import create_app
 
     app = create_app()
 
@@ -243,16 +245,16 @@ def _make_app(mock_session, monkeypatch=None):
 async def test_create_provider_config_returns_201(monkeypatch, mock_db, sample_config):  # B1
     """POST /api/v1/providers with minimal fields returns 201."""
     mock_db.execute.return_value = MockResult(row=None)  # No duplicate
-    from datetime import datetime, timezone
+    from datetime import datetime
     mock_db.refresh.side_effect = lambda cfg: (
         setattr(cfg, "id", sample_config.id),
-        setattr(cfg, "created_at", datetime.now(timezone.utc)),
-        setattr(cfg, "updated_at", datetime.now(timezone.utc)),
+        setattr(cfg, "created_at", datetime.now(UTC)),
+        setattr(cfg, "updated_at", datetime.now(UTC)),
         setattr(cfg, "circuit_breaker_failures", 0),
     )[-1]  # last value is the return
 
     app = _make_app(mock_db, monkeypatch)
-    from httpx import AsyncClient, ASGITransport
+    from httpx import ASGITransport, AsyncClient
     transport = ASGITransport(app=app)
 
     payload = {
@@ -283,7 +285,7 @@ async def test_update_provider_config_returns_updated(monkeypatch, mock_db, samp
     mock_db.execute.return_value = MockResult(row=sample_config)
 
     app = _make_app(mock_db, monkeypatch)
-    from httpx import AsyncClient, ASGITransport
+    from httpx import ASGITransport, AsyncClient
     transport = ASGITransport(app=app)
 
     async with AsyncClient(transport=transport, base_url="http://test") as client:
@@ -304,7 +306,7 @@ async def test_delete_provider_config_returns_204(monkeypatch, mock_db, sample_c
     mock_db.execute.return_value = MockResult(row=sample_config)
 
     app = _make_app(mock_db, monkeypatch)
-    from httpx import AsyncClient, ASGITransport
+    from httpx import ASGITransport, AsyncClient
     transport = ASGITransport(app=app)
 
     async with AsyncClient(transport=transport, base_url="http://test") as client:
@@ -320,7 +322,7 @@ async def test_delete_non_existent_returns_404(monkeypatch, mock_db):  # B4
     mock_db.execute.return_value = MockResult(row=None)
 
     app = _make_app(mock_db, monkeypatch)
-    from httpx import AsyncClient, ASGITransport
+    from httpx import ASGITransport, AsyncClient
     transport = ASGITransport(app=app)
 
     async with AsyncClient(transport=transport, base_url="http://test") as client:
@@ -336,7 +338,7 @@ async def test_update_non_existent_returns_404(monkeypatch, mock_db):  # B5
     mock_db.execute.return_value = MockResult(row=None)
 
     app = _make_app(mock_db, monkeypatch)
-    from httpx import AsyncClient, ASGITransport
+    from httpx import ASGITransport, AsyncClient
     transport = ASGITransport(app=app)
 
     async with AsyncClient(transport=transport, base_url="http://test") as client:
@@ -353,7 +355,7 @@ async def test_create_duplicate_provider_returns_409(monkeypatch, mock_db, sampl
     mock_db.execute.return_value = MockResult(row=sample_config)  # Found existing
 
     app = _make_app(mock_db, monkeypatch)
-    from httpx import AsyncClient, ASGITransport
+    from httpx import ASGITransport, AsyncClient
     transport = ASGITransport(app=app)
 
     payload = {

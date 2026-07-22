@@ -3,23 +3,24 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
+
 from fastapi import APIRouter, Depends, Query, Request
-from sqlalchemy import case, func, select, literal_column
+from sqlalchemy import case, func, literal_column, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.database import get_db
 from core.limiter import limiter
 from models.road_issue import RoadIssue
-from models.ward import Ward
 from models.schemas import (
-    AnalyticsHeatmapResponse, 
-    HeatmapFeature, 
-    HeatmapFeatureGeometry, 
+    AnalyticsHeatmapResponse,
+    HeatmapFeature,
+    HeatmapFeatureGeometry,
     HeatmapFeatureProperties,
+    RoadIssueItem,
     WardSummaryItem,
-    RoadIssueItem
 )
+from models.ward import Ward
 from services.ward_service import WardService
 
 router = APIRouter(prefix='/api/v1/analytics', tags=['Analytics'])
@@ -35,16 +36,16 @@ async def get_heatmap_geojson(
     """Get active complaints as a GeoJSON FeatureCollection for rendering choropleth maps/heatmaps."""
     lat_expr = func.ST_Y(RoadIssue.location).label('lat')
     lon_expr = func.ST_X(RoadIssue.location).label('lon')
-    
+
     stmt = (
         select(RoadIssue, lat_expr, lon_expr)
         .where(RoadIssue.status.in_(["open", "acknowledged", "in_progress"]))
     )
     if category:
         stmt = stmt.where(RoadIssue.category == category)
-        
+
     rows = (await db.execute(stmt)).all()
-    
+
     features = []
     for issue, lat, lon in rows:
         features.append(
@@ -58,7 +59,7 @@ async def get_heatmap_geojson(
                 )
             )
         )
-        
+
     return AnalyticsHeatmapResponse(features=features)
 
 
@@ -70,10 +71,10 @@ async def get_ward_summary(
 ) -> list[WardSummaryItem]:
     """Get complaint metrics, resolution rates, and SLA breaches grouped by ward."""
     await WardService.ensure_seeded(db)
-    
-    now = datetime.now(timezone.utc).replace(tzinfo=None)
+
+    now = datetime.now(UTC).replace(tzinfo=None)
     active_statuses = ["open", "acknowledged", "in_progress"]
-    
+
     stmt = (
         select(
             Ward.ward_id,
@@ -105,14 +106,14 @@ async def get_ward_summary(
         .group_by(Ward.ward_id, Ward.ward_name, Ward.zone_name)
         .order_by(Ward.ward_name.asc())
     )
-    
+
     rows = (await db.execute(stmt)).all()
-    
+
     summary = []
     for row in rows:
         total = (row.open_count or 0) + (row.resolved_count or 0) + (row.rejected_count or 0)
         resolution_rate = (row.resolved_count / total * 100.0) if total > 0 else 0.0
-        
+
         summary.append(
             WardSummaryItem(
                 ward_id=row.ward_id,
@@ -124,7 +125,7 @@ async def get_ward_summary(
                 sla_breach_count=row.breached_count or 0,
             )
         )
-        
+
     return summary
 
 
@@ -135,10 +136,10 @@ async def get_sla_breaches(
     db: AsyncSession = Depends(get_db)
 ) -> list[RoadIssueItem]:
     """Get unresolved complaints that have breached their SLA timeline."""
-    now = datetime.now(timezone.utc).replace(tzinfo=None)
+    now = datetime.now(UTC).replace(tzinfo=None)
     lat_expr = func.ST_Y(RoadIssue.location).label('lat')
     lon_expr = func.ST_X(RoadIssue.location).label('lon')
-    
+
     stmt = (
         select(RoadIssue, lat_expr, lon_expr)
         .where(RoadIssue.status.in_(["open", "acknowledged", "in_progress"]))
@@ -146,9 +147,9 @@ async def get_sla_breaches(
         .where(RoadIssue.sla_deadline < now)
         .order_by(RoadIssue.sla_deadline.asc())
     )
-    
+
     rows = (await db.execute(stmt)).all()
-    
+
     return [
         RoadIssueItem(
             uuid=issue.uuid,
@@ -195,10 +196,10 @@ async def get_category_breakdown(
     )
     result = await db.execute(stmt)
     rows = result.all()
-    
+
     breakdown = {"roads": 0, "traffic": 0, "streetlight": 0}
     for cat, count in rows:
         if cat in breakdown:
             breakdown[cat] = count
-            
+
     return breakdown

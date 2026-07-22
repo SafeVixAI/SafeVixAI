@@ -1,4 +1,4 @@
-# SafeVixAI Operations Handbook
+﻿# SafeVixAI Operations Handbook
 
 **Version:** 1.0
 **Last Updated:** 2026-07-14
@@ -29,7 +29,7 @@ SafeVixAI runs three independent services communicating over REST/WebSocket with
 | API Availability | 99.5% | Health endpoint success rate | Render free tier has no SLA |
 | API Latency p95 (standard) | < 2s | Backend API response times | Excludes LLM endpoints |
 | API Latency p95 (LLM) | < 5s | Chatbot /chat/stream endpoint | Includes fallback chain |
-| Chatbot Response p95 | < 8s | End-to-end LLM generation | 9-provider fallback adds latency |
+| Chatbot Response p95 | < 8s | End-to-end LLM generation | 10-provider fallback adds latency |
 | Frontend TTI | < 3s | Lighthouse / Web Vitals | PWA with service worker |
 | Offline Queue Delivery | > 99% | SOS/reports delivered within 5min of reconnect | IndexedDB queue |
 | Database Query p99 | < 200ms | Indexed PostGIS queries | ST_DWithin with GiST index |

@@ -5,13 +5,15 @@ import uuid
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
-from sqlalchemy import delete as sa_delete, select
+from sqlalchemy import delete as sa_delete
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.audit import AuditLog, AuditEvent
+from core.audit import AuditEvent, AuditLog
 from core.database import get_db
 from core.limiter import limiter
 from core.security import get_current_user
+from models.road_issue import RoadIssue
 from models.schemas import (
     UserDataExport,
     UserDeleteResponse,
@@ -20,9 +22,7 @@ from models.schemas import (
     UserProfileUpdate,
 )
 from models.sos_incident import SosIncident
-from models.road_issue import RoadIssue
 from models.user import UserProfile
-
 
 router = APIRouter(prefix="/api/v1/users", tags=["Users"])
 
@@ -37,7 +37,7 @@ async def create_user_profile(
 ) -> Any:
     """Create a new emergency user profile."""
     contacts = [contact.model_dump() for contact in profile_data.emergency_contacts]
-    
+
     db_profile = UserProfile(
         user_id=str(current_user["sub"]),
         name=profile_data.name,
@@ -66,7 +66,7 @@ async def get_user_profile(
         select(UserProfile).where(UserProfile.id == user_id, UserProfile.user_id == str(current_user["sub"]))
     )
     profile = result.scalar_one_or_none()
-    
+
     if not profile:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -89,21 +89,21 @@ async def update_user_profile(
         select(UserProfile).where(UserProfile.id == user_id, UserProfile.user_id == str(current_user["sub"]))
     )
     profile = result.scalar_one_or_none()
-    
+
     if not profile:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Emergency profile not found"
         )
-    
+
     update_data = profile_update.model_dump(exclude_unset=True)
-    
+
     if "emergency_contacts" in update_data and update_data["emergency_contacts"] is not None:
         update_data["emergency_contacts"] = [contact for contact in update_data["emergency_contacts"]]
 
     for key, value in update_data.items():
         setattr(profile, key, value)
-        
+
     await db.commit()
     await db.refresh(profile)
     ip = request.client.host if request.client else "unknown"

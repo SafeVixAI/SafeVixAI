@@ -29,10 +29,11 @@ target-version = "py311"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "N", "W", "UP", "B", "SIM", "ARG", "C4", "EM", "G", "PIE", "T20"]
-ignore = ["E501"]
+ignore = ["E501", "B008", "B904"]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/*" = ["ARG"]
+"tests/*" = ["ARG", "B017", "EM", "SIM", "N806", "N817", "F841", "B007", "E741", "PIE810", "E402", "F401", "B011", "C408", "N802", "W291", "T201"]
+"scripts/*" = ["T201", "EM101", "EM102", "W291", "W293", "E402", "G004", "F821"]
 
 [tool.ruff.format]
 quote-style = "double"

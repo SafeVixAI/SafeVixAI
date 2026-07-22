@@ -43,37 +43,37 @@ def _column_exists(conn, table_name: str, column_name: str) -> bool:
 
 def upgrade() -> None:
     conn = op.get_bind()
-    
+
     # Add org_id to users table (if it exists)
     if _table_exists(conn, "users"):
         if not _column_exists(conn, "users", "org_id"):
             op.add_column("users", sa.Column("org_id", sa.String(36), nullable=True))
         op.create_index("ix_users_org_id", "users", ["org_id"], if_not_exists=True)
-    
+
     # Add org_id to emergency_services table
     if _table_exists(conn, "emergency_services"):
         if not _column_exists(conn, "emergency_services", "org_id"):
             op.add_column("emergency_services", sa.Column("org_id", sa.String(36), nullable=True))
         op.create_index("ix_emergency_services_org_id", "emergency_services", ["org_id"], if_not_exists=True)
-    
+
     # Add org_id to road_issues table
     if _table_exists(conn, "road_issues"):
         if not _column_exists(conn, "road_issues", "org_id"):
             op.add_column("road_issues", sa.Column("org_id", sa.String(36), nullable=True))
         op.create_index("ix_road_issues_org_id", "road_issues", ["org_id"], if_not_exists=True)
-    
+
     # Add org_id to road_infrastructure table
     if _table_exists(conn, "road_infrastructure"):
         if not _column_exists(conn, "road_infrastructure", "org_id"):
             op.add_column("road_infrastructure", sa.Column("org_id", sa.String(36), nullable=True))
         op.create_index("ix_road_infrastructure_org_id", "road_infrastructure", ["org_id"], if_not_exists=True)
-    
+
     # Add org_id to sos_incidents table
     if _table_exists(conn, "sos_incidents"):
         if not _column_exists(conn, "sos_incidents", "org_id"):
             op.add_column("sos_incidents", sa.Column("org_id", sa.String(36), nullable=True))
         op.create_index("ix_sos_incidents_org_id", "sos_incidents", ["org_id"], if_not_exists=True)
-    
+
     # Add org_id to user_profiles table
     if _table_exists(conn, "user_profiles"):
         if not _column_exists(conn, "user_profiles", "org_id"):
@@ -83,27 +83,27 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     conn = op.get_bind()
-    
+
     if _table_exists(conn, "user_profiles"):
         op.drop_index("ix_user_profiles_org_id", table_name="user_profiles", if_exists=True)
         op.drop_column("user_profiles", "org_id")
-    
+
     if _table_exists(conn, "sos_incidents"):
         op.drop_index("ix_sos_incidents_org_id", table_name="sos_incidents", if_exists=True)
         op.drop_column("sos_incidents", "org_id")
-    
+
     if _table_exists(conn, "road_infrastructure"):
         op.drop_index("ix_road_infrastructure_org_id", table_name="road_infrastructure", if_exists=True)
         op.drop_column("road_infrastructure", "org_id")
-    
+
     if _table_exists(conn, "road_issues"):
         op.drop_index("ix_road_issues_org_id", table_name="road_issues", if_exists=True)
         op.drop_column("road_issues", "org_id")
-    
+
     if _table_exists(conn, "emergency_services"):
         op.drop_index("ix_emergency_services_org_id", table_name="emergency_services", if_exists=True)
         op.drop_column("emergency_services", "org_id")
-    
+
     if _table_exists(conn, "users"):
         op.drop_index("ix_users_org_id", table_name="users", if_exists=True)
         op.drop_column("users", "org_id")

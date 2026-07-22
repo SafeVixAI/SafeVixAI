@@ -1,4 +1,4 @@
-# Environment Configuration — Chatbot Service
+﻿# Environment Configuration — Chatbot Service
 
 Create a `.env` file in the `chatbot_service/` root based on `.env.example`. This file should contain all the secret keys and service URLs.
 
@@ -35,7 +35,7 @@ Create a `.env` file in the `chatbot_service/` root based on `.env.example`. Thi
 - `OPENCAGE_API_KEY`: Required for OpenCage geocoding fallback.
 - `HF_TOKEN`: HuggingFace token — used as Sarvam fallback + Shuka/BharatGen/Whisper via HF Inference API. Not needed for core chatbot flow.
 - `ADMIN_SECRET`: Protects admin-only endpoints.
-- `ALERT_EMAIL` / `ALERT_EMAIL_PASSWORD`: Email alert config when all 9 LLM providers fail (5-min cooldown).
+- `ALERT_EMAIL` / `ALERT_EMAIL_PASSWORD`: Email alert config when all 10 LLM providers fail (5-min cooldown).
 - `SENTRY_DSN`: Optional Sentry error tracking.
 
 ## Local Development vs. Production

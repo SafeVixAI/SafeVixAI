@@ -26,7 +26,7 @@ def upgrade() -> None:
     )
     if not result.fetchone():
         return  # Skip RLS setup in non-Supabase environments
-    
+
     # Enable RLS on all tables
     tables = [
         'user_profiles',
@@ -34,10 +34,10 @@ def upgrade() -> None:
         'road_infrastructure',
         'emergency_services',
     ]
-    
+
     for table in tables:
         op.execute(f"ALTER TABLE {table} ENABLE ROW LEVEL SECURITY;")
-        
+
         # Policy: Authenticated users can read all rows (for public datasets like infrastructure/emergency)
         # Note: In Supabase, auth.uid() is used for checking the logged-in user.
         # But since FastAPI accesses the DB with a service role, the service role bypasses RLS anyway.
@@ -63,7 +63,7 @@ def upgrade() -> None:
         USING (id = auth.uid())
         WITH CHECK (id = auth.uid());
     """)
-    
+
     # Specific policies for Road Issues (reporters can insert/update their own issues)
     op.execute("""
         CREATE POLICY "Users can insert road issues" 
@@ -86,7 +86,7 @@ def downgrade() -> None:
         'road_infrastructure',
         'emergency_services',
     ]
-    
+
     op.execute('DROP POLICY IF EXISTS "Users can insert their own profile" ON user_profiles;')
     op.execute('DROP POLICY IF EXISTS "Users can update their own profile" ON user_profiles;')
     op.execute('DROP POLICY IF EXISTS "Users can insert road issues" ON road_issues;')

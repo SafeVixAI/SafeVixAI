@@ -3,13 +3,14 @@
 
 from __future__ import annotations
 
-import os
 import base64
 import logging
+import os
+
 from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 
 logger = logging.getLogger('safevixai.provider_encrypt')
 
@@ -54,7 +55,7 @@ def decrypt_api_key(encrypted: str | None, master_key: str | None = None) -> str
         return encrypted
 
     derived_key = _derive_key(key)
-    
+
     if encrypted.startswith("v2_"):
         try:
             data = base64.urlsafe_b64decode(encrypted[3:].encode('utf-8'))
@@ -63,7 +64,7 @@ def decrypt_api_key(encrypted: str | None, master_key: str | None = None) -> str
             return aesgcm.decrypt(nonce, ct, None).decode('utf-8')
         except Exception:
             return encrypted
-    
+
     # Fallback to Fernet
     try:
         f = Fernet(base64.urlsafe_b64encode(derived_key))

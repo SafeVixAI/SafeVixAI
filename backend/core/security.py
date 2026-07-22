@@ -3,22 +3,20 @@
 
 from __future__ import annotations
 
+import logging
 import os
+import re
 import secrets
 import time
-from collections import OrderedDict
-from datetime import datetime, timedelta, timezone
 import uuid
+from collections import OrderedDict
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
+import jwt
 from fastapi import HTTPException, Request
 from fastapi.responses import JSONResponse
 from fastapi.security import HTTPBearer
-import jwt
-
-import re
-
-import logging
 
 from core.rbac import Role
 
@@ -216,13 +214,13 @@ def create_access_token(
     role: str = "user",
 ) -> str:
     to_encode = data.copy()
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     expire = now + (expires_delta if expires_delta else timedelta(hours=ACCESS_TOKEN_EXPIRE_HOURS))
     # P1-01: Add aud and iss claims
     # Phase 0.1: Add role claim to JWT
     to_encode.update({
         "jti": str(uuid.uuid4()),
-        "exp": expire, 
+        "exp": expire,
         "iat": now,
         "aud": APP_JWT_AUDIENCE,
         "iss": APP_JWT_ISSUER,
@@ -238,7 +236,7 @@ def create_refresh_token(
     expires_delta: timedelta | None = None,
 ) -> str:
     to_encode = data.copy()
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     expire = now + (expires_delta if expires_delta else timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS))
     to_encode.update({
         "jti": str(uuid.uuid4()),
@@ -262,8 +260,8 @@ def create_secure_cookie_response(
     Phase 0.2: Prevents XSS attacks by making JWT inaccessible to JavaScript.
     """
     response = JSONResponse(content=content, status_code=status_code)
-    expire = datetime.now(timezone.utc) + (expires_delta or timedelta(hours=ACCESS_TOKEN_EXPIRE_HOURS))
-    
+    expire = datetime.now(UTC) + (expires_delta or timedelta(hours=ACCESS_TOKEN_EXPIRE_HOURS))
+
     response.set_cookie(
         key="access_token",
         value=token,
@@ -272,7 +270,7 @@ def create_secure_cookie_response(
         samesite=COOKIE_SAMESITE,
         path=COOKIE_PATH,
         expires=expire,
-        max_age=int((expire - datetime.now(timezone.utc)).total_seconds()),
+        max_age=int((expire - datetime.now(UTC)).total_seconds()),
     )
     return response
 
@@ -289,13 +287,13 @@ def _normalize_user_payload(payload: dict[str, Any], *, provider: str) -> dict[s
     raw_role = payload.get("role") or payload.get("app_metadata", {}).get("role") or "user"
     if raw_role == "authenticated":
         raw_role = "user"
-        
+
     try:
         Role(raw_role)
     except ValueError:
         logger.warning(f"Invalid role claim '{raw_role}' in token payload, rejecting token")
         raise HTTPException(status_code=401, detail="Invalid role claim in token")
-        
+
     return {
         **payload,
         "sub": str(user_id),
@@ -325,8 +323,8 @@ def require_role(required_role: str | Role):
 def _decode_app_token(token: str) -> dict[str, Any]:
     # P1-01: Strictly validate audience and issuer
     payload = jwt.decode(
-        token, 
-        SECRET_KEY, 
+        token,
+        SECRET_KEY,
         algorithms=[ALGORITHM, "RS256"],
         audience=APP_JWT_AUDIENCE,
         issuer=APP_JWT_ISSUER,

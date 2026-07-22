@@ -1,4 +1,4 @@
-# Phase 3 Implementation Plan - Advanced AI, Performance, Production Readiness
+﻿# Phase 3 Implementation Plan - Advanced AI, Performance, Production Readiness
 
 ## Current Status
 - **Tests:** 2829 total passing (1365 backend + 892 chatbot + 572 frontend)
@@ -17,7 +17,7 @@
 - [x] Multi-turn intent refinement (agent/intent_detector.py refine_intent())
 - [x] Smart fallback routing with confidence scores (providers/router.py confidence scoring)
 - [x] AI-powered report classification (services/report_classifier.py — 10 categories, severity scoring, integrated into RoadWatch submit flow)
-- [x] 9-provider fallback chain: Groq→Cerebras→Gemini→GitHub→NVIDIA→OpenRouter→Mistral→Together→Template
+- [x] 10-provider fallback chain: Groq→Cerebras→Gemini→GitHub→NVIDIA→OpenRouter→Mistral→Together→Template
 - [x] Safety checker (7-layer defense: SafetyChecker → prompt injection → RAG trust boundary → token budget → provider check → Groq guard → HTML sanitization)
 - [x] Indian language auto-routing (Sarvam-30B for Indic queries, Sarvam-105B for legal/challan)
 - [x] Speech/ASR: IndicSeamless service (14 Indian languages, bilingual ASR + TTS)

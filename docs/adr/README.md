@@ -1,4 +1,4 @@
-# Architecture Decision Records (ADRs)
+﻿# Architecture Decision Records (ADRs)
 
 This directory contains Architecture Decision Records for SafeVixAI.
 Each ADR documents a significant architectural decision, the context, options considered, and the chosen approach.
@@ -8,7 +8,7 @@ Each ADR documents a significant architectural decision, the context, options co
 | ADR | Title | Date | Status |
 |-----|-------|------|--------|
 | [ADR-001](./ADR-001-two-service-architecture.md) | Two-Service Architecture (Backend + Chatbot) | 2026-05-19 | ✅ Accepted |
-| [ADR-002](./ADR-002-llm-fallback-chain.md) | 9-Provider LLM Fallback Chain | 2026-05-20 | ✅ Accepted |
+| [ADR-002](./ADR-002-llm-fallback-chain.md) | 10-provider LLM Fallback Chain | 2026-05-20 | ✅ Accepted |
 | [ADR-003](./ADR-003-postgis-over-mongo.md) | PostGIS for Geospatial Queries | 2026-05-21 | ✅ Accepted |
 | [ADR-004](./ADR-004-cqrs-command-query.md) | CQRS for Write-Heavy Operations | 2026-06-28 | ✅ Accepted |
 | [ADR-005](./ADR-005-redlock-distributed-locking.md) | Distributed Locking with Redlock | 2026-06-28 | ✅ Accepted |

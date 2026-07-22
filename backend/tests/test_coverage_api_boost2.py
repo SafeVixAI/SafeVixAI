@@ -7,31 +7,39 @@ officers, user, roadwatch, command_center, tracking edge cases.
 from __future__ import annotations
 
 import asyncio
-import jwt
 import uuid
-import pytest
+from datetime import UTC, datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock, patch
-from datetime import datetime, timedelta, timezone
+
+import jwt
+import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.database import get_db
-from core.security import (
-    APP_JWT_AUDIENCE, APP_JWT_ISSUER, ALGORITHM, SECRET_KEY,
-    create_access_token, create_refresh_token, get_current_user,
-    get_current_user_optional, _revoked_token_jtis,
-)
-from core.rbac import require_role, Role
 from core.circuit_breaker import CircuitBreakerRegistry
-from models.schemas import (
-    AuthorityPreviewResponse, RoadInfrastructureResponse,
-    RoadIssuesResponse, RoadReportResponse,
+from core.database import get_db
+from core.rbac import Role, require_role
+from core.security import (
+    ALGORITHM,
+    APP_JWT_AUDIENCE,
+    APP_JWT_ISSUER,
+    SECRET_KEY,
+    _revoked_token_jtis,
+    create_access_token,
+    create_refresh_token,
+    get_current_user,
+    get_current_user_optional,
 )
-from models.road_issue import RoadIssue
 from models.officer import Officer
+from models.road_issue import RoadIssue
+from models.schemas import (
+    AuthorityPreviewResponse,
+    RoadInfrastructureResponse,
+    RoadIssuesResponse,
+    RoadReportResponse,
+)
 from models.user import UserProfile
-
 
 _USER_ID = str(uuid.uuid4())
 
@@ -88,7 +96,7 @@ def _mock_issue(status="open", severity=3, complaint_ref="RS-TEST-001"):
     i.assigned_officer_id = None
     i.sla_deadline = None
     i.resolved_at = None
-    i.created_at = datetime.now(timezone.utc)
+    i.created_at = datetime.now(UTC)
     i.before_photo_url = None
     i.after_photo_url = None
     i.photo_url = None
@@ -115,9 +123,9 @@ def _mock_officer():
     o.ward_id = "ward_05"
     o.department = "PWD"
     o.is_active = True
-    o.last_checkin = datetime.now(timezone.utc)
+    o.last_checkin = datetime.now(UTC)
     o.last_location = None
-    o.created_at = datetime.now(timezone.utc)
+    o.created_at = datetime.now(UTC)
     return o
 
 
@@ -131,8 +139,8 @@ def _mock_user_profile():
     p.allergies = None
     p.vehicle_details = None
     p.medical_notes = None
-    p.created_at = datetime.now(timezone.utc)
-    p.updated_at = datetime.now(timezone.utc)
+    p.created_at = datetime.now(UTC)
+    p.updated_at = datetime.now(UTC)
     return p
 
 
@@ -152,8 +160,7 @@ class TestAuthCoverage:
         assert not _verify_pbkdf2_password("pass", "")
 
     def test_verify_pbkdf2_valid(self):
-        from api.v1.auth import _verify_pbkdf2_password
-        from api.v1.auth import _hash_password
+        from api.v1.auth import _hash_password, _verify_pbkdf2_password
         h = _hash_password("correct-horse-battery")
         assert _verify_pbkdf2_password("correct-horse-battery", h)
         assert not _verify_pbkdf2_password("wrong", h)
@@ -222,8 +229,8 @@ class TestAuthCoverage:
             "sub": "user@test.com",
             "jti": jti,
             "purpose": "refresh",
-            "exp": datetime.now(timezone.utc) + timedelta(days=1),
-            "iat": datetime.now(timezone.utc),
+            "exp": datetime.now(UTC) + timedelta(days=1),
+            "iat": datetime.now(UTC),
             "aud": APP_JWT_AUDIENCE,
             "iss": APP_JWT_ISSUER,
         }, SECRET_KEY, algorithm=ALGORITHM)
@@ -249,8 +256,8 @@ class TestAuthCoverage:
             "sub": "user@test.com",
             "jti": str(uuid.uuid4()),
             "purpose": "refresh",
-            "exp": datetime.now(timezone.utc) - timedelta(hours=1),
-            "iat": datetime.now(timezone.utc) - timedelta(hours=2),
+            "exp": datetime.now(UTC) - timedelta(hours=1),
+            "iat": datetime.now(UTC) - timedelta(hours=2),
             "aud": APP_JWT_AUDIENCE,
             "iss": APP_JWT_ISSUER,
         }, SECRET_KEY, algorithm=ALGORITHM)
@@ -354,8 +361,8 @@ class TestAuthCoverage:
             "sub": "user@test.com",
             "jti": jti,
             "role": "operator",
-            "exp": datetime.now(timezone.utc) + timedelta(hours=1),
-            "iat": datetime.now(timezone.utc),
+            "exp": datetime.now(UTC) + timedelta(hours=1),
+            "iat": datetime.now(UTC),
             "aud": APP_JWT_AUDIENCE,
             "iss": APP_JWT_ISSUER,
         }, SECRET_KEY, algorithm=ALGORITHM)
@@ -493,7 +500,7 @@ class TestAuthorityCoverage:
         officer_id = uuid.uuid4()
         issue = _mock_issue(status="assigned")
         issue.assigned_officer_id = officer_id
-        issue.sla_deadline = datetime.now(timezone.utc) + timedelta(hours=24)
+        issue.sla_deadline = datetime.now(UTC) + timedelta(hours=24)
 
         db = _mock_db(rows=[issue])
         db.execute.return_value.scalars.return_value.all.return_value = [issue]
@@ -554,7 +561,7 @@ class TestCitizenCoverage:
 
     def test_track_complaint_sla_breached(self):
         issue = _mock_issue()
-        issue.sla_deadline = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(hours=2)
+        issue.sla_deadline = datetime.now(UTC).replace(tzinfo=None) - timedelta(hours=2)
         db = _mock_db()
         first_result = MagicMock()
         first_result.scalar_one_or_none.return_value = issue
@@ -701,7 +708,7 @@ class TestCitizenCoverage:
         event.event_type = "created"
         event.actor_role = "citizen"
         event.notes = "Issue reported"
-        event.created_at = datetime.now(timezone.utc)
+        event.created_at = datetime.now(UTC)
         event.id = 1
         event.complaint_uuid = issue.uuid
 
@@ -833,7 +840,7 @@ class TestPublicCoverage:
 
     def test_days_old_with_tzinfo(self):
         from api.v1.public import _days_old
-        d = datetime.now(timezone.utc) - timedelta(days=5)
+        d = datetime.now(UTC) - timedelta(days=5)
         assert _days_old(d) == 5
 
 
@@ -1102,8 +1109,9 @@ class TestOfficersCoverage:
         assert officer is not None
 
     def test_get_or_create_officer_invalid_user(self):
-        from api.v1.officers import get_or_create_officer
         import pytest
+
+        from api.v1.officers import get_or_create_officer
         with pytest.raises(Exception):
             asyncio.run(get_or_create_officer(_mock_db(), {"role": "user"}))
 
@@ -1129,7 +1137,7 @@ class TestOfficersCoverage:
 
     def test_checkin_success(self):
         officer = _mock_officer()
-        officer.last_checkin = datetime.now(timezone.utc)
+        officer.last_checkin = datetime.now(UTC)
         db = _mock_db()
         db.execute.return_value.scalar_one_or_none.return_value = officer
 
@@ -1196,8 +1204,8 @@ class TestUserCoverage:
         db.commit = AsyncMock()
         async def _set_id_and_refresh(obj):
             obj.id = uuid.uuid4()
-            obj.created_at = datetime.now(timezone.utc)
-            obj.updated_at = datetime.now(timezone.utc)
+            obj.created_at = datetime.now(UTC)
+            obj.updated_at = datetime.now(UTC)
         db.refresh = AsyncMock(side_effect=_set_id_and_refresh)
 
         async def _mock_exec(q):
@@ -1287,13 +1295,13 @@ class TestUserCoverage:
             emergency_contacts=[{"name": "C", "phone": "9999999999", "relation": "friend"}],
         )
         profile.id = uuid.uuid4()
-        profile.created_at = datetime.now(timezone.utc)
-        profile.updated_at = datetime.now(timezone.utc)
+        profile.created_at = datetime.now(UTC)
+        profile.updated_at = datetime.now(UTC)
         sos_mock = MagicMock()
         sos_mock.id = uuid.uuid4()
         sos_mock.lat = 13.0
         sos_mock.lon = 80.0
-        sos_mock.created_at = datetime.now(timezone.utc)
+        sos_mock.created_at = datetime.now(UTC)
         sos_mock.to_dict.return_value = {"id": str(sos_mock.id), "lat": 13.0, "lon": 80.0, "created_at": str(sos_mock.created_at)}
         road_mock = MagicMock()
         road_mock.uuid = uuid.uuid4()
@@ -1301,7 +1309,7 @@ class TestUserCoverage:
         road_mock.severity = 3
         road_mock.description = "Test"
         road_mock.status = "open"
-        road_mock.created_at = datetime.now(timezone.utc)
+        road_mock.created_at = datetime.now(UTC)
 
         class _MultiExec:
             idx = 0
@@ -1449,7 +1457,7 @@ class TestRoadwatchCoverage:
     @patch("services.complaint_lifecycle.ComplaintLifecycle")
     def test_resolve_success(self, mock_cl):
         issue = _mock_issue()
-        issue.resolved_at = datetime.now(timezone.utc)
+        issue.resolved_at = datetime.now(UTC)
         mock_cl.resolve = AsyncMock(return_value=issue)
 
         app = self._app()
@@ -1564,7 +1572,7 @@ class TestRoadwatchCoverage:
         event.actor_role = "system"
         event.notes = "Issue created"
         event.metadata = {}
-        event.created_at = datetime.now(timezone.utc)
+        event.created_at = datetime.now(UTC)
 
         db = _mock_db()
         db.execute.return_value.all.return_value = [event]
@@ -1737,8 +1745,9 @@ class TestTrackingCoverage:
         redis_mock.publish.assert_called_once()
 
     def test_ws_origin_not_allowed(self):
-        from api.v1.tracking import router
         from starlette.websockets import WebSocketDisconnect
+
+        from api.v1.tracking import router
         monkeypatch = pytest.MonkeyPatch()
         monkeypatch.setenv("ENVIRONMENT", "production")
         monkeypatch.setenv("CORS_ORIGINS", "https://app.example.com")
@@ -1747,11 +1756,10 @@ class TestTrackingCoverage:
 
         app = FastAPI()
         app.include_router(router)
-        with pytest.raises(WebSocketDisconnect) as exc:
-            with TestClient(app).websocket_connect(
-                "/api/v1/tracking/group",
-                headers={"origin": "https://evil.com"}):
-                pass
+        with pytest.raises(WebSocketDisconnect) as exc, TestClient(app).websocket_connect(
+            "/api/v1/tracking/group",
+            headers={"origin": "https://evil.com"}):
+            pass
         assert exc.value.code == 1008
         get_settings.cache_clear()
         monkeypatch.undo()
@@ -1770,8 +1778,9 @@ class TestTrackingCoverage:
                 ws.receive_text()
 
     def test_connection_health_stale_detection(self):
-        from api.v1.tracking import ConnectionHealth
         import time
+
+        from api.v1.tracking import ConnectionHealth
         ch = ConnectionHealth()
         ws = MagicMock()
         # Set activity far in the past (use monotonic time so comparison works)

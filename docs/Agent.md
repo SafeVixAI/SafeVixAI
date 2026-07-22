@@ -1,4 +1,4 @@
-# SafeVixAI — Agent Guide
+﻿# SafeVixAI — Agent Guide
 
 > **READ THIS FIRST.** This document is written for any developer, AI agent, or team member who opens this codebase for the first time.
 
@@ -9,7 +9,7 @@
 **SafeVixAI** is a full-stack, AI-powered road safety Progressive Web App (PWA) built for the IIT Madras Road Safety Hackathon 2026. It solves three problem statements:
 
 1. **Emergency Locator** — Find nearest hospital, police, ambulance, towing via GPS. Works offline for 25 Indian cities.
-2. **AI Chatbot RAG** — Traffic law (Motor Vehicles Act 2019) and first aid queries. 9-provider online fallback, Phi-3 Mini offline.
+2. **AI Chatbot RAG** — Traffic law (Motor Vehicles Act 2019) and first aid queries. 10-provider online fallback, Phi-3 Mini offline.
 3. **Challan Calculator** — Exact traffic fines under MVA 2019 with state-specific overrides. Deterministic SQL — never hallucinates.
 4. **RoadWatch Reporter** — Citizens report potholes, flooding, broken roads. Auto-routes complaint to correct government authority.
 
@@ -64,9 +64,9 @@
 |---------|---------|---------|----------|
 | Backend | `pytest tests/ -q` from `backend/` | **2445/2445** | **100%** (`fail_under=100`) |
 | Chatbot | `pytest tests/ -q` from `chatbot_service/` | **1452/1452** | **97%** |
-| Frontend | `npm test` | **2757/2757** (236 suites) | **85% lines** |
+| Frontend | `npm test` | **2757/2757** (237 suites) | **87.22% lines** |
 | E2E | `npx playwright test e2e/ --grep-invert="Visual Regression\|visual"` | **55/55** | **0 remaining** |
-| **Total unit tests** | | **~6654 total passing** | |
+| **Total unit tests** | | **~7200 total passing** | |
 
 **Enterprise Hardening: All Phases Complete (Batch 26)**
 | Phase | Focus | Status |
@@ -84,7 +84,7 @@
 
 | Status | Count | Details |
 |--------|-------|---------|
-| **COMPLETE** | 25 | Emergency Locator, Family Live Tracking, Challan Calculator, RoadWatch Reporter, AI Chatbot RAG, LLM Fallback Chain (9 providers), Offline SOS Queue, WebLLM Offline AI, What3Words, Voice/ASR, Indian Language Detection, PWA Share Target, QR Emergency Card, MCP Server, Waze CIFS Feed, Circuit Breakers, Streaming Chat, Conversation Summarization, Multi-Turn Intent Refinement, Safety Checker, GSAP Animations, Speech Language Mapping, Assistant Voice Output, Crash Detection (Accelerometer + CrashCountdown UI), Authentication (JWT + Secure Service-to-Service Auth Bypass) |
+| **COMPLETE** | 25 | Emergency Locator, Family Live Tracking, Challan Calculator, RoadWatch Reporter, AI Chatbot RAG, LLM Fallback Chain (10 providers), Offline SOS Queue, WebLLM Offline AI, What3Words, Voice/ASR, Indian Language Detection, PWA Share Target, QR Emergency Card, MCP Server, Waze CIFS Feed, Circuit Breakers, Streaming Chat, Conversation Summarization, Multi-Turn Intent Refinement, Safety Checker, GSAP Animations, Speech Language Mapping, Assistant Voice Output, Crash Detection (Accelerometer + CrashCountdown UI), Authentication (JWT + Secure Service-to-Service Auth Bypass) |
 
 ---
 
@@ -161,7 +161,7 @@ POST /api/v1/chat/stream
 ┌──────────────▼─────────┐  ┌─────────────▼───────────────────┐
 │  backend/              │  │  chatbot_service/               │
 │  FastAPI :8000         │  │  FastAPI :8010                   │
-│  PostgreSQL + PostGIS  │◄─┤  9-provider LLM fallback       │
+│  PostgreSQL + PostGIS  │◄─┤  10-provider LLM fallback       │
 │  Redis cache           │  │  ChromaDB RAG vectorstore        │
 │  DuckDB (challan SQL)  │  │  13 agent tools                  │
 │  Overpass/Nominatim    │  │  Redis conversation memory       │

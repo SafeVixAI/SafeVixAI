@@ -1,4 +1,4 @@
-# Threat Model & Assurance Case
+﻿# Threat Model & Assurance Case
 
 > **Version:** 1.0  
 > **Applies to:** SafeVixAI (all three services: backend, chatbot, frontend)  
@@ -177,7 +177,7 @@
 | "Call 112 immediately" enforcement | `chatbot_service/agent/safety_checker.py` |
 | LLM provider timeout handling | `chatbot_service/providers/provider_router.py` |
 | RAG chunk sanitization | `chatbot_service/agent/context_assembler.py` |
-| 9-provider fallback prevents single-point failure | `chatbot_service/providers/provider_router.py` |
+| 10-provider fallback prevents single-point failure | `chatbot_service/providers/provider_router.py` |
 
 ### Claim: The system is available under expected load
 

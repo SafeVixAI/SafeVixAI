@@ -45,7 +45,7 @@ class LLMService:
             response.raise_for_status()
             data = response.json()
             return ChatResponse.model_validate(data)
-        except (asyncio.TimeoutError, TimeoutError):
+        except TimeoutError:
             logger.warning(
                 "Chatbot service timed out after %.1fs for session %s",
                 self.settings.chatbot_request_timeout_seconds,

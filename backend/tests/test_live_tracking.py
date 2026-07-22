@@ -16,24 +16,21 @@ def _create_ws_token():
 
 
 def test_ws_connect_requires_token(app):
-    with TestClient(app) as client:
-        with pytest.raises(Exception):
-            with client.websocket_connect("/api/v1/tracking/test-group"):
-                pass
+    with TestClient(app) as client, pytest.raises(Exception):
+        with client.websocket_connect("/api/v1/tracking/test-group"):
+            pass
 
 
 def test_ws_reject_invalid_token(app):
-    with TestClient(app) as client:
-        with pytest.raises(Exception):
-            with client.websocket_connect("/api/v1/tracking/test-group?token=invalid-token"):
-                pass
+    with TestClient(app) as client, pytest.raises(Exception):
+        with client.websocket_connect("/api/v1/tracking/test-group?token=invalid-token"):
+            pass
 
 
 def test_ws_reject_no_token(app):
-    with TestClient(app) as client:
-        with pytest.raises(Exception):
-            with client.websocket_connect("/api/v1/tracking/test-group"):
-                pass
+    with TestClient(app) as client, pytest.raises(Exception):
+        with client.websocket_connect("/api/v1/tracking/test-group"):
+            pass
 
 
 def test_ws_accept_valid_token(app):

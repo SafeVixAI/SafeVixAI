@@ -6,7 +6,7 @@ from __future__ import annotations
 import math
 from datetime import datetime
 
-from services.geo_verifier import _haversine_m, GeoVerifier
+from services.geo_verifier import GeoVerifier, _haversine_m
 
 
 def test_haversine_same_point():

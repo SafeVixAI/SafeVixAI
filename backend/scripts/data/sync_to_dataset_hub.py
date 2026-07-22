@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import json
 import shutil
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -121,7 +121,7 @@ def main():
 
     # 4. Generate sync manifest
     manifest = {
-        'synced_at': datetime.now(timezone.utc).isoformat(),
+        'synced_at': datetime.now(UTC).isoformat(),
         'source': str(PROJECT_ROOT),
         'destination': str(HUB_ROOT),
         'total_files': total_files,

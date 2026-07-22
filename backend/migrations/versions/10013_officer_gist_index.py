@@ -12,7 +12,6 @@ from __future__ import annotations
 
 from alembic import op
 
-
 # revision identifiers, used by Alembic.
 revision = '10013_officer_gist_index'
 down_revision = '3947cb9fa679'

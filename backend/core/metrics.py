@@ -5,12 +5,12 @@
 from __future__ import annotations
 
 from prometheus_client import (
+    CONTENT_TYPE_LATEST,
+    CollectorRegistry,
     Counter,
     Gauge,
     Histogram,
-    CollectorRegistry,
     generate_latest,
-    CONTENT_TYPE_LATEST,
 )
 
 # Shared registry (use default registry for simplicity)

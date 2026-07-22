@@ -16,7 +16,7 @@
 ┌──────────────▼─────────┐  ┌─────────────▼──────────────────┐
 │  backend/              │  │  chatbot_service/              │
 │  FastAPI :8000         │  │  FastAPI :8010                  │
-│  PostgreSQL + PostGIS  │◄─┤  9-provider LLM fallback      │
+│  PostgreSQL + PostGIS  │◄─┤  10-provider LLM fallback     │
 │  Redis cache           │  │  ChromaDB RAG vectorstore       │
 │  DuckDB (challan SQL)  │  │  13 agent tools                 │
 │  Overpass/Nominatim    │  │  Redis conversation memory      │
@@ -29,7 +29,7 @@
 | Service | Port | Tech Stack | Purpose |
 |---------|------|------------|---------|
 | **Backend** | 8000 | FastAPI, PostgreSQL + PostGIS, Redis, DuckDB | Emergency locator, challan calc, road reporting, geocoding, live tracking, auth |
-| **Chatbot Service** | 8010 | FastAPI, ChromaDB, 9 LLM providers, Redis | Agentic RAG chatbot, Indian language AI, speech translation |
+| **Chatbot Service** | 8010 | FastAPI, ChromaDB, 10 LLM providers, Redis | Agentic RAG chatbot, Indian language AI, speech translation |
 | **Frontend** | 3000 | Next.js 15, React 19, MapLibre GL 5, Tailwind CSS, GSAP | PWA UI, maps, offline AI (WebLLM), offline SQL (DuckDB-Wasm) |
 
 > **Critical:** Backend and Chatbot Service have **separate** `.venv`, `.env`, `requirements.txt`, and `Dockerfile`. Never mix their dependencies.
@@ -62,7 +62,7 @@ graph TD
     H -->|proxy| CS
 
     CS --> CS1[ChatEngine - Agentic RAG]
-    CS --> CS2[9-provider LLM Fallback Chain]
+    CS --> CS2[10-provider LLM Fallback Chain]
     CS --> CS3[13 Agent Tools]
     CS --> CS4[Sarvam AI - Indian Language Routing]
     CS --> CS5[ChromaDB RAG Vectorstore]
@@ -83,7 +83,7 @@ graph TD
 
 ## Backend (FastAPI :8000)
 
-### 25 Route Modules (registered in `api/v1/__init__.py`) + 1 MCP Server
+### 28 Route Modules (registered in `api/v1/__init__.py`) + 1 MCP Server
 
 All routes live in `backend/api/v1/`:
 
@@ -226,7 +226,7 @@ Enterprise-grade patterns added in Batch 16-22 hardening:
 | `core/idempotency.py` | Idempotency Keys | Idempotency-Key header dedup with audit logging and distributed lock isolation |
 | `core/security.py` | RS256 JWT | RS256 JWT validation with atomic JWKS fetching and distributed caching |
 | `core/jwks.py` | JWKS Manager | Key rotation, caching (TTL-based), historical key fallback for gradual rotation |
-| `core/alert.py` | Email Alerts | When all 9 LLM providers fail, sends email with 3 diagnostic solutions. 5-min cooldown. |
+| `core/alert.py` | Email Alerts | When all 10 LLM providers fail, sends email with 3 diagnostic solutions. 5-min cooldown. |
 | `core/redis_client.py` | Stampede Protection | `get_json_with_stampede_protection()` — Redis SET NX EX mutex + stale-while-revalidate + retry |
 | `models/values.py` | Value Objects | `Coordinates(lat, lon)` with haversine `distance_to()`, `Severity(level)` with `from_risk_score()`, `Distance(meters)` |
 | `models/schemas_*.py` | Domain Schemas | 9 supplementary domain-specific Pydantic schema files alongside monolithic `schemas.py` |
@@ -273,7 +273,7 @@ flowchart TD
     M --> N[ChatResponse]
 ```
 
-### 9-Provider LLM Fallback Chain
+### 10-provider LLM Fallback Chain
 
 ```mermaid
 flowchart LR
@@ -419,7 +419,7 @@ flowchart TD
     CS --> CS1[IntentDetector - classify query]
     CS --> CS2[ContextAssembler - call tools]
     CS --> CS3[ChromaDB RAG - top 5 law/medical chunks]
-    CS --> CS4[ProviderRouter - 9 LLM fallback]
+    CS --> CS4[ProviderRouter - 10 LLM fallback]
     CS4 --> CS5{Indian language?}
     CS5 -->|YES| CS6[Sarvam AI 30B/105B]
     CS5 -->|NO| CS7[Groq → Cerebras → Gemini → ...]
@@ -435,7 +435,7 @@ flowchart TD
 
 | Aspect | Online — Layer 1 | Offline — Layer 2 |
 |--------|-----------------|-------------------|
-| LLM | 9-provider chain (Groq primary) | WebLLM Phi-3-mini-4k (4-bit, 2.2GB) |
+| LLM | 10-provider chain (Groq primary) | WebLLM Phi-3-mini-4k (4-bit, 2.2GB) |
 | Indian Languages | Sarvam AI (30B/105B) | English only |
 | Runs on | Cloud (Groq/Gemini/etc.) | User's browser (WebGPU) |
 | RAG | ChromaDB on chatbot service | None (static first-aid.json) |
@@ -591,7 +591,7 @@ SafeVixAI/
 ├── chatbot_service/         FastAPI :8010
 │   ├── main.py              App factory (create_app → lifespan → ChatEngine)
 │   ├── agent/               ChatEngine graph, IntentDetector, SafetyChecker, ContextAssembler
-│   ├── providers/           9 LLM providers + TemplateProvider + ProviderRouter
+│   ├── providers/           10 LLM providers + TemplateProvider + ProviderRouter
 │   ├── rag/                 ChromaDB local vectorstore, Retriever, embeddings
 │   ├── tools/               13 agent tools
 │   ├── memory/              Redis conversation memory with session TTL
@@ -647,7 +647,7 @@ All services use free tiers or open-source self-hosted alternatives:
 | Decision | Rationale |
 |----------|-----------|
 | Two separate FastAPI services | Chatbot has heavy ML deps (torch ~2GB); backend stays lightweight |
-| 9-provider LLM fallback | Zero downtime — if one API rate-limits, next takes over |
+| 10-provider LLM fallback | Zero downtime — if one API rate-limits, next takes over |
 | Sarvam AI for Indian languages | Trained on 4 trillion Indic tokens; best Hindi/Tamil legal accuracy |
 | DuckDB for challans (not LLM) | Deterministic SQL; LLMs hallucinate fine amounts |
 | ChromaDB committed to git | Render cold-starts need pre-built vectorstore; rebuild takes 10 min |

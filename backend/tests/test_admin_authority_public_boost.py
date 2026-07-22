@@ -5,7 +5,7 @@
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -17,7 +17,7 @@ from core.circuit_breaker import CircuitBreakerRegistry
 from core.database import get_db
 from core.limiter import limiter
 from core.rbac import Role, require_role
-from core.security import create_access_token, get_current_user
+from core.security import get_current_user
 
 # ── Core test helpers ─────────────────────────────────────────────────────────
 
@@ -116,7 +116,7 @@ def _waze_row(**overrides):
         "lat": 13.0827,
         "lon": 80.2707,
         "severity": 2,
-        "created_at": datetime.now(timezone.utc).isoformat(),
+        "created_at": datetime.now(UTC).isoformat(),
         "description": "Road hazard on highway",
         "issue_type": "pothole",
         "road_name": "MG Road",
@@ -910,7 +910,7 @@ class TestPublicBoost:
         """Aware datetime has tzinfo stripped before diff; result is still correct."""
         from api.v1.public import _days_old
 
-        aware_past = datetime(2026, 1, 15, 12, 0, 0, tzinfo=timezone.utc)
+        aware_past = datetime(2026, 1, 15, 12, 0, 0, tzinfo=UTC)
         result = _days_old(aware_past)
         assert isinstance(result, int)
         assert result > 0  # Jan 15 is before Jun 29
@@ -986,7 +986,7 @@ class TestWazeFeedBoost:
         """datetime object in created_at → isinstance branch sets start_dt directly."""
         db = _mock_db()
         # Use a datetime object (not a string) to exercise the isinstance branch
-        now_dt = datetime.now(timezone.utc)
+        now_dt = datetime.now(UTC)
         db.execute.return_value.fetchall.return_value = [_waze_row(created_at=now_dt)]
 
         settings_mock = MagicMock()
@@ -1024,7 +1024,7 @@ class TestWazeFeedBoost:
     def test_waze_severity_4_critical_ttl_72_hours(self):
         """Critical severity → 72h window; incident 50h old is still active."""
         db = _mock_db()
-        created = (datetime.now(timezone.utc) - timedelta(hours=50)).isoformat()
+        created = (datetime.now(UTC) - timedelta(hours=50)).isoformat()
         db.execute.return_value.fetchall.return_value = [_waze_row(severity=4, created_at=created)]
         settings_mock = MagicMock()
         settings_mock.frontend_url = "http://localhost:3000"
@@ -1038,7 +1038,7 @@ class TestWazeFeedBoost:
     def test_waze_severity_1_low_ttl_12_hours(self):
         """Low severity → 12h window; incident 5h old is still active."""
         db = _mock_db()
-        created = (datetime.now(timezone.utc) - timedelta(hours=5)).isoformat()
+        created = (datetime.now(UTC) - timedelta(hours=5)).isoformat()
         db.execute.return_value.fetchall.return_value = [_waze_row(severity=1, created_at=created)]
         settings_mock = MagicMock()
         settings_mock.frontend_url = "http://localhost:3000"
@@ -1069,7 +1069,7 @@ class TestWazeFeedBoost:
     def test_waze_expired_incident_skipped(self):
         """Incident created 200h ago with severity=2 (ttl=24h) → expired, skipped."""
         db = _mock_db()
-        old_ts = (datetime.now(timezone.utc) - timedelta(hours=200)).isoformat()
+        old_ts = (datetime.now(UTC) - timedelta(hours=200)).isoformat()
         db.execute.return_value.fetchall.return_value = [_waze_row(severity=2, created_at=old_ts)]
         settings_mock = MagicMock()
         settings_mock.frontend_url = "http://localhost:3000"
@@ -1083,7 +1083,7 @@ class TestWazeFeedBoost:
     def test_waze_severity_2_medium_ttl_24_hours(self):
         """Medium severity (default 2) → 24h window; incident 1h old is active."""
         db = _mock_db()
-        created = (datetime.now(timezone.utc) - timedelta(hours=1)).isoformat()
+        created = (datetime.now(UTC) - timedelta(hours=1)).isoformat()
         db.execute.return_value.fetchall.return_value = [_waze_row(severity=2, created_at=created)]
         settings_mock = MagicMock()
         settings_mock.frontend_url = "http://localhost:3000"
@@ -1099,7 +1099,7 @@ class TestWazeFeedBoost:
     def test_waze_severity_3_high_ttl_48_hours(self):
         """High severity → 48h window; incident 40h old still has 8h remaining."""
         db = _mock_db()
-        created = (datetime.now(timezone.utc) - timedelta(hours=40)).isoformat()
+        created = (datetime.now(UTC) - timedelta(hours=40)).isoformat()
         db.execute.return_value.fetchall.return_value = [_waze_row(severity=3, created_at=created)]
         settings_mock = MagicMock()
         settings_mock.frontend_url = "http://localhost:3000"

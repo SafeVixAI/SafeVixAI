@@ -1,4 +1,4 @@
-# SafeVixAI — Complete Project Analysis (Updated 2026-05-26)
+﻿# SafeVixAI — Complete Project Analysis (Updated 2026-05-26)
 
 > **SNAPSHOT**: This document reflects the state as of 2026-05-26. For current state see [AGENTS.md](../../AGENTS.md).
 
@@ -14,7 +14,7 @@ Total infra cost: ₹0.
 | Problem | Solution |
 |---------|----------|
 | Emergency Locator | PostGIS-powered nearest service finder (hospitals, police, fire) with radius expansion up to 50km |
-| AI Chatbot | 9-provider LLM fallback chain, ChromaDB RAG (Motor Vehicles Act + first-aid + accident data), 13 agent tools |
+| AI Chatbot | 10-provider LLM fallback chain, ChromaDB RAG (Motor Vehicles Act + first-aid + accident data), 13 agent tools |
 | Challan Calculator | Dual-path (DuckDB-Wasm client-side + Python server-side) fine calculation with state overrides |
 | Road Reporter | Community hazard reporting with photo upload, authority routing, OSM contribution, Waze CIFS feed |
 
@@ -110,7 +110,7 @@ Chatbot Service (FastAPI, Port 8010)                 → Render
 | Render free tier 512MB RAM | Backend OOM under load | Single worker, pool=1 |
 | Render 750h/month limit | Services spin down | ~1464h needed for 2 services |
 | Upstash Redis 10K commands/day | Rate limiting and cache disabled | In-memory fallback works |
-| LLM API rate limits | Chatbot degraded | 9-provider chain handles failover |
+| LLM API rate limits | Chatbot degraded | 10-provider chain handles failover |
 | Single-threaded workers | No request parallelism | Keep-alive, I/O-bound design |
 
 ---
@@ -118,7 +118,7 @@ Chatbot Service (FastAPI, Port 8010)                 → Render
 ## 6. Operationally Critical Workflows
 
 1. **Emergency SOS Dispatch** — Must work with POST, offline via IndexedDB queue, auto-flush on reconnect
-2. **Chatbot LLM Generation** — 9 providers in chain, TemplateProvider as final deterministic fallback
+2. **Chatbot LLM Generation** — 10 providers in chain, TemplateProvider as final deterministic fallback
 3. **Crash Detection** — Accelerometer + 20s countdown → auto-dispatch; false positives acceptable, false negatives not
 4. **Database Migration** — 18 Alembic versions, PostgreSQL+PostGIS required, RLS policies applied
 5. **Offline Data Sync** — SOS + road report queues in IndexedDB v2, per-item atomic delete-after-send

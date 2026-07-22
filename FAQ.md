@@ -1,4 +1,4 @@
-# Frequently Asked Questions
+﻿# Frequently Asked Questions
 
 ## General
 
@@ -35,7 +35,7 @@ Yes. Core features work offline:
 Press and hold the SOS button for 2 seconds. Your GPS location is shared with emergency contacts via SMS/WhatsApp. Family members can track your location in real time via a WebSocket stream.
 
 ### What LLM providers are supported?
-9 providers in fallback chain: Groq → Cerebras → Gemini → GitHub Models → NVIDIA NIM → OpenRouter → Mistral → Together AI → Template (deterministic fallback).
+10 providers in fallback chain: Groq → Cerebras → Gemini → GitHub Models → NVIDIA NIM → OpenRouter → Mistral → Together AI → Template (deterministic fallback).
 
 ## Development
 

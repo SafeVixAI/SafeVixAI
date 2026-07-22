@@ -17,7 +17,7 @@ from starlette.requests import Request as StarletteRequest
 from starlette.responses import Response
 from starlette.routing import Mount, Route
 
-from core.rbac import require_role, Role
+from core.rbac import Role, require_role
 
 logger = logging.getLogger("safevixai.mcp")
 

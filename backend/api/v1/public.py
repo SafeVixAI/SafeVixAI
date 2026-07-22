@@ -14,16 +14,17 @@ No-authentication transparency endpoints for public accountability:
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
+
 from fastapi import APIRouter, Depends, Query, Request
-from sqlalchemy import case, func, select, extract, literal_column
+from sqlalchemy import case, extract, func, literal_column, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.database import get_db
 from core.limiter import limiter
+from models.officer import Officer
 from models.road_issue import RoadIssue
 from models.ward import Ward
-from models.officer import Officer
 
 logger = logging.getLogger("safevixai.public")
 
@@ -43,7 +44,7 @@ async def get_ward_rankings(
     from services.ward_service import WardService
     await WardService.ensure_seeded(db)
 
-    now = datetime.now(timezone.utc).replace(tzinfo=None)
+    now = datetime.now(UTC).replace(tzinfo=None)
     active_statuses = ["open", "acknowledged", "assigned", "accepted", "in_progress"]
     resolved_statuses = ["resolved", "citizen_confirmed", "closed"]
 
@@ -107,7 +108,7 @@ async def get_ward_rankings(
 
     return {
         "rankings": rankings,
-        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "generated_at": datetime.now(UTC).isoformat(),
         "total_wards": len(rankings),
     }
 
@@ -145,7 +146,7 @@ async def get_authority_performance(
 
     return {
         "authorities": authorities,
-        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "generated_at": datetime.now(UTC).isoformat(),
     }
 
 
@@ -156,7 +157,7 @@ async def get_public_stats(
     db: AsyncSession = Depends(get_db),
 ) -> dict:
     """City-wide public KPIs — total filed, resolved, avg time, categories."""
-    now = datetime.now(timezone.utc).replace(tzinfo=None)
+    now = datetime.now(UTC).replace(tzinfo=None)
 
     total = (await db.execute(select(func.count(RoadIssue.id)))).scalar() or 0
     resolved = (await db.execute(
@@ -207,7 +208,7 @@ async def get_public_stats(
         "active_field_officers": officers_active,
         "category_breakdown": categories,
         "severity_distribution": severity_dist,
-        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "generated_at": datetime.now(UTC).isoformat(),
         "platform": "SafeVixAI — AI-Powered Civic Intelligence",
     }
 
@@ -256,7 +257,7 @@ async def get_open_issues_map(
         "type": "FeatureCollection",
         "features": features,
         "total": len(features),
-        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "generated_at": datetime.now(UTC).isoformat(),
     }
 
 
@@ -291,7 +292,7 @@ async def public_complaint_status(
 def _days_old(created_at: datetime | None) -> int:
     if not created_at:
         return 0
-    now = datetime.now(timezone.utc).replace(tzinfo=None)
+    now = datetime.now(UTC).replace(tzinfo=None)
     if created_at.tzinfo:
         created_at = created_at.replace(tzinfo=None)
     return max(0, (now - created_at).days)

@@ -4,8 +4,9 @@
 from __future__ import annotations
 
 from datetime import datetime
+
 from geoalchemy2 import Geometry
-from sqlalchemy import Float, Integer, String, Text, DateTime
+from sqlalchemy import DateTime, Float, Integer, String, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 

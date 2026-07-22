@@ -4,14 +4,15 @@
 """Property-based tests for core domain invariants using Hypothesis."""
 
 from datetime import timedelta
-from hypothesis import given, strategies as st
 
+from hypothesis import given
+from hypothesis import strategies as st
+
+from core.config import Settings
+from models.schemas import ChallanQuery
+from models.values import Coordinates, Distance, Severity
 from services.challan_service import ChallanService
 from services.officer_route_optimizer import _haversine_km
-from models.values import Coordinates, Severity, Distance
-from models.schemas import ChallanQuery
-from core.config import Settings
-
 
 # ── Coordinate invariants ──────────────────────────────────────────────
 

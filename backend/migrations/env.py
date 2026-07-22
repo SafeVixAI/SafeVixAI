@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import os
 from logging.config import fileConfig
 
 from alembic import context
@@ -12,9 +13,6 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 from core.config import get_settings
 from core.database import Base
 from models import RoadIssue  # noqa: F401
-
-
-import os
 
 config = context.config
 settings = get_settings()

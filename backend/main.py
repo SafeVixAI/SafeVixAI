@@ -3,13 +3,13 @@
 
 from __future__ import annotations
 
-import logging
 import re
-from datetime import datetime, timezone
 import time
 from contextlib import asynccontextmanager
+from datetime import UTC, datetime
 
 import httpx
+
 try:
     import sentry_sdk
 except ImportError:
@@ -18,20 +18,23 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
 
 from api.v1 import api_router
 from core.alert import get_alert_service
 from core.config import get_settings
 from core.database import check_database, check_replica_database
-from core.limiter import limiter
-from core.idempotency import IdempotencyMiddleware
-from core.versioning import APIVersioningMiddleware
-from core.jwks import JWKSManager
-from core.response_wrapper import ApiResponseMiddleware
 from core.i18n_middleware import setup_backend_i18n
-from slowapi import _rate_limit_exceeded_handler
-from slowapi.errors import RateLimitExceeded
+from core.idempotency import IdempotencyMiddleware
+from core.jwks import JWKSManager
+from core.limiter import limiter
+
+# alert_service imported at top level
+from core.logging import configure_logging
 from core.redis_client import create_cache
+from core.response_wrapper import ApiResponseMiddleware
+from core.versioning import APIVersioningMiddleware
 from models.schemas import ApiErrorResponse, DependencyHealth, HealthResponse
 from services.authority_router import AuthorityRouter
 from services.challan_service import ChallanService
@@ -41,11 +44,6 @@ from services.llm_service import LLMService
 from services.overpass_service import OverpassService
 from services.roadwatch_service import RoadWatchService
 from services.routing_service import RoutingService
-
-# alert_service imported at top level
-
-
-from core.logging import configure_logging
 
 logger = configure_logging(get_settings().environment, "safevixai.backend")
 
@@ -72,6 +70,7 @@ def create_app() -> FastAPI:
     async def lifespan(app: FastAPI):
         import asyncio
         import signal
+
         from core.database import AsyncSessionLocal, engine
         from services.sla_monitor import SLAMonitor
 
@@ -94,7 +93,7 @@ def create_app() -> FastAPI:
         )
         jwks_manager = JWKSManager(jwks_url=settings.jwks_url if hasattr(settings, 'jwks_url') else None)
         await jwks_manager.start()
-        
+
         overpass_service = OverpassService(settings)
         geocoding_service = GeocodingService(settings, cache)
         authority_router = AuthorityRouter(settings, overpass_service, cache)
@@ -126,7 +125,7 @@ def create_app() -> FastAPI:
         app.state.roadwatch_service = roadwatch_service
 
         # Initialize Event Bus and Redis adapter
-        from services.event_bus import get_event_bus, RedisPubSubAdapter
+        from services.event_bus import RedisPubSubAdapter, get_event_bus
         event_bus = get_event_bus()
         try:
             adapter = RedisPubSubAdapter(cache)
@@ -137,7 +136,7 @@ def create_app() -> FastAPI:
         # Global audit event logger
         async def global_event_logger(event):
             logger.info("DOMAIN EVENT PROCESSED: %s [%s] payload=%s", event.event_type, event.event_id[:8], event.payload)
-        
+
         event_bus.subscribe("*", global_event_logger)
         app.state.event_bus = event_bus
 
@@ -164,23 +163,23 @@ def create_app() -> FastAPI:
         await data_retention.start(interval_seconds=retention_interval)
 
         # ── Wire remaining domain services into app.state ────────────────────
-        from services.roadwatch_photos import PhotoService
-        from services.roadwatch_moderation_service import RoadWatchModerationService
         from services.ai_verification import AIVerificationPipeline
+        from services.challan_dispute_service import ChallanDisputeService
+        from services.complaint_cluster import ComplaintClusterService
         from services.complaint_lifecycle import ComplaintLifecycle
         from services.complaint_state_machine import ComplaintStateMachine
-        from services.complaint_cluster import ComplaintClusterService
-        from services.ward_service import WardService
-        from services.workload_balancer import WorkloadBalancer
-        from services.officer_route_optimizer import OfficerRouteOptimizer
-        from services.sla_notification import SLANotificationService
-        from services.geo_verifier import GeoVerifier
-        from services.report_classifier import ReportClassifier
         from services.duplicate_detector import DuplicateDetector
-        from services.fraud_detector import FraudDetector
         from services.escalation_predictor import EscalationPredictor
         from services.fine_prediction_service import FinePredictionService
-        from services.challan_dispute_service import ChallanDisputeService
+        from services.fraud_detector import FraudDetector
+        from services.geo_verifier import GeoVerifier
+        from services.officer_route_optimizer import OfficerRouteOptimizer
+        from services.report_classifier import ReportClassifier
+        from services.roadwatch_moderation_service import RoadWatchModerationService
+        from services.roadwatch_photos import PhotoService
+        from services.sla_notification import SLANotificationService
+        from services.ward_service import WardService
+        from services.workload_balancer import WorkloadBalancer
 
         app.state.roadwatch_moderation = RoadWatchModerationService(settings=settings)
         app.state.photo_service = PhotoService()
@@ -202,7 +201,7 @@ def create_app() -> FastAPI:
         logger.info("All domain services initialized and wired into app.state")
 
         # Initialize and start background task queue and worker daemon
-        from core.queue import TaskQueue, BackgroundWorker
+        from core.queue import BackgroundWorker, TaskQueue
         if cache._client is not None:
             queue = TaskQueue(cache._client)
             worker = BackgroundWorker(cache._client, concurrency=2)
@@ -228,7 +227,7 @@ def create_app() -> FastAPI:
                 app.state.data_retention.stop()
             if hasattr(app.state, 'etl_scheduler'):
                 await app.state.etl_scheduler.stop()
-            
+
             await jwks_manager.stop()
             from services.safe_spaces import close_safe_spaces_client
             await close_safe_spaces_client()
@@ -256,10 +255,10 @@ def create_app() -> FastAPI:
         redoc_url=redoc_url,
         openapi_url=openapi_url,
     )
-    
+
     # Mount backend multi-language exception and validation localization
     setup_backend_i18n(app)
-    
+
     # OBSERVABILITY#2: OpenTelemetry distributed tracing
     try:
         from core.tracing import setup_tracing
@@ -267,7 +266,7 @@ def create_app() -> FastAPI:
     except ImportError as exc:
         # opentelemetry not installed (dev-only dependency)
         logger.debug("OpenTelemetry not installed, tracing disabled: %s", exc)
-    
+
     app.state.limiter = limiter
     app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
@@ -288,28 +287,28 @@ def create_app() -> FastAPI:
     # OBSERVABILITY#4: Prometheus API metrics middleware
     @app.middleware("http")
     async def _prometheus_metrics_middleware(request: Request, call_next):
-        from core.metrics import api_request_total, api_request_time
-        
+        from core.metrics import api_request_time, api_request_total
+
         # Skip metrics endpoint itself to avoid recursion
         if request.url.path == "/metrics":
             return await call_next(request)
-        
+
         start = time.monotonic()
         response = await call_next(request)
         duration = time.monotonic() - start
-        
+
         # Record metrics
         api_request_total.labels(
             method=request.method,
             endpoint=request.url.path,
             status_code=response.status_code,
         ).inc()
-        
+
         api_request_time.labels(
             method=request.method,
             endpoint=request.url.path,
         ).observe(duration)
-        
+
         return response
 
     from middleware.csrf import setup_csrf
@@ -320,19 +319,20 @@ def create_app() -> FastAPI:
 
     @app.middleware("http")
     async def _tenant_isolation_middleware(request: Request, call_next):
-        from fastapi.responses import JSONResponse
         from fastapi import HTTPException
+        from fastapi.responses import JSONResponse
+
         from core.tenant import get_tenant_id
-        
+
         try:
             # Get tenant ID from authenticated user
             tenant_id = await get_tenant_id(request)
         except HTTPException as exc:
             return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
-        
+
         # Store tenant ID in request state for downstream use
         request.state.tenant_id = tenant_id
-        
+
         response = await call_next(request)
         return response
 
@@ -423,7 +423,7 @@ def create_app() -> FastAPI:
             status_code=500,
             content=ApiErrorResponse(
                 error={"code": "INTERNAL_ERROR", "message": "Internal server error. The team has been notified."},
-                timestamp=datetime.now(timezone.utc).isoformat(),
+                timestamp=datetime.now(UTC).isoformat(),
             ).model_dump(),
         )
 
@@ -556,7 +556,8 @@ def create_app() -> FastAPI:
     @app.get('/metrics', tags=['Observability'])
     async def metrics():
         from fastapi.responses import Response
-        from core.metrics import metrics_response, metrics_content_type
+
+        from core.metrics import metrics_content_type, metrics_response
         return Response(
             content=metrics_response(),
             media_type=metrics_content_type(),
@@ -571,14 +572,14 @@ def create_app() -> FastAPI:
         return JSONResponse(status_code=204)
 
     app.include_router(api_router)
-    
+
     if settings.mcp_enabled:
         from api.v1.mcp_server import router as mcp_info_router
         from api.v1.mcp_server import sse_app as mcp_app
 
         app.include_router(mcp_info_router)
         app.mount('/mcp', mcp_app)
-    
+
     return app
 
 

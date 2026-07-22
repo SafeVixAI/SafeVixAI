@@ -6,23 +6,22 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, Request, UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.audit import AuditLog, AuditEvent
+from core.audit import AuditEvent, AuditLog
 from core.database import get_db
-from core.rbac import require_role, Role
+from core.limiter import limiter
+from core.rbac import Role, require_role
 from core.security import get_current_user_optional
 from models.schemas import (
     AuthorityPreviewResponse,
+    ComplaintEventItem,
+    ComplaintTimelineResponse,
     RoadInfrastructureResponse,
+    RoadIssueItem,
     RoadIssuesResponse,
     RoadReportResponse,
-    RoadIssueItem,
-    ComplaintTimelineResponse,
-    ComplaintEventItem,
 )
-from services.roadwatch_service import RoadWatchService, ALL_ROAD_ISSUE_STATUSES
 from services.exceptions import ServiceValidationError
-from core.limiter import limiter
-
+from services.roadwatch_service import ALL_ROAD_ISSUE_STATUSES, RoadWatchService
 
 router = APIRouter(prefix='/api/v1/roads', tags=['RoadWatch'])
 
@@ -225,7 +224,8 @@ async def get_issue_details(
         HTTPException (404): When no report matches the UUID.
     """
     import uuid
-    from sqlalchemy import select, func
+
+    from sqlalchemy import func, select
     try:
         report_uuid = uuid.UUID(issue_uuid)
     except ValueError as exc:
@@ -233,7 +233,7 @@ async def get_issue_details(
 
     lat_expr = func.ST_Y(RoadIssue.location).label('lat')
     lon_expr = func.ST_X(RoadIssue.location).label('lon')
-    
+
     stmt = (
         select(RoadIssue, lat_expr, lon_expr)
         .where(RoadIssue.uuid == report_uuid)
@@ -296,6 +296,7 @@ async def get_complaint_timeline(
         HTTPException (422): If UUID is invalid.
     """
     import uuid
+
     from services.complaint_lifecycle import ComplaintLifecycle
     try:
         report_uuid = uuid.UUID(issue_uuid)
@@ -303,7 +304,7 @@ async def get_complaint_timeline(
         raise HTTPException(status_code=422, detail='Invalid UUID format') from exc
 
     events = await ComplaintLifecycle.get_timeline(db, report_uuid)
-    
+
     timeline_items = [
         ComplaintEventItem(
             id=e.id,
@@ -345,8 +346,9 @@ async def confirm_road_issue(
         HTTPException (404): If the complaint cannot be found.
     """
     import uuid
-    from services.duplicate_detector import DuplicateDetector
+
     from services.complaint_lifecycle import ComplaintLifecycle
+    from services.duplicate_detector import DuplicateDetector
     try:
         report_uuid = uuid.UUID(issue_uuid)
     except ValueError as exc:
@@ -405,6 +407,7 @@ async def resolve_road_issue(
         HTTPException (404): If the complaint does not exist.
     """
     import uuid
+
     from services.complaint_lifecycle import ComplaintLifecycle
     try:
         report_uuid = uuid.UUID(issue_uuid)
@@ -416,7 +419,7 @@ async def resolve_road_issue(
         after_photo_url = await roadwatch_service._save_photo(issue_uuid=report_uuid, photo=after_photo)
 
     actor_id = uuid.UUID(current_user["sub"]) if "sub" in current_user else None
-    
+
     try:
         issue = await ComplaintLifecycle.resolve(
             db=db,
@@ -467,6 +470,7 @@ async def verify_road_report(
         HTTPException (422): If report has insufficient confirmations or is ineligible.
     """
     import logging
+
     from services.osm_contributor import get_osm_contributor
     logger = logging.getLogger(__name__)
 
@@ -477,14 +481,15 @@ async def verify_road_report(
         raise HTTPException(status_code=status_code, detail=str(exc)) from exc
 
     import uuid
+
     from services.complaint_lifecycle import ComplaintLifecycle
     actor_id = uuid.UUID(current_user["sub"]) if "sub" in current_user else None
-    
+
     queue = getattr(request.app.state, "queue", None)
     if queue is not None:
         # Asynchronously sync to OSM via the background task queue!
         await queue.enqueue("sync_osm_report", report_data)
-        
+
         await ComplaintLifecycle.update_status(
             db=db,
             complaint_uuid=uuid.UUID(report_id),
@@ -493,7 +498,7 @@ async def verify_road_report(
             actor_id=actor_id,
             actor_role="operator"
         )
-        
+
         return {
             "report_id": report_id,
             "status": report_data["status"],

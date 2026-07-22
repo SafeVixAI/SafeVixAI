@@ -9,8 +9,8 @@ import time
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from core.jwks import JWKSManager, JWKS_CACHE_TTL_SECONDS
 
+from core.jwks import JWKS_CACHE_TTL_SECONDS, JWKSManager
 
 SAMPLE_JWKS = {
     "keys": [

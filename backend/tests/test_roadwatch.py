@@ -13,8 +13,8 @@ from core.redis_client import CacheHelper
 from models.schemas import (
     AuthorityPreviewResponse,
     RoadInfrastructureResponse,
-    RoadIssuesResponse,
     RoadIssueItem,
+    RoadIssuesResponse,
     RoadReportResponse,
 )
 from services.authority_router import AuthorityRouter
@@ -179,9 +179,7 @@ class DummyDbSession:
 
     def add(self, obj) -> None:
         self.added_list.append(obj)
-        if hasattr(obj, 'location_address') or getattr(obj, '__tablename__', None) == 'road_issues':
-            self.added = obj
-        elif not self.added:
+        if hasattr(obj, 'location_address') or getattr(obj, '__tablename__', None) == 'road_issues' or not self.added:
             self.added = obj
 
     async def execute(self, stmt) -> DummyDbResult:

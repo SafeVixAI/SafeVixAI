@@ -9,11 +9,11 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from core.service_tracing import (
-    trace_operation,
-    traced,
-    trace_sos_dispatch,
-    trace_emergency_lookup,
     trace_chatbot_request,
+    trace_emergency_lookup,
+    trace_operation,
+    trace_sos_dispatch,
+    traced,
 )
 
 

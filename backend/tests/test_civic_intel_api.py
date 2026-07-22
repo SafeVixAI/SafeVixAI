@@ -4,8 +4,7 @@
 
 from __future__ import annotations
 
-import json
-from datetime import date, datetime, timezone
+from datetime import UTC, date, datetime
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -14,7 +13,6 @@ from fastapi.testclient import TestClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.database import get_async_session
-from core.limiter import limiter
 from core.rbac import Role, require_role
 from core.security import get_current_user
 
@@ -515,8 +513,8 @@ class TestGrievances:
         g.state_code = "MH"
         g.complainant_district = "Mumbai"
         g.status = "resolved"
-        g.filed_at = datetime(2024, 1, 15, 10, 30, tzinfo=timezone.utc)
-        g.resolved_at = datetime(2024, 1, 20, 12, 0, tzinfo=timezone.utc)
+        g.filed_at = datetime(2024, 1, 15, 10, 30, tzinfo=UTC)
+        g.resolved_at = datetime(2024, 1, 20, 12, 0, tzinfo=UTC)
         app = self._app_with_grievances([g])
         resp = TestClient(app).get("/civic/grievances")
         assert resp.status_code == 200
@@ -1084,12 +1082,12 @@ class TestGetETLLog:
         self,
         pipeline="lgd",
         status="success",
-        finished_at=datetime(2024, 1, 1, 0, 5, tzinfo=timezone.utc),
+        finished_at=datetime(2024, 1, 1, 0, 5, tzinfo=UTC),
     ):
         log = MagicMock()
         log.id = 1
         log.pipeline_name = pipeline
-        log.started_at = datetime(2024, 1, 1, tzinfo=timezone.utc)
+        log.started_at = datetime(2024, 1, 1, tzinfo=UTC)
         log.finished_at = finished_at
         log.status = status
         log.records_fetched = 500

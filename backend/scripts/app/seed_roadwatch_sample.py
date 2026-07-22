@@ -12,7 +12,6 @@ from sqlalchemy.dialects.postgresql import insert
 from core.database import AsyncSessionLocal
 from models.road_issue import RoadInfrastructure, RoadIssue
 
-
 SAMPLE_INFRASTRUCTURE = [
     {
         'road_id': 'sample-nh32-chennai',

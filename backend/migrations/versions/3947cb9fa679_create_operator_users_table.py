@@ -10,9 +10,8 @@ Create Date: 2026-05-25 18:50:47.843364
 """
 from __future__ import annotations
 
-from alembic import op
 import sqlalchemy as sa
-
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = '3947cb9fa679'
@@ -76,7 +75,7 @@ def upgrade() -> None:
 def downgrade() -> None:
     """Clean up operator_users table and policies."""
     conn = op.get_bind()
-    
+
     if _table_exists(conn, 'operator_users'):
         op.execute(
             """

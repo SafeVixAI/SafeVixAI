@@ -130,7 +130,7 @@ def run_audit():
         print(f"  [X] {t}")
 
     print("\nPolicy counts:")
-    counts = {t: 0 for t in TABLES}
+    counts = dict.fromkeys(TABLES, 0)
     for t, c in policy_counts:
         counts[t] = c
     for t in TABLES:

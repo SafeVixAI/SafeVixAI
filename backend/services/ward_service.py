@@ -4,12 +4,13 @@
 from __future__ import annotations
 
 import logging
+
+from geoalchemy2 import WKTElement
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from geoalchemy2 import WKTElement
 
-from models.ward import Ward
 from models.road_issue import RoadIssue
+from models.ward import Ward
 
 logger = logging.getLogger(__name__)
 
@@ -95,7 +96,7 @@ class WardService:
     async def find_ward_by_coordinates(cls, db: AsyncSession, lat: float, lon: float) -> Ward | None:
         """Find the ward containing the given lat/lon coordinates."""
         await cls.ensure_seeded(db)
-        
+
         # Point is lon, lat in PostGIS
         point = func.ST_SetSRID(func.ST_MakePoint(lon, lat), 4326)
         stmt = select(Ward).where(func.ST_Contains(Ward.boundary, point)).limit(1)

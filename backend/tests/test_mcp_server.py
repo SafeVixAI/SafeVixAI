@@ -5,8 +5,7 @@
 
 from __future__ import annotations
 
-import importlib
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, patch
 
 import pytest
 
@@ -24,7 +23,6 @@ def reset_mcp_module():
 
 def _get_mcp():
     """Lazy import api.v1.mcp_server and return the mcp instance."""
-    import sys
     from api.v1 import mcp_server
     return mcp_server.mcp
 

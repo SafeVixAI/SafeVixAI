@@ -1,8 +1,7 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2026 SafeVixAI Team
 
-from datetime import datetime, timedelta
-from unittest.mock import patch
+from datetime import datetime
 
 from api.deprecation import (
     DEPRECATED_ENDPOINTS,

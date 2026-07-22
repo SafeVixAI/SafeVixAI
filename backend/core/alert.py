@@ -32,7 +32,6 @@ import time
 from collections import defaultdict
 from datetime import datetime
 from email.mime.text import MIMEText
-from typing import Optional
 
 logger = logging.getLogger("safevixai.alerts")
 
@@ -257,7 +256,7 @@ Configure: ALERT_EMAIL + ALERT_EMAIL_PASSWORD in .env
             logger.error("Failed to send alert email: %s", e)
 
 
-_instance: Optional[AlertService] = None
+_instance: AlertService | None = None
 
 
 def get_alert_service() -> AlertService:

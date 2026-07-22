@@ -2,6 +2,7 @@
 # Copyright (c) 2026 SafeVixAI Team
 
 from fastapi import APIRouter, Depends, Request
+
 from core.limiter import limiter
 from core.security import get_current_user
 from models.schemas import GarageSyncResponse

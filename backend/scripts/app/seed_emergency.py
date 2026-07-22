@@ -6,7 +6,7 @@ from __future__ import annotations
 import argparse
 import asyncio
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 from geoalchemy2.elements import WKTElement
@@ -17,7 +17,6 @@ from core.database import AsyncSessionLocal
 from models.emergency import EmergencyService
 from services.emergency_locator import CITY_CENTERS, OFFLINE_CITY_CENTERS
 from services.overpass_service import OverpassService
-
 
 OFFLINE_DIR = Path(__file__).resolve().parent / 'offline'
 FRONTEND_GEOJSON_PATH = Path(__file__).resolve().parents[2] / 'frontend' / 'public' / 'offline-data' / 'india-emergency.geojson'
@@ -59,7 +58,7 @@ def _write_geojson(path: Path, *, cities: list[str], features: list[dict]) -> No
     payload = {
         'type': 'FeatureCollection',
         'properties': {
-            'generated_at': datetime.now(timezone.utc).replace(tzinfo=None).isoformat(timespec='seconds') + 'Z',
+            'generated_at': datetime.now(UTC).replace(tzinfo=None).isoformat(timespec='seconds') + 'Z',
             'cities': [city.title() for city in cities],
             'source': 'overpass',
             'feature_count': len(features),

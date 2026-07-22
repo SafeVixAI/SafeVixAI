@@ -16,9 +16,9 @@ Run: python backend/scripts/ingest_legal_chromadb.py
 from __future__ import annotations
 
 import csv
+import io
 import json
 import sys
-import io
 from pathlib import Path
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")

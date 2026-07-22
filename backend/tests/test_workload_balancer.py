@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 import math
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
@@ -225,7 +225,7 @@ class TestWorkloadBalancer:
         officer.department = "Traffic"
         officer.ward_id = None
         officer.is_active = True
-        officer.last_checkin = datetime.now(timezone.utc) - timedelta(minutes=30)
+        officer.last_checkin = datetime.now(UTC) - timedelta(minutes=30)
         officer.last_location = None
 
         mock_officer_result = MagicMock()
@@ -277,7 +277,7 @@ class TestWorkloadBalancer:
         officer.department = "Traffic"
         officer.ward_id = None
         officer.is_active = True
-        officer.last_checkin = datetime.now(timezone.utc) - timedelta(hours=10)
+        officer.last_checkin = datetime.now(UTC) - timedelta(hours=10)
         officer.last_location = None
 
         mock_officer_result = MagicMock()

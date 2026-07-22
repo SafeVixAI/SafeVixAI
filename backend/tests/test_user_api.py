@@ -5,10 +5,10 @@
 from __future__ import annotations
 
 import uuid
+
 import pytest
 
-from models.schemas import UserProfileCreate, UserProfileUpdate, EmergencyContact
-
+from models.schemas import EmergencyContact, UserProfileCreate, UserProfileUpdate
 
 # ── Schema Validation Tests ─────────────────────────────────────────────────
 
@@ -24,7 +24,7 @@ class TestUserProfileSchemas:
                 EmergencyContact(name="Contact", phone="+919876543210", relation="spouse")
             ],
         )
-        
+
         assert profile.name == "Test User"
         assert profile.blood_group == "O+"
         assert len(profile.emergency_contacts) == 1
@@ -35,7 +35,7 @@ class TestUserProfileSchemas:
             name="Test User",
             emergency_contacts=[],
         )
-        
+
         assert profile.name == "Test User"
         assert profile.blood_group is None
 
@@ -61,14 +61,14 @@ class TestUserProfileSchemas:
             name="Updated Name",
             blood_group="A+",
         )
-        
+
         assert update.name == "Updated Name"
         assert update.blood_group == "A+"
 
     def test_user_profile_update_partial(self):
         """Test partial profile update."""
         update = UserProfileUpdate(name="New Name")
-        
+
         assert update.name == "New Name"
         assert update.blood_group is None
 
@@ -79,7 +79,7 @@ class TestUserProfileSchemas:
             phone="+919876543210",
             relation="spouse",
         )
-        
+
         assert contact.name == "Emergency Contact"
         assert contact.phone == "+919876543210"
         assert contact.relation == "spouse"
@@ -90,7 +90,7 @@ class TestUserProfileSchemas:
             name="Contact",
             phone="+919876543210",
         )
-        
+
         assert contact.name == "Contact"
         assert contact.relation is None
 
@@ -111,7 +111,7 @@ class TestUserValidation:
     def test_blood_group_patterns(self):
         """Test blood group pattern matching."""
         valid_groups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"]
-        
+
         for group in valid_groups:
             assert len(group) in [2, 3]
             assert group[-1] in ["+", "-"]
@@ -123,7 +123,7 @@ class TestUserValidation:
             "+1234567890",
             "9876543210",
         ]
-        
+
         for phone in valid_phones:
             assert len(phone) >= 10
 
@@ -138,7 +138,7 @@ class TestUserValidation:
         # Max length 80
         long_name = "A" * 80
         assert len(long_name) == 80
-        
+
         # Min length 1
         short_name = "A"
         assert len(short_name) == 1
@@ -149,7 +149,7 @@ class TestUserValidation:
             EmergencyContact(name="Contact 1", phone="+919876543210", relation="spouse"),
             EmergencyContact(name="Contact 2", phone="+919876543211", relation="parent"),
         ]
-        
+
         serialized = [contact.model_dump() for contact in contacts]
         assert len(serialized) == 2
         assert serialized[0]["name"] == "Contact 1"
@@ -159,7 +159,7 @@ class TestUserValidation:
         """Test profile update excludes unset fields."""
         update = UserProfileUpdate(name="New Name")
         update_data = update.model_dump(exclude_unset=True)
-        
+
         assert "name" in update_data
         assert "blood_group" not in update_data
         assert "emergency_contacts" not in update_data

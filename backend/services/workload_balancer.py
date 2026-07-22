@@ -16,7 +16,7 @@ from __future__ import annotations
 import logging
 import math
 from dataclasses import dataclass
-from datetime import datetime, time, timezone
+from datetime import UTC, datetime, time
 
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -107,7 +107,7 @@ class WorkloadBalancer:
         stmt = select(Officer).where(Officer.is_active)
         if department:
             stmt = stmt.where(Officer.department == department)
-        
+
         officers = (await db.execute(stmt)).scalars().all()
 
         if not officers:
@@ -123,7 +123,7 @@ class WorkloadBalancer:
         workload_rows = (await db.execute(workload_stmt)).all()
         workload_map = {str(oid): count for oid, count in workload_rows}
 
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         current_time = now.time()
         is_shift_time = cls.SHIFT_START <= current_time <= cls.SHIFT_END
 
@@ -158,8 +158,7 @@ class WorkloadBalancer:
                 # Consider recently checked-in as on-shift
                 checkin = officer.last_checkin
                 if checkin.tzinfo is None:
-                    from datetime import timezone as tz
-                    checkin = checkin.replace(tzinfo=tz.utc)
+                    checkin = checkin.replace(tzinfo=UTC)
                 hours_since = (now - checkin).total_seconds() / 3600
                 if hours_since < 1:
                     on_shift = True

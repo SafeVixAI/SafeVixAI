@@ -14,7 +14,6 @@ import sqlalchemy as sa
 from alembic import op
 from geoalchemy2 import Geometry
 
-
 revision = '10011_civic_intel_tables'
 down_revision = '10010_enterprise_roads'
 branch_labels = None

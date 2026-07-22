@@ -13,8 +13,8 @@ a fresh import under patch, avoiding importlib.reload() issues.
 
 from __future__ import annotations
 
-import sys
 import importlib
+import sys
 from unittest.mock import MagicMock, patch
 
 

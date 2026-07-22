@@ -39,7 +39,7 @@ def main():
         city, feature_type = parts
 
         try:
-            with open(csv_file, 'r', encoding='utf-8') as f:
+            with open(csv_file, encoding='utf-8') as f:
                 count = sum(1 for _ in csv.reader(f)) - 1  # minus header
         except Exception:
             count = 0

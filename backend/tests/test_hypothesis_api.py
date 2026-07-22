@@ -4,7 +4,8 @@
 """Hypothesis property-based API fuzz tests for SafeVixAI backend."""
 from __future__ import annotations
 
-from hypothesis import given, settings, strategies as st
+from hypothesis import given, settings
+from hypothesis import strategies as st
 
 # ── Coordinate Strategies ─────────────────────────────────────────────────────
 valid_lat = st.floats(min_value=-90.0, max_value=90.0, allow_nan=False, allow_infinity=False)

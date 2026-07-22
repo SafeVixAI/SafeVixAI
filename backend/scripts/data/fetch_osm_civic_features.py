@@ -148,7 +148,7 @@ def main():
         print(f'[ERROR] City bboxes file not found: {BBOXES_FILE}')
         sys.exit(1)
 
-    with open(BBOXES_FILE, 'r', encoding='utf-8') as f:
+    with open(BBOXES_FILE, encoding='utf-8') as f:
         raw_bboxes = json.load(f)
 
     # city_bboxes.json has nested structure: {"metros": {"mumbai": {"bbox": [...], ...}}}

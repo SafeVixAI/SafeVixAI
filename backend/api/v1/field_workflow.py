@@ -16,7 +16,8 @@ from __future__ import annotations
 import logging
 import math
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
+
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, Field
 from sqlalchemy import func, select
@@ -24,7 +25,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.database import get_db
 from core.limiter import limiter
-from core.rbac import require_role, Role
+from core.rbac import Role, require_role
 from models.road_issue import RoadIssue
 from services.complaint_state_machine import ComplaintStateMachine, InvalidTransitionError
 
@@ -123,7 +124,7 @@ async def start_field_work(
         "complaint_ref": result.issue.complaint_ref if result.issue else None,
         "geo_verified": geo_verified,
         "distance_meters": round(distance_m, 1) if distance_m else None,
-        "work_started_at": datetime.now(timezone.utc).isoformat(),
+        "work_started_at": datetime.now(UTC).isoformat(),
     }
 
 
@@ -185,7 +186,7 @@ async def complete_field_work(
         "status": "resolved",
         "complaint_ref": result.issue.complaint_ref if result.issue else None,
         "geo_verified": geo_verified,
-        "resolved_at": datetime.now(timezone.utc).isoformat(),
+        "resolved_at": datetime.now(UTC).isoformat(),
         "resolution_notes": body.resolution_notes,
     }
 
@@ -213,7 +214,7 @@ async def geo_checkin_at_complaint(
         raise HTTPException(status_code=404, detail="Complaint not found")
 
     complaint_lat, complaint_lon = await _get_issue_coords(db, issue)
-    
+
     if not complaint_lat or not complaint_lon:
         return {"verified": False, "reason": "Complaint has no GPS coordinates"}
 

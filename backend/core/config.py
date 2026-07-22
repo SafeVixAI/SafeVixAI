@@ -3,13 +3,13 @@
 
 from __future__ import annotations
 
+import logging
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -127,7 +127,7 @@ class Settings(BaseSettings):
             normalized = normalized.replace('postgres://', 'postgresql://', 1)
         if normalized.startswith('postgresql://'):
             normalized = normalized.replace('postgresql://', 'postgresql+asyncpg://', 1)
-        
+
         # Auto-correct Supabase pooler using direct port 5432 to standard transaction port 6543
         if 'pooler.supabase.com' in normalized and ':5432' in normalized:
             import logging
@@ -136,7 +136,7 @@ class Settings(BaseSettings):
                 'Rewriting database port to transaction pooler port 6543 to prevent connection saturation.'
             )
             normalized = normalized.replace(':5432', ':6543', 1)
-            
+
         return normalized
 
     @property

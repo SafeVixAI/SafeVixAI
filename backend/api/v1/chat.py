@@ -3,16 +3,16 @@
 
 import asyncio
 import json
+
+import httpx
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import StreamingResponse
-import httpx
 
+from core.config import get_settings
+from core.limiter import limiter
+from core.security import get_current_user
 from models.schemas import ChatRequest, ChatResponse
 from services.llm_service import LLMService
-from core.security import get_current_user
-from core.limiter import limiter
-from core.config import get_settings
-
 
 router = APIRouter(prefix='/api/v1/chat', tags=['Chat'])
 
@@ -102,10 +102,10 @@ async def chat_stream(
                     async for chunk in response.aiter_bytes():
                         yield chunk
             except Exception:
-                yield f"data: {json.dumps({'type': 'error', 'message': 'Chatbot service unavailable, using fallback'})}\n\n".encode("utf-8")
+                yield f"data: {json.dumps({'type': 'error', 'message': 'Chatbot service unavailable, using fallback'})}\n\n".encode()
                 fallback = _get_fallback_response(payload.message, payload.session_id or "")
-                yield f"data: {json.dumps({'type': 'token', 'text': fallback.response})}\n\n".encode("utf-8")
-                yield f"data: {json.dumps({'type': 'done', 'intent': fallback.intent, 'sources': fallback.sources})}\n\n".encode("utf-8")
+                yield f"data: {json.dumps({'type': 'token', 'text': fallback.response})}\n\n".encode()
+                yield f"data: {json.dumps({'type': 'done', 'intent': fallback.intent, 'sources': fallback.sources})}\n\n".encode()
 
     return StreamingResponse(
         _generate(),

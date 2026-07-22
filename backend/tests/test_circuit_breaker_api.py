@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 from fastapi import FastAPI
@@ -26,7 +26,7 @@ def admin_auth_headers():
 @pytest.fixture
 def cb_app():
     app = FastAPI()
-    from api.v1.circuit_breaker_api import router, get_current_user
+    from api.v1.circuit_breaker_api import get_current_user, router
     app.include_router(router)
     app.dependency_overrides[get_current_user] = lambda: {"sub": "admin-user", "role": "admin"}
     return app
@@ -68,7 +68,7 @@ class TestGetCircuitBreaker:
 
     def test_get_requires_admin(self):
         app = FastAPI()
-        from api.v1.circuit_breaker_api import router, get_current_user
+        from api.v1.circuit_breaker_api import get_current_user, router
         app.include_router(router)
         app.dependency_overrides[get_current_user] = lambda: {"sub": "user", "role": "operator"}
         client = TestClient(app)
@@ -88,7 +88,7 @@ class TestResetCircuitBreaker:
 
     def test_reset_requires_admin(self):
         app = FastAPI()
-        from api.v1.circuit_breaker_api import router, get_current_user
+        from api.v1.circuit_breaker_api import get_current_user, router
         app.include_router(router)
         app.dependency_overrides[get_current_user] = lambda: {"sub": "user"}
         client = TestClient(app)
@@ -114,7 +114,7 @@ class TestTriggerBreaker:
 
     def test_trigger_requires_admin(self):
         app = FastAPI()
-        from api.v1.circuit_breaker_api import router, get_current_user
+        from api.v1.circuit_breaker_api import get_current_user, router
         app.include_router(router)
         app.dependency_overrides[get_current_user] = lambda: {"sub": "user"}
         client = TestClient(app)
@@ -140,7 +140,7 @@ class TestCloseBreaker:
 
     def test_close_requires_admin(self):
         app = FastAPI()
-        from api.v1.circuit_breaker_api import router, get_current_user
+        from api.v1.circuit_breaker_api import get_current_user, router
         app.include_router(router)
         app.dependency_overrides[get_current_user] = lambda: {"sub": "user"}
         client = TestClient(app)

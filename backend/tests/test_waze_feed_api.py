@@ -4,10 +4,9 @@
 """Waze Feed API tests for SafeVixAI backend."""
 from __future__ import annotations
 
-from datetime import datetime, timezone, timedelta
+from datetime import UTC, datetime, timedelta
 
 from api.v1 import waze_feed
-
 
 # ── CIFS Mapping Tests ──────────────────────────────────────────────────────
 
@@ -87,7 +86,7 @@ class TestEmptyFeed:
 
     def test_empty_feed_structure(self):
         result = waze_feed._empty_feed("No data")
-        
+
         assert result["incidents"] == []
         assert result["count"] == 0
         assert result["source"] == "SafeVixAI RoadWatch Community Reports"
@@ -98,7 +97,7 @@ class TestEmptyFeed:
     def test_empty_feed_different_reasons(self):
         result = waze_feed._empty_feed("Database unavailable")
         assert result["note"] == "Database unavailable"
-        
+
         result = waze_feed._empty_feed("No verified reports")
         assert result["note"] == "No verified reports"
 
@@ -129,7 +128,7 @@ class TestFeedBuildingLogic:
     def test_severity_ttl_mapping(self):
         """Test severity to TTL hour mapping."""
         ttl_hours = {4: 72, 3: 48, 2: 24, 1: 12}
-        
+
         assert ttl_hours[4] == 72  # Critical
         assert ttl_hours[3] == 48  # High
         assert ttl_hours[2] == 24  # Medium
@@ -138,7 +137,7 @@ class TestFeedBuildingLogic:
     def test_severity_label_mapping(self):
         """Test severity value to label mapping."""
         severity_labels = {4: "critical", 3: "high", 2: "medium", 1: "low"}
-        
+
         assert severity_labels[4] == "critical"
         assert severity_labels[3] == "high"
         assert severity_labels[2] == "medium"
@@ -146,13 +145,13 @@ class TestFeedBuildingLogic:
 
     def test_expired_incident_filtering(self):
         """Test expired incident filtering logic."""
-        now = datetime.now(timezone.utc)
-        
+        now = datetime.now(UTC)
+
         # Critical severity (72 hour TTL) - should not be expired if created 2 days ago
         created_2_days = now - timedelta(days=2)
         end_dt_critical = created_2_days + timedelta(hours=72)
         assert end_dt_critical > now  # Not expired
-        
+
         # Low severity (12 hour TTL) - should be expired if created 2 days ago
         created_2_days = now - timedelta(days=2)
         end_dt_low = created_2_days + timedelta(hours=12)
@@ -178,7 +177,7 @@ class TestFeedBuildingLogic:
 
     def test_feed_response_structure(self):
         """Test feed response structure."""
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         feed = {
             "incidents": [],
             "timestamp": now.strftime("%m/%d/%Y %H:%M:%S"),
@@ -186,7 +185,7 @@ class TestFeedBuildingLogic:
             "version": "1.0",
             "count": 0,
         }
-        
+
         assert "incidents" in feed
         assert "timestamp" in feed
         assert "source" in feed
@@ -201,7 +200,7 @@ class TestFeedBuildingLogic:
             "broken_barrier", "missing_sign", "accident", "road_closed",
             "construction", "landslide", "debris", "stalled_vehicle", "other"
         ]
-        
+
         for issue_type in expected_types:
             assert issue_type in waze_feed.CIFS_TYPE_MAP or waze_feed._to_cifs_type(issue_type) == "HAZARD_ON_ROAD"
 
@@ -212,7 +211,7 @@ class TestFeedBuildingLogic:
             "broken_barrier", "missing_sign", "accident", "road_closed",
             "construction", "landslide", "debris", "stalled_vehicle", "other"
         ]
-        
+
         for issue_type in expected_types:
             result = waze_feed._to_cifs_subtype(issue_type)
             assert result is not None

@@ -4,12 +4,12 @@
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
+import jwt
 import pytest
 from fastapi import HTTPException
 from fastapi.testclient import TestClient
-import jwt
 
 import core.security as security_module
 from api.v1.user import get_user_profile
@@ -59,7 +59,7 @@ def test_verify_accepts_supabase_auth_jwt(app, monkeypatch):
             'aud': 'authenticated',
             'role': 'authenticated',
             'email': 'user@example.com',
-            'exp': datetime.now(timezone.utc) + timedelta(minutes=10),
+            'exp': datetime.now(UTC) + timedelta(minutes=10),
         },
         secret,
         algorithm=ALGORITHM,
@@ -84,8 +84,8 @@ def test_profile_endpoint_requires_auth(app):
 
 @pytest.mark.asyncio
 async def test_profile_owner_mismatch_returns_not_found():
-    from starlette.requests import Request
     from starlette.datastructures import Headers
+    from starlette.requests import Request
 
     class EmptyResult:
         def scalar_one_or_none(self):

@@ -12,8 +12,8 @@ from urllib.parse import quote_plus
 
 import httpx
 
+from core.circuit_breaker import CircuitBreakerOpenError, CircuitBreakerRegistry
 from core.config import Settings
-from core.circuit_breaker import CircuitBreakerRegistry, CircuitBreakerOpenError
 from core.redis_client import CacheHelper
 from models.schemas import GeocodeResult
 from services.exceptions import ExternalServiceError

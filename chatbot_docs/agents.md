@@ -1,9 +1,9 @@
-# Agent Specialization Overview
+﻿# Agent Specialization Overview
 
 The SafeVixAI Chatbot operates as a unified interface but adapts its persona and tools dynamically according to the user's current context: Emergency (SafeVixAI), Legal (DriveLegal), or Infrastructure (RoadWatch).
 
 ## Unified Agent Interface
-- **Brain**: Driven by the **ProviderRouter** — 9 LLM providers with automatic fallback.
+- **Brain**: Driven by the **ProviderRouter** — 10 LLM providers with automatic fallback.
 - **Orchestration**: Managed by a custom `ChatEngine` class (`agent/graph.py`).
 - **Tools**: 13 distinct tools specialized for different domains.
 - **Language**: Auto-detection via Unicode script range regex routes Indian languages to **Sarvam AI** (30B/105B) — separate path from main fallback chain.

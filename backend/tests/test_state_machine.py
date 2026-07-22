@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import uuid
 from unittest.mock import AsyncMock, MagicMock
+
 import pytest
 
 from services.complaint_state_machine import ComplaintStateMachine, InvalidTransitionError
@@ -16,7 +17,7 @@ def test_can_transition():
     assert ComplaintStateMachine.can_transition("assigned", "accepted") is True
     assert ComplaintStateMachine.can_transition("accepted", "in_progress") is True
     assert ComplaintStateMachine.can_transition("in_progress", "resolved") is True
-    
+
     # Invalid transitions
     assert ComplaintStateMachine.can_transition("open", "resolved") is False
     assert ComplaintStateMachine.can_transition("closed", "open") is False

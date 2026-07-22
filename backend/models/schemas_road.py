@@ -9,7 +9,6 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-
 RoadIssueStatus = Literal['open', 'acknowledged', 'in_progress', 'resolved', 'rejected', 'pending_processing', 'verified']
 
 

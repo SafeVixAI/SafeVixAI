@@ -1,4 +1,4 @@
-# SafeVixAI
+﻿# SafeVixAI
 
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License" /></a>
@@ -23,7 +23,7 @@
 | Features | **25/25 COMPLETE** |
 | Unit Tests | **7,160+ passing** — Frontend 2,956 / Backend 2,750 / Chatbot 1,613 |
 | E2E Tests | 55/55 passing |
-| LLM Providers | 9-provider fallback chain |
+| LLM Providers | 10-provider fallback chain |
 | Services | 3 (frontend :3000, backend :8000, chatbot :8010) |
 | Coverage | Frontend 86% lines / 72% branches / 81% functions |
 | CI Workflows | 40 (security, load, chaos, E2E, migration, benchmark, more) |
@@ -95,7 +95,7 @@ Verify: http://localhost:3000
 ```
 SafeVixAI/
 ├── backend/           FastAPI Python 3.11 + PostgreSQL/PostGIS (port 8000)
-├── chatbot_service/   FastAPI Agentic RAG Chatbot + 9 LLM providers (port 8010)
+├── chatbot_service/   FastAPI Agentic RAG Chatbot + 10 LLM providers (port 8010)
 ├── frontend/          Next.js 15 + React 19 TypeScript PWA (port 3000)
 ├── docs/              Complete technical documentation
 ├── chatbot_docs/      Documentation specifically for Chatbot Service
@@ -149,7 +149,7 @@ Read `docs/NEW_CONTRIBUTOR_GUIDE.md` first (humans) or `docs/Agent.md` (AI agent
 
 **Backend:** FastAPI, SQLAlchemy, PostGIS, Redis, DuckDB, Overpass/Nominatim
 
-**Chatbot Service:** FastAPI, ChromaDB, LangChain, 9 LLM providers (Groq, Gemini, Sarvam AI, etc.), IndicSeamless Speech
+**Chatbot Service:** FastAPI, ChromaDB, LangChain, 10 LLM providers (Groq, Gemini, Sarvam AI, etc.), IndicSeamless Speech
 
 **Frontend:** Next.js 15, React 19, TypeScript, Tailwind CSS, MapLibre GL, WebLLM, DuckDB-Wasm, Transformers.js
 

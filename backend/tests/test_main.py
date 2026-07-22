@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+from datetime import UTC
+
 from fastapi.testclient import TestClient
 
 from main import create_app
@@ -73,11 +75,13 @@ class TestExceptionHandler:
             assert body.get("success") is False
 
     def test_500_response_shape(self, app):
+        from datetime import datetime
+
         from fastapi import FastAPI
         from fastapi.responses import JSONResponse
         from starlette.testclient import TestClient as TC
+
         from models.schemas import ApiErrorResponse
-        from datetime import datetime, timezone
 
         test_app = FastAPI()
 
@@ -94,7 +98,7 @@ class TestExceptionHandler:
                 status_code=500,
                 content=ApiErrorResponse(
                     error={"code": "INTERNAL_ERROR", "message": "Internal server error"},
-                    timestamp=datetime.now(timezone.utc).isoformat(),
+                    timestamp=datetime.now(UTC).isoformat(),
                 ).model_dump(),
             )
 

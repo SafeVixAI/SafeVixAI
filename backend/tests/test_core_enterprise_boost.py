@@ -3,21 +3,20 @@
 
 from __future__ import annotations
 
-import asyncio
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
+
 import pytest
 from fastapi import FastAPI, Request
-from starlette.responses import JSONResponse
 
-from core.redis_client import CacheHelper
-from core.distributed_lock import Redlock, distributed_lock, _memory_locks
-from core.cqrs import Command, Query, CommandHandler, QueryHandler, CQRSBus
+from core.cqrs import Command, CommandHandler, CQRSBus, Query, QueryHandler
+from core.distributed_lock import Redlock, distributed_lock
 from core.exception_handlers import (
     DomainError,
-    ResourceNotFoundError,
     InvalidTransitionError,
+    ResourceNotFoundError,
     register_exception_handlers,
 )
+from core.redis_client import CacheHelper
 
 
 @pytest.mark.asyncio

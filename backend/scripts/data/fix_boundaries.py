@@ -2,10 +2,11 @@
 # Copyright (c) 2026 SafeVixAI Team
 
 """Download all 36 state district boundary GeoJSONs from udit-001/india-maps-data."""
-import httpx
 import json
 import time
 from pathlib import Path
+
+import httpx
 
 OUT = Path(__file__).resolve().parents[2] / 'data' / 'civic_intel' / 'boundaries'
 OUT.mkdir(parents=True, exist_ok=True)

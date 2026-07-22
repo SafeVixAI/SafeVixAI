@@ -1,4 +1,4 @@
-# SafeVixAI — Features Specification
+﻿# SafeVixAI — Features Specification
 
 ## Feature Status (25/25 Complete)
 
@@ -6,7 +6,7 @@
 |---|---------|--------|
 | 1 | Emergency Locator (radius expansion, nearby services) | ✅ COMPLETE |
 | 2 | AI Chatbot RAG (traffic law + first aid) | ✅ COMPLETE |
-| 3 | LLM Fallback Chain (9 providers) | ✅ COMPLETE |
+| 3 | LLM Fallback Chain (10 providers) | ✅ COMPLETE |
 | 4 | Challan Calculator (DuckDB, offline + online) | ✅ COMPLETE |
 | 5 | RoadWatch Reporter (community issue reporting) | ✅ COMPLETE |
 | 6 | Crash Detection (Accelerometer + CrashCountdown) | ✅ COMPLETE |
@@ -101,7 +101,7 @@
 
 ### F2.2 — Online RAG Chatbot
 - ChatEngine with ContextAssembler + ProviderRouter
-- 9-provider fallback chain (Groq primary, 300+ tok/s)
+- 10-provider fallback chain (Groq primary, 300+ tok/s)
 - Indian languages auto-routed to Sarvam AI (30B general, 105B legal)
 - ChromaDB MMR search, top-5 chunks
 - Knowledge base: MV Act 1988 + MV Amendment 2019 + WHO Trauma Care Guidelines
@@ -125,7 +125,7 @@
 - Output: SpeechSynthesis API (speaker icon per bot message)
 - Graceful degradation on Safari/Firefox
 
-### F2.6 — LLM Fallback Chain (9 Providers)
+### F2.6 — LLM Fallback Chain (10 providers)
 - **Order**: Groq → Cerebras → Gemini → GitHub Models → NVIDIA NIM → OpenRouter → Mistral → Together → Template (deterministic)
 - Indian language queries bypass the chain: routed directly to Sarvam AI
 - Email alert sent when all providers fail (via `alert_service.py` at project root)

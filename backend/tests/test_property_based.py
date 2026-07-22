@@ -5,8 +5,8 @@ from __future__ import annotations
 
 import math
 import time
+from datetime import UTC, datetime
 from uuid import uuid4
-from datetime import datetime, timezone
 
 
 class TestChallanProperties:
@@ -75,7 +75,7 @@ class TestTimestampProperties:
 
         timestamps = []
         for _ in range(100):
-            timestamps.append(datetime.now(timezone.utc).isoformat())
+            timestamps.append(datetime.now(UTC).isoformat())
             time.sleep(0.001)
 
         for i in range(1, len(timestamps)):

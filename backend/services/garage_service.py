@@ -3,14 +3,15 @@
 
 from __future__ import annotations
 
+import asyncio
+import hashlib
+import logging
 import re
 import uuid
-import logging
-import hashlib
-import asyncio
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Any
-from models.schemas import VehicleGarageItem, GarageSyncResponse
+
+from models.schemas import GarageSyncResponse, VehicleGarageItem
 from services.exceptions import ServiceValidationError
 
 logger = logging.getLogger("safevixai.garage_service")
@@ -131,24 +132,24 @@ class GarageService:
     def _generate_deterministic_vehicle(cls, vehicle_number: str) -> dict[str, Any]:
         """Generate a realistic vehicle record deterministically based on plate hash."""
         clean_number = re.sub(r'[^A-Z0-9]', '', vehicle_number.upper())
-        
+
         # Exact override for the test baseline plate to guarantee zero breaking changes
         if clean_number == "TN01AB1234" or vehicle_number == "TN-01-AB-1234":
             return PREDEFINED_VEHICLES["TN-01-AB-1234"]
-            
+
         if vehicle_number in PREDEFINED_VEHICLES:
             return PREDEFINED_VEHICLES[vehicle_number]
-            
+
         h_val = int(hashlib.md5(clean_number.encode('utf-8')).hexdigest(), 16)
         make, model = MAKES_AND_MODELS[h_val % len(MAKES_AND_MODELS)]
         owner = OWNERS[h_val % len(OWNERS)]
         rc_status = "ACTIVE" if (h_val % 10 != 0) else "SUSPENDED"
-        
+
         # Deteministic offsets
         insurance_offset = (h_val % 300) - 15  # occasional expired insurance
         puc_offset = (h_val % 180) - 10        # occasional expired PUC
         created_offset = 365 + (h_val % 730)
-        
+
         return {
             "owner_name": owner,
             "vehicle_make": make,
@@ -161,8 +162,8 @@ class GarageService:
 
     @classmethod
     async def sync_vehicles(
-        cls, 
-        user_id: str, 
+        cls,
+        user_id: str,
         vehicle_number: str | None = None,
         cache: Any = None
     ) -> GarageSyncResponse:
@@ -172,7 +173,7 @@ class GarageService:
         """
         # Ensure audits are properly tracked
         logger.info(f"Initiating RTO registry synchronization for User: {user_id}, Vehicle: {vehicle_number}")
-        
+
         # 1. Determine targets
         if vehicle_number is None:
             # Multi-vehicle household fetch: Retrieve standard set registered to user
@@ -189,8 +190,8 @@ class GarageService:
             target_numbers = [norm_number]
 
         vehicles_list = []
-        now_utc = datetime.now(timezone.utc)
-        
+        now_utc = datetime.now(UTC)
+
         for plate in target_numbers:
             # 2. Check Cache
             cache_key = f"garage_sync:{user_id}:{plate}"
@@ -200,7 +201,7 @@ class GarageService:
                     cached_data = await cache.get_json(cache_key)
                 except Exception as e:
                     logger.error(f"Redis cache lookup failed for {plate}: {str(e)}")
-            
+
             if cached_data is not None:
                 logger.info(f"Cache hit for vehicle registry record {plate}")
                 vehicles_list.append(
@@ -222,22 +223,22 @@ class GarageService:
             state_code = cls._parse_state_code(plate)
             authority = STATE_AUTHORITIES.get(state_code, "Ministry of Road Transport and Highways")
             logger.info(f"Connecting to upstream registry: {authority} for {plate}")
-            
+
             try:
                 # Simulate small dynamic network processing latency
                 await asyncio.sleep(0.05)
             except Exception as exc:
                 logger.debug("Garage service — network latency simulation failed: %s", exc)
-                
+
             # Construct the dynamic metadata
             v_data = cls._generate_deterministic_vehicle(plate)
-            
+
             ins_exp = now_utc + timedelta(days=v_data["insurance_expiry_days"])
             puc_exp = now_utc + timedelta(days=v_data["puc_expiry_days"])
             created = now_utc - timedelta(days=v_data["created_days_ago"])
-            
+
             v_id = uuid.uuid5(uuid.NAMESPACE_DNS, f"{user_id}:{plate}")
-            
+
             item = VehicleGarageItem(
                 id=v_id,
                 vehicle_number=plate,
@@ -249,7 +250,7 @@ class GarageService:
                 puc_expiry=puc_exp,
                 created_at=created
             )
-            
+
             # 4. Save to Cache
             if cache is not None:
                 serializable = {
@@ -269,7 +270,7 @@ class GarageService:
                     logger.info(f"Successfully cached vehicle registry record {plate} in Redis")
                 except Exception as e:
                     logger.error(f"Failed to cache vehicle {plate}: {str(e)}")
-                    
+
             vehicles_list.append(item)
 
         return GarageSyncResponse(

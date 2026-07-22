@@ -6,12 +6,12 @@ from __future__ import annotations
 import logging
 import time
 import uuid
+from collections.abc import Callable
+from typing import Any
 
 import jwt
 from fastapi import FastAPI, Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
-from collections.abc import Callable
-from typing import Any
 
 logger = logging.getLogger("safevixai.request_id")
 

@@ -8,7 +8,7 @@ the Pydantic schemas defined in models/schemas.py.
 """
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import pytest
 from pydantic import ValidationError
@@ -52,7 +52,7 @@ class TestHealthContract:
 
     def test_health_missing_required(self):
         with pytest.raises(ValidationError):
-            HealthResponse(**{})
+            HealthResponse()
 
     def test_health_response_with_optional_services(self):
         data = {
@@ -231,7 +231,7 @@ class TestUserContract:
 
     def test_user_profile_response_valid(self):
         uid = uuid.uuid4()
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         data = {
             "name": "John Doe",
             "id": str(uid),
@@ -248,7 +248,7 @@ class TestUserContract:
 
     def test_user_profile_partial(self):
         uid = uuid.uuid4()
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         data = {
             "name": "John Doe",
             "id": str(uid),
@@ -273,7 +273,7 @@ class TestWardOfficerContract:
 
     def test_officer_response_valid(self):
         uid = uuid.uuid4()
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         data = {
             "id": str(uid),
             "name": "Officer Kumar",

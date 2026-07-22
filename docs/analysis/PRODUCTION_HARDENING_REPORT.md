@@ -1,4 +1,4 @@
-# SafeVixAI — Production Hardening Report
+﻿# SafeVixAI — Production Hardening Report
 
 **Date:** 2026-07-19  
 **Scope:** Full-stack production readiness audit across 7 dimensions  
@@ -105,7 +105,7 @@
 | Exponential backoff retries | ✅ | Frontend: 3 retries @ 1s/2s/4s; Backend: Overpass retry with mirror failover |
 | Graceful shutdown | ✅ | SIGTERM/SIGINT handlers, Redis pool close, DB pool dispose, background task cancellation |
 | Idempotency middleware | ✅ | `Idempotency-Key` header for POST/PUT — 24h cache |
-| Fallback chains | ✅ | 9 LLM providers, 3-tier emergency data, 3-tier challan calculation |
+| Fallback chains | ✅ | 10 LLM providers, 3-tier emergency data, 3-tier challan calculation |
 | In-memory fallback | ✅ | Redis down → memory cache; Upstash down → local rate limiting |
 | CQRS command bus | ✅ | Command/Query separation for roadwatch moderation |
 | Distributed locking | ✅ | Redlock + in-memory fallback |

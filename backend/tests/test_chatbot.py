@@ -5,8 +5,8 @@ from __future__ import annotations
 
 import asyncio
 
-from fastapi.testclient import TestClient
 import pytest
+from fastapi.testclient import TestClient
 
 from core.config import Settings
 from models.schemas import ChatRequest

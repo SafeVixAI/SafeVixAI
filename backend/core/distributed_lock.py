@@ -4,13 +4,12 @@
 from __future__ import annotations
 
 import asyncio
-from contextlib import asynccontextmanager
 import logging
-import time
 import uuid
-from typing import AsyncGenerator
+from collections.abc import AsyncGenerator
+from contextlib import asynccontextmanager
 
-from core.redis_client import create_cache, CacheHelper
+from core.redis_client import CacheHelper, create_cache
 
 logger = logging.getLogger(__name__)
 
@@ -53,7 +52,7 @@ class Redlock:
             await asyncio.wait_for(lock.acquire(), timeout=0.1)
             self._has_lock = True
             return True
-        except asyncio.TimeoutError:
+        except TimeoutError:
             return False
 
     async def release(self) -> None:

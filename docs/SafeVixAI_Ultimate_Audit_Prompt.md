@@ -1,4 +1,4 @@
-# SafeVixAI — Ultimate Enterprise-Grade Codebase Audit Prompt
+﻿# SafeVixAI — Ultimate Enterprise-Grade Codebase Audit Prompt
 
 > **SNAPSHOT**: This document reflects the state as of 2026-05-25. For current state see [AGENTS.md](AGENTS.md).
 
@@ -31,7 +31,7 @@ You are auditing **SafeVixAI** — an AI-powered road safety PWA built for the I
 - Frontend: Next.js 15, TypeScript 5, Tailwind CSS 3, shadcn/ui, MapLibre GL JS, OpenFreeMap, Zustand 5, WebLLM/Transformers.js Gemma (offline AI), GSAP 3.15.0 animations, SWR data fetching
 - Backend: FastAPI (main :8000), FastAPI (chatbot_service :8010 — separate deployment)
 - Database: Supabase (PostgreSQL 16 + PostGIS 3.4 + pgvector)
-- AI: RAG + LangGraph Agent, ChromaDB, 9-provider LLM fallback chain (Groq → Cerebras → Gemini → GitHub Models → NVIDIA NIM → OpenRouter → Mistral → Together → Template). Sarvam-30B/105B used for Indian language auto-routing (separate path, not in fallback chain). Indian language detection (Unicode script regex) pre-routes to Sarvam-30B (general) or Sarvam-105B (legal/challan). Circuit breakers, streaming chat, conversation summarization, multi-turn intent refinement, smart fallback routing with confidence scores.
+- AI: RAG + LangGraph Agent, ChromaDB, 10-provider LLM fallback chain (Groq → Cerebras → Gemini → GitHub Models → NVIDIA NIM → OpenRouter → Mistral → Together → Template). Sarvam-30B/105B used for Indian language auto-routing (separate path, not in fallback chain). Indian language detection (Unicode script regex) pre-routes to Sarvam-30B (general) or Sarvam-105B (legal/challan). Circuit breakers, streaming chat, conversation summarization, multi-turn intent refinement, smart fallback routing with confidence scores.
 - Hosting: Render (free tier, 2 services) + Vercel (frontend)
 - PWA: Service worker (safevixai-v3), offline SOS queue (IndexedDB + idb library), Web Share Target, PWA shortcuts (3: SOS, Hospital, Report), push notifications, Background Sync
 - Speech: `POST /speech/translate` (MediaRecorder → IndicSeamlessM4Tv2), `GET /speech/status`. 14 languages mapped via `frontend/lib/languages.ts` (UI code → recognitionCode → speechTargetCode → synthesisCode)
@@ -576,7 +576,7 @@ For each of these, determine if a test exists:
 - Is Sentry integrated for backend error tracking?
 - Are source maps uploaded for frontend error tracking?
 - Are there alerts for: deploy failures, high error rates, LLM provider failures?
-- **Email alerting for LLM failures**: `alert_service.py` at project root sends email with 3 diagnostic solutions when all 9 LLM providers fail. Verify `ALERT_EMAIL` + `ALERT_EMAIL_PASSWORD` env vars are set. Check 5-minute cooldown is working.
+- **Email alerting for LLM failures**: `alert_service.py` at project root sends email with 3 diagnostic solutions when all 10 LLM providers fail. Verify `ALERT_EMAIL` + `ALERT_EMAIL_PASSWORD` env vars are set. Check 5-minute cooldown is working.
 
 **13.3 Health & Uptime**
 - Is there a /health endpoint returning service status?
@@ -1225,7 +1225,7 @@ These checks are specific to SafeVixAI's exact stack and are NOT covered by Sect
 ## AUDIT SECTION 24 — MONITORING DEEP AUDIT (GAPS FROM SECTION 13)
 
 **24.1 LLM Provider Health Dashboard**
-- Which of the 9 LLMs providers are currently up?
+- Which of the 10 LLMs providers are currently up?
 - Is there a `/api/v1/status` endpoint that pings each provider and returns their health?
 - Useful for debugging: "Chatbot is slow" → check which providers are down → explains fallback latency
 
@@ -1291,7 +1291,7 @@ The remaining 5% are operational concerns that require live runtime data:
 - Are exceptions re-raised after logging? Or are they swallowed silently?
 - Specific check: what happens when Supabase is completely unreachable — `ConnectionRefusedError`?
 - Specific check: what happens when ChromaDB `PersistentClient` fails to load corrupt data?
-- Specific check: what happens when all 9 LLMs providers fail — does it return a 500 or a graceful "service unavailable" message?
+- Specific check: what happens when all 10 LLMs providers fail — does it return a 500 or a graceful "service unavailable" message?
 - Is there a global FastAPI exception handler registered for unhandled exceptions?
   ```python
   @app.exception_handler(Exception)
@@ -1459,7 +1459,7 @@ If business logic is inline in components instead of these hooks: it is untestab
 | GPS denied | Unknown | Show manual location input fallback |
 | Backend unreachable (cold start) | Unknown | Show "Server waking up..." + retry with countdown |
 | Supabase returns 0 results | Unknown | Expand radius to 25km → Overpass fallback → "No services found" |
-| LLM all 9 providers fail | Unknown | Return template answer + "AI temporarily unavailable" |
+| LLM all 10 providers fail | Unknown | Return template answer + "AI temporarily unavailable" |
 | ChromaDB empty/corrupt | Unknown | Answer from template responses, log error |
 | Network lost mid-SOS | Unknown | Queue in IndexedDB, show "SOS queued" toast |
 | Photo upload fails | Unknown | Show "Retry upload" button, keep report data |
@@ -2057,7 +2057,7 @@ async def check_all_providers_on_startup():
         )
     elif active_count < 3:
         await send_alert_email(
-            subject=f"SafeVixAI WARNING: Only {active_count}/9 LLMs providers available",
+            subject=f"SafeVixAI WARNING: Only {active_count}/10 LLMs providers available",
             body=f"Results: {results}"
         )
 
@@ -2234,7 +2234,7 @@ You already added email alerts for critical failures — bro this is exactly the
 **What should trigger email alerts:**
 ```
 CRITICAL (send immediately):
-  - All 9 LLMs providers down simultaneously
+  - All 10 LLMs providers down simultaneously
   - Backend service crashes (Render restart)
   - Supabase connection failed
   - Any API key returning 403 (key invalid/banned)
@@ -2356,7 +2356,7 @@ await send_alert_email(
 
 # When all providers fail simultaneously:
 await send_alert_email(
-    subject="CRITICAL: All 9 LLMs providers down — chatbot using templates only",
+    subject="CRITICAL: All 10 LLMs providers down — chatbot using templates only",
     body=f"Provider status: {provider_results}",
     severity="CRITICAL",
     dedupe_key="all_providers_down"
@@ -2535,7 +2535,7 @@ Total:     9
 ### Feature Completeness (25 Features)
 | Status | Count | Details |
 |--------|-------|---------|
-| COMPLETE | 25 | Emergency Locator, Crash Detection (Accelerometer + CrashCountdown UI integrated), Family Live Tracking, Challan Calculator, RoadWatch Reporter, AI Chatbot RAG, LLM Fallback Chain (9 providers), Offline SOS Queue, WebLLM Offline AI, What3Words, Voice/ASR, Indian Language Detection, PWA Share Target, QR Emergency Card, MCP Server, Waze CIFS Feed, Circuit Breakers, Streaming Chat, Conversation Summarization, Multi-Turn Intent Refinement, Safety Checker, GSAP Animations, Speech Language Mapping (14 languages), Assistant Voice Output, Authentication (Production JWT + Secure Service-to-Service Auth Bypass fully implemented) |
+| COMPLETE | 25 | Emergency Locator, Crash Detection (Accelerometer + CrashCountdown UI integrated), Family Live Tracking, Challan Calculator, RoadWatch Reporter, AI Chatbot RAG, LLM Fallback Chain (10 providers), Offline SOS Queue, WebLLM Offline AI, What3Words, Voice/ASR, Indian Language Detection, PWA Share Target, QR Emergency Card, MCP Server, Waze CIFS Feed, Circuit Breakers, Streaming Chat, Conversation Summarization, Multi-Turn Intent Refinement, Safety Checker, GSAP Animations, Speech Language Mapping (14 languages), Assistant Voice Output, Authentication (Production JWT + Secure Service-to-Service Auth Bypass fully implemented) |
 | PARTIAL | 0 | None — All items fully verified |
 | BROKEN | 0 | — |
 | MISSING | 0 | — |

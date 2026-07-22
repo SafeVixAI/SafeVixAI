@@ -172,10 +172,10 @@ def translate_message(message: str, locale: str) -> str:
     # Standard fallback to English, then original
     if message in TRANSLATIONS:
         return TRANSLATIONS[message].get(locale, TRANSLATIONS[message].get("en", message))
-    
+
     # Check for prefix or substring matches for circuit breakers and others
     for key, loc_map in TRANSLATIONS.items():
         if key in message:
             return loc_map.get(locale, loc_map.get("en", message))
-            
+
     return message

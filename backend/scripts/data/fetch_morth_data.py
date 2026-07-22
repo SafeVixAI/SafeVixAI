@@ -19,11 +19,11 @@ Run: python backend/scripts/fetch_morth_data.py
 from __future__ import annotations
 
 import csv
+import io
 import json
 import sys
-import io
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
 

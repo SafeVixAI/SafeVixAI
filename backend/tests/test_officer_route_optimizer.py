@@ -7,7 +7,6 @@ import math
 from datetime import time
 from unittest.mock import AsyncMock, MagicMock, patch
 
-
 from services.officer_route_optimizer import (
     OfficerRouteOptimizer,
     OfficerShift,

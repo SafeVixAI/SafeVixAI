@@ -21,7 +21,6 @@ from typing import Any
 import httpx
 import jwt
 
-
 logger = logging.getLogger(__name__)
 
 # Rotation configuration
@@ -83,7 +82,7 @@ class JWKSManager:
                 kid = key_data.get("kid")
                 key = jwt.PyJWK(key_data)
                 return key.key, kid or "default"
-        
+
         # Fallback to static secret
         from core.security import SECRET_KEY
         return SECRET_KEY, "static"
@@ -112,7 +111,7 @@ class JWKSManager:
         for kid, expiry_time in self._key_history:
             if now > expiry_time:
                 continue  # Key expired
-            
+
             try:
                 key = self._jwks_cache.get(kid)
                 if key:
@@ -126,7 +125,7 @@ class JWKSManager:
                 continue
 
         # Fallback to static secret
-        from core.security import SECRET_KEY, ALGORITHM
+        from core.security import ALGORITHM, SECRET_KEY
         try:
             return jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         except jwt.InvalidTokenError:
@@ -169,14 +168,14 @@ class JWKSManager:
                 response = await client.get(self._jwks_url, timeout=10.0)
                 response.raise_for_status()
                 jwks = response.json()
-            
+
             self._jwks_cache = jwks
             self._jwks_cache_time = now
-            
+
             # Update current key ID
             if jwks.get("keys"):
                 self._current_key_id = jwks["keys"][0].get("kid", "default")
-            
+
             return jwks
         except Exception as e:
             logger.error("Failed to fetch JWKS: %s", e)

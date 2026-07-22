@@ -21,7 +21,6 @@ from models.schemas import (
 from services.exceptions import ExternalServiceError, ServiceValidationError
 from services.routing_service import RoutingService
 
-
 # ---------------------------------------------------------------------------
 # Test fixtures
 # ---------------------------------------------------------------------------

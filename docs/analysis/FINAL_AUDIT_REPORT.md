@@ -1,4 +1,4 @@
-# SafeVixAI — Final Enterprise Audit Report
+﻿# SafeVixAI — Final Enterprise Audit Report
 
 > **SNAPSHOT**: This document reflects the state as of its creation date. For current state see [AGENTS.md](../../AGENTS.md).
 
@@ -29,7 +29,7 @@ Chatbot/RAG:       88/100  — Real ChromaDB, 11-provider chain, circuit breaker
 Security:          72/100  — .env credentials in git, safety output check fixed, chatbot auth enforced
 Database:          81/100  — PostGIS, 18 migrations, RLS policies exist
 Testing:           85/100  — 2829 tests, 90%+ backend coverage, 572 frontend tests
-CI/CD:             85/100  — 19 workflows, permissions added, blue-green deploy
+CI/CD:             85/100  — 40 workflows, permissions added, blue-green deploy
 Observability:     60/100  — Prometheus wired, no uptime monitor, Sentry optional
 PWA/Offline:       82/100  — SW v3, IndexedDB queues, offline challan, WebLLM missing
 Accessibility:     75/100  — Skip links, reduced motion, aria labels partial

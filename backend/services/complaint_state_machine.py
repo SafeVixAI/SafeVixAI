@@ -31,15 +31,15 @@ from __future__ import annotations
 
 import logging
 import uuid
-from datetime import datetime, timezone
 from dataclasses import dataclass
+from datetime import UTC, datetime
 from typing import Any
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from models.road_issue import RoadIssue
 from models.complaint_event import ComplaintEvent
+from models.road_issue import RoadIssue
 from services.event_bus import DomainEvent, get_event_bus
 
 logger = logging.getLogger("safevixai.state_machine")
@@ -151,7 +151,7 @@ class ComplaintStateMachine:
             raise InvalidTransitionError(old_status, target_status, issue.complaint_ref)
 
         # 3. Update status
-        now = datetime.now(timezone.utc).replace(tzinfo=None)
+        now = datetime.now(UTC).replace(tzinfo=None)
         issue.status = target_status
         issue.status_updated = now
 
@@ -267,7 +267,7 @@ class ComplaintStateMachine:
         if hasattr(issue, 'escalation_tier'):
             issue.escalation_tier = new_tier
 
-        now = datetime.now(timezone.utc).replace(tzinfo=None)
+        now = datetime.now(UTC).replace(tzinfo=None)
         issue.status_updated = now
 
         await db.commit()

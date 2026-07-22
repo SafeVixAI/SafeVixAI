@@ -1,4 +1,4 @@
-# RB-001: LLM Provider Outage
+﻿# RB-001: LLM Provider Outage
 
 **Severity:** P0  
 **Last Updated:** 2026-06-16  
@@ -9,7 +9,7 @@
 - Chatbot returns 503 or timeout
 - `POST /api/v1/chat/` errors in logs
 - CloudWatch alarm `safevixai-chatbot-5xx` triggered
-- Email alert from `alert_service.py` (all 9 providers down)
+- Email alert from `alert_service.py` (all 10 providers down)
 
 ## Diagnosis
 

@@ -12,8 +12,9 @@ Captures and replays HTTP interactions to verify:
 import pytest
 
 try:
-    import httpx
     from unittest.mock import MagicMock, patch
+
+    import httpx
 except ImportError:
     pass
 
@@ -25,7 +26,6 @@ pytestmark = pytest.mark.skipif(
 from core.config import Settings
 from services.geocoding_service import GeocodingService
 from services.overpass_service import OverpassService
-
 
 # ── Geocoding Service ──────────────────────────────────────────────────
 

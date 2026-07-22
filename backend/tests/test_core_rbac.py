@@ -5,12 +5,10 @@
 
 from __future__ import annotations
 
-from unittest.mock import AsyncMock, MagicMock, patch
-
 import pytest
 from fastapi import HTTPException
 
-from core.rbac import Role, _has_permission, ROLE_HIERARCHY, require_role
+from core.rbac import ROLE_HIERARCHY, Role, _has_permission, require_role
 
 
 class TestRoleEnum:

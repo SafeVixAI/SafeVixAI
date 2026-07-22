@@ -1,4 +1,4 @@
-# SafeVixAI — Architecture Review (Updated 2026-05-26)
+﻿# SafeVixAI — Architecture Review (Updated 2026-05-26)
 
 > **SNAPSHOT**: This document reflects the state as of 2026-05-26. For current state see [AGENTS.md](../../AGENTS.md).
 
@@ -16,7 +16,7 @@
 - **Two isolated virtual environments**: backend and chatbot have separate .venv, .env, requirements.txt
 
 ### Resilience
-- **9-provider LLM fallback chain**: Groq → Cerebras → Gemini → GitHub Models → NVIDIA NIM → OpenRouter → Mistral → Together → Template (deterministic)
+- **10-provider LLM fallback chain**: Groq → Cerebras → Gemini → GitHub Models → NVIDIA NIM → OpenRouter → Mistral → Together → Template (deterministic)
 - **3-tier emergency data**: PostGIS DB (~50k facilities) → Local CSV → Overpass API
 - **3-tier offline challan**: DuckDB-Wasm → CSV parser → Dict in-memory fallback
 - **Circuit breakers**: Per-provider graduated cooldowns (60s for timeout → 24h for quota exhaustion)

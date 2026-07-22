@@ -11,7 +11,6 @@ from services.exceptions import ExternalServiceError, ServiceValidationError
 from services.routing_service import RoutingService
 from services.safe_routing import get_safe_route
 
-
 router = APIRouter(prefix='/api/v1/routing', tags=['Routing'])
 
 

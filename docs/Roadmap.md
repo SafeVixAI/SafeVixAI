@@ -1,4 +1,4 @@
-# SafeVixAI - Roadmap
+﻿# SafeVixAI - Roadmap
 
 Build phases for the IIT Madras Road Safety Hackathon 2026 submission.
 
@@ -88,13 +88,13 @@ gantt
 
 ## Phase 3 - AI Layer
 
-**Goal:** RAG chatbot working with 9-provider fallback + ChromaDB.
+**Goal:** RAG chatbot working with 10-provider fallback + ChromaDB.
 
 - [x] Download 3 PDFs (MV Act 1988, MV Amendment 2019, WHO Trauma)
 - [x] Run build_vectorstore.py to index PDFs into ChromaDB
 - [x] RAG chain with ChromaDB MMR retrieval
 - [x] Groq llama3-70b-8192 integration
-- [x] 9-provider fallback chain: Groq→Cerebras→Gemini→GitHub→NVIDIA→OpenRouter→Mistral→Together→Template
+- [x] 10-provider fallback chain: Groq→Cerebras→Gemini→GitHub→NVIDIA→OpenRouter→Mistral→Together→Template
 - [x] Intent detection system (9 intent labels)
 - [x] Chat history in Redis per session
 - [x] Chat API endpoint - POST /api/v1/chat/

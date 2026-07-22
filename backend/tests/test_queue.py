@@ -1,10 +1,13 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2026 SafeVixAI Team
 
-import pytest
 import json
 from unittest.mock import AsyncMock
-from core.queue import TaskQueue, BackgroundWorker, task
+
+import pytest
+
+from core.queue import BackgroundWorker, TaskQueue, task
+
 
 @task("test_job_task")
 async def dummy_job_task_func(x):
@@ -19,7 +22,7 @@ async def test_enqueue_job():
 
     queue = TaskQueue(mock_redis)
     job_id = await queue.enqueue("test_job_task", 42)
-    
+
     assert job_id is not None
     assert mock_redis.hset.call_count == 1
     assert mock_redis.rpush.call_count == 1
@@ -28,7 +31,7 @@ async def test_enqueue_job():
     hset_args = mock_redis.hset.call_args[0]
     assert hset_args[0] == "svai:jobs"
     assert hset_args[1] == job_id
-    
+
     job_dict = json.loads(hset_args[2])
     assert job_dict["task_name"] == "test_job_task"
     assert job_dict["args"] == [42]
@@ -51,7 +54,7 @@ async def test_worker_processing():
         "retries_left": 3,
         "created_at": 12345.0,
     }
-    
+
     mock_redis.hget.return_value = json.dumps(job_data)
 
     worker = BackgroundWorker(mock_redis, concurrency=1)

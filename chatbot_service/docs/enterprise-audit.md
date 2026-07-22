@@ -1,4 +1,4 @@
-# Enterprise Architecture Audit — Chatbot Service
+﻿# Enterprise Architecture Audit — Chatbot Service
 
 ## 1. Coverage Status
 
@@ -64,7 +64,7 @@
 
 | Risk | Likelihood | Impact | Mitigation |
 |------|-----------|--------|------------|
-| All 9 LLM providers down | Low | Critical | TemplateProvider always works; alert_service.py notifies |
+| All 10 LLM providers down | Low | Critical | TemplateProvider always works; alert_service.py notifies |
 | Slow streaming under load | Medium | High | connection pool sizing, streaming timeout (60s) |
 | ChromaDB corruption | Low | Medium | `data/chroma_db/` committed; rebuild script exists |
 | Redis outage | Medium | Medium | Graceful fallback to in-memory dicts in all layers |
@@ -110,7 +110,7 @@
 | Graceful shutdown | ✅ Signal handlers + lifespan cleanup |
 | Connection pooling | ✅ httpx.AsyncClient reuse |
 | Circuit breakers | ✅ Per-provider, configurable thresholds |
-| Retry logic | ✅ Fallback chain (9 providers) |
+| Retry logic | ✅ Fallback chain (10 providers) |
 | Timeout handling | ✅ `asyncio.wait_for` / `asyncio.timeout` |
 | Error categorization | ✅ `RateLimitError`, `QuotaExhaustedError`, `ProviderUnavailableError` |
 | Logging | ✅ `structlog`-like via stdlib logger |
@@ -151,7 +151,7 @@
 - Latency SLO alerting
 
 ### Phase 7 — Performance Optimization (1 week)
-- Streaming for all 9 providers
+- Streaming for all 10 providers
 - Connection pooling tuning
 - Response caching (semantic cache)
 - Token budget optimization

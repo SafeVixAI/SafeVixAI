@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -80,19 +80,19 @@ class EscalationPredictor:
             factors.append(f"High severity ({sev}/5)")
 
         # Factor 2: SLA proximity / age (25%)
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         age_hours = 0
         if issue.created_at:
             created = issue.created_at
             if created.tzinfo is None:
-                created = created.replace(tzinfo=timezone.utc)
+                created = created.replace(tzinfo=UTC)
             age_hours = (now - created).total_seconds() / 3600
 
         sla_score = 0.0
         if issue.sla_deadline:
             deadline = issue.sla_deadline
             if deadline.tzinfo is None:
-                deadline = deadline.replace(tzinfo=timezone.utc)
+                deadline = deadline.replace(tzinfo=UTC)
             hours_left = (deadline - now).total_seconds() / 3600
             if hours_left < 0:
                 sla_score = 1.0

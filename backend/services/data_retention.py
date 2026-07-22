@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
@@ -63,10 +63,12 @@ class DataRetentionScheduler:
         async with self.session_factory() as db:
             try:
                 # Call the cleanup function defined in Alembic migrations
-                from sqlalchemy import text as sql_text, delete
+                from sqlalchemy import delete
+                from sqlalchemy import text as sql_text
+
                 from models.sos_incident import SosIncident
 
-                cutoff_90 = datetime.now(timezone.utc)
+                cutoff_90 = datetime.now(UTC)
                 stmt = delete(SosIncident).where(SosIncident.created_at < cutoff_90)
                 result = await db.execute(stmt)
                 deleted_sos = result.rowcount
@@ -80,7 +82,7 @@ class DataRetentionScheduler:
                 logger.info(
                     "Data retention cleanup executed: %d SOS records purged at %s",
                     deleted_sos,
-                    datetime.now(timezone.utc).isoformat()
+                    datetime.now(UTC).isoformat()
                 )
             except Exception as e:
                 await db.rollback()

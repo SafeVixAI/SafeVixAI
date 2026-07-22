@@ -9,12 +9,11 @@ gracefully (e.g., pkg_resources on Python 3.14+).
 
 from __future__ import annotations
 
-import sys
 import os
-from unittest.mock import MagicMock, patch, PropertyMock
+import sys
+from unittest.mock import MagicMock, patch
 
 import pytest
-
 
 # ── OTLP Tests (mock-based, no real deps needed) ───────────────────────────
 

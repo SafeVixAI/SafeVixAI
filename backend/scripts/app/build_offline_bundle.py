@@ -9,9 +9,9 @@ import asyncio
 from core.config import get_settings
 from core.database import AsyncSessionLocal
 from core.redis_client import create_cache
+from scripts.app.seed_emergency import CITY_GROUPS
 from services.emergency_locator import CITY_CENTERS, EmergencyLocatorService
 from services.overpass_service import OverpassService
-from scripts.app.seed_emergency import CITY_GROUPS
 
 
 async def build_bundle(city: str) -> tuple[str, int]:

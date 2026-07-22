@@ -8,8 +8,8 @@ import logging
 
 import httpx
 
-from core.circuit_breaker import CircuitBreakerRegistry, CircuitBreakerOpenError
-from services.exceptions import ExternalServiceError, ServiceValidationError
+from core.circuit_breaker import CircuitBreakerOpenError, CircuitBreakerRegistry
+from services.exceptions import ServiceValidationError
 
 logger = logging.getLogger(__name__)
 

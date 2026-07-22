@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 import asyncio
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from geoalchemy2.elements import WKTElement
 from sqlalchemy.dialects.postgresql import insert
@@ -12,7 +12,6 @@ from sqlalchemy.ext.asyncio import AsyncEngine, async_sessionmaker, create_async
 
 from core.config import get_settings
 from models.emergency import EmergencyService
-
 
 settings = get_settings()
 
@@ -99,7 +98,7 @@ def _build_rows() -> list[dict]:
     if len(SEED_DATA) != 50:
         raise ValueError(f'Expected exactly 50 rows but found {len(SEED_DATA)}')
 
-    seeded_at = datetime.now(timezone.utc).replace(tzinfo=None)
+    seeded_at = datetime.now(UTC).replace(tzinfo=None)
     rows: list[dict] = []
 
     for idx, row in enumerate(SEED_DATA, start=1):

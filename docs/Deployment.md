@@ -1,4 +1,4 @@
-# SafeVixAI v2.0 — Deployment Guide
+﻿# SafeVixAI v1.0.0 — Deployment Guide
 
 ## Infrastructure Overview (All Free Tier)
 
@@ -9,9 +9,9 @@
 | Chatbot Service | Render.com | `safevixai-chatbot.onrender.com` | FastAPI :8010, Agentic RAG AI |
 | Database | Supabase | `[project].supabase.co` | PostgreSQL + PostGIS |
 | Cache | Upstash | `[host].upstash.io` | Redis, 10K commands/day |
-| LLM APIs | 9-provider fallback chain (Groq, Cerebras, Gemini, GitHub Models, NVIDIA NIM, OpenRouter, Mistral, Together, Template) | Various | Auto-fallback on rate limit / failure |
+| LLM APIs | 10-provider fallback chain (Groq, Cerebras, Gemini, GitHub Models, NVIDIA NIM, OpenRouter, Mistral, Together, Template) | Various | Auto-fallback on rate limit / failure |
 | Model CDN | Hugging Face | `huggingface.co` | WebLLM weights |
-| CI/CD | GitHub Actions (19 workflows) | | Auto-deploy on push |
+| CI/CD | GitHub Actions (40 workflows) | | Auto-deploy on push |
 
 ---
 
@@ -402,7 +402,7 @@ Backed by IndicSeamlessService (SeamlessM4T for ASR + translation).
 
 ---
 
-## Static Analysis Stats (v2.0)
+## Static Analysis Stats (v1.0.0)
 
 | Metric | Count |
 |--------|-------|

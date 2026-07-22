@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone, timedelta
+from datetime import UTC, datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -188,7 +188,7 @@ class TestSLABreach:
         issue.ward_id = "ward-1"
         issue.ward_name = "Ward 1"
         issue.assigned_officer_id = None
-        issue.sla_deadline = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(hours=2)
+        issue.sla_deadline = datetime.now(UTC).replace(tzinfo=None) - timedelta(hours=2)
         issue.resolved_at = None
         issue.duplicate_of_uuid = None
         issue.confirmation_count = 0

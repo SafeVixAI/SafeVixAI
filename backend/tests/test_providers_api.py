@@ -214,7 +214,11 @@ async def test_sync_route_is_registered(monkeypatch):
 
 
 def _make_app(mock_session, monkeypatch=None):
-    """Build a test app with a mock DB session injected."""
+    """Build a minimal test app with a mock DB session injected.
+
+    Uses a bare FastAPI app (not create_app()) to avoid complex service
+    initialization chains that fail without real Postgres/Redis.
+    """
     if monkeypatch:
         monkeypatch.setenv("REDIS_URL", "")
         monkeypatch.setenv("ENVIRONMENT", "test")
@@ -225,17 +229,22 @@ def _make_app(mock_session, monkeypatch=None):
         os.environ["ENVIRONMENT"] = "test"
         os.environ["ADMIN_SECRET"] = "test-admin-secret-2026"
 
+    from fastapi import FastAPI
+
+    from api.v1.providers import router as providers_router
     from core.config import get_settings
     from core.database import get_db
-    get_settings.cache_clear()
-    from main import create_app
 
-    app = create_app()
+    get_settings.cache_clear()
+
+    app = FastAPI()
+    app.include_router(providers_router)
 
     async def override_db():
         yield mock_session
 
     app.dependency_overrides[get_db] = override_db
+
     async def override_auth():
         return {"sub": "test-user", "role": "user", "jti": None}
     app.dependency_overrides[get_current_user] = override_auth

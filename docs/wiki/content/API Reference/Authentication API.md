@@ -140,7 +140,7 @@ Example error response:
 }
 
 Security Notes:
-- Uses a demo user registry for validation during the hackathon phase.
+- Uses a demo user registry for validation during initial deployment phase.
 - Issues a JWT with a fixed expiration period.
 - Frontend automatically attaches Authorization: Bearer <token> to subsequent requests.
 
@@ -283,4 +283,4 @@ Common issues and resolutions:
 - [frontend/lib/api.ts:19-30](https://github.com/SafeVixAI/SafeVixAI/blob/main/frontend/lib/api.ts#L19-L30)
 
 ## Conclusion
-The authentication system provides a streamlined login flow with JWT-based session management, suitable for the hackathon demo. It integrates cleanly with the frontend via explicit login handling and automatic Authorization header injection. For production, consider implementing secure password hashing, refresh token rotation, and robust user registration flows.
+The authentication system provides a streamlined login flow with JWT-based session management, suitable for the demo. It integrates cleanly with the frontend via explicit login handling and automatic Authorization header injection. For production, consider implementing secure password hashing, refresh token rotation, and robust user registration flows.

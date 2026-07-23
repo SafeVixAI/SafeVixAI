@@ -2,7 +2,7 @@
 
 ## v1.0.0 — 2026-07-20
 
-Initial production release of SafeVixAI, an AI-powered road safety PWA for the IIT Madras Road Safety Hackathon 2026.
+Initial production release of SafeVixAI, an AI-powered road safety PWA.
 
 ### New Features
 
@@ -13,7 +13,7 @@ Initial production release of SafeVixAI, an AI-powered road safety PWA for the I
 - **SOS**: Hold-to-activate emergency alert with live family tracking via WebSocket (GPS, speed, battery)
 - **Bystander Mode**: Report accidents as passerby with GPS capture, nearest hospital lookup, and first aid guidance
 - **Command Center**: Real-time agency dashboard with incident timeline, resolution analytics, and escalation board
-- **Crisis Landing Page**: Animated hero with Three.js globe, IIT Madras branding, and scroll-triggered section reveals
+- **Crisis Landing Page**: Animated hero with Three.js globe and scroll-triggered section reveals
 - **Offline Support**: PWA with service worker caching, IndexedDB offline SOS queue, and WebLLM Phi-3 Mini offline AI
 - **Privacy Architecture**: Blood group and emergency contacts stored exclusively in IndexedDB (never leaves device)
 

@@ -208,4 +208,4 @@ Before opening a PR, confirm:
 
 ---
 
-*SafeVixAI | IIT Madras Road Safety Hackathon 2026*
+*SafeVixAI | AI-powered road safety platform*

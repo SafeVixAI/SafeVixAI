@@ -20,7 +20,7 @@ Complete guide to install dependencies and run both backend and frontend locally
 
 ```bash
 # Go to your workspace folder
-cd C:\Hackathons\IITM           # Windows
+cd C:\Projects\SafeVixAI        # Windows
 # cd ~/projects                 # Linux/Mac
 
 # Clone the repository

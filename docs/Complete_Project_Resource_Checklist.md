@@ -1,12 +1,12 @@
-ï»¿# SafeVixAI Complete Project Resource Checklist
+# SafeVixAI Complete Project Resource Checklist
 
 Generated from:
-- [SafeVixAI_Complete_Resources_main.docx](C:/Hackathons/IITM/SafeVixAI_Complete_Resources_main.docx)
-- [SafeVixAI_Chatbot_Impl_Plan.txt](C:/Hackathons/IITM/SafeVixAI_Chatbot_Impl_Plan.txt)
-- [SafeVixAI_Chatbot_Guide.txt](C:/Hackathons/IITM/SafeVixAI_Chatbot_Guide.txt)
-- [doc_text.txt](C:/Hackathons/IITM/doc_text.txt)
+- [SafeVixAI_Complete_Resources_main.docx](C:/Projects/IITM/SafeVixAI_Complete_Resources_main.docx)
+- [SafeVixAI_Chatbot_Impl_Plan.txt](C:/Projects/IITM/SafeVixAI_Chatbot_Impl_Plan.txt)
+- [SafeVixAI_Chatbot_Guide.txt](C:/Projects/IITM/SafeVixAI_Chatbot_Guide.txt)
+- [doc_text.txt](C:/Projects/IITM/doc_text.txt)
 
-Last updated: 2026-06-09 â€” Brought in sync with actual repo state. All 25 features complete.
+Last updated: 2026-06-09 — Brought in sync with actual repo state. All 25 features complete.
 
 This file is the single source of truth for:
 - what you need to collect
@@ -51,7 +51,7 @@ Important notes:
 
 ## 2. Backend env values and config
 
-Target file: [backend/.env.example](C:/Hackathons/IITM/SafeVixAI/backend/.env.example) -> copy to `backend/.env`
+Target file: [backend/.env.example](C:/Projects/IITM/SafeVixAI/backend/.env.example) -> copy to `backend/.env`
 
 | Item | Source | Local save path | Env variable name | Status | Priority |
 |---|---|---|---|---|---|
@@ -97,7 +97,7 @@ Target file: [backend/.env.example](C:/Hackathons/IITM/SafeVixAI/backend/.env.ex
 
 ## 3. Frontend env values and config
 
-Target file: [frontend/.env.example](C:/Hackathons/IITM/SafeVixAI/frontend/.env.example) -> copy to `frontend/.env`
+Target file: [frontend/.env.example](C:/Projects/IITM/SafeVixAI/frontend/.env.example) -> copy to `frontend/.env`
 
 | Item | Source | Local save path | Env variable name | Status | Priority |
 |---|---|---|---|---|---|
@@ -153,16 +153,16 @@ Target file: `chatbot_service/.env`
 
 | Item | Source | Local save path | Env variable name | Status | Priority |
 |---|---|---|---|---|---|
-| MapLibre GL JS | https://maplibre.org and npm | [frontend/package.json](C:/Hackathons/IITM/SafeVixAI/frontend/package.json) | N/A | Wired now | Critical |
-| OpenFreeMap Liberty style | https://tiles.openfreemap.org/styles/liberty | [frontend/components/maps/MapLibreCanvas.tsx](C:/Hackathons/IITM/SafeVixAI/frontend/components/maps/MapLibreCanvas.tsx) and `frontend/.env` | `NEXT_PUBLIC_MAP_STYLE_URL` | Wired now | Critical |
+| MapLibre GL JS | https://maplibre.org and npm | [frontend/package.json](C:/Projects/IITM/SafeVixAI/frontend/package.json) | N/A | Wired now | Critical |
+| OpenFreeMap Liberty style | https://tiles.openfreemap.org/styles/liberty | [frontend/components/maps/MapLibreCanvas.tsx](C:/Projects/IITM/SafeVixAI/frontend/components/maps/MapLibreCanvas.tsx) and `frontend/.env` | `NEXT_PUBLIC_MAP_STYLE_URL` | Wired now | Critical |
 | OpenFreeMap Positron style | https://tiles.openfreemap.org/styles/positron | Future style toggle or theme config | N/A | Future phase | Low |
 | Carto Voyager backup style | https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json | Future fallback in `frontend/components/maps/MapLibreCanvas.tsx` | N/A | Future phase | High |
 | Carto Dark Matter style | Carto CDN | Future dark-mode style toggle | N/A | Future phase | Medium |
-| Photon search geocoder | https://photon.komoot.io/api | [backend/core/config.py](C:/Hackathons/IITM/SafeVixAI/backend/core/config.py), `backend/.env` | `PHOTON_URL` | Wired now | Critical |
-| Nominatim reverse geocoder | https://nominatim.openstreetmap.org | [backend/core/config.py](C:/Hackathons/IITM/SafeVixAI/backend/core/config.py), `backend/.env` | `NOMINATIM_URL` | Wired now | Critical |
-| Overpass API | https://overpass-api.de/api/interpreter | [backend/core/config.py](C:/Hackathons/IITM/SafeVixAI/backend/core/config.py), `backend/.env` | `OVERPASS_URL` | Wired now | Critical |
+| Photon search geocoder | https://photon.komoot.io/api | [backend/core/config.py](C:/Projects/IITM/SafeVixAI/backend/core/config.py), `backend/.env` | `PHOTON_URL` | Wired now | Critical |
+| Nominatim reverse geocoder | https://nominatim.openstreetmap.org | [backend/core/config.py](C:/Projects/IITM/SafeVixAI/backend/core/config.py), `backend/.env` | `NOMINATIM_URL` | Wired now | Critical |
+| Overpass API | https://overpass-api.de/api/interpreter | [backend/core/config.py](C:/Projects/IITM/SafeVixAI/backend/core/config.py), `backend/.env` | `OVERPASS_URL` | Wired now | Critical |
 | Overpass mirror list | `overpass.kumi.systems`, `overpass.private.coffee` | `backend/.env` | `OVERPASS_URLS` | Wired now | High |
-| openrouteservice routing | https://api.openrouteservice.org | [backend/services/routing_service.py](C:/Hackathons/IITM/SafeVixAI/backend/services/routing_service.py), `backend/.env` | `OPENROUTESERVICE_BASE_URL`, `OPENROUTESERVICE_API_KEY` | Wired now | Critical |
+| openrouteservice routing | https://api.openrouteservice.org | [backend/services/routing_service.py](C:/Projects/IITM/SafeVixAI/backend/services/routing_service.py), `backend/.env` | `OPENROUTESERVICE_BASE_URL`, `OPENROUTESERVICE_API_KEY` | Wired now | Critical |
 | PMTiles runtime | https://github.com/protomaps/PMTiles | `frontend/public/maps/india.pmtiles` and future PMTiles loader | N/A | Future phase | Medium |
 
 ## 6. Government and public datasets for maps and reporting
@@ -225,8 +225,8 @@ Keep raw training datasets outside git if possible.
 |---|---|---|---|---|---|
 | LocalHashEmbeddingFunction embeddings | `LocalHashEmbeddingFunction (zero-dependency)` on Hugging Face | `chatbot_service/.env` plus `chatbot_service/rag/embeddings.py` | `EMBEDDING_MODEL` | Complete | Critical |
 | multilingual MiniLM embeddings | `hash-based embeddings/paraphrase-multilingual-MiniLM-L12-v2` | Future `chatbot_service/rag/embeddings.py` | `EMBEDDING_MODEL` or upgrade path | Future phase | High |
-| Gemma 4 E2B | `google/gemma-4-E2B-it` | [frontend/lib/edge-ai.ts](C:/Hackathons/IITM/SafeVixAI/frontend/lib/edge-ai.ts) | N/A | Future phase | Critical |
-| Gemma 4 E4B | `google/gemma-4-E4B-it` | [frontend/lib/edge-ai.ts](C:/Hackathons/IITM/SafeVixAI/frontend/lib/edge-ai.ts) or future offline vision module | N/A | Future phase | High |
+| Gemma 4 E2B | `google/gemma-4-E2B-it` | [frontend/lib/edge-ai.ts](C:/Projects/IITM/SafeVixAI/frontend/lib/edge-ai.ts) | N/A | Future phase | Critical |
+| Gemma 4 E4B | `google/gemma-4-E4B-it` | [frontend/lib/edge-ai.ts](C:/Projects/IITM/SafeVixAI/frontend/lib/edge-ai.ts) or future offline vision module | N/A | Future phase | High |
 | Gemma 4 26B A4B | `google/gemma-4-26B-A4B-it` | Future server-side inference path only | N/A | Future phase | Low |
 | Gemma 4 31B Dense | `google/gemma-4-31B-it` | Future server-side inference path only | N/A | Future phase | Low |
 | Sarvam-30B | AI Kosh / Hugging Face inference | `chatbot_service/providers/sarvam_provider.py` | `HF_TOKEN` | Complete | Critical |
@@ -268,7 +268,7 @@ Keep raw training datasets outside git if possible.
 | OpenRouter | https://openrouter.ai | `chatbot_service/providers/openrouter_provider.py` | `OPENROUTER_API_KEY` | Complete | Medium |
 | Mistral | https://console.mistral.ai | `chatbot_service/providers/mistral_provider.py` | `MISTRAL_API_KEY` | Complete | Low |
 | Together AI | https://api.together.xyz | `chatbot_service/providers/together_provider.py` | `TOGETHER_API_KEY` | Complete | Low |
-| Provider Router with circuit breaker | â€” | `chatbot_service/providers/router.py`, `chatbot_service/providers/provider_router.py` | `DEFAULT_LLM_PROVIDER`, `DEFAULT_LLM_MODEL` | Complete | Critical |
+| Provider Router with circuit breaker | — | `chatbot_service/providers/router.py`, `chatbot_service/providers/provider_router.py` | `DEFAULT_LLM_PROVIDER`, `DEFAULT_LLM_MODEL` | Complete | Critical |
 
 ## 13. Offline map and browser-side model artifacts
 
@@ -277,8 +277,8 @@ Keep raw training datasets outside git if possible.
 | India PMTiles extract | Protomaps / PMTiles downloads | `frontend/public/maps/india.pmtiles` | N/A | Future phase | Medium |
 | WebLLM Phi-3 Mini (2.2GB) | Microsoft / Hugging Face | Runtime browser cache (on-demand download) | N/A | Complete | High |
 | LocalHashEmbeddingFunction (zero-dependency) | ChromaDB bundled | Runtime browser cache | N/A | Complete | Medium |
-| YOLOv8n browser ONNX | Xenova/yolov8n or fine-tuned ONNX export | `frontend/public/models/` â€” loaded via @huggingface/transformers | N/A | Complete | High |
-| GeoJSON offline data bundles | Generated by backend | `frontend/public/offline-data/` â€” `india-emergency.geojson`, city bundles | N/A | Complete | High |
+| YOLOv8n browser ONNX | Xenova/yolov8n or fine-tuned ONNX export | `frontend/public/models/` — loaded via @huggingface/transformers | N/A | Complete | High |
+| GeoJSON offline data bundles | Generated by backend | `frontend/public/offline-data/` — `india-emergency.geojson`, city bundles | N/A | Complete | High |
 
 ## 14. Mobile-only future references from the document
 
@@ -371,7 +371,7 @@ Already wired in current code:
 - openrouteservice route plumbing
 - emergency seeding scaffold
 - road infrastructure import scaffold
-- **Chatbot provider chain** (10 providers: Groqâ†’Cerebrasâ†’Geminiâ†’GitHubâ†’NVIDIAâ†’OpenRouterâ†’Mistralâ†’Togetherâ†’Template)
+- **Chatbot provider chain** (10 providers: Groq?Cerebras?Gemini?GitHub?NVIDIA?OpenRouter?Mistral?Together?Template)
 - **Intent detector** (9 intent classes)
 - **All 13 agent tools** (SOS, Challan, LegalSearch, FirstAid, Weather, OpenMeteo, RoadInfra, RoadIssues, SubmitReport, Geocoding, DrugInfo, What3Words, Emergency)
 - **Conversation memory** (Redis, 24-hour TTL)
@@ -414,16 +414,16 @@ Target root: `chatbot_service/`
 
 | Item | Source | Local save path | Env variable name | Status | Priority |
 |---|---|---|---|---|---|
-| Chatbot FastAPI entrypoint | â€” | `chatbot_service/main.py` | N/A | Complete | Critical |
-| Chatbot Python dependencies | â€” | `chatbot_service/requirements.txt` | N/A | Complete | Critical |
-| Chatbot Dockerfile | â€” | `chatbot_service/Dockerfile` | N/A | Complete | Critical |
-| Chatbot env template | â€” | `chatbot_service/.env.example` | N/A | Complete | Critical |
-| Chatbot gitignore | â€” | `chatbot_service/.gitignore` | N/A | Complete | High |
-| Chatbot Render blueprint | â€” | `chatbot_service/render.yaml` | N/A | Complete | High |
-| Chatbot config module | â€” | `chatbot_service/config.py` | N/A | Complete | Critical |
-| Chatbot service health endpoint | â€” | `chatbot_service/main.py` | N/A | Complete | High |
-| Chatbot service port 8010 binding | â€” | `chatbot_service/main.py` and `chatbot_service/.env` | `CHATBOT_SERVICE_PORT` | Complete | High |
-| Chroma build baked into Docker image | â€” | `chatbot_service/Dockerfile` and `chatbot_service/data/build_vectorstore.py` | N/A | Complete | Medium |
+| Chatbot FastAPI entrypoint | — | `chatbot_service/main.py` | N/A | Complete | Critical |
+| Chatbot Python dependencies | — | `chatbot_service/requirements.txt` | N/A | Complete | Critical |
+| Chatbot Dockerfile | — | `chatbot_service/Dockerfile` | N/A | Complete | Critical |
+| Chatbot env template | — | `chatbot_service/.env.example` | N/A | Complete | Critical |
+| Chatbot gitignore | — | `chatbot_service/.gitignore` | N/A | Complete | High |
+| Chatbot Render blueprint | — | `chatbot_service/render.yaml` | N/A | Complete | High |
+| Chatbot config module | — | `chatbot_service/config.py` | N/A | Complete | Critical |
+| Chatbot service health endpoint | — | `chatbot_service/main.py` | N/A | Complete | High |
+| Chatbot service port 8010 binding | — | `chatbot_service/main.py` and `chatbot_service/.env` | `CHATBOT_SERVICE_PORT` | Complete | High |
+| Chroma build baked into Docker image | — | `chatbot_service/Dockerfile` and `chatbot_service/data/build_vectorstore.py` | N/A | Complete | Medium |
 
 ## 21. Chatbot service code artifacts by subsystem
 
@@ -431,140 +431,140 @@ Target root: `chatbot_service/`
 
 | Item | Source | Local save path | Env variable name | Status | Priority |
 |---|---|---|---|---|---|
-| Provider base class | â€” | `chatbot_service/providers/base.py` | N/A | Complete | Critical |
-| Groq provider wrapper | â€” | `chatbot_service/providers/groq_provider.py` | `GROQ_API_KEY` | Complete | Critical |
-| Gemini provider wrapper | â€” | `chatbot_service/providers/gemini_provider.py` | `GOOGLE_API_KEY`, `GEMINI_MODEL` | Complete | High |
-| GitHub Models provider wrapper | â€” | `chatbot_service/providers/github_models_provider.py` | `GITHUB_TOKEN` | Complete | High |
-| NVIDIA NIM provider wrapper | â€” | `chatbot_service/providers/nvidia_nim_provider.py` | `NVIDIA_NIM_API_KEY`, `NVIDIA_NIM_BASE_URL` | Complete | Medium |
-| Mistral provider wrapper | â€” | `chatbot_service/providers/mistral_provider.py` | `MISTRAL_API_KEY` | Complete | Medium |
-| Together AI provider wrapper | â€” | `chatbot_service/providers/together_provider.py` | `TOGETHER_API_KEY` | Complete | Medium |
-| Cerebras provider wrapper | â€” | `chatbot_service/providers/cerebras_provider.py` | `CEREBRAS_API_KEY` | Complete | High |
-| OpenRouter provider wrapper | â€” | `chatbot_service/providers/openrouter_provider.py` | `OPENROUTER_API_KEY` | Complete | Medium |
-| Template provider (deterministic fallback) | â€” | `chatbot_service/providers/template_provider.py` | N/A | Complete | Critical |
-| Provider router with circuit breaker | â€” | `chatbot_service/providers/router.py`, `chatbot_service/providers/provider_router.py` | `DEFAULT_LLM_PROVIDER`, `DEFAULT_LLM_MODEL` | Complete | Critical |
+| Provider base class | — | `chatbot_service/providers/base.py` | N/A | Complete | Critical |
+| Groq provider wrapper | — | `chatbot_service/providers/groq_provider.py` | `GROQ_API_KEY` | Complete | Critical |
+| Gemini provider wrapper | — | `chatbot_service/providers/gemini_provider.py` | `GOOGLE_API_KEY`, `GEMINI_MODEL` | Complete | High |
+| GitHub Models provider wrapper | — | `chatbot_service/providers/github_models_provider.py` | `GITHUB_TOKEN` | Complete | High |
+| NVIDIA NIM provider wrapper | — | `chatbot_service/providers/nvidia_nim_provider.py` | `NVIDIA_NIM_API_KEY`, `NVIDIA_NIM_BASE_URL` | Complete | Medium |
+| Mistral provider wrapper | — | `chatbot_service/providers/mistral_provider.py` | `MISTRAL_API_KEY` | Complete | Medium |
+| Together AI provider wrapper | — | `chatbot_service/providers/together_provider.py` | `TOGETHER_API_KEY` | Complete | Medium |
+| Cerebras provider wrapper | — | `chatbot_service/providers/cerebras_provider.py` | `CEREBRAS_API_KEY` | Complete | High |
+| OpenRouter provider wrapper | — | `chatbot_service/providers/openrouter_provider.py` | `OPENROUTER_API_KEY` | Complete | Medium |
+| Template provider (deterministic fallback) | — | `chatbot_service/providers/template_provider.py` | N/A | Complete | Critical |
+| Provider router with circuit breaker | — | `chatbot_service/providers/router.py`, `chatbot_service/providers/provider_router.py` | `DEFAULT_LLM_PROVIDER`, `DEFAULT_LLM_MODEL` | Complete | Critical |
 
 ### 21.2 RAG, agent, and orchestration
 
 | Item | Source | Local save path | Env variable name | Status | Priority |
 |---|---|---|---|---|---|
-| Chroma vectorstore manager | â€” | `chatbot_service/rag/vectorstore.py` | `CHROMA_PERSIST_DIR` | Complete | Critical |
-| Embeddings wrapper | â€” | `chatbot_service/rag/embeddings.py` | `EMBEDDING_MODEL` | Complete | Critical |
-| Retriever module | â€” | `chatbot_service/rag/retriever.py` | `TOP_K_RETRIEVAL` | Complete | High |
-| PDF/document loader | â€” | `chatbot_service/rag/document_loader.py` | `RAG_DATA_DIR` | Complete | High |
-| ChatEngine definition | â€” | `chatbot_service/agent/graph.py` | N/A | Complete | Critical |
-| Agent state schema | â€” | `chatbot_service/agent/state.py` | N/A | Complete | High |
-| Intent detector | â€” | `chatbot_service/agent/intent_detector.py` (9 intent classes) | N/A | Complete | Critical |
-| Context assembler | â€” | `chatbot_service/agent/context_assembler.py` | N/A | Complete | Critical |
-| Safety checker | â€” | `chatbot_service/agent/safety_checker.py` (7-layer defense) | N/A | Complete | High |
+| Chroma vectorstore manager | — | `chatbot_service/rag/vectorstore.py` | `CHROMA_PERSIST_DIR` | Complete | Critical |
+| Embeddings wrapper | — | `chatbot_service/rag/embeddings.py` | `EMBEDDING_MODEL` | Complete | Critical |
+| Retriever module | — | `chatbot_service/rag/retriever.py` | `TOP_K_RETRIEVAL` | Complete | High |
+| PDF/document loader | — | `chatbot_service/rag/document_loader.py` | `RAG_DATA_DIR` | Complete | High |
+| ChatEngine definition | — | `chatbot_service/agent/graph.py` | N/A | Complete | Critical |
+| Agent state schema | — | `chatbot_service/agent/state.py` | N/A | Complete | High |
+| Intent detector | — | `chatbot_service/agent/intent_detector.py` (9 intent classes) | N/A | Complete | Critical |
+| Context assembler | — | `chatbot_service/agent/context_assembler.py` | N/A | Complete | Critical |
+| Safety checker | — | `chatbot_service/agent/safety_checker.py` (7-layer defense) | N/A | Complete | High |
 
 ### 21.3 Tools, memory, API, and tests
 
 | Item | Source | Local save path | Env variable name | Status | Priority |
 |---|---|---|---|---|---|
-| SOS API tool | â€” | `chatbot_service/tools/sos_tool.py` | `MAIN_BACKEND_BASE_URL` | Complete | Critical |
-| Emergency tool | â€” | `chatbot_service/tools/emergency_tool.py` | `MAIN_BACKEND_BASE_URL` | Complete | Critical |
-| Challan tool | â€” | `chatbot_service/tools/challan_tool.py` | `MAIN_BACKEND_BASE_URL` | Complete | Critical |
-| Legal search tool | â€” | `chatbot_service/tools/legal_search_tool.py` | N/A | Complete | High |
-| Road infrastructure tool | â€” | `chatbot_service/tools/road_infra_tool.py` | `MAIN_BACKEND_BASE_URL` | Complete | High |
-| Road issues tool | â€” | `chatbot_service/tools/road_issues_tool.py` | `MAIN_BACKEND_BASE_URL` | Complete | High |
-| First-aid tool | â€” | `chatbot_service/tools/first_aid_tool.py` | N/A | Complete | High |
-| Weather tool | â€” | `chatbot_service/tools/weather_tool.py` | `OPENWEATHER_API_KEY` | Complete | Medium |
-| Open-Meteo tool | â€” | `chatbot_service/tools/open_meteo.py` | N/A | Complete | Medium |
-| Submit-report tool | â€” | `chatbot_service/tools/submit_report_tool.py` | `MAIN_BACKEND_BASE_URL` | Complete | High |
-| Geocoding tool | â€” | `chatbot_service/tools/geocoding.py` | N/A | Complete | High |
-| Drug Info tool | â€” | `chatbot_service/tools/drug_info.py` | N/A | Complete | Medium |
-| What3Words tool | â€” | `chatbot_service/tools/what3words.py` | N/A | Complete | Medium |
-| Redis conversation memory | â€” | `chatbot_service/memory/redis_memory.py` | `REDIS_URL` | Complete | High |
-| Chat REST and SSE API | â€” | `chatbot_service/api/chat.py` | N/A | Complete | Critical |
-| Chat message endpoint | â€” | `chatbot_service/api/chat.py` -> `POST /api/v1/chat/` | N/A | Complete | Critical |
-| Chat stream endpoint | â€” | `chatbot_service/api/chat.py` -> `POST /api/v1/chat/stream` | N/A | Complete | Critical |
-| Chat history endpoint | â€” | `chatbot_service/api/chat.py` -> `GET /api/v1/chat/history/{session_id}` | N/A | Complete | Medium |
-| Admin endpoints API | â€” | `chatbot_service/api/admin.py` | N/A | Complete | Medium |
-| Provider health admin endpoint | â€” | `chatbot_service/api/admin.py` -> `GET /admin/provider-health` | N/A | Complete | Medium |
-| Vectorstore rebuild admin endpoint | â€” | `chatbot_service/api/admin.py` -> `POST /admin/rebuild-vectorstore` | N/A | Complete | Medium |
-| Chatbot stats admin endpoint | â€” | `chatbot_service/api/admin.py` -> `GET /admin/stats` | N/A | Complete | Medium |
-| Provider integration tests | â€” | `chatbot_service/tests/test_providers.py` | N/A | Complete | High |
-| Intent tests | â€” | `chatbot_service/tests/test_intent.py` | N/A | Complete | High |
-| Tool contract tests | â€” | `chatbot_service/tests/test_tools.py` | N/A | Complete | High |
-| RAG retrieval tests | â€” | `chatbot_service/tests/test_rag.py` | N/A | Complete | High |
-| Voice tests | â€” | `chatbot_service/tests/test_voice.py` | N/A | Complete | Medium |
-| End-to-end chatbot tests | â€” | `chatbot_service/tests/test_e2e.py` | N/A | Complete | Critical |
+| SOS API tool | — | `chatbot_service/tools/sos_tool.py` | `MAIN_BACKEND_BASE_URL` | Complete | Critical |
+| Emergency tool | — | `chatbot_service/tools/emergency_tool.py` | `MAIN_BACKEND_BASE_URL` | Complete | Critical |
+| Challan tool | — | `chatbot_service/tools/challan_tool.py` | `MAIN_BACKEND_BASE_URL` | Complete | Critical |
+| Legal search tool | — | `chatbot_service/tools/legal_search_tool.py` | N/A | Complete | High |
+| Road infrastructure tool | — | `chatbot_service/tools/road_infra_tool.py` | `MAIN_BACKEND_BASE_URL` | Complete | High |
+| Road issues tool | — | `chatbot_service/tools/road_issues_tool.py` | `MAIN_BACKEND_BASE_URL` | Complete | High |
+| First-aid tool | — | `chatbot_service/tools/first_aid_tool.py` | N/A | Complete | High |
+| Weather tool | — | `chatbot_service/tools/weather_tool.py` | `OPENWEATHER_API_KEY` | Complete | Medium |
+| Open-Meteo tool | — | `chatbot_service/tools/open_meteo.py` | N/A | Complete | Medium |
+| Submit-report tool | — | `chatbot_service/tools/submit_report_tool.py` | `MAIN_BACKEND_BASE_URL` | Complete | High |
+| Geocoding tool | — | `chatbot_service/tools/geocoding.py` | N/A | Complete | High |
+| Drug Info tool | — | `chatbot_service/tools/drug_info.py` | N/A | Complete | Medium |
+| What3Words tool | — | `chatbot_service/tools/what3words.py` | N/A | Complete | Medium |
+| Redis conversation memory | — | `chatbot_service/memory/redis_memory.py` | `REDIS_URL` | Complete | High |
+| Chat REST and SSE API | — | `chatbot_service/api/chat.py` | N/A | Complete | Critical |
+| Chat message endpoint | — | `chatbot_service/api/chat.py` -> `POST /api/v1/chat/` | N/A | Complete | Critical |
+| Chat stream endpoint | — | `chatbot_service/api/chat.py` -> `POST /api/v1/chat/stream` | N/A | Complete | Critical |
+| Chat history endpoint | — | `chatbot_service/api/chat.py` -> `GET /api/v1/chat/history/{session_id}` | N/A | Complete | Medium |
+| Admin endpoints API | — | `chatbot_service/api/admin.py` | N/A | Complete | Medium |
+| Provider health admin endpoint | — | `chatbot_service/api/admin.py` -> `GET /admin/provider-health` | N/A | Complete | Medium |
+| Vectorstore rebuild admin endpoint | — | `chatbot_service/api/admin.py` -> `POST /admin/rebuild-vectorstore` | N/A | Complete | Medium |
+| Chatbot stats admin endpoint | — | `chatbot_service/api/admin.py` -> `GET /admin/stats` | N/A | Complete | Medium |
+| Provider integration tests | — | `chatbot_service/tests/test_providers.py` | N/A | Complete | High |
+| Intent tests | — | `chatbot_service/tests/test_intent.py` | N/A | Complete | High |
+| Tool contract tests | — | `chatbot_service/tests/test_tools.py` | N/A | Complete | High |
+| RAG retrieval tests | — | `chatbot_service/tests/test_rag.py` | N/A | Complete | High |
+| Voice tests | — | `chatbot_service/tests/test_voice.py` | N/A | Complete | Medium |
+| End-to-end chatbot tests | — | `chatbot_service/tests/test_e2e.py` | N/A | Complete | Critical |
 
 ## 22. Database tables, runtime channels, offline data files, and helper scripts
 
 | Item | Source | Local save path | Env variable name | Status | Priority |
 |---|---|---|---|---|---|
-| Violations seed CSV | â€” | `backend/data/violations_seed.csv` | N/A | Complete | Critical |
-| State overrides CSV | â€” | `backend/data/state_overrides.csv` | N/A | Complete | Critical |
-| Violations reseed script | â€” | `backend/data/seed_violations.py` | N/A | Complete | High |
-| Offline violations CSV for browser challan | â€” | `frontend/public/offline-data/violations.csv` | N/A | Complete | High |
-| Offline emergency GeoJSON | â€” | `frontend/public/offline-data/india-emergency.geojson` | N/A | Complete | High |
-| Downloadable city/state emergency bundles | â€” | `frontend/public/offline-data/city-bundles/` or `frontend/public/offline-data/state-packs/` | N/A | Complete | Medium |
-| Vectorstore build script | â€” | `chatbot_service/data/build_vectorstore.py` | N/A | Complete | High |
-| Offline first-aid JSON corpus | â€” | `chatbot_service/data/first_aid.json` | N/A | Complete | High |
-| Authority matrix | â€” | `backend/services/authority_router.py` | N/A | Complete | Critical |
-| Road safety score / segment risk dataset | â€” | Future `backend/data/road_safety_score/` or DB table | N/A | Future phase | Medium |
-| Passive road-quality heatmap storage | â€” | Future DB table / analytics dataset | N/A | Future phase | Low |
+| Violations seed CSV | — | `backend/data/violations_seed.csv` | N/A | Complete | Critical |
+| State overrides CSV | — | `backend/data/state_overrides.csv` | N/A | Complete | Critical |
+| Violations reseed script | — | `backend/data/seed_violations.py` | N/A | Complete | High |
+| Offline violations CSV for browser challan | — | `frontend/public/offline-data/violations.csv` | N/A | Complete | High |
+| Offline emergency GeoJSON | — | `frontend/public/offline-data/india-emergency.geojson` | N/A | Complete | High |
+| Downloadable city/state emergency bundles | — | `frontend/public/offline-data/city-bundles/` or `frontend/public/offline-data/state-packs/` | N/A | Complete | Medium |
+| Vectorstore build script | — | `chatbot_service/data/build_vectorstore.py` | N/A | Complete | High |
+| Offline first-aid JSON corpus | — | `chatbot_service/data/first_aid.json` | N/A | Complete | High |
+| Authority matrix | — | `backend/services/authority_router.py` | N/A | Complete | Critical |
+| Road safety score / segment risk dataset | — | Future `backend/data/road_safety_score/` or DB table | N/A | Future phase | Medium |
+| Passive road-quality heatmap storage | — | Future DB table / analytics dataset | N/A | Future phase | Low |
 | Chatbot service Chroma vectorstore | Built by vectorstore job | `chatbot_service/data/chroma_db/` | N/A | Complete | Critical |
 
 ## 23. Browser APIs, client-side runtime assets, and offline storage
 
 | Item | Source | Local save path | Env variable name | Status | Priority |
 |---|---|---|---|---|---|
-| Geolocation one-shot API | â€” | `frontend/lib/geolocation.ts` | N/A | Wired now | Critical |
-| Geolocation continuous watch | â€” | `frontend/lib/geolocation.ts` | N/A | Wired now | Critical |
-| DeviceMotion crash detection | â€” | `frontend/lib/crash-detection.ts` | N/A | Complete | High |
-| Service Worker | â€” | `frontend/public/sw.js` or Next.js PWA layer | N/A | Complete | High |
-| IndexedDB cache | â€” | `frontend/lib/offline-sos-queue.ts` and browser storage | N/A | Complete | High |
-| DuckDB-Wasm | â€” | `frontend/lib/duckdb-challan.ts` and browser bundle | N/A | Complete | High |
-| WebLLM Phi-3 Mini | â€” | `frontend/lib/offline-ai.ts` and @mlc-ai/web-llm | N/A | Complete | High |
-| @huggingface/transformers (YOLO) | â€” | `frontend/lib/offline-ai.ts` and @huggingface/transformers | N/A | Complete | High |
-| Browser Cache Storage for offline models | â€” | Browser cache only | N/A | Complete | Medium |
-| WebSocket stream endpoint | â€” | `chatbot_service/api/chat.py` and frontend chat client | N/A | Complete | Critical |
-| SSE streaming fallback | â€” | Frontend chat client / API adapter | N/A | Complete | Low |
-| Chat session ID stored client-side | â€” | `frontend/lib/store.ts` or browser storage | N/A | Complete | Medium |
-| Web Speech API | â€” | `frontend/components/chat/VoiceInput.tsx` | N/A | Complete | High |
-| Web Speech Synthesis API | â€” | `frontend/components/chat/VoiceOutput.tsx` | N/A | Complete | High |
-| Browser Notification API | â€” | `frontend/lib/notifications.ts` or alert module | N/A | Future phase | Medium |
-| Hands-free mode toggle | â€” | `frontend/app/settings/page.tsx` and `frontend/components/chat/VoiceOutput.tsx` | N/A | Complete | Medium |
-| Trip history in IndexedDB | â€” | Future `frontend/lib/trip-history.ts` or IndexedDB store | N/A | Future phase | Medium |
-| Feedback thumbs up/down UI | â€” | Future `frontend/components/chat/FeedbackButtons.tsx` | N/A | Future phase | Medium |
-| Voice transcript UI | â€” | `frontend/components/chat/VoiceInput.tsx` | N/A | Complete | Medium |
-| Route-to-hospital external deep link | â€” | `frontend/components/EmergencyMapInner.tsx` or service popup UI | N/A | Future phase | Medium |
+| Geolocation one-shot API | — | `frontend/lib/geolocation.ts` | N/A | Wired now | Critical |
+| Geolocation continuous watch | — | `frontend/lib/geolocation.ts` | N/A | Wired now | Critical |
+| DeviceMotion crash detection | — | `frontend/lib/crash-detection.ts` | N/A | Complete | High |
+| Service Worker | — | `frontend/public/sw.js` or Next.js PWA layer | N/A | Complete | High |
+| IndexedDB cache | — | `frontend/lib/offline-sos-queue.ts` and browser storage | N/A | Complete | High |
+| DuckDB-Wasm | — | `frontend/lib/duckdb-challan.ts` and browser bundle | N/A | Complete | High |
+| WebLLM Phi-3 Mini | — | `frontend/lib/offline-ai.ts` and @mlc-ai/web-llm | N/A | Complete | High |
+| @huggingface/transformers (YOLO) | — | `frontend/lib/offline-ai.ts` and @huggingface/transformers | N/A | Complete | High |
+| Browser Cache Storage for offline models | — | Browser cache only | N/A | Complete | Medium |
+| WebSocket stream endpoint | — | `chatbot_service/api/chat.py` and frontend chat client | N/A | Complete | Critical |
+| SSE streaming fallback | — | Frontend chat client / API adapter | N/A | Complete | Low |
+| Chat session ID stored client-side | — | `frontend/lib/store.ts` or browser storage | N/A | Complete | Medium |
+| Web Speech API | — | `frontend/components/chat/VoiceInput.tsx` | N/A | Complete | High |
+| Web Speech Synthesis API | — | `frontend/components/chat/VoiceOutput.tsx` | N/A | Complete | High |
+| Browser Notification API | — | `frontend/lib/notifications.ts` or alert module | N/A | Future phase | Medium |
+| Hands-free mode toggle | — | `frontend/app/settings/page.tsx` and `frontend/components/chat/VoiceOutput.tsx` | N/A | Complete | Medium |
+| Trip history in IndexedDB | — | Future `frontend/lib/trip-history.ts` or IndexedDB store | N/A | Future phase | Medium |
+| Feedback thumbs up/down UI | — | Future `frontend/components/chat/FeedbackButtons.tsx` | N/A | Future phase | Medium |
+| Voice transcript UI | — | `frontend/components/chat/VoiceInput.tsx` | N/A | Complete | Medium |
+| Route-to-hospital external deep link | — | `frontend/components/EmergencyMapInner.tsx` or service popup UI | N/A | Future phase | Medium |
 
 ## 24. User profile fields, portals, helplines, and authority-routing integrations
 
 | Item | Source | Local save path | Env variable name | Status | Priority |
 |---|---|---|---|---|---|
-| User blood group field | â€” | `frontend/app/profile/page.tsx` and IndexedDB persistence (never leaves device) | N/A | Complete | High |
-| User vehicle number field | â€” | `frontend/app/profile/page.tsx` and profile persistence layer | N/A | Complete | High |
-| User emergency contacts | â€” | `frontend/app/profile/page.tsx` and profile persistence layer | N/A | Complete | High |
-| Optional disability / medical info | â€” | `frontend/app/profile/page.tsx` and profile persistence layer | N/A | Future phase | Medium |
+| User blood group field | — | `frontend/app/profile/page.tsx` and IndexedDB persistence (never leaves device) | N/A | Complete | High |
+| User vehicle number field | — | `frontend/app/profile/page.tsx` and profile persistence layer | N/A | Complete | High |
+| User emergency contacts | — | `frontend/app/profile/page.tsx` and profile persistence layer | N/A | Complete | High |
+| Optional disability / medical info | — | `frontend/app/profile/page.tsx` and profile persistence layer | N/A | Future phase | Medium |
 | NHAI emergency helpline | Official NHAI / Sukhad Yatra references | UI constants and authority matrix | N/A | Complete | Critical |
 | NHAI complaint portal | https://nhai.gov.in/complaint | External link and authority matrix | N/A | Future phase | High |
 | PG Portal grievance fallback | https://pgportal.gov.in | External link and authority matrix | N/A | Future phase | High |
 | OMMAS / PMGSY complaint routing | https://ommas.nic.in | External link and authority matrix | N/A | Future phase | High |
-| Universal authority-routing matrix | â€” | `backend/services/authority_router.py` | N/A | Complete | Critical |
-| Budget source attribution URL | â€” | `road_infrastructure.data_source_url` in DB and UI cards | N/A | Partially wired | High |
+| Universal authority-routing matrix | — | `backend/services/authority_router.py` | N/A | Complete | Critical |
+| Budget source attribution URL | — | `road_infrastructure.data_source_url` in DB and UI cards | N/A | Partially wired | High |
 
 ## 25. Runtime policies, thresholds, safety rules, and quality gates from the docs
 
 | Item | Source | Local save path | Env variable name | Status | Priority |
 |---|---|---|---|---|---|
-| Conversation memory (last 6 turns) | â€” | `chatbot_service/memory/redis_memory.py` | N/A | Complete | Medium |
-| 24-hour conversation TTL | â€” | `chatbot_service/memory/redis_memory.py` | N/A | Complete | Medium |
-| Provider health polling | â€” | `chatbot_service/providers/router.py` or health worker | N/A | Complete | Medium |
-| Circuit breaker open period 60 seconds | â€” | `chatbot_service/providers/router.py` | N/A | Complete | Medium |
-| Provider health dashboard | â€” | `chatbot_service/api/admin.py` and admin UI | N/A | Complete | Medium |
-| Rate limit target | â€” | `chatbot_service/config.py` and middleware | N/A | Complete | High |
-| 500+ Chroma chunks after indexing | â€” | `chatbot_service/data/build_vectorstore.py` validation | N/A | Complete | High |
-| Voice silence auto-stop 5 seconds | â€” | `frontend/components/chat/VoiceInput.tsx` | N/A | Complete | Medium |
-| Voice auto-read speed 0.9 | â€” | `frontend/components/chat/VoiceOutput.tsx` | N/A | Complete | Medium |
-| Crash threshold 2.5G | â€” | `frontend/lib/crash-detection.ts` | N/A | Complete | High |
-| Crash cooldown 30 seconds | â€” | `frontend/lib/crash-detection.ts` | N/A | Complete | Medium |
-| Ignore crash below 10km/h | â€” | `frontend/lib/crash-detection.ts` | N/A | Complete | High |
-| Nearby road issues freshness 90 days | â€” | backend road issues query layer | N/A | Partially wired | Medium |
-| Safety rule: "Call 112 immediately" | â€” | `chatbot_service/agent/safety_checker.py` | N/A | Complete | High |
+| Conversation memory (last 6 turns) | — | `chatbot_service/memory/redis_memory.py` | N/A | Complete | Medium |
+| 24-hour conversation TTL | — | `chatbot_service/memory/redis_memory.py` | N/A | Complete | Medium |
+| Provider health polling | — | `chatbot_service/providers/router.py` or health worker | N/A | Complete | Medium |
+| Circuit breaker open period 60 seconds | — | `chatbot_service/providers/router.py` | N/A | Complete | Medium |
+| Provider health dashboard | — | `chatbot_service/api/admin.py` and admin UI | N/A | Complete | Medium |
+| Rate limit target | — | `chatbot_service/config.py` and middleware | N/A | Complete | High |
+| 500+ Chroma chunks after indexing | — | `chatbot_service/data/build_vectorstore.py` validation | N/A | Complete | High |
+| Voice silence auto-stop 5 seconds | — | `frontend/components/chat/VoiceInput.tsx` | N/A | Complete | Medium |
+| Voice auto-read speed 0.9 | — | `frontend/components/chat/VoiceOutput.tsx` | N/A | Complete | Medium |
+| Crash threshold 2.5G | — | `frontend/lib/crash-detection.ts` | N/A | Complete | High |
+| Crash cooldown 30 seconds | — | `frontend/lib/crash-detection.ts` | N/A | Complete | Medium |
+| Ignore crash below 10km/h | — | `frontend/lib/crash-detection.ts` | N/A | Complete | High |
+| Nearby road issues freshness 90 days | — | backend road issues query layer | N/A | Partially wired | Medium |
+| Safety rule: "Call 112 immediately" | — | `chatbot_service/agent/safety_checker.py` | N/A | Complete | High |
 
 ## 26. Reference applications and benchmark products mentioned in the docs
 

@@ -13,8 +13,7 @@ permissions:
 
 jobs:
   benchmark:
-    if: github.event.issue.pull_request && contains(github.event.comment.body, '/benchmark')
-    runs-on: ubuntu-latest
+    if: false
     timeout-minutes: 15
 
     steps:

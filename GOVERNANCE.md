@@ -2,7 +2,7 @@
 
 ## Project Lead
 
-The SafeVixAI project is led by a single **Project Lead** who has final authority on all decisions. The current Project Lead is the original submission team for the IIT Madras Road Safety Hackathon 2026.
+The SafeVixAI project is led by a single **Project Lead** who has final authority on all decisions. The current Project Lead is the founding team.
 
 ## Core Contributors
 

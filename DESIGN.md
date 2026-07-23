@@ -596,7 +596,7 @@ Section 5 — DATA & STORAGE:
 Section 6 — SYSTEM LINKS:
   - Edit Profile → /profile (chevron)
   - Emergency Guides → /emergency (chevron)
-  - Build Info: "IIT Madras Hackathon 2026" + version number
+  - Build Info: "SafeVixAI v1.0" + version number
 
 Section 7 — SIGN OUT (conditional, only when authenticated):
   Full-width red outlined button: "SIGN OUT — {name}"

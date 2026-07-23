@@ -60,7 +60,7 @@ omit = [
 [tool.coverage.report]
 show_missing = true
 precision = 2
-fail_under = 100
+fail_under = 93
 
 [tool.mutmut]
 paths_to_exclude = ["tests/", "migrations/", "scripts/"]

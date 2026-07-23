@@ -158,11 +158,10 @@ class TestCheckDatabase:
 
     @pytest.mark.asyncio
     async def test_check_database_production_failure(self):
-        with patch("core.database.get_settings") as mock_get_settings:
+        with patch("core.database.get_settings") as mock_get_settings, patch("core.database.engine") as mock_engine:
             settings = MagicMock()
             settings.environment = "production"
             mock_get_settings.return_value = settings
-        with patch("core.database.engine") as mock_engine:
             mock_engine.connect.side_effect = Exception("DB down")
             result = await check_database()
         assert result is False

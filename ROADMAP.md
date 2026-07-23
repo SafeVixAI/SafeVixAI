@@ -4,7 +4,7 @@
 
 ---
 
-## Completed (Hackathon 2026)
+## Completed (Initial Release)
 
 - **Phase 1-6:** All core features built and hardened — see [`docs/Roadmap.md`](docs/Roadmap.md) for full build history.
 - **25/25 Features:** Emergency Locator, AI Chatbot RAG, Challan Calculator, Road Reporter, Offline Mode, PWA, Voice/ASR, Live Tracking, and more.

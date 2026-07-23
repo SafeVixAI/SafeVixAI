@@ -3,13 +3,13 @@
 ## General
 
 ### What is SafeVixAI?
-SafeVixAI is an AI-powered road safety PWA built for the IIT Madras Road Safety Hackathon 2026. It combines an Emergency Locator, AI Chatbot, Challan Calculator, and Road Reporter in a single offline-first Progressive Web App.
+SafeVixAI is an AI-powered road safety PWA combining an Emergency Locator, AI Chatbot, Challan Calculator, and Road Reporter in a single offline-first Progressive Web App.
 
 ### Is SafeVixAI free?
 Yes. SafeVixAI is 100% free and open source under the MIT License. Total infrastructure cost is ₹0 — all services use free tiers.
 
 ### Who built SafeVixAI?
-The SafeVixAI Team — a submission team for the IIT Madras Road Safety Hackathon 2026.
+The SafeVixAI Team — a group of developers, designers, and domain experts committed to improving road safety through open-source technology.
 
 ## Installation
 

@@ -151,13 +151,12 @@ async def test_mcp_health_endpoint():
     assert res["mcp_server"] == "online"
 
     with patch("api.v1.mcp_server.mcp", MagicMock()) as mock_mcp:
-        del mock_mcp._mcp_server
-        # Force an exception by passing an object that raises when accessed
+        mock_mcp._mcp_server = MagicMock()
+        mock_mcp._mcp_server.tools = object()  # object() has no __len__ -> TypeError -> HTTPException(500)
         with patch("api.v1.mcp_server.logger.exception") as mock_logger:
-            with patch("api.v1.mcp_server.len", side_effect=Exception("Failure")):
-                with pytest.raises(HTTPException) as exc_info:
-                    await get_mcp_health()
-                assert exc_info.value.status_code == 500
+            with pytest.raises(HTTPException) as exc_info:
+                await get_mcp_health()
+            assert exc_info.value.status_code == 500
 
 
 def test_waze_token_bucket():

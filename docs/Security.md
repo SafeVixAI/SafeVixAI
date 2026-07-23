@@ -178,4 +178,4 @@ Implemented via `slowapi` (IP-based):
 
 ---
 
-*Document version: 2.0 | IIT Madras Road Safety Hackathon 2026 | Updated: June 2026*
+*Document version: 2.0 | AI-powered road safety platform | Updated: June 2026*

@@ -1,4 +1,4 @@
-﻿# SafeVixAI v1.0.0 — Deployment Guide
+# SafeVixAI v1.0.0 � Deployment Guide
 
 ## Infrastructure Overview (All Free Tier)
 
@@ -17,12 +17,12 @@
 
 ## Step 1: Create Free Accounts
 
-1. **Groq** — [console.groq.com](https://console.groq.com) → Create account → API Keys → Create Key (starts with `gsk_`)
-2. **Supabase** — [supabase.com](https://supabase.com) → New project → Region: Singapore (closest to India) → Save password
-3. **Upstash** — [upstash.com](https://upstash.com) → New Redis Database → Global → Copy `REDIS_URL`
-4. **Vercel** — [vercel.com](https://vercel.com) → Connect GitHub account
-5. **Render.com** — [render.com](https://render.com) → Connect GitHub account
-6. **data.gov.in** — [data.gov.in](https://data.gov.in) → Register → Get API key (for NHAI data)
+1. **Groq** � [console.groq.com](https://console.groq.com) ? Create account ? API Keys ? Create Key (starts with `gsk_`)
+2. **Supabase** � [supabase.com](https://supabase.com) ? New project ? Region: Singapore (closest to India) ? Save password
+3. **Upstash** � [upstash.com](https://upstash.com) ? New Redis Database ? Global ? Copy `REDIS_URL`
+4. **Vercel** � [vercel.com](https://vercel.com) ? Connect GitHub account
+5. **Render.com** � [render.com](https://render.com) ? Connect GitHub account
+6. **data.gov.in** � [data.gov.in](https://data.gov.in) ? Register ? Get API key (for NHAI data)
 
 ---
 
@@ -37,7 +37,7 @@ SELECT PostGIS_version(); -- verify: should return version string
 ```
 
 ### Get Connection String
-Supabase → Settings → Database → Connection string → URI
+Supabase ? Settings ? Database ? Connection string ? URI
 
 Change `postgresql://` to `postgresql+asyncpg://` for async driver.
 
@@ -67,7 +67,7 @@ cp .env.example .env
 alembic upgrade head
 
 # 6. Verify tables were created
-# Check Supabase Table Editor — should see 6 tables
+# Check Supabase Table Editor � should see 6 tables
 ```
 
 ### Download Required PDFs (for RAG)
@@ -91,7 +91,7 @@ python backend/scripts/data/seed_violations.py
 # Also creates: frontend/public/offline-data/india-emergency.geojson
 python backend/scripts/app/seed_emergency.py
 
-# Build ChromaDB vector store from PDFs — RUN ONCE, takes 5-10 minutes
+# Build ChromaDB vector store from PDFs � RUN ONCE, takes 5-10 minutes
 # Creates: chatbot_service/data/chroma_db/ directory (committed to git)
 python chatbot_service/data/build_vectorstore.py
 ```
@@ -160,9 +160,9 @@ This bypasses AuthGuard at the component level, preventing redirect loops while 
 npm run build && npm start
 
 # Then in Chrome:
-# 1. DevTools → Application → Service Workers — verify registered
-# 2. DevTools → Network — check "Offline"
-# 3. Navigate to /emergency — hospitals should still show
+# 1. DevTools ? Application ? Service Workers � verify registered
+# 2. DevTools ? Network � check "Offline"
+# 3. Navigate to /emergency � hospitals should still show
 ```
 
 ---
@@ -173,7 +173,7 @@ npm run build && npm start
 
 The `render.yaml` at the project root configures automatic deployment.
 
-1. Go to Render.com → New → Blueprint
+1. Go to Render.com ? New ? Blueprint
 2. Connect GitHub repository
 3. Render detects `render.yaml` automatically
 4. Set environment variables (from Render dashboard):
@@ -191,7 +191,7 @@ The `render.yaml` at the project root configures automatic deployment.
 
 ### Manual Setup (Alternative)
 
-Render.com → New → Web Service:
+Render.com ? New ? Web Service:
 - **Name:** `safevixai-api`
 - **Root Directory:** `backend`
 - **Runtime:** Python 3.11
@@ -215,7 +215,7 @@ python chatbot_service/data/build_vectorstore.py  # 10 minutes
 
 The chatbot service is a **separate** Render web service.
 
-Render.com → New → Web Service:
+Render.com ? New ? Web Service:
 - **Name:** `safevixai-chatbot`
 - **Root Directory:** `chatbot_service`
 - **Runtime:** Python 3.11
@@ -246,7 +246,7 @@ Set environment variables:
 
 The repository is configured with a fully automated CI/CD pipeline. The frontend is automatically deployed to Vercel when changes are pushed to the `main` branch, *only* if the E2E and unit test suites pass successfully.
 
-1. Add the following secrets to your GitHub repository (`Settings` → `Secrets and variables` → `Actions`):
+1. Add the following secrets to your GitHub repository (`Settings` ? `Secrets and variables` ? `Actions`):
    - `VERCEL_TOKEN`: Generate this at [vercel.com/account/tokens](https://vercel.com/account/tokens)
    - `VERCEL_ORG_ID`: Found in your Vercel project settings or `.vercel/project.json` after linking locally.
    - `VERCEL_PROJECT_ID`: Found in your Vercel project settings or `.vercel/project.json`.
@@ -285,14 +285,14 @@ curl "https://safevixai-api.onrender.com/api/v1/challan/calculate?violation_code
 # Expected: {"final_fine_inr":10000,"section":"185"}
 
 # Frontend PWA check
-# Chrome → visit safevixai.vercel.app → check "Add to Home Screen" prompt
+# Chrome ? visit safevixai.vercel.app ? check "Add to Home Screen" prompt
 ```
 
 ---
 
 ## CI/CD (GitHub Actions)
 
-Configured in `.github/workflows/` — 19 workflow files:
+Configured in `.github/workflows/` � 19 workflow files:
 
 | Workflow | Trigger | Purpose |
 |---|---|---|
@@ -360,7 +360,7 @@ MAIN_BACKEND_BASE_URL=http://localhost:8000
 
 # RAG
 CHROMA_PERSIST_DIR=./data/chroma_db
-EMBEDDING_MODEL=LocalHashEmbeddingFunction (zero-dependency)  # Config hint — runtime uses LocalHashEmbeddingFunction
+EMBEDDING_MODEL=LocalHashEmbeddingFunction (zero-dependency)  # Config hint � runtime uses LocalHashEmbeddingFunction
 
 # Cache
 REDIS_URL=rediss://default:[TOKEN]@[HOST].upstash.io:6379
@@ -419,9 +419,9 @@ Backed by IndicSeamlessService (SeamlessM4T for ASR + translation).
 
 ## Render.com Free Tier Limitations
 
-- **512MB RAM** — sufficient for FastAPI + ChromaDB reads (build vectorstore before deploy)
-- **750 hrs/month** — one service runs 24/7 for a month
-- **Cold starts** — first request after inactivity takes ~30s (free tier sleeps after 15min)
+- **512MB RAM** � sufficient for FastAPI + ChromaDB reads (build vectorstore before deploy)
+- **750 hrs/month** � one service runs 24/7 for a month
+- **Cold starts** � first request after inactivity takes ~30s (free tier sleeps after 15min)
   - Mitigation: Set up a `/health` ping every 14 minutes via UptimeRobot (free)
 
 ---
@@ -460,7 +460,7 @@ curl "http://localhost:8000/api/v1/challan/calculate?violation_code=MVA_185"
 
 ## Free Tier Cold Start Mitigation
 
-Render free web services spin down after **15 minutes of inactivity** and take **30–60 seconds** to cold start. The app mitigates this with three layers:
+Render free web services spin down after **15 minutes of inactivity** and take **30�60 seconds** to cold start. The app mitigates this with three layers:
 
 ### 1. cron-job.org (Automatic Keep-Alive)
 
@@ -472,18 +472,18 @@ Set up two free cron jobs at [cron-job.org](https://cron-job.org) (no signup cos
 | Chatbot | `https://safevixai-chatbot.onrender.com/health` | Every 10 minutes |
 
 1. Create account at cron-job.org
-2. Add new cron job → URL, 10-minute interval, GET request
+2. Add new cron job ? URL, 10-minute interval, GET request
 3. Disable "Save Responses" to save their resources
-4. Both jobs stay free forever (10 min interval = 6 jobs/day × 30 days = 180 requests/month ≈ free)
+4. Both jobs stay free forever (10 min interval = 6 jobs/day � 30 days = 180 requests/month � free)
 
 ### 2. Client-Side Warm-Up (Automatic)
 
 The frontend automatically pings both `/health` endpoints:
 
-- **On page load** — immediately sends warm-up pings
-- **Every 9 minutes** — interval timer keeps instances awake
-- **On tab focus** — re-warms when user returns after idle
-- **Emergency page** — pre-warms before user needs to act
+- **On page load** � immediately sends warm-up pings
+- **Every 9 minutes** � interval timer keeps instances awake
+- **On tab focus** � re-warms when user returns after idle
+- **Emergency page** � pre-warms before user needs to act
 
 This runs in `EnterpriseClientAppHooks.tsx` (keep-alive pings) and `app/emergency/page.tsx` (emergency pre-warm).
 
@@ -495,13 +495,13 @@ When a request takes >5 seconds (cold start signal), a "Connecting..." banner ap
 
 | Scenario | Delay | User Sees |
 |----------|-------|-----------|
-| First visit (or after >15 min idle) | 30–60s warming + page load | "Connecting..." banner, then normal page |
-| Active user (returning within 15 min) | ~1–2s | No delay, instant response |
-| cron-job.org ping arrives | 30–60s warming (server wakes up) | No user impact (next user request is fast) |
+| First visit (or after >15 min idle) | 30�60s warming + page load | "Connecting..." banner, then normal page |
+| Active user (returning within 15 min) | ~1�2s | No delay, instant response |
+| cron-job.org ping arrives | 30�60s warming (server wakes up) | No user impact (next user request is fast) |
 | Emergency page visited | Immediate pre-warm ping | Minimal delay on SOS actions |
 
 > **Note:** On free tier, the combined idle+startup time per month is ~750 hours per service. With 10-min keep-alive, expect ~744 hours/month uptime (99.9%).
 
 ---
 
-*Document version: 2.1 | IIT Madras Road Safety Hackathon 2026 | Updated: July 2026*
+*Document version: 2.1 | AI-powered road safety platform | Updated: July 2026*

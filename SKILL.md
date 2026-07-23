@@ -1,6 +1,6 @@
 ---
 name: SafeVixAI Frontend
-description: Development guide for the SafeVixAI Next.js 15 frontend — a tactical command terminal, mobile-first road safety platform with AI features built for IIT Madras 2026 Hackathon.
+description: Development guide for the SafeVixAI Next.js 15 frontend — a mobile-first road safety platform with AI features.
 ---
 
 # SafeVixAI Frontend Skill

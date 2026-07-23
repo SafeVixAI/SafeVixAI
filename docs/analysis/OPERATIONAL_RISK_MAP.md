@@ -251,7 +251,7 @@ Vercel Hobby:
   Bandwidth: 100 GB/month
   Build minutes: 6000/month
   Functions: 10s timeout
-  Risk: LOW for hackathon traffic
+  Risk: LOW For initial traffic
 
 Render Free:
   Hours: 750/month total (needs 1488 for 24/7)

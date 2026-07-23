@@ -273,10 +273,12 @@ class TestCreateSOSIncident:
 
         mock_emergency_service.build_sos_payload = AsyncMock(return_value=mock_result)
 
-        response = test_client.post(
-            "/api/v1/emergency/sos",
-            params={"lat": 13.0827, "lon": 80.2707}
-        )
+        with patch("api.v1.emergency.get_alert_service"), \
+             patch("core.audit.AuditLog.log_sos_trigger"):
+            response = test_client.post(
+                "/api/v1/emergency/sos",
+                params={"lat": 13.0827, "lon": 80.2707}
+            )
 
         assert response.status_code == 200
         body = response.json()
@@ -316,11 +318,13 @@ class TestCreateSOSIncident:
             algorithm=ALGORITHM,
         )
 
-        response = test_client.post(
-            "/api/v1/emergency/sos",
-            params={"lat": 13.0827, "lon": 80.2707},
-            headers={"Authorization": f"Bearer {token}"},
-        )
+        with patch("api.v1.emergency.get_alert_service"), \
+             patch("core.audit.AuditLog.log_sos_trigger"):
+            response = test_client.post(
+                "/api/v1/emergency/sos",
+                params={"lat": 13.0827, "lon": 80.2707},
+                headers={"Authorization": f"Bearer {token}"},
+            )
 
         assert response.status_code == 200
 
@@ -341,12 +345,17 @@ class TestCreateSOSIncident:
         assert response.status_code == 503
 
     def test_create_sos_incident_general_exception(self, test_client, mock_emergency_service, mock_db_session):
-        """Test SOS creation with a non-ExternalServiceError triggers general Exception handler (lines 203-212)."""
+        """Test SOS creation with a non-ExternalServiceError triggers general Exception handler (lines 203-212).
+
+        NOTE: ExternalServiceError inherits from RuntimeError, so we use KeyError
+        to guarantee the except Exception (not except ExternalServiceError) path.
+        """
         mock_emergency_service.build_sos_payload = AsyncMock(
-            side_effect=RuntimeError("Unexpected internal error")
+            side_effect=KeyError("Unexpected internal error")
         )
 
-        with patch("api.v1.emergency.get_alert_service"):
+        with patch("api.v1.emergency.get_alert_service"), \
+             patch("core.audit.AuditLog.log_sos_trigger"):
             response = test_client.post(
                 "/api/v1/emergency/sos",
                 params={"lat": 13.0827, "lon": 80.2707}

@@ -1,4 +1,4 @@
-ï»¿# Introduction and Purpose
+# Introduction and Purpose
 
 <cite>
 **Referenced Files in This Document**
@@ -32,7 +32,7 @@
 10. [Appendices](#appendices)
 
 ## Introduction
-SafeVixAI is an AI-powered road safety platform designed to address three critical road safety challenges in India: emergency response, legal assistance, and road infrastructure reporting. Built for the IIT Madras Road Safety Hackathon 2026, the platform integrates a tactical, life-safety-focused UI with robust backend services, an agentic RAG chatbot, and a fully capable frontend PWA. Its mission is to reduce road accident mortality by dramatically improving response times, legal literacy, and transparency around road maintenance.
+SafeVixAI is an AI-powered road safety platform designed to address three critical road safety challenges in India: emergency response, legal assistance, and road infrastructure reporting. Built for the AI-powered road safety platform, the platform integrates a tactical, life-safety-focused UI with robust backend services, an agentic RAG chatbot, and a fully capable frontend PWA. Its mission is to reduce road accident mortality by dramatically improving response times, legal literacy, and transparency around road maintenance.
 
 Key pillars:
 - Zero infrastructure cost: 100% free and open source, leveraging free-tier cloud services and browser-based AI.
@@ -95,7 +95,7 @@ FE --> CDN
 - [docs/Deployment.md:3-16](https://github.com/SafeVixAI/SafeVixAI/blob/main/docs/Deployment.md#L3-L16)
 
 ## Core Components
-SafeVixAIâ€™s modules are engineered to deliver immediate value in high-stakes scenarios:
+SafeVixAI’s modules are engineered to deliver immediate value in high-stakes scenarios:
 
 - Emergency Locator (SafeVixAI Core)
   - GPS auto-detection, tiered radius fallback, SOS WhatsApp share, crash detection, offline emergency map, and first aid guidance.
@@ -182,7 +182,7 @@ FE-->>U : "Map markers + service cards"
 
 Practical example:
 - Scenario: A car crashes on a remote highway with poor cell reception.
-- Outcome: The appâ€™s crash detection triggers an SOS with pre-filled GPS and emergency contacts, while the offline emergency map displays the nearest hospital and police station using cached GeoJSON and Turf.js.
+- Outcome: The app’s crash detection triggers an SOS with pre-filled GPS and emergency contacts, while the offline emergency map displays the nearest hospital and police station using cached GeoJSON and Turf.js.
 
 **Diagram sources**
 - [docs/Architecture.md:141-165](https://github.com/SafeVixAI/SafeVixAI/blob/main/docs/Architecture.md#L141-L165)
@@ -289,7 +289,7 @@ Practical example:
 - [backend/api/v1/roadwatch.py:26-97](https://github.com/SafeVixAI/SafeVixAI/blob/main/backend/api/v1/roadwatch.py#L26-L97)
 
 ### Conceptual Overview
-SafeVixAIâ€™s conceptual design emphasizes a â€œlife-safety command terminalâ€ with two operational modes: Tactical Emergency (seconds count) and Operational Normal (research, compliance, reporting). The UIâ€™s dark tactical palette, terminal aesthetics, and high-contrast typography reinforce urgency and clarity.
+SafeVixAI’s conceptual design emphasizes a “life-safety command terminal” with two operational modes: Tactical Emergency (seconds count) and Operational Normal (research, compliance, reporting). The UI’s dark tactical palette, terminal aesthetics, and high-contrast typography reinforce urgency and clarity.
 
 ```mermaid
 flowchart TD
@@ -309,7 +309,7 @@ E --> H["Road Reporter + Authority Routing"]
 - [DESIGN.md:367-555](https://github.com/SafeVixAI/SafeVixAI/blob/main/DESIGN.md#L367-L555)
 
 ## Dependency Analysis
-SafeVixAIâ€™s backend, chatbot, and frontend services depend on shared infrastructure and external datasets. The backend relies on PostGIS for spatial queries, Redis for caching, and Overpass/Nominatim for POI enrichment. The chatbot leverages ChromaDB for RAG and a 9-provider LLM fallback chain. The frontend consumes these services via HTTPS and operates offline through browser-based AI and cached assets.
+SafeVixAI’s backend, chatbot, and frontend services depend on shared infrastructure and external datasets. The backend relies on PostGIS for spatial queries, Redis for caching, and Overpass/Nominatim for POI enrichment. The chatbot leverages ChromaDB for RAG and a 9-provider LLM fallback chain. The frontend consumes these services via HTTPS and operates offline through browser-based AI and cached assets.
 
 ```mermaid
 graph TB
@@ -351,14 +351,14 @@ FE --> HF["local model files (WebLLM)"]
 - [SETUP.md:316-343](https://github.com/SafeVixAI/SafeVixAI/blob/main/SETUP.md#L316-L343)
 
 ## Conclusion
-SafeVixAI advances road safety in India by combining tactical UX, AI-driven legal assistance, and transparent infrastructure reportingâ€”without any infrastructure cost. Its modular architecture, offline-first design, and open-source philosophy enable rapid deployment, community-driven improvements, and scalable impact across diverse geographies and languages.
+SafeVixAI advances road safety in India by combining tactical UX, AI-driven legal assistance, and transparent infrastructure reporting—without any infrastructure cost. Its modular architecture, offline-first design, and open-source philosophy enable rapid deployment, community-driven improvements, and scalable impact across diverse geographies and languages.
 
 [No sources needed since this section summarizes without analyzing specific files]
 
 ## Appendices
 
-### Hackathon Context and Commitment
-- Built for the IIT Madras Road Safety Hackathon 2026.
+### initial context and Commitment
+- Built for the AI-powered road safety platform.
 - Total infrastructure cost: Rs. 0 using free-tier services and open-source stacks.
 
 **Section sources**

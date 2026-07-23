@@ -133,7 +133,7 @@ class TestReportRoadIssue:
     @pytest.mark.asyncio
     async def test_valid_report_submission(self):
         """Test successful road issue report."""
-        mock_service = AsyncMock()
+        mock_service = MagicMock()
         mock_service.submit_report = AsyncMock()
         mock_result = MagicMock()
         mock_result.uuid = "test-uuid-123"
@@ -149,7 +149,10 @@ class TestReportRoadIssue:
         mock_geocoding = MagicMock()
         mock_geocoding.aclose = AsyncMock()
 
-        with patch("api.v1.mcp_server._build_roadwatch_service", return_value=(mock_service, mock_cache, mock_overpass, mock_geocoding)), \
+        async def mock_build():
+            return (mock_service, mock_cache, mock_overpass, mock_geocoding)
+
+        with patch("api.v1.mcp_server._build_roadwatch_service", side_effect=mock_build), \
              patch("core.database.get_async_session") as mock_session:
 
             async def mock_gen():

@@ -195,7 +195,7 @@ class TestSetupTracing:
         ct = _import_tracing()
         with patch.dict(os.environ, {"OTEL_EXPORTER_OTLP_ENDPOINT": "http://jaeger:4317"}):
             mock_app = MagicMock()
-            with patch("opentelemetry.exporter.otlp.proto.grpc.trace_exporter.OTLPSpanExporter") as mock_otlp, \
+            with patch("opentelemetry.exporter.otlp.proto.grpc.trace_exporter.OTLPSpanExporter", create=True) as mock_otlp, \
                  patch.object(ct, "BatchSpanProcessor"), \
                  patch.object(ct, "FastAPIInstrumentor"):
                 ct.setup_tracing(mock_app)

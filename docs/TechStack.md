@@ -1,4 +1,4 @@
-ï»¿# SafeVixAI â€” Tech Stack
+# SafeVixAI — Tech Stack
 
 ## Overview
 
@@ -22,7 +22,7 @@ Embeddings                 LocalHashEmbeddingFunction              Free (CPU, ze
 Edge SQL                   DuckDB-Wasm (browser)                   Free (device compute)
 Edge Vision                Transformers.js + YOLOv8n ONNX          Free (device compute)
 CI/CD                      GitHub Actions                          Free (2000 min/mo)
-Total                                                              â‚¹ 0
+Total                                                              ? 0
 ```
 
 ---
@@ -35,31 +35,31 @@ Total                                                              â‚¹ 0
 | **React** | 19.2.6 | UI framework |
 | **TypeScript** | 6.0.3 | Type safety |
 | **Tailwind CSS** | 3.4.x | Utility-first styling, dark navy theme |
-| **clsx** | â€” | Conditional class joining |
-| **tailwind-merge** | â€” | Tailwind class merging |
-| **class-variance-authority** | â€” | Component variants |
-| **MapLibre GL** | 5.22.0 | Vector map â€” `dynamic({ssr:false})` |
+| **clsx** | — | Conditional class joining |
+| **tailwind-merge** | — | Tailwind class merging |
+| **class-variance-authority** | — | Component variants |
+| **MapLibre GL** | 5.22.0 | Vector map — `dynamic({ssr:false})` |
 | **Zustand** | 4.5.4 | Global state: GPS, services, AI mode |
 | **SWR** | 2.4.1 | Data fetching with stale-while-revalidate |
 | **Axios** | 1.17.0 | HTTP client |
 | **GSAP** | 3.15.0 | Animations (`@gsap/react`) |
-| **@mlc-ai/web-llm** | â€” | Phi-3 Mini in-browser inference (WebGPU/Wasm) |
+| **@mlc-ai/web-llm** | — | Phi-3 Mini in-browser inference (WebGPU/Wasm) |
 | **@huggingface/transformers** | 4.0.1 | YOLOv8n ONNX pothole detection |
 | **@duckdb/duckdb-wasm** | 1.29.0 | Browser SQL engine for offline challan |
 | **i18next** | 26.3.1 | Internationalization |
 | **react-i18next** | 17.0.8 | React binding for i18next |
 | **@supabase/supabase-js** | 2.107.0 | Supabase client for storage + auth |
 | **idb** | 8.0.3 | IndexedDB wrapper |
-| **lucide-react** | â€” | Icon set |
+| **lucide-react** | — | Icon set |
 | **qrcode.react** | 4.2.0 | QR code generation |
-| **three** | â€” | 3D rendering (landing page) |
-| **@react-three/fiber** | â€” | React renderer for Three.js |
-| **@react-three/drei** | â€” | Three.js helpers |
-| **posthog-js** | â€” | Product analytics |
-| **sonner** | â€” | Toast notifications |
-| **cmdk** | â€” | Command palette |
-| **use-debounce** | â€” | Debounced hooks |
-| **lenis** | â€” | Smooth scrolling |
+| **three** | — | 3D rendering (landing page) |
+| **@react-three/fiber** | — | React renderer for Three.js |
+| **@react-three/drei** | — | Three.js helpers |
+| **posthog-js** | — | Product analytics |
+| **sonner** | — | Toast notifications |
+| **cmdk** | — | Command palette |
+| **use-debounce** | — | Debounced hooks |
+| **lenis** | — | Smooth scrolling |
 
 ### Testing & Quality
 
@@ -67,7 +67,7 @@ Total                                                              â‚¹ 0
 |---|---|---|
 | **Jest** | 30.3.0 | Unit testing |
 | **Playwright** | 1.60.0 | E2E testing |
-| **@axe-core/playwright** | â€” | Accessibility testing |
+| **@axe-core/playwright** | — | Accessibility testing |
 | **ESLint** | 8.57.1 | Linting |
 | **eslint-config-next** | 15.5.18 | Next.js lint rules |
 
@@ -114,7 +114,7 @@ Total                                                              â‚¹ 0
 
 | Technology | Configuration |
 |---|---|
-| **pytest** | `asyncio_mode = auto` â€” async tests run automatically |
+| **pytest** | `asyncio_mode = auto` — async tests run automatically |
 | **pytest-cov** | Coverage reporting |
 | **httpx** | Async test client |
 
@@ -155,10 +155,10 @@ A **separate FastAPI service** with its own Python environment & heavy ML depend
 
 | Technology | Configuration |
 |---|---|
-| **pytest** | `asyncio_mode = strict` â€” async tests **require** `@pytest.mark.asyncio` |
+| **pytest** | `asyncio_mode = strict` — async tests **require** `@pytest.mark.asyncio` |
 
 ### Config Note
-- Config uses **dataclass + os.getenv** â€” NOT pydantic-settings (despite pydantic-settings being in requirements.txt)
+- Config uses **dataclass + os.getenv** — NOT pydantic-settings (despite pydantic-settings being in requirements.txt)
 
 ---
 
@@ -166,12 +166,12 @@ A **separate FastAPI service** with its own Python environment & heavy ML depend
 
 | Model | Parameters | Size | Runtime | Use Case |
 |---|---|---|---|---|
-| Groq llama3-70b-8192 | 70B | Cloud | Groq API | Online chatbot â€” max intelligence |
-| Gemini 1.5 Flash | â€” | Cloud | Gemini API | Large context |
+| Groq llama3-70b-8192 | 70B | Cloud | Groq API | Online chatbot — max intelligence |
+| Gemini 1.5 Flash | — | Cloud | Gemini API | Large context |
 | Sarvam-30B | 30B | Cloud | Sarvam API | Indian languages |
 | Sarvam-105B | 105B | Cloud | Sarvam API | Legal Indic queries |
-| Phi-3-mini-4k-instruct-q4f16_1-MLC | 3.8B | ~2.2GB | WebGPU | Offline chatbot â€” primary |
-| gemma-2b-it-q4f16_1-MLC | 2B | ~1.4GB | WebAssembly | Offline chatbot â€” CPU fallback |
+| Phi-3-mini-4k-instruct-q4f16_1-MLC | 3.8B | ~2.2GB | WebGPU | Offline chatbot — primary |
+| gemma-2b-it-q4f16_1-MLC | 2B | ~1.4GB | WebAssembly | Offline chatbot — CPU fallback |
 | LocalHashEmbeddingFunction | N/A | 0 MB | CPU | Hash-based 384-dim embeddings |
 | Xenova/yolov8n | ~6M | ~15MB | Browser Wasm | Pothole detection |
 | ai4bharat/indic-seamless | Large | ~7GB | Server GPU/CPU | Indian language speech (ASR/TTS) |
@@ -208,4 +208,4 @@ A **separate FastAPI service** with its own Python environment & heavy ML depend
 
 ---
 
-*Document version: 2.0 | IIT Madras Road Safety Hackathon 2026 | Updated: June 2026*
+*Document version: 2.0 | AI-powered road safety platform | Updated: June 2026*

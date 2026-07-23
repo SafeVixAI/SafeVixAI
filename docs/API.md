@@ -1,4 +1,4 @@
-ï»¿# SafeVixAI API Reference
+# SafeVixAI API Reference
 
 ## Base URLs
 
@@ -23,8 +23,8 @@ Most endpoints require **JWT Bearer tokens** (HS256). Supabase-compatible via `S
 | JWT Access Token | Bearer token in `Authorization` header |
 | Refresh Token | 30-day expiry, one-time use |
 | Guest Auth | Anonymous UUID via `X-Guest-ID` header |
-| Service-to-Service | `X-Internal-Api-Key` header for chatbotâ†”backend |
-| Public Endpoints | Use `get_current_user_optional` â€” returns `None` if unauthenticated |
+| Service-to-Service | `X-Internal-Api-Key` header for chatbot?backend |
+| Public Endpoints | Use `get_current_user_optional` — returns `None` if unauthenticated |
 | Frontend AuthGuard | Bypassed in E2E via `localStorage.__E2E_SKIP_AUTH__` |
 
 ---
@@ -121,7 +121,7 @@ Various CRUD operations for system administration.
 
 #### `GET /api/v1/admin/cache/status`
 
-Cache status â€” returns `{"status": "online"}` if Redis is available, `{"status": "fallback_in_memory"}` if not.
+Cache status — returns `{"status": "online"}` if Redis is available, `{"status": "fallback_in_memory"}` if not.
 
 #### `POST /api/v1/admin/cache/purge?key_prefix=...`
 
@@ -129,7 +129,7 @@ Purge cache entries. Optional `key_prefix` query param to filter keys (e.g., `?k
 
 #### `GET /api/v1/admin/cache/status`
 
-Cache status â€” returns `{"status": "online"}` if Redis is available, `{"status": "fallback_in_memory"}` if not.
+Cache status — returns `{"status": "online"}` if Redis is available, `{"status": "fallback_in_memory"}` if not.
 
 #### `POST /api/v1/admin/cache/purge?key_prefix=...`
 
@@ -190,7 +190,7 @@ Calculate fine for a traffic violation. DuckDB-based, deterministic (no LLM).
 {
   "violation_code": "MVA_185",
   "section": "185",
-  "description_en": "Drunk driving â€” first offence",
+  "description_en": "Drunk driving — first offence",
   "base_fine_inr": 10000,
   "state_override_fine": null,
   "final_fine_inr": 10000,
@@ -251,7 +251,7 @@ Streaming chat response via Server-Sent Events (SSE). Tokens delivered as genera
 
 **Send:** `{"message": "...", "session_id": "...", "lat": 0.0, "lon": 0.0}`
 
-**Receive:** `{"token": "The ", "done": false}` â†’ `{"token": "", "done": true, "intent": "LEGAL_INFO"}`
+**Receive:** `{"token": "The ", "done": false}` ? `{"token": "", "done": true, "intent": "LEGAL_INFO"}`
 
 ---
 
@@ -407,13 +407,13 @@ Get details for a specific vehicle.
 
 #### `GET /api/v1/geocode/search?q=...&limit=...`
 
-Forward geocoding â€” text address to GPS coordinates. Uses Nominatim/Photon with Redis caching.
+Forward geocoding — text address to GPS coordinates. Uses Nominatim/Photon with Redis caching.
 
 **Query Parameters:** `q` (address string), `limit` (max results, default 5)
 
 #### `GET /api/v1/geocode/reverse?lat=...&lon=...`
 
-Reverse geocoding â€” GPS coordinates to address.
+Reverse geocoding — GPS coordinates to address.
 
 **Response:**
 ```json
@@ -459,7 +459,7 @@ MCP message endpoint for tool calls.
 
 #### `GET /health`
 
-MCP server health check â€” returns `{"status": "healthy", "mcp_server": "online"}`.
+MCP server health check — returns `{"status": "healthy", "mcp_server": "online"}`.
 
 ---
 
@@ -643,7 +643,7 @@ Waze alert data.
 
 ---
 
-## Speech Endpoints (Chatbot Service â€” port 8010)
+## Speech Endpoints (Chatbot Service — port 8010)
 
 #### `POST /speech/translate`
 
@@ -673,7 +673,7 @@ Speech service health and available language pairs.
 
 ## Rate Limits
 
-### Server-Side (slowapi â€” IP-based)
+### Server-Side (slowapi — IP-based)
 
 | Endpoint | Limit |
 |---|---|
@@ -712,4 +712,4 @@ Speech service health and available language pairs.
 
 ---
 
-*Document version: 3.4 | IIT Madras Road Safety Hackathon 2026 | 28 backend route modules + chatbot + MCP*
+*Document version: 3.4 | AI-powered road safety platform | 28 backend route modules + chatbot + MCP*

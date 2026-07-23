@@ -1,6 +1,6 @@
-﻿# SafeVixAI — AI Instructions
+# SafeVixAI � AI Instructions
 
-> **Version 2.1** | IIT Madras Road Safety Hackathon 2026  
+> **Version 2.1** | AI-powered road safety platform  
 > Reflects the current chatbot/agent architecture.
 
 ---
@@ -11,12 +11,12 @@
 
 ```
 User message
-  → SafetyChecker.evaluate()          # Block harmful queries, prepend "Call 112 immediately" for injuries
-  → IntentDetector.detect()           # 9 intent classes, keyword/regex, <1ms
-  → ContextAssembler.assemble()        # Call relevant tools + retrieve RAG chunks
-  → ProviderRouter.generate()          # LLM call with asyncio.wait_for() timeout + auto-fallback chain
-  → ConversationMemoryStore.append()   # Redis session persistence (24h TTL)
-  → ChatResponse
+  ? SafetyChecker.evaluate()          # Block harmful queries, prepend "Call 112 immediately" for injuries
+  ? IntentDetector.detect()           # 9 intent classes, keyword/regex, <1ms
+  ? ContextAssembler.assemble()        # Call relevant tools + retrieve RAG chunks
+  ? ProviderRouter.generate()          # LLM call with asyncio.wait_for() timeout + auto-fallback chain
+  ? ConversationMemoryStore.append()   # Redis session persistence (24h TTL)
+  ? ChatResponse
 ```
 
 ### Location of Core Components
@@ -39,7 +39,7 @@ All agent logic lives under `chatbot_service/`:
 
 ## 9 Intent Classes
 
-Defined in `chatbot_service/agent/intent_detector.py`. Uses keyword matching + regex — **not** a separate LLM call (<1ms).
+Defined in `chatbot_service/agent/intent_detector.py`. Uses keyword matching + regex � **not** a separate LLM call (<1ms).
 
 | Intent | Triggers |
 |--------|----------|
@@ -82,8 +82,8 @@ Located in `chatbot_service/providers/`.
 ### Fallback Chain (in order)
 
 ```
-Groq (fastest, 300+ tok/s) → Cerebras → Gemini → GitHub Models
-    → NVIDIA NIM → OpenRouter → Mistral → Together → Template (deterministic fallback)
+Groq (fastest, 300+ tok/s) ? Cerebras ? Gemini ? GitHub Models
+    ? NVIDIA NIM ? OpenRouter ? Mistral ? Together ? Template (deterministic fallback)
 ```
 
 If all 10 providers fail, `alert_service.py` (project root) sends an email with 3 diagnostic solutions (5-minute cooldown).
@@ -91,8 +91,8 @@ If all 10 providers fail, `alert_service.py` (project root) sends an email with 
 ### Indian Language Auto-Routing (Separate Path, Not in Chain)
 
 - **Language detection:** Unicode script range regex (Devnagari, Tamil, Telugu, etc.)
-- **Sarvam-30B** — General Indic queries
-- **Sarvam-105B** — Legal/challan queries in Indic languages (higher accuracy)
+- **Sarvam-30B** � General Indic queries
+- **Sarvam-105B** � Legal/challan queries in Indic languages (higher accuracy)
 - Direct Sarvam API used if `SARVAM_API_KEY` is set
 - Falls back to `HF_TOKEN` via HuggingFace Inference API if Sarvam key absent
 
@@ -112,11 +112,11 @@ If all 10 providers fail, `alert_service.py` (project root) sends an email with 
 
 ### Auto-Routing Rules
 
-1. Indian language input (Hindi, Tamil, Telugu, etc.) → **Sarvam-30B** (Indic specialist)
-2. Legal/challan + Indian language → **Sarvam-105B** (higher accuracy for law)
-3. English → Default provider (usually Groq, 300+ tok/s)
-4. Rate-limited → Cascade through fallback chain
-5. All providers fail → `TemplateProvider` (deterministic, always works)
+1. Indian language input (Hindi, Tamil, Telugu, etc.) ? **Sarvam-30B** (Indic specialist)
+2. Legal/challan + Indian language ? **Sarvam-105B** (higher accuracy for law)
+3. English ? Default provider (usually Groq, 300+ tok/s)
+4. Rate-limited ? Cascade through fallback chain
+5. All providers fail ? `TemplateProvider` (deterministic, always works)
 
 ---
 
@@ -129,7 +129,7 @@ SYSTEM_PROMPT = (
     "navigation, and road authority escalation. "
     "Always answer concisely in the SAME language the user writes in (Hindi, Tamil, Telugu, etc.). "
     "For life-threatening situations, always lead with 112 (universal emergency) or 102 (ambulance). "
-    "Be factual — cite MV Act sections when answering challan questions."
+    "Be factual � cite MV Act sections when answering challan questions."
 )
 ```
 
@@ -169,7 +169,7 @@ python data/build_vectorstore.py
 
 ### SafetyChecker (`chatbot_service/agent/safety_checker.py`)
 
-- `SafetyChecker.evaluate()` — Blocks prompt injection, hate speech, dangerous instructions
+- `SafetyChecker.evaluate()` � Blocks prompt injection, hate speech, dangerous instructions
 - 12-pattern prompt injection guard
 - All injury responses **must** start with "Call 112 immediately"
 
@@ -192,7 +192,7 @@ python data/build_vectorstore.py
 ### Endpoint Truth
 
 ```
-POST /speech/translate   ← Correct, NOT /api/v1/speech/translate
+POST /speech/translate   ? Correct, NOT /api/v1/speech/translate
 GET  /speech/status
 ```
 
@@ -202,24 +202,24 @@ GET  /speech/status
 
 Defined in `frontend/lib/languages.ts`. Each language has a 4-code mapping:
 
-`UI code → recognitionCode → speechTargetCode → synthesisCode`
+`UI code ? recognitionCode ? speechTargetCode ? synthesisCode`
 
 | Language | Example Codes |
 |----------|--------------|
-| Hindi | `hi → hi → hin_Deva → hi-IN` |
-| Tamil | `ta → ta → tam_Taml → ta-IN` |
-| Telugu | `te → te → tel_Telu → te-IN` |
-| Bengali | `bn → bn → ben_Beng → bn-IN` |
-| Marathi | `mr → mr → mar_Deva → mr-IN` |
-| Gujarati | `gu → gu → guj_Gujr → gu-IN` |
-| Kannada | `kn → kn → kan_Knda → kn-IN` |
-| Malayalam | `ml → ml → mal_Mlym → ml-IN` |
-| Punjabi | `pa → pa → pan_Guru → pa-IN` |
-| Urdu | `ur → ur → urd_Arab → ur-IN` |
-| Odia | `or → or → ory_Orya → or-IN` |
-| Assamese | `as → as → asm_Beng → as-IN` |
-| English | `en → en → eng_Latn → en-IN` |
-| Hinglish | `hi-en → hi → hin_Deva → hi-IN` |
+| Hindi | `hi ? hi ? hin_Deva ? hi-IN` |
+| Tamil | `ta ? ta ? tam_Taml ? ta-IN` |
+| Telugu | `te ? te ? tel_Telu ? te-IN` |
+| Bengali | `bn ? bn ? ben_Beng ? bn-IN` |
+| Marathi | `mr ? mr ? mar_Deva ? mr-IN` |
+| Gujarati | `gu ? gu ? guj_Gujr ? gu-IN` |
+| Kannada | `kn ? kn ? kan_Knda ? kn-IN` |
+| Malayalam | `ml ? ml ? mal_Mlym ? ml-IN` |
+| Punjabi | `pa ? pa ? pan_Guru ? pa-IN` |
+| Urdu | `ur ? ur ? urd_Arab ? ur-IN` |
+| Odia | `or ? or ? ory_Orya ? or-IN` |
+| Assamese | `as ? as ? asm_Beng ? as-IN` |
+| English | `en ? en ? eng_Latn ? en-IN` |
+| Hinglish | `hi-en ? hi ? hin_Deva ? hi-IN` |
 
 This mapping is correctly used in `VoiceInput.tsx` and the assistant page `speechSynthesis`.
 
@@ -228,7 +228,7 @@ This mapping is correctly used in `VoiceInput.tsx` and the assistant page `speec
 ## Conversation Memory
 
 - **Storage:** Redis with 24h TTL (`config.py: session_ttl_seconds = 86400`)
-- **Library:** `chatbot_service/memory/conversation_memory.py` — `ConversationMemoryStore`
+- **Library:** `chatbot_service/memory/conversation_memory.py` � `ConversationMemoryStore`
 - **Fallback:** In-memory store if Redis is unavailable
 - **Session ID:** Generated per conversation and passed as `session_id` in chat requests
 
@@ -236,7 +236,7 @@ This mapping is correctly used in `VoiceInput.tsx` and the assistant page `speec
 
 ## Offline AI
 
-All offline AI runs client-side in the browser — no server required.
+All offline AI runs client-side in the browser � no server required.
 
 | Component | Technology | Model/Size | File |
 |-----------|-----------|------------|------|
@@ -263,7 +263,7 @@ Only activates in production (`npm run build && npm start`), not in dev mode.
 | Decision | Why |
 |----------|-----|
 | Two separate FastAPI services | Chatbot has heavy ML deps (torch ~2GB); backend stays lightweight |
-| 10-provider LLM fallback | Zero downtime — if one API rate-limits, next takes over |
+| 10-provider LLM fallback | Zero downtime � if one API rate-limits, next takes over |
 | Sarvam AI for Indian languages | Trained on 4 trillion Indic tokens; best Hindi/Tamil legal accuracy |
 | DuckDB for challans (not LLM) | Deterministic SQL; LLMs hallucinate fine amounts |
 | ChromaDB committed to git | Render cold-starts need pre-built vectorstore; rebuild takes 10 min |
@@ -291,12 +291,12 @@ Only activates in production (`npm run build && npm start`), not in dev mode.
 ## Critical Rules (Never Break)
 
 1. Any AI response about injuries **must** start with "Call 112 immediately"
-2. Never delete `chatbot_service/data/chroma_db/` — it's committed for Render deployment
-3. Backend and chatbot have **separate** `.venv`, `.env`, `requirements.txt` — never mix dependencies
-4. WebLLM Phi-3 model (2.2GB) downloads on-demand only — never preload without user consent
+2. Never delete `chatbot_service/data/chroma_db/` � it's committed for Render deployment
+3. Backend and chatbot have **separate** `.venv`, `.env`, `requirements.txt` � never mix dependencies
+4. WebLLM Phi-3 model (2.2GB) downloads on-demand only � never preload without user consent
 5. All injury responses must pass through `SafetyChecker.evaluate()`
 6. Do **not** change the system prompt without testing all 9 intent classes
 
 ---
 
-*Document version: 2.1 | IIT Madras Road Safety Hackathon 2026*
+*Document version: 2.1 | AI-powered road safety platform*

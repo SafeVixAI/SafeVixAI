@@ -1,4 +1,4 @@
-﻿# SafeVixAI  Data Sources
+# SafeVixAI  Data Sources
 
 ## Overview
 
@@ -44,7 +44,7 @@ out body center;
 - **Use in SafeVixAI**: GPS coordinates  city/state name, address  coordinates
 
 ```
-# Required header: User-Agent: SafeVixAI/1.0 (hackathon@rbg.iitm.ac.in)
+# Required header: User-Agent: SafeVixAI/1.0 (Project@rbg.iitm.ac.in)
 # Reverse: GET /reverse?lat=13.0827&lon=80.2707&format=json&addressdetails=1
 # Forward: GET /search?q=Apollo+Hospital+Chennai&format=json&limit=1
 ```
@@ -53,7 +53,7 @@ out body center;
 - **URL**: `https://api.groq.com/openai/v1`
 - **Authentication**: API key (gsk_...) from [console.groq.com](https://console.groq.com)
 - **Rate limit**: 6,000 tokens/minute free tier
-- **Use in SafeVixAI**: Online AI chatbot — llama-3.1-8b-instant model
+- **Use in SafeVixAI**: Online AI chatbot � llama-3.1-8b-instant model
 
 ### Overpass Turbo (Testing Only)
 - **URL**: [overpass-turbo.eu](https://overpass-turbo.eu)
@@ -173,4 +173,4 @@ WebLLM fetches directly from Hugging Face CDN and caches in browser Cache Storag
 
 ---
 
-*Document version: 1.0 | IIT Madras Road Safety Hackathon 2026*
+*Document version: 1.0 | AI-powered road safety platform*

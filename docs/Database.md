@@ -459,4 +459,4 @@ LIMIT 1;
 
 ---
 
-*Document version: 3.3 | IIT Madras Road Safety Hackathon 2026 | July 2026 (Enterprise Hardening Batch 26)*
+*Document version: 3.3 | AI-powered road safety platform | July 2026 (Enterprise Hardening Batch 26)*

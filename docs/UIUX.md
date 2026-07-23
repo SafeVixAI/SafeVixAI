@@ -278,7 +278,7 @@ const MARKER_COLORS = {
 
 ---
 
-*Document version: 1.1 | IIT Madras Road Safety Hackathon 2026 | Updated: 2026-06-09*
+*Document version: 1.1 | AI-powered road safety platform | Updated: 2026-06-09*
 
 ---
 

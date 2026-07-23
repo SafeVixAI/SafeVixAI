@@ -12,11 +12,11 @@
 |---------|----------|--------|
 | PBKDF2 password hashing — no plaintext | ✅ GOOD | Verified |
 | `admin123` not hardcoded (FALSE from prior audit) | ✅ GOOD | PBKDF2 + env vars |
-| `mock-jwt-token-for-hackathon` explicitly rejected | ✅ GOOD | REJECTED_STATIC_TOKENS set |
+| `mock-jwt-token-for-Project` explicitly rejected | ✅ GOOD | REJECTED_STATIC_TOKENS set |
 | JWT_SECRET_KEY required in production (ephemeral only in dev) | ✅ GOOD | RuntimeError if missing |
 | Dual JWT validation (app JWT + Supabase JWT + JWKS optional) | ✅ GOOD | Multi-path validation |
 | Chatbot API auth now enforced in production | ✅ FIXED | `verify_internal_auth` fails without CHATBOT_INTERNAL_API_KEY |
-| Single-operator only (no user registration) | ⚠️ ACCEPTED | Hackathon constraint |
+| Single-operator only (no user registration) | ⚠️ ACCEPTED | Project constraint |
 | No token revocation / blacklist | ⚠️ RISK | 24h expiry mitigates |
 | JWT stored in IndexedDB (offline SOS queue) | ⚠️ RISK | Location PII co-located |
 

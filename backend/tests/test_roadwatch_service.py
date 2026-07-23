@@ -1394,8 +1394,6 @@ class TestSavePhotoExifAndAI:
 
     @pytest.mark.asyncio
     async def test_exif_stripping_jpeg(self) -> None:
-        import PIL
-        import PIL.Image
         settings = make_mock_settings(
             supabase_url='https://project.supabase.co',
             supabase_service_role_key='key',
@@ -1407,7 +1405,7 @@ class TestSavePhotoExifAndAI:
         photo = make_mock_upload_file(b'\xff\xd8\xff\xe0' + b'\x00' * 100)
 
         with (
-            patch.object(PIL, 'Image') as mock_image,
+            patch('services.roadwatch_photos.Image') as mock_image,
             patch('services.roadwatch_service.httpx.AsyncClient') as mock_cls,
             patch('services.roadwatch_service.aiofiles.open') as mock_aio,
         ):
@@ -1427,8 +1425,6 @@ class TestSavePhotoExifAndAI:
 
     @pytest.mark.asyncio
     async def test_exif_stripping_rgba_to_rgb(self) -> None:
-        import PIL
-        import PIL.Image
         settings = make_mock_settings(
             supabase_url='https://project.supabase.co',
             supabase_service_role_key='key',
@@ -1440,7 +1436,7 @@ class TestSavePhotoExifAndAI:
         photo = make_mock_upload_file(b'\xff\xd8\xff\xe0' + b'\x00' * 100)
 
         with (
-            patch.object(PIL, 'Image') as mock_image,
+            patch('services.roadwatch_photos.Image') as mock_image,
             patch('services.roadwatch_service.httpx.AsyncClient') as mock_cls,
             patch('services.roadwatch_service.aiofiles.open') as mock_aio,
         ):
@@ -1470,11 +1466,10 @@ class TestSavePhotoExifAndAI:
         )
         photo = make_mock_upload_file(b'\xff\xd8\xff\xe0' + b'\x00' * 100)
 
-        import PIL
         with (
             patch('services.roadwatch_service.httpx.AsyncClient') as mock_cls,
             patch('services.roadwatch_service.aiofiles.open') as mock_aio,
-            patch.object(PIL.Image, 'open', side_effect=OSError('Corrupt image')),
+            patch('services.roadwatch_photos.Image.open', side_effect=OSError('Corrupt image')),
         ):
             mock_client = AsyncMock()
             mock_client.__aenter__.return_value = mock_client
@@ -1498,10 +1493,8 @@ class TestSavePhotoExifAndAI:
         )
         photo = make_mock_upload_file(b'\xff\xd8\xff\xe0' + b'\x00' * 100)
 
-        import PIL
-        import PIL.Image
         with (
-            patch.object(PIL, 'Image') as mock_image,
+            patch('services.roadwatch_photos.Image') as mock_image,
             patch('services.roadwatch_service.httpx.AsyncClient') as mock_cls,
             patch.object(svc, '_validate_photo_ai', new_callable=AsyncMock) as mock_ai,
         ):

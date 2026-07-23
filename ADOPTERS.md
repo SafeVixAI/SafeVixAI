@@ -6,7 +6,7 @@
 
 | Organization | Usage | Since |
 |-------------|-------|-------|
-| IIT Madras | Road Safety Hackathon 2026 submission | 2026-06 |
+| IIT Madras | Road safety research and pilot deployment | 2026-06 |
 
 ---
 

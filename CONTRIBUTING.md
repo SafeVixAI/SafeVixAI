@@ -1,6 +1,6 @@
 # Contributing to SafeVixAI
 
-Thank you for contributing to SafeVixAI — an AI-powered road safety platform for the IIT Madras Road Safety Hackathon.
+Thank you for contributing to SafeVixAI — an open-source, AI-powered road safety platform.
 
 ## Code of Conduct
 

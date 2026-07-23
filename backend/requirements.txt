@@ -60,7 +60,7 @@ pytest-httpx>=0.35.0
 hypothesis>=6.155.0
 
 # --- Dev / Data Tools ---
-kaggle>=2.2.0
+kaggle>=2.2.3
 kagglehub>=0.3.8
 
 # --- Observability Extras ---

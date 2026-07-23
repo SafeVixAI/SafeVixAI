@@ -1,80 +1,59 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2026 SafeVixAI Team
-name: Deploy
+name: Deploy Frontend
 
 on:
   workflow_run:
-    workflows: [Backend CI, Chatbot CI, Frontend CI]
+    workflows: ['Frontend CI']
     types: [completed]
     branches: [main]
 
+permissions:
+  contents: read
+  id-token: write
+
 env:
   AWS_REGION: ap-south-1
-  EKS_CLUSTER: safevixai-production
+  ECR_REPOSITORY: safevixai/frontend
 
 jobs:
-  deploy-backend:
-    if: ${{ github.event.workflow_run.workflow == 'Backend CI' && github.event.workflow_run.conclusion == 'success' }}
+  docker-build:
+    if: github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      id-token: write
     steps:
       - uses: actions/checkout@v4
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-          aws-region: ${{ env.AWS_REGION }}
-      - name: Update kubeconfig
-        run: aws eks update-kubeconfig --name $EKS_CLUSTER --region $AWS_REGION
-      - name: Deploy backend
-        working-directory: k8s
-        run: |
-          kubectl set image deployment/safevixai-backend -n safevixai \
-            backend=${{ env.ECR_REGISTRY }}/safevixai/backend:${{ github.event.workflow_run.head_sha }}
-          kubectl rollout status deployment/safevixai-backend -n safevixai --timeout=5m
 
-  deploy-chatbot:
-    if: ${{ github.event.workflow_run.workflow == 'Chatbot CI' && github.event.workflow_run.conclusion == 'success' }}
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      id-token: write
-    steps:
-      - uses: actions/checkout@v4
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+      - name: Set up Node 22
+        uses: actions/setup-node@v4
         with:
-          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-          aws-region: ${{ env.AWS_REGION }}
-      - name: Update kubeconfig
-        run: aws eks update-kubeconfig --name $EKS_CLUSTER --region $AWS_REGION
-      - name: Deploy chatbot
-        working-directory: k8s
-        run: |
-          kubectl set image deployment/safevixai-chatbot -n safevixai \
-            chatbot=${{ env.ECR_REGISTRY }}/safevixai/chatbot:${{ github.event.workflow_run.head_sha }}
-          kubectl rollout status deployment/safevixai-chatbot -n safevixai --timeout=10m
+          node-version: '22'
 
-  deploy-frontend:
-    if: ${{ github.event.workflow_run.workflow == 'Frontend CI' && github.event.workflow_run.conclusion == 'success' }}
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      id-token: write
-    steps:
-      - uses: actions/checkout@v4
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
-      - name: Update kubeconfig
-        run: aws eks update-kubeconfig --name $EKS_CLUSTER --region $AWS_REGION
-      - name: Deploy frontend
-        working-directory: k8s
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: frontend
+          file: frontend/Dockerfile.frontend
+          push: true
+          tags: |
+            ${{ env.ECR_REPOSITORY }}:${{ github.sha }}
+            ${{ env.ECR_REPOSITORY }}:latest
+          build-args: |
+            STANDALONE=true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Notify deployment success
         run: |
-          kubectl set image deployment/safevixai-frontend -n safevixai \
-            frontend=${{ env.ECR_REGISTRY }}/safevixai/frontend:${{ github.event.workflow_run.head_sha }}
-          kubectl rollout status deployment/safevixai-frontend -n safevixai --timeout=5m
+          echo "Frontend Docker image pushed: $ECR_REPOSITORY:${{ github.sha }}"

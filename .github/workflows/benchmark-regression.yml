@@ -5,6 +5,7 @@ name: Benchmark Regression
 on:
   issue_comment:
     types: [created]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -13,7 +14,8 @@ permissions:
 
 jobs:
   benchmark:
-    if: false
+    if: github.event_name == 'issue_comment' && contains(github.event.comment.body, '/benchmark')
+    runs-on: ubuntu-latest
     timeout-minutes: 15
 
     steps:
@@ -21,7 +23,7 @@ jobs:
         with:
           ref: refs/pull/${{ github.event.issue.number }}/head
 
-      - name: Set up Node 20
+      - name: Set up Node 22
         uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -73,18 +75,25 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const body = `## 🏎️ Benchmark Results
-| Metric | Duration |
-|--------|----------|
-| Frontend Build | ${{ steps.frontend-build.outputs.duration }} ms |
-| Backend Import | ${{ steps.backend-import.outputs.duration }} ms |
-| Frontend Tests | ${{ steps.frontend-tests.outputs.duration }} ms |
-
-> Triggered by \`/benchmark\` on PR #${{ github.event.issue.number }}
-> Commit: ${{ github.sha }}`;
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: body,
-            });
+            const lines = [
+              '## Benchmark Results',
+              '| Metric | Duration |',
+              '|--------|----------|',
+              '| Frontend Build | ${{ steps.frontend-build.outputs.duration }} ms |',
+              '| Backend Import | ${{ steps.backend-import.outputs.duration }} ms |',
+              '| Frontend Tests | ${{ steps.frontend-tests.outputs.duration }} ms |',
+              '',
+              '> Triggered by `/benchmark` on PR #${{ github.event.issue.number }}',
+              '> Commit: ${{ github.sha }}',
+            ];
+            const body = lines.join('\n');
+            try {
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: body,
+              });
+            } catch (error) {
+              core.warning('Failed to post benchmark comment: ' + error.message);
+            }

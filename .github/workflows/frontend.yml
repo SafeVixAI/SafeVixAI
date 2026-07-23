@@ -11,10 +11,6 @@ on:
     branches: [main]
     paths: ['frontend/**']
 
-env:
-  AWS_REGION: ap-south-1
-  ECR_REPOSITORY: safevixai/frontend
-
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -80,39 +76,4 @@ jobs:
             echo "⚠️ Bundle size exceeds 15MB threshold (${TOTAL_SIZE}KB)"
           fi
 
-  build:
-    if: github.ref == 'refs/heads/main'
-    needs: [test]
-    runs-on: ubuntu-latest
-    continue-on-error: true
-    permissions:
-      contents: read
-      id-token: write
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Node 22
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-          aws-region: ${{ env.AWS_REGION }}
-      - name: Login to Amazon ECR
-        uses: aws-actions/amazon-ecr-login@v2
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-      - name: Build and push Docker image (with standalone output)
-        uses: docker/build-push-action@v5
-        with:
-          context: frontend
-          file: frontend/Dockerfile.frontend
-          push: true
-          tags: |
-            ${{ env.ECR_REPOSITORY }}:${{ github.sha }}
-            ${{ env.ECR_REPOSITORY }}:latest
-          build-args: |
-            STANDALONE=true
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+

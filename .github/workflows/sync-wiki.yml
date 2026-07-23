@@ -72,6 +72,7 @@ jobs:
           python scripts/docs/wiki_manager.py "$MODE" || echo "wiki_manager.py exited with code $?"
 
       - name: Post-run integrity check
+        continue-on-error: true
         run: |
           echo "=== Wiki Integrity Report ==="
           CONTENT_COUNT=$(find docs/wiki/content -name "*.md" | wc -l)

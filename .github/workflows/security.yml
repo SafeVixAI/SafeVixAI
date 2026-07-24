@@ -83,6 +83,7 @@ jobs:
           path: |
             sbom.cyclonedx.json
             sbom.spdx.json
+          retention-days: 90
 
   trivy:
     runs-on: ubuntu-latest

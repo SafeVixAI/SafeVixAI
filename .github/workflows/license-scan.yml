@@ -101,3 +101,4 @@ jobs:
           path: |
             *-licenses.json
             *-LICENSES.md
+          retention-days: 90

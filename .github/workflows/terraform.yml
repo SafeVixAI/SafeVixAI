@@ -91,6 +91,7 @@ jobs:
         with:
           name: tfplan
           path: terraform/tfplan
+          retention-days: 30
 
   apply:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'

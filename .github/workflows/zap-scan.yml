@@ -37,3 +37,4 @@ jobs:
         with:
           name: zap-report
           path: zap_*.html
+          retention-days: 90

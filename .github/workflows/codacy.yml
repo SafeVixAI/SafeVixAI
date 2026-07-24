@@ -102,3 +102,4 @@ jobs:
           path: |
             results.sarif
             /tmp/sarif-runs/*.sarif
+          retention-days: 90

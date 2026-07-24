@@ -105,3 +105,4 @@ jobs:
         with:
           name: pa11y-report
           path: pa11y-output.txt
+          retention-days: 30

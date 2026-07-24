@@ -18,7 +18,27 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  validate-commits:
+    name: Validate Signed Commits
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4.2.2
+        with:
+          fetch-depth: 0
+      - name: Verify HEAD commit is signed
+        run: |
+          COMMIT_SIGNATURE=$(git verify-commit HEAD 2>&1 || true)
+          if echo "$COMMIT_SIGNATURE" | grep -q "gpg: Signature made"; then
+            echo "✅ HEAD commit is signed"
+          else
+            echo "❌ HEAD commit is NOT signed (or git verify-commit not available)"
+            echo "Release tags must be from signed commits."
+            exit 1
+          fi
+
   validate:
+    needs: [validate-commits]
     name: Validate Release
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -177,6 +197,18 @@ jobs:
         run: |
           cosign verify --insecure-ignore-tlog \
             "${{ steps.tag.outputs.image }}:v${{ needs.validate.outputs.version }}"
+
+  notify-failure:
+    if: always() && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled'))
+    needs: [validate-commits, validate, test, lint, sbom, license-scan, build, sign, create-release]
+    uses: ./.github/workflows/notify-failure.yml
+    with:
+      workflow-name: 'Release'
+      job-name: create-release
+      run-id: ${{ github.run_id }}
+      conclusion: ${{ github.action_status || 'failure' }}
+    secrets:
+      SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
 
   create-release:
     name: Create GitHub Release

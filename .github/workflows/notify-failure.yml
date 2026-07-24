@@ -1,0 +1,90 @@
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 SafeVixAI Team
+name: Notify Failure
+
+on:
+  workflow_call:
+    inputs:
+      workflow-name:
+        required: true
+        type: string
+      job-name:
+        required: true
+        type: string
+      run-id:
+        required: true
+        type: string
+      conclusion:
+        required: false
+        type: string
+        default: failure
+    secrets:
+      SLACK_WEBHOOK:
+        required: false
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Generate failure summary
+        id: summary
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3  # v9.0.0
+        with:
+          script: |
+            const wf = '${{ inputs.workflow-name }}';
+            const job = '${{ inputs.job-name }}';
+            const conclusion = '${{ inputs.conclusion }}';
+            const runId = '${{ inputs.run-id }}';
+            const repo = context.repo;
+            const runUrl = `https://github.com/${repo.owner}/${repo.repo}/actions/runs/${runId}`;
+            const emoji = conclusion === 'cancelled' ? '⚠️' : '❌';
+
+            core.summary.addHeading(`${emoji} ${wf}: ${job}`, 'h2');
+            core.summary.addLink('View workflow run', runUrl);
+            core.summary.write();
+
+            return JSON.stringify({
+              conclusion,
+              workflow: wf,
+              job,
+              run_url: runUrl,
+              repository: `${repo.owner}/${repo.repo}`,
+              sha: context.sha,
+              timestamp: new Date().toISOString(),
+            });
+          result-encoding: string
+
+      - name: Post status to GitHub commit status
+        if: failure()
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3  # v9.0.0
+        with:
+          script: |
+            const payload = JSON.parse('${{ steps.summary.outputs.result }}');
+            await github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: context.sha,
+              state: '${{ inputs.conclusion }}',
+              target_url: payload.run_url,
+              description: `${{ inputs.workflow-name }} → ${{ inputs.job-name }} ${{ inputs.conclusion }}`,
+              context: `failure/${{ inputs.workflow-name }}`,
+            });
+
+      - name: Slack notification (if webhook configured)
+        if: failure() && secrets.SLACK_WEBHOOK != ''
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SUMMARY: ${{ steps.summary.outputs.result }}
+        run: |
+          if [ -n "$SLACK_WEBHOOK" ]; then
+            curl -s -X POST "$SLACK_WEBHOOK" \
+              -H "Content-Type: application/json" \
+              -d "$SUMMARY" || echo "Slack notification skipped (network error)"
+          else
+            echo "No SLACK_WEBHOOK configured — skipping Slack notification"
+          fi

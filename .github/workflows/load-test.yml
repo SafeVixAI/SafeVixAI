@@ -39,6 +39,7 @@ jobs:
         with:
           name: k6-results
           path: results.json
+          retention-days: 30
 
   k6-load:
     if: github.event_name == 'workflow_dispatch'
@@ -60,3 +61,4 @@ jobs:
         with:
           name: k6-load-results
           path: results.json
+          retention-days: 30

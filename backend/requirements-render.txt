@@ -24,6 +24,6 @@ python-dotenv==1.2.2
 python-multipart==0.0.32
 
 mcp==1.27.2
-sentry-sdk[fastapi]==2.61.0
+sentry-sdk[fastapi]==2.66.1
 prometheus-client>=0.25.0
 

@@ -11,6 +11,7 @@ from __future__ import annotations
 import json
 import logging
 from typing import Any
+from urllib.parse import urlparse
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 
@@ -62,6 +63,28 @@ async def get_active_providers(
     return provider_router.get_active_provider_info()
 
 
+_ALLOWED_PROVIDER_DOMAINS = {
+    "api.groq.com", "api.cerebras.ai", "generativelanguage.googleapis.com",
+    "models.inference.ai.azure.com", "integrate.api.nvidia.com",
+    "openrouter.ai", "api.mistral.ai", "api.together.xyz",
+    "api.sarvam.ai", "api.openai.com", "api.anthropic.com",
+    "api.deepseek.com", "huggingface.co",
+}
+
+
+def _validate_provider_url(url: str) -> str:
+    """Validate and return a sanitized provider URL. Raises HTTPException on invalid URL."""
+    parsed = urlparse(url)
+    if not parsed.scheme:
+        parsed = urlparse("https://" + url)
+    if parsed.scheme not in ("http", "https"):
+        raise HTTPException(status_code=400, detail="URL must use http or https scheme")
+    hostname = parsed.hostname or ""
+    if hostname not in _ALLOWED_PROVIDER_DOMAINS and not hostname.endswith(".safevixai.internal") and hostname not in ("localhost", "127.0.0.1", "host.docker.internal"):
+        raise HTTPException(status_code=400, detail=f"Provider domain '{hostname}' is not allowed")
+    return url
+
+
 @router.post("/test")
 @limiter.limit("5/minute")
 async def test_provider(
@@ -69,6 +92,8 @@ async def test_provider(
     data: dict[str, Any],
 ):
     """Test a provider connection directly from the chatbot service."""
+    import traceback
+
     import httpx
 
     api_key = data.get("api_key", "")
@@ -78,6 +103,8 @@ async def test_provider(
 
     if not base_url:
         raise HTTPException(status_code=400, detail="base_url is required")
+
+    base_url = _validate_provider_url(base_url)
 
     headers = {
         "Authorization": f"Bearer {api_key}",
@@ -95,8 +122,9 @@ async def test_provider(
             if resp.status_code == 200:
                 return {"status": "ok", "message": "Connection successful", "provider": provider_name}
             return {"status": "error", "message": f"HTTP {resp.status_code}: {resp.text[:200]}"}
-    except Exception as e:
-        return {"status": "error", "message": str(e)}
+    except Exception:
+        logger.exception("Provider test failed for %s", provider_name)
+        return {"status": "error", "message": "An unexpected error occurred. Check server logs."}
 
 
 @router.post("/reset")

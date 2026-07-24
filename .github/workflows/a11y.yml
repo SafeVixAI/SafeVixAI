@@ -23,6 +23,7 @@ jobs:
   pa11y:
     name: WCAG 2.1 AA Scan
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Checkout code
         uses: actions/checkout@v4

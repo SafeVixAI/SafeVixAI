@@ -170,10 +170,15 @@ export default function ChatPage() {
     /* istanbul ignore next */if (typeof window === 'undefined') return `assistant-${Date.now()}`;
     const existing = window.localStorage.getItem('safevixai:assistant-session');
     if (existing) return existing;
-    const uuid = typeof crypto !== 'undefined' && /* istanbul ignore next */crypto.randomUUID
-      ? crypto.randomUUID()
-      : Math.random().toString(36).substring(2, 15) + '-' + Date.now();
-    const next = `assistant-${uuid}`;
+    /* istanbul ignore else */if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+      const next = `assistant-${crypto.randomUUID()}`;
+      window.localStorage.setItem('safevixai:assistant-session', next);
+      return next;
+    }
+    const array = new Uint8Array(16);
+    crypto.getRandomValues(array);
+    const hex = Array.from(array, (b) => b.toString(16).padStart(2, '0')).join('');
+    const next = `assistant-${hex}`;
     window.localStorage.setItem('safevixai:assistant-session', next);
     return next;
   });

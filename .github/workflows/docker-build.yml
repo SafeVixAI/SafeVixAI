@@ -33,6 +33,7 @@ jobs:
   build-and-scan:
     name: Build & Scan Images
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     strategy:
       matrix:
         include:

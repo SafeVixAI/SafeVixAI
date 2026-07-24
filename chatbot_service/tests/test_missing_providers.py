@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import os
 from unittest.mock import AsyncMock, MagicMock, patch
+from urllib.parse import urlparse
 
 import httpx
 import pytest
@@ -49,7 +50,8 @@ class TestCerebrasProvider:
 
     def test_base_url(self) -> None:
         p = CerebrasProvider(api_key="test")
-        assert "cerebras.ai" in p.base_url()
+        parsed = urlparse(p.base_url())
+        assert parsed.hostname == "api.cerebras.ai"
 
     def test_default_model(self) -> None:
         p = CerebrasProvider(api_key="test")
@@ -71,7 +73,8 @@ class TestOpenRouterProvider:
 
     def test_base_url(self) -> None:
         p = OpenRouterProvider(api_key="test")
-        assert "openrouter" in p.base_url()
+        parsed = urlparse(p.base_url())
+        assert parsed.hostname == "openrouter.ai"
 
     def test_default_model(self) -> None:
         p = OpenRouterProvider(api_key="test")

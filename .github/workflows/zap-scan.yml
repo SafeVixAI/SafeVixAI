@@ -19,6 +19,7 @@ permissions:
 jobs:
   zap-scan:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: ZAP Scan
         uses: zaproxy/action-full-scan@v0.11

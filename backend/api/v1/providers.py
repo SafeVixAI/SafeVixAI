@@ -1,9 +1,11 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2026 SafeVixAI Team
 
-from __future__ import annotations
+from __future__import annotations
 
+import logging
 import uuid
+from urllib.parse import urlparse
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from pydantic import BaseModel, Field, field_validator
@@ -15,6 +17,8 @@ from core.limiter import limiter
 from core.security import get_current_user
 from models.provider_config import UserProviderConfig
 from services.provider_encrypt import decrypt_api_key, encrypt_api_key, mask_api_key
+
+logger = logging.getLogger("safevixai.api.providers")
 
 router = APIRouter(prefix="/api/v1/providers", tags=["Providers"])
 
@@ -289,6 +293,28 @@ async def delete_provider_config(
     await db.commit()
 
 
+_ALLOWED_PROVIDER_DOMAINS = {
+    "api.groq.com", "api.cerebras.ai", "generativelanguage.googleapis.com",
+    "models.inference.ai.azure.com", "integrate.api.nvidia.com",
+    "openrouter.ai", "api.mistral.ai", "api.together.xyz",
+    "api.sarvam.ai", "api.openai.com", "api.anthropic.com",
+    "api.deepseek.com", "huggingface.co",
+}
+
+
+def _validate_provider_url(url: str) -> str:
+    """Validate and return a sanitized provider URL. Raises HTTPException on invalid URL."""
+    parsed = urlparse(url)
+    if not parsed.scheme:
+        parsed = urlparse("https://" + url)
+    if parsed.scheme not in ("http", "https"):
+        raise HTTPException(status_code=400, detail="URL must use http or https scheme")
+    hostname = parsed.hostname or ""
+    if hostname not in _ALLOWED_PROVIDER_DOMAINS and not hostname.endswith(".safevixai.internal") and hostname not in ("localhost", "127.0.0.1", "host.docker.internal"):
+        raise HTTPException(status_code=400, detail=f"Provider domain '{hostname}' is not allowed")
+    return url
+
+
 @router.post("/test")
 @limiter.limit("10/minute")
 async def test_provider_connection(
@@ -296,16 +322,17 @@ async def test_provider_connection(
     data: ProviderTestRequest,
 ):
     """Test a provider connection by making a lightweight API call."""
+    import traceback
 
     import httpx
+
+    base_url = _validate_provider_url(data.base_url or "")
+    model = data.model or "gpt-3.5-turbo"
 
     headers = {
         "Authorization": f"Bearer {data.api_key}",
         "Content-Type": "application/json",
     }
-
-    base_url = data.base_url or ""
-    model = data.model or "gpt-3.5-turbo"
 
     test_payload = {
         "model": model,
@@ -328,14 +355,16 @@ async def test_provider_connection(
                 body = await resp.aread()
                 return {"status": "error", "message": f"HTTP {resp.status_code}: {body[:200].decode(errors='replace')}"}
     except httpx.ConnectError:
-        err_msg = f"Cannot connect to {base_url}. Check URL and network."
+        logger.warning("Provider connection failed for %s: %s", data.provider_name, base_url)
+        err_msg = f"Cannot connect to {data.provider_name}. Check URL and network."
         if "localhost" in base_url or "127.0.0.1" in base_url:
             err_msg += " Note: If running in Docker, 'localhost' refers to the container. Use 'host.docker.internal' or your machine's IP."
         return {"status": "error", "message": err_msg}
     except httpx.TimeoutException:
         return {"status": "error", "message": "Connection timed out after 10s"}
-    except Exception as e:
-        return {"status": "error", "message": str(e)}
+    except Exception:
+        logger.exception("Unexpected error testing provider %s", data.provider_name)
+        return {"status": "error", "message": "Internal server error"}
 
 
 @router.post("/sync", status_code=status.HTTP_200_OK)

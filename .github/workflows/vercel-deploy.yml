@@ -19,7 +19,17 @@ jobs:
       && github.event.workflow_run.event == 'push'
       && github.event.workflow_run.head_branch == 'main'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
+      - name: Validate workflow payload
+        run: |
+          if [ -z "${{ github.event.workflow_run.head_sha }}" ]; then
+            echo "Missing head_sha in workflow_run payload" >&2
+            exit 1
+          fi
+          echo "head_sha: ${{ github.event.workflow_run.head_sha }}"
+          echo "head_branch: ${{ github.event.workflow_run.head_branch }}"
+
       - name: Checkout
         uses: actions/checkout@v4
         with:
@@ -38,7 +48,16 @@ jobs:
       github.event.workflow_run.conclusion == 'success'
       && github.event.workflow_run.event == 'pull_request'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
+      - name: Validate workflow payload
+        run: |
+          if [ -z "${{ github.event.workflow_run.head_sha }}" ]; then
+            echo "Missing head_sha in workflow_run payload" >&2
+            exit 1
+          fi
+          echo "head_sha: ${{ github.event.workflow_run.head_sha }}"
+
       - name: Checkout
         uses: actions/checkout@v4
         with:

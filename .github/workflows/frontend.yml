@@ -11,9 +11,13 @@ on:
     branches: [main]
     paths: ['frontend/**']
 
+permissions:
+  contents: read
+
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - name: Set up Node 22
@@ -52,7 +56,11 @@ jobs:
   bundle-check:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     needs: [test]
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
       - uses: actions/checkout@v4
       - name: Set up Node 22

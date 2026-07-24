@@ -23,6 +23,7 @@ permissions:
 jobs:
   attest:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
 
@@ -34,6 +35,7 @@ jobs:
 
   container-attest:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       attestations: write
       id-token: write

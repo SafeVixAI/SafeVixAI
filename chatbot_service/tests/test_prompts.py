@@ -5,6 +5,8 @@ from __future__ import annotations
 import tempfile
 from pathlib import Path
 
+import pytest
+
 from prompts import reload, get_system_prompt, get_prohibited_patterns
 from prompts import get_harm_patterns, get_jailbreak_patterns
 from prompts import get_severe_output_patterns, get_medical_keywords
@@ -38,9 +40,10 @@ max_response_tokens: 400
 
 class TestPromptsLoader:
     def _write_yaml(self, content: str) -> Path:
-        tmp = Path(tempfile.mktemp(suffix='.yaml'))
-        tmp.write_text(content, encoding='utf-8')
-        return tmp
+        tmp = tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False, encoding='utf-8')
+        tmp.write(content)
+        tmp.close()
+        return Path(tmp.name)
 
     def test_get_system_prompt(self):
         tmp = self._write_yaml(_SAMPLE_YAML)
@@ -111,8 +114,10 @@ class TestPromptsLoader:
         assert get_max_response_tokens() == 400
 
     def test_missing_file_uses_empty_dict(self):
-        fake = Path(tempfile.mktemp(suffix='.nonexistent'))
-        reload(str(fake))
+        fake = tempfile.NamedTemporaryFile(suffix='.nonexistent', delete=False)
+        fake.close()
+        fake_path = Path(fake.name)
+        reload(str(fake_path))
         assert get_system_prompt() == ""
 
     def test_invalid_yaml_uses_empty_dict(self):

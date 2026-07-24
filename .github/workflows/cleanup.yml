@@ -13,6 +13,7 @@ permissions:
 jobs:
   cleanup:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Clean up old workflow artifacts
         uses: c-hive/gha-remove-artifacts@v1

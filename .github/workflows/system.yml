@@ -20,6 +20,7 @@ jobs:
   render-config-check:
     name: Validate Render Blueprint & Service Config
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
 

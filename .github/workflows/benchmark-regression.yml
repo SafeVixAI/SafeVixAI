@@ -19,9 +19,18 @@ jobs:
     timeout-minutes: 15
 
     steps:
+      - name: Validate PR context
+        if: github.event_name == 'issue_comment'
+        run: |
+          if [ -z "${{ github.event.issue.number }}" ]; then
+            echo "No issue/PR number found" >&2
+            exit 1
+          fi
+          echo "PR #${{ github.event.issue.number }} validated"
+
       - uses: actions/checkout@v4
         with:
-          ref: refs/pull/${{ github.event.issue.number }}/head
+          ref: ${{ github.event_name == 'issue_comment' && format('refs/pull/{0}/head', github.event.issue.number) || '' }}
 
       - name: Set up Node 22
         uses: actions/setup-node@v4

@@ -6,6 +6,7 @@
 from __future__ import annotations
 
 from unittest.mock import AsyncMock, MagicMock
+from urllib.parse import urlparse
 
 import pytest
 
@@ -156,7 +157,8 @@ class TestSetupAllowedHosts:
         middleware_class = args[0]
         allowed_hosts = kwargs.get("allowed_hosts", [])
         assert middleware_class == AllowedHostsMiddleware
-        assert "app.safevixai.com" in allowed_hosts
+        hosts_set = set(allowed_hosts)
+        assert "app.safevixai.com" in hosts_set
 
     def test_production_without_frontend_url_defaults_localhost(self):
         app = MagicMock()
@@ -173,6 +175,25 @@ class TestSetupAllowedHosts:
         allowed_hosts = kwargs.get("allowed_hosts", [])
         assert "localhost" in allowed_hosts or "127.0.0.1" in allowed_hosts
 
+    def test_production_multiple_urls(self):
+        app = MagicMock()
+        settings = MagicMock()
+        settings.environment = "production"
+        settings.allowed_hosts_env = None
+        settings.frontend_url = "https://app.safevixai.com"
+        settings.chatbot_service_url = "http://chatbot.safevixai.internal:8010/api/v1"
+
+        setup_allowed_hosts(app, settings)
+
+        app.add_middleware.assert_called_once()
+        args, kwargs = app.add_middleware.call_args
+        allowed_hosts_list = kwargs.get("allowed_hosts", [])
+        parsed_frontend = urlparse(settings.frontend_url)
+        parsed_chatbot = urlparse(settings.chatbot_service_url)
+        hostnames = set(allowed_hosts_list)
+        assert parsed_frontend.hostname in hostnames
+        assert parsed_chatbot.hostname in hostnames
+
     def test_non_production_with_env_var(self):
         app = MagicMock()
         settings = MagicMock()
@@ -185,8 +206,9 @@ class TestSetupAllowedHosts:
         app.add_middleware.assert_called_once()
         args, kwargs = app.add_middleware.call_args
         allowed_hosts = kwargs.get("allowed_hosts", [])
-        assert "dev.example.com" in allowed_hosts
-        assert "staging.example.com" in allowed_hosts
+        hosts_set = set(allowed_hosts)
+        assert "dev.example.com" in hosts_set
+        assert "staging.example.com" in hosts_set
 
     def test_non_production_without_env_var_skips(self):
         app = MagicMock()

@@ -12,6 +12,7 @@ permissions:
 jobs:
   backup:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     services:
       postgres:
         image: postgis/postgis:16-3.4
@@ -56,6 +57,7 @@ jobs:
   backup-production:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - name: Backup Production Database
@@ -80,6 +82,7 @@ jobs:
   restore-test:
     needs: [backup]
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     continue-on-error: true
     services:
       postgres:

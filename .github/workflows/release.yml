@@ -21,6 +21,7 @@ jobs:
   validate:
     name: Validate Release
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     outputs:
       version: ${{ steps.parse.outputs.version }}
       channel: ${{ steps.parse.outputs.channel }}
@@ -78,6 +79,7 @@ jobs:
     name: Build & Push Images
     needs: [validate, test, lint]
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     outputs:
       digest: ${{ steps.push.outputs.digest }}
     strategy:
@@ -133,6 +135,7 @@ jobs:
     name: Sign Container Images
     needs: [validate, build]
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: read
       id-token: write
@@ -175,6 +178,7 @@ jobs:
     name: Create GitHub Release
     needs: [validate, build, sbom]
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: write
     steps:

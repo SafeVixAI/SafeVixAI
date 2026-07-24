@@ -20,6 +20,7 @@ jobs:
     name: Auto Version Bump
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4

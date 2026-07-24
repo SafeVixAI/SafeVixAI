@@ -22,6 +22,7 @@ permissions:
 jobs:
   k6-smoke:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - name: Run k6 smoke test
@@ -42,6 +43,7 @@ jobs:
   k6-load:
     if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - name: Run k6 load test

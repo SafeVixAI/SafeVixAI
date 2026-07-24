@@ -27,7 +27,7 @@
     "@gsap/react": "2.1.2",
     "@huggingface/transformers": "4.0.1",
     "@supabase/supabase-js": "2.107.0",
-    "@tanstack/react-virtual": "3.13.24",
+    "@tanstack/react-virtual": "3.14.8",
     "autoprefixer": "10.4.20",
     "axios": "1.18.1",
     "class-variance-authority": "0.7.1",

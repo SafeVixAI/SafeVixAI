@@ -12,6 +12,10 @@ on:
     paths: ['backend/**']
 
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
@@ -169,3 +173,15 @@ jobs:
           docker tag $ECR_REPOSITORY:$IMAGE_TAG $ECR_REPOSITORY:latest
           docker push $ECR_REPOSITORY:$IMAGE_TAG
           docker push $ECR_REPOSITORY:latest
+
+  notify-failure:
+    if: always() && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled'))
+    needs: [test, lint, build]
+    uses: ./.github/workflows/notify-failure.yml
+    with:
+      workflow-name: 'Backend CI'
+      job-name: test
+      run-id: ${{ github.run_id }}
+      conclusion: failure
+    secrets:
+      SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}

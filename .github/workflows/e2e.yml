@@ -9,6 +9,10 @@ on:
   schedule:
     - cron: '0 6 * * 1' # Every Monday at 6 AM UTC
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
   checks: write
@@ -141,3 +145,15 @@ jobs:
           name: playwright-report
           path: frontend/playwright-report/
           retention-days: 30
+
+  notify-failure:
+    if: always() && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled'))
+    needs: [e2e]
+    uses: ./.github/workflows/notify-failure.yml
+    with:
+      workflow-name: 'E2E Tests'
+      job-name: e2e
+      run-id: ${{ github.run_id }}
+      conclusion: failure
+    secrets:
+      SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}

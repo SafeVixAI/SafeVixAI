@@ -11,6 +11,10 @@ on:
     branches: [main]
     paths: ['frontend/**']
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
@@ -90,5 +94,17 @@ jobs:
           if [ "${TOTAL_SIZE:-0}" -gt 15000 ]; then
             echo "⚠️ Bundle size exceeds 15MB threshold (${TOTAL_SIZE}KB)"
           fi
+
+  notify-failure:
+    if: always() && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled'))
+    needs: [test, bundle-check]
+    uses: ./.github/workflows/notify-failure.yml
+    with:
+      workflow-name: 'Frontend CI'
+      job-name: test
+      run-id: ${{ github.run_id }}
+      conclusion: failure
+    secrets:
+      SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
 
 

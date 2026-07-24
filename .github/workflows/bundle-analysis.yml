@@ -7,6 +7,10 @@ on:
     branches: [main]
     paths: ['frontend/**']
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
   pull-requests: write
@@ -76,3 +80,15 @@ jobs:
               repo: context.repo.repo,
               body: table,
             });
+
+  notify-failure:
+    if: always() && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled'))
+    needs: [bundle-size]
+    uses: ./.github/workflows/notify-failure.yml
+    with:
+      workflow-name: 'Bundle Analysis'
+      job-name: bundle-size
+      run-id: ${{ github.run_id }}
+      conclusion: failure
+    secrets:
+      SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}

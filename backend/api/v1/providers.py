@@ -5,8 +5,6 @@ from __future__ import annotations
 
 import logging
 import uuid
-from urllib.parse import urlparse
-
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from pydantic import BaseModel, Field, field_validator
 from sqlalchemy import select
@@ -83,7 +81,6 @@ class ProviderConfigResponse(BaseModel):
 class ProviderTestRequest(BaseModel):
     provider_name: str
     api_key: str
-    base_url: str | None = None
     model: str | None = None
 
 
@@ -293,26 +290,12 @@ async def delete_provider_config(
     await db.commit()
 
 
-_ALLOWED_PROVIDER_DOMAINS = {
-    "api.groq.com", "api.cerebras.ai", "generativelanguage.googleapis.com",
-    "models.inference.ai.azure.com", "integrate.api.nvidia.com",
-    "openrouter.ai", "api.mistral.ai", "api.together.xyz",
-    "api.sarvam.ai", "api.openai.com", "api.anthropic.com",
-    "api.deepseek.com", "huggingface.co",
-}
-
-
-def _validate_provider_url(url: str) -> str:
-    """Validate and return a sanitized provider URL. Raises HTTPException on invalid URL."""
-    parsed = urlparse(url)
-    if not parsed.scheme:
-        parsed = urlparse("https://" + url)
-    if parsed.scheme not in ("http", "https"):
-        raise HTTPException(status_code=400, detail="URL must use http or https scheme")
-    hostname = parsed.hostname or ""
-    if hostname not in _ALLOWED_PROVIDER_DOMAINS and not hostname.endswith(".safevixai.internal") and hostname not in ("localhost", "127.0.0.1", "host.docker.internal"):
-        raise HTTPException(status_code=400, detail=f"Provider domain '{hostname}' is not allowed")
-    return url
+def _lookup_provider_url(provider_name: str) -> str:
+    """Look up the base URL for a built-in provider by name. Raises 404 if not found."""
+    for p in _BUILTIN_PROVIDERS:
+        if p["name"] == provider_name:
+            return p["base_url"]
+    raise HTTPException(status_code=404, detail=f"Unknown provider '{provider_name}'")
 
 
 @router.post("/test")
@@ -326,7 +309,7 @@ async def test_provider_connection(
 
     import httpx
 
-    base_url = _validate_provider_url(data.base_url or "")
+    base_url = _lookup_provider_url(data.provider_name)
     model = data.model or "gpt-3.5-turbo"
 
     headers = {
@@ -350,16 +333,13 @@ async def test_provider_connection(
             elif resp.status_code == 403:
                 return {"status": "error", "message": "API key lacks access (403)"}
             elif resp.status_code == 404:
-                return {"status": "error", "message": f"Endpoint not found. Check base URL: {resp.status_code}"}
+                return {"status": "error", "message": f"Endpoint not found: {resp.status_code}"}
             else:
                 body = await resp.aread()
                 return {"status": "error", "message": f"HTTP {resp.status_code}: {body[:200].decode(errors='replace')}"}
     except httpx.ConnectError:
         logger.warning("Provider connection failed for %s: %s", data.provider_name, base_url)
-        err_msg = f"Cannot connect to {data.provider_name}. Check URL and network."
-        if "localhost" in base_url or "127.0.0.1" in base_url:
-            err_msg += " Note: If running in Docker, 'localhost' refers to the container. Use 'host.docker.internal' or your machine's IP."
-        return {"status": "error", "message": err_msg}
+        return {"status": "error", "message": f"Cannot connect to {data.provider_name}. Check URL and network."}
     except httpx.TimeoutException:
         return {"status": "error", "message": "Connection timed out after 10s"}
     except Exception:

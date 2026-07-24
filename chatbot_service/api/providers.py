@@ -8,10 +8,8 @@ which get synced to the chatbot service via Redis or direct API call.
 
 from __future__ import annotations
 
-import json
 import logging
 from typing import Any
-from urllib.parse import urlparse
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 
@@ -63,26 +61,24 @@ async def get_active_providers(
     return provider_router.get_active_provider_info()
 
 
-_ALLOWED_PROVIDER_DOMAINS = {
-    "api.groq.com", "api.cerebras.ai", "generativelanguage.googleapis.com",
-    "models.inference.ai.azure.com", "integrate.api.nvidia.com",
-    "openrouter.ai", "api.mistral.ai", "api.together.xyz",
-    "api.sarvam.ai", "api.openai.com", "api.anthropic.com",
-    "api.deepseek.com", "huggingface.co",
-}
-
-
-def _validate_provider_url(url: str) -> str:
-    """Validate and return a sanitized provider URL. Raises HTTPException on invalid URL."""
-    parsed = urlparse(url)
-    if not parsed.scheme:
-        parsed = urlparse("https://" + url)
-    if parsed.scheme not in ("http", "https"):
-        raise HTTPException(status_code=400, detail="URL must use http or https scheme")
-    hostname = parsed.hostname or ""
-    if hostname not in _ALLOWED_PROVIDER_DOMAINS and not hostname.endswith(".safevixai.internal") and hostname not in ("localhost", "127.0.0.1", "host.docker.internal"):
-        raise HTTPException(status_code=400, detail=f"Provider domain '{hostname}' is not allowed")
-    return url
+def _lookup_provider_url(provider_name: str, provider_router: ProviderRouter) -> str:
+    """Look up the base URL for a provider from the active provider config."""
+    providers = provider_router.get_active_provider_info()
+    for p in providers:
+        name = p.get("provider_name", "")
+        if name == provider_name:
+            base_url = p.get("base_url", "")
+            if base_url:
+                return base_url
+    # Fallback: check env provider configs
+    settings = get_settings()
+    env_providers = getattr(settings, "provider_configs", [])
+    for p in env_providers:
+        if p.get("name") == provider_name:
+            base_url = p.get("base_url", "")
+            if base_url:
+                return base_url
+    raise HTTPException(status_code=404, detail=f"Unknown provider '{provider_name}'")
 
 
 @router.post("/test")
@@ -90,21 +86,18 @@ def _validate_provider_url(url: str) -> str:
 async def test_provider(
     request: Request,
     data: dict[str, Any],
+    provider_router: ProviderRouter = Depends(get_provider_router),
 ):
-    """Test a provider connection directly from the chatbot service."""
+    """Test a provider connection."""
     import traceback
 
     import httpx
 
     api_key = data.get("api_key", "")
-    base_url = data.get("base_url", "")
-    model = data.get("model", "gpt-3.5-turbo")
     provider_name = data.get("provider_name", "custom")
+    model = data.get("model", "gpt-3.5-turbo")
 
-    if not base_url:
-        raise HTTPException(status_code=400, detail="base_url is required")
-
-    base_url = _validate_provider_url(base_url)
+    base_url = _lookup_provider_url(provider_name, provider_router)
 
     headers = {
         "Authorization": f"Bearer {api_key}",

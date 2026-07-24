@@ -157,8 +157,7 @@ class TestSetupAllowedHosts:
         middleware_class = args[0]
         allowed_hosts = kwargs.get("allowed_hosts", [])
         assert middleware_class == AllowedHostsMiddleware
-        hosts_set = set(allowed_hosts)
-        assert "app.safevixai.com" in hosts_set
+        assert any(h == "app.safevixai.com" for h in allowed_hosts)
 
     def test_production_without_frontend_url_defaults_localhost(self):
         app = MagicMock()
@@ -206,9 +205,8 @@ class TestSetupAllowedHosts:
         app.add_middleware.assert_called_once()
         args, kwargs = app.add_middleware.call_args
         allowed_hosts = kwargs.get("allowed_hosts", [])
-        hosts_set = set(allowed_hosts)
-        assert "dev.example.com" in hosts_set
-        assert "staging.example.com" in hosts_set
+        assert any(h == "dev.example.com" for h in allowed_hosts)
+        assert any(h == "staging.example.com" for h in allowed_hosts)
 
     def test_non_production_without_env_var_skips(self):
         app = MagicMock()

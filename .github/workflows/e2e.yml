@@ -128,7 +128,7 @@ jobs:
           BACKEND_URL: http://localhost:8000
           CHATBOT_URL: http://localhost:8010
         run: |
-          npx playwright test e2e/ --reporter=github --grep-invert="Visual Regression|visual|Live tracking|Form validation" || echo "E2E tests completed with failures (non-blocking)"
+          npx playwright test e2e/ --reporter=github --grep-invert="Visual Regression|visual|Live tracking|Form validation"
 
       - name: Upload test results
         if: failure()

@@ -54,24 +54,28 @@ jobs:
   test:
     name: Test Suite
     needs: [validate]
+    timeout-minutes: 30
     uses: ./.github/workflows/backend.yml
     secrets: inherit
 
   lint:
     name: Lint & Type Check
     needs: [validate]
+    timeout-minutes: 30
     uses: ./.github/workflows/frontend.yml
     secrets: inherit
 
   sbom:
     name: Generate SBOM
     needs: [validate]
+    timeout-minutes: 30
     uses: ./.github/workflows/security.yml
     secrets: inherit
 
   license-scan:
     name: License Compliance Check
     needs: [validate]
+    timeout-minutes: 30
     uses: ./.github/workflows/license-scan.yml
     secrets: inherit
 

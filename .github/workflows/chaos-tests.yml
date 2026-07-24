@@ -39,7 +39,8 @@ jobs:
 
       - name: Chaos tests
         if: steps.connectivity.outputs.backend_available == 'true'
-        run: pytest tests/test_chaos.py -v --tb=short 2>&1 || true
+        continue-on-error: true
+        run: pytest tests/test_chaos.py -v --tb=short 2>&1
 
       - name: System validation
         run: |

@@ -31,7 +31,7 @@ sentence-transformers==5.4.1
 # --- LLM Provider SDKs ---
 groq==1.2.0
 google-generativeai==0.8.6
-openai==2.38.0
+openai==2.48.0
 mistralai==2.4.0
 
 # --- Cache / Memory ---

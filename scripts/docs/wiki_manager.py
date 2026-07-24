@@ -357,7 +357,7 @@ def discover_wiki_topics():
         topics.add(f.stem.lower().replace(" ", "_").replace("-", "_"))
         try:
             text = f.read_text(encoding="utf-8")[:2000].lower()
-            for m in re.findall(r'`(\w+(?:[_-]\w+)+)`', text):
+            for m in re.findall(r'`([\w-]+)`', text):
                 topics.add(m.replace("-", "_"))
         except Exception:
             logger.debug("Failed to read wiki topic file %s", f, exc_info=True)

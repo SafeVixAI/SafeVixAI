@@ -19,6 +19,10 @@ Environment overrides:
     BACKEND_URL=https://...
     CHATBOT_URL=https://...
     FRONTEND_URL=https://...
+
+# codeql[py/clear-text-logging-sensitive-data] — intentional: verify script
+# searches committed source for leaked API-key patterns and reports file+line
+# (never the secret value itself) so the developer can remove them.
 """
 
 from __future__ import annotations

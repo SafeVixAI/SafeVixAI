@@ -18,6 +18,8 @@ function generateGuestId(): string {
   return Array.from(arr, (b) => b.toString(16).padStart(2, '0')).join('');
 }
 
+// Guest profile is device-local only — contains no server-side secrets or credentials
+// See: AGENTS.md "Privacy by design" — blood group stays on device
 export function getOrCreateGuestId(): string {
   let id = localStorage.getItem(GUEST_ID_KEY);
   if (!id) {

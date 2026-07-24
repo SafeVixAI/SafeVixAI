@@ -198,6 +198,7 @@ async def submit_road_issue(
         AuditLog.log(AuditEvent.ROAD_REPORT_SUBMITTED, user_id=user_id, ip_address=ip, details={"issue_type": issue_type, "lat": lat, "lon": lon, "severity": severity})
         return result
     except ServiceValidationError as exc:
+        logger.warning("Road report submission validation error: %s", exc)
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
@@ -477,6 +478,7 @@ async def verify_road_report(
     try:
         report_data = await roadwatch_service.verify_report(db=db, report_id=report_id)
     except ServiceValidationError as exc:
+        logger.warning("Report verification error: %s", exc)
         status_code = 404 if 'not found' in str(exc).lower() else 422
         raise HTTPException(status_code=status_code, detail=str(exc)) from exc
 
@@ -515,7 +517,7 @@ async def verify_road_report(
             logger.info("OSM contribution for report %s: %s", report_id, osm_result.get("status"))
         except Exception as exc:
             logger.warning("OSM contribution failed for report %s: %s", report_id, exc)
-            osm_result = {"status": "error", "reason": str(exc)}
+            osm_result = {"status": "error", "reason": "OSM contribution failed"}
     else:
         osm_result = {"status": "skipped", "reason": "OSM not configured"}
 

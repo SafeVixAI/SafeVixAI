@@ -7,6 +7,7 @@ import logging
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlparse
 
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -129,7 +130,8 @@ class Settings(BaseSettings):
             normalized = normalized.replace('postgresql://', 'postgresql+asyncpg://', 1)
 
         # Auto-correct Supabase pooler using direct port 5432 to standard transaction port 6543
-        if 'pooler.supabase.com' in normalized and ':5432' in normalized:
+        parsed_db_url = urlparse(normalized)
+        if parsed_db_url.hostname == 'pooler.supabase.com' and ':5432' in normalized:
             import logging
             logging.getLogger('safevixai.config').warning(
                 'Supabase pooler host detected with direct session port 5432! '

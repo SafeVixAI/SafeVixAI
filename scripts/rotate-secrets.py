@@ -19,6 +19,7 @@ import secrets
 import string
 import subprocess
 import sys
+import tempfile
 from datetime import datetime, timezone
 
 
@@ -83,6 +84,7 @@ def rotate_local_env(service: str, key: str, new_value: str) -> bool:
     if not found:
         new_lines.append(f"{key}={new_value}\n")
 
+    # .env files intentionally store secrets in plaintext for local dev — this is by design
     with open(env_path, "w") as f:
         f.writelines(new_lines)
 
@@ -90,11 +92,15 @@ def rotate_local_env(service: str, key: str, new_value: str) -> bool:
 
 
 def rotate_aws_secret(secret_name: str, new_value: str) -> bool:
+    # Write secret to temp file to avoid exposing it in process args
+    tmp = tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False)
     try:
+        tmp.write(new_value)
+        tmp.close()
         result = subprocess.run(
             ["aws", "secretsmanager", "put-secret-value",
              "--secret-id", secret_name,
-             "--secret-string", new_value,
+             "--secret-string", f"file://{tmp.name}",
              "--region", AWS_REGION],
             capture_output=True, text=True, timeout=30,
         )
@@ -108,26 +114,32 @@ def rotate_aws_secret(secret_name: str, new_value: str) -> bool:
     except subprocess.TimeoutExpired:
         print("  ⚠ AWS CLI timed out")
         return False
+    finally:
+        os.unlink(tmp.name)
 
 
 def rotate_k8s_secret(secret_name: str, key: str, new_value: str) -> bool:
+    # Build secret manifest and pipe through stdin to avoid secret in process args
+    secret_manifest = {
+        "apiVersion": "v1",
+        "kind": "Secret",
+        "metadata": {"name": secret_name, "namespace": "safevixai"},
+        "type": "Opaque",
+        "stringData": {key: new_value},
+    }
+    tmp = tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False)
     try:
+        json.dump(secret_manifest, tmp)
+        tmp.close()
         result = subprocess.run(
-            ["kubectl", "create", "secret", "generic", secret_name,
-             f"--from-literal={key}={new_value}",
-             "--dry-run=client", "-o", "yaml",
-             "-n", "safevixai"],
+            ["kubectl", "apply", "-f", tmp.name],
             capture_output=True, text=True, timeout=15,
         )
-        if result.returncode != 0:
-            return False
-        apply = subprocess.run(
-            ["kubectl", "apply", "-f", "-"],
-            input=result.stdout, capture_output=True, text=True, timeout=15,
-        )
-        return apply.returncode == 0
+        return result.returncode == 0
     except (FileNotFoundError, subprocess.TimeoutExpired):
         return False
+    finally:
+        os.unlink(tmp.name)
 
 
 def main():
@@ -163,7 +175,7 @@ def main():
             print(f"  ↪ Rotating {service}/{key} ...")
 
             if args.dry_run:
-                print(f"     DRY-RUN: would set {key}={new_value[:8]}...")
+                print(f"     DRY-RUN: would rotate {service}/{key}")
                 rotation_log["rotations"].append({
                     "service": service, "key": key, "dry_run": True,
                 })

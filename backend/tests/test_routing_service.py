@@ -6,6 +6,7 @@
 from __future__ import annotations
 
 from unittest.mock import AsyncMock, MagicMock, patch
+from urllib.parse import urlparse
 
 import httpx
 import pytest
@@ -528,7 +529,8 @@ class TestPreviewRoute:
 
         osrm_svc._client.get.assert_called_once()
         url = osrm_svc._client.get.call_args[0][0]
-        assert "router.project-osrm.org" in url
+        parsed_url = urlparse(url)
+        assert parsed_url.hostname == "router.project-osrm.org"
 
     # OSRM HTTP error
     @pytest.mark.asyncio

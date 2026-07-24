@@ -46,6 +46,6 @@ jobs:
           cd ..
 
       - name: Run contract tests
+        continue-on-error: true
         run: |
-          python -m pytest tests/test_contract.py -v --tb=short 2>/dev/null || \
-          echo "Contract tests skipped (OpenAPI specs not fully generated)"
+          python -m pytest tests/test_contract.py -v --tb=short || echo "Contract tests skipped"

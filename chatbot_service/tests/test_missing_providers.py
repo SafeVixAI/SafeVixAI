@@ -34,6 +34,8 @@ from providers.together_provider import TogetherProvider
 
 pytestmark = pytest.mark.skip(reason="Provider APIs have been refactored; tests need rewrite for current interfaces")
 
+from urllib.parse import urlparse
+
 
 # ═══════════════════════════════════════════════════════════════════
 # CerebrasProvider
@@ -96,7 +98,7 @@ class TestTogetherProvider:
 
     def test_base_url(self) -> None:
         p = TogetherProvider(api_key="test")
-        assert "together.xyz" in p.base_url()
+        assert "api.together.xyz" in p.base_url() and p.base_url().startswith("https://")
 
     def test_default_model(self) -> None:
         p = TogetherProvider(api_key="test")
@@ -118,7 +120,9 @@ class TestNvidiaNimProvider:
 
     def test_base_url(self) -> None:
         p = NvidiaNimProvider(api_key="test")
-        assert "api.nvcf.nvidia.com" in p.base_url() or "nvidia" in p.base_url()
+        from urllib.parse import urlparse
+        parsed = urlparse(p.base_url())
+        assert parsed.hostname and "nvidia" in parsed.hostname
 
     def test_default_model(self) -> None:
         p = NvidiaNimProvider(api_key="test")
@@ -140,7 +144,9 @@ class TestGitHubModelsProvider:
 
     def test_base_url(self) -> None:
         p = GitHubModelsProvider(api_key="test")
-        assert "github" in p.base_url() or "models" in p.base_url()
+        from urllib.parse import urlparse
+        parsed = urlparse(p.base_url())
+        assert parsed.hostname and ("github" in parsed.hostname or "models" in parsed.hostname)
 
     def test_default_model(self) -> None:
         p = GitHubModelsProvider(api_key="test")
@@ -162,7 +168,9 @@ class TestMistralProvider:
 
     def test_base_url(self) -> None:
         p = MistralProvider(api_key="test")
-        assert "mistral.ai" in p.base_url()
+        from urllib.parse import urlparse
+        parsed = urlparse(p.base_url())
+        assert parsed.hostname and parsed.hostname.endswith("mistral.ai")
 
     def test_default_model(self) -> None:
         p = MistralProvider(api_key="test")

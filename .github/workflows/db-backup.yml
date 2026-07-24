@@ -48,7 +48,7 @@ jobs:
             --file="backups/safevixai_${TIMESTAMP}.sql.gz" \
             --format=custom
 
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@v4
         with:
           name: safevixai-db-backup
           path: backups/
@@ -73,7 +73,7 @@ jobs:
             --file=production_backup.sql
       - name: Upload Production Backup
         if: env.PROD_DATABASE_URL != ''
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v4
         with:
           name: production-db-backup
           path: production_backup.sql

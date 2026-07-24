@@ -14,6 +14,8 @@ jobs:
   backend-load:
     name: Backend Load Test
     runs-on: ubuntu-latest
+
+    if: github.repository == 'SafeVixAI/SafeVixAI'
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
@@ -28,6 +30,8 @@ jobs:
   frontend-load:
     name: Frontend Load Test
     runs-on: ubuntu-latest
+
+    if: github.repository == 'SafeVixAI/SafeVixAI'
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
@@ -42,6 +46,8 @@ jobs:
   chatbot-load:
     name: Chatbot Load Test
     runs-on: ubuntu-latest
+
+    if: github.repository == 'SafeVixAI/SafeVixAI'
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4

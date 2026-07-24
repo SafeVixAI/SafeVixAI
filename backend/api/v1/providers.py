@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2026 SafeVixAI Team
 
-from __future__import annotations
+from __future__ import annotations
 
 import logging
 import uuid

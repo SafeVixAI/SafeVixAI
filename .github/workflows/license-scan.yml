@@ -85,13 +85,14 @@ jobs:
         run: npm ci
 
       - name: Check npm dependency licenses
+        continue-on-error: true
         working-directory: frontend
         run: |
           npx license-checker --json --production \
             --excludePrivatePackages --relativeLicensePath \
-            > ../frontend-licenses.json 2>/dev/null || true
+            > ../frontend-licenses.json 2>&1 || echo "npm license-checker failed (non-blocking)"
           npx license-checker --summary --production \
-            > ../frontend-LICENSES.md 2>/dev/null || true
+            > ../frontend-LICENSES.md 2>&1 || echo "npm license-checker summary failed (non-blocking)"
 
       - name: Upload license reports
         uses: actions/upload-artifact@v4

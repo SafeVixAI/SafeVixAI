@@ -173,7 +173,7 @@ class TestSetupAllowedHosts:
         app.add_middleware.assert_called_once()
         args, kwargs = app.add_middleware.call_args
         allowed_hosts = kwargs.get("allowed_hosts", [])
-        assert "localhost" in allowed_hosts or "127.0.0.1" in allowed_hosts
+        assert any(h in ("localhost", "127.0.0.1") for h in allowed_hosts)
 
     def test_production_multiple_urls(self):
         app = MagicMock()

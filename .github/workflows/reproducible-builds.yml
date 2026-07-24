@@ -23,7 +23,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Build (run 1)
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: ${{ matrix.service.dir }}
           file: ${{ matrix.service.dockerfile }}
@@ -33,7 +33,7 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: Build (run 2 - independent)
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: ${{ matrix.service.dir }}
           file: ${{ matrix.service.dockerfile }}

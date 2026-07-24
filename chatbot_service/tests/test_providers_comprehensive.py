@@ -44,6 +44,7 @@ from providers.circuit_breaker import CircuitBreaker, TokenBucket
 from providers.lang_detection import detect_lang
 from providers.provider_registry import DEFAULT_FALLBACK_CHAIN, create_default_providers, get_provider_configs
 from providers.router import ProviderRouter
+from urllib.parse import urlparse
 
 _BASE_REQUEST = ProviderRequest(message="hello", intent="general", history=[])
 _INDIC_REQUEST = ProviderRequest(message="\u0928\u092e\u0938\u094d\u0924\u0947", intent="general", history=[])
@@ -61,14 +62,16 @@ class TestSimpleProviders:
         p = CerebrasProvider()
         assert p.name == "cerebras"
         assert p.api_key_env() == "CEREBRAS_API_KEY"
-        assert "cerebras.ai" in p.base_url()
+        parsed = urlparse(p.base_url())
+        assert "cerebras.ai" == (parsed.hostname or parsed.netloc)
         assert "llama" in p.default_model()
 
     def test_github_models_provider(self):
         p = GitHubModelsProvider()
         assert p.name == "github"
         assert "GITHUB_TOKEN" in p.api_key_env()
-        assert "azure.com" in p.base_url()
+        parsed = urlparse(p.base_url())
+        assert "models.inference.ai.azure.com" == (parsed.hostname or parsed.netloc)
         assert "Llama" in p.default_model()
         headers = p.extra_headers()
         assert "SafeVixAI" in headers.get("User-Agent", "")
@@ -77,14 +80,16 @@ class TestSimpleProviders:
         p = MistralProvider()
         assert p.name == "mistral"
         assert p.api_key_env() == "MISTRAL_API_KEY"
-        assert "mistral.ai" in p.base_url()
+        parsed = urlparse(p.base_url())
+        assert "api.mistral.ai" == (parsed.hostname or parsed.netloc)
         assert "mistral-small" in p.default_model()
 
     def test_nvidia_nim_provider(self):
         p = NvidiaNimProvider()
         assert p.name == "nvidia"
         assert p.api_key_env() == "NVIDIA_NIM_API_KEY"
-        assert "nvidia.com" in p.base_url()
+        parsed = urlparse(p.base_url())
+        assert any(d in (parsed.hostname or "") for d in ("integrate.api.nvidia.com", "api.nvcf.nvidia.com"))
         headers = p.extra_headers()
         assert "SafeVixAI" in headers.get("User-Agent", "")
 
@@ -92,7 +97,8 @@ class TestSimpleProviders:
         p = OpenRouterProvider()
         assert p.name == "openrouter"
         assert p.api_key_env() == "OPENROUTER_API_KEY"
-        assert "openrouter.ai" in p.base_url()
+        parsed = urlparse(p.base_url())
+        assert "openrouter.ai" == (parsed.hostname or parsed.netloc)
         headers = p.extra_headers()
         assert "SafeVixAI" in headers.get("X-Title", "")
 
@@ -100,7 +106,8 @@ class TestSimpleProviders:
         p = TogetherProvider()
         assert p.name == "together"
         assert p.api_key_env() == "TOGETHER_API_KEY"
-        assert "together.xyz" in p.base_url()
+        parsed = urlparse(p.base_url())
+        assert "api.together.xyz" == (parsed.hostname or parsed.netloc)
 
     def test_provider_constructor_with_env_override(self):
         p = CerebrasProvider(api_key="custom-key", model="custom-model")

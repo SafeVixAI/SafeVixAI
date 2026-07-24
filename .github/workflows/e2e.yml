@@ -54,7 +54,7 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Set up Node 20
+      - name: Set up Node 22
         uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -122,12 +122,13 @@ jobs:
           done
 
       - name: Run E2E tests
+        continue-on-error: true
         working-directory: frontend
         env:
           BACKEND_URL: http://localhost:8000
           CHATBOT_URL: http://localhost:8010
         run: |
-          npx playwright test e2e/ --reporter=github --grep-invert="Visual Regression|visual|Live tracking|Form validation" || true
+          npx playwright test e2e/ --reporter=github --grep-invert="Visual Regression|visual|Live tracking|Form validation" || echo "E2E tests completed with failures (non-blocking)"
 
       - name: Upload test results
         if: failure()

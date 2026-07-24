@@ -47,11 +47,6 @@ jobs:
           queries: security-and-quality
           source-root: ${{ matrix.language == 'javascript-typescript' && 'frontend' || '.' }}
 
-      - name: Autobuild
-        if: ${{ matrix.language != 'python' && matrix.language != 'javascript-typescript' }}
-        uses: github/codeql-action/autobuild@v3
-        continue-on-error: true
-
       - name: Check analysis results
         if: always()
         run: echo "CodeQL analysis completed for ${{ matrix.language }}"

@@ -27,7 +27,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4.2.2
 
       - name: Verify all CI workflows passed
         run: |
@@ -61,7 +61,7 @@ jobs:
           RENDER_DEPLOY_HOOK_CHATBOT: ${{ secrets.RENDER_DEPLOY_HOOK_CHATBOT }}
 
       - name: Create GitHub Deployment
-        uses: actions/github-script@v9
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3  # v9.0.0
         with:
           script: |
             await github.rest.repos.createDeployment({

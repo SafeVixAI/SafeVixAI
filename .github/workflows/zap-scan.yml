@@ -22,7 +22,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: ZAP Scan
-        uses: zaproxy/action-full-scan@v0.11
+        uses: zaproxy/action-full-scan@0f8503472afc3d03963d42a593629622d1a8c13b  # v0.11.0
         with:
           target: ${{ github.event.inputs.target_url || 'https://app.safevixai.com' }}
           rules_file_name: '.zap/rules.tsv'
@@ -32,7 +32,7 @@ jobs:
           allow_issue_writing: true
 
       - name: Upload ZAP report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4.6.2
         if: always()
         with:
           name: zap-report

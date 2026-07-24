@@ -18,10 +18,10 @@ jobs:
     if: github.repository == 'SafeVixAI/SafeVixAI'
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4.2.2
 
       - name: Run k6 load test
-        uses: grafana/k6-action@v0.3.1
+        uses: grafana/k6-action@e4714b734f2b0afaabeb7b4a69142745548ab9ec  # v0.3.1
         with:
           filename: tests/load/backend_api_load.js
         env:
@@ -34,10 +34,10 @@ jobs:
     if: github.repository == 'SafeVixAI/SafeVixAI'
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4.2.2
 
       - name: Run k6 load test
-        uses: grafana/k6-action@v0.3.1
+        uses: grafana/k6-action@e4714b734f2b0afaabeb7b4a69142745548ab9ec  # v0.3.1
         with:
           filename: tests/load/frontend_load.js
         env:
@@ -50,10 +50,10 @@ jobs:
     if: github.repository == 'SafeVixAI/SafeVixAI'
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4.2.2
 
       - name: Run k6 load test
-        uses: grafana/k6-action@v0.3.1
+        uses: grafana/k6-action@e4714b734f2b0afaabeb7b4a69142745548ab9ec  # v0.3.1
         with:
           filename: tests/load/chatbot_api_load.js
         env:

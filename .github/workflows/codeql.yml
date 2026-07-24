@@ -38,10 +38,10 @@ jobs:
           - python
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4.2.2
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
+        uses: github/codeql-action/init@4187e74d05793876e9989daffde9c3e66b4acd07  # v3.28.16
         with:
           languages: ${{ matrix.language }}
           queries: security-and-quality
@@ -52,6 +52,6 @@ jobs:
         run: echo "CodeQL analysis completed for ${{ matrix.language }}"
 
       - name: Perform CodeQL analysis
-        uses: github/codeql-action/analyze@v3
+        uses: github/codeql-action/analyze@4187e74d05793876e9989daffde9c3e66b4acd07  # v3.28.16
         with:
           category: /language:${{ matrix.language }}

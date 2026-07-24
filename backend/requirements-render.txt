@@ -1,29 +1,29 @@
 # Lightweight Render deployment dependencies.
 # RAG ingestion, data science, and local ML packages stay in requirements.txt for local scripts.
 
-fastapi==0.136.3
-uvicorn[standard]==0.49.0
-slowapi==0.1.9
+fastapi==0.139.2
+uvicorn[standard]==0.51.0
+slowapi==0.1.10
 
-sqlalchemy[asyncio]==2.0.50
+sqlalchemy[asyncio]==2.0.51
 asyncpg==0.31.0
-geoalchemy2==0.19.0
+geoalchemy2==0.20.0
 shapely==2.1.2
-Pillow==12.2.0
+Pillow==12.3.0
 
 
 
-redis[hiredis]==8.0.0
+redis[hiredis]==8.0.1
 httpx==0.28.1
 aiofiles==25.1.0
 
-PyJWT[crypto]>=2.12.0,<3.0
-pydantic==2.13.2
-pydantic-settings==2.13.1
+PyJWT[crypto]>=2.13.0,<3.0
+pydantic==2.13.4
+pydantic-settings==2.14.2
 python-dotenv==1.2.2
 python-multipart==0.0.32
 
-mcp==1.27.2
-sentry-sdk[fastapi]==2.61.0
+mcp==1.28.1
+sentry-sdk[fastapi]==2.66.1
 prometheus-client>=0.25.0
 

@@ -12,6 +12,10 @@ on:
         required: true
         default: 'https://app.safevixai.com'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
   issues: write
@@ -38,3 +42,16 @@ jobs:
           name: zap-report
           path: zap_*.html
           retention-days: 90
+
+  notify-failure:
+    if: always() && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled'))
+    needs: [zap-scan]
+    uses: ./.github/workflows/notify-failure.yml
+    with:
+      workflow-name: 'OWASP ZAP Scan'
+      job-name: zap-scan
+      run-id: ${{ github.run_id }}
+      conclusion: failure
+    secrets:
+      SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+

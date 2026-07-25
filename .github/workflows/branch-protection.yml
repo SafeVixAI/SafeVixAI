@@ -6,6 +6,10 @@ on:
     types: [opened, synchronize, reopened]
     branches: [main, develop]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
   pull-requests: write
@@ -48,3 +52,16 @@ jobs:
             echo "::error title=Invalid PR title::PR title must follow conventional commits format (e.g. 'feat: add user login')"
             exit 1
           fi
+
+  notify-failure:
+    if: always() && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled'))
+    needs: [check-protection]
+    uses: ./.github/workflows/notify-failure.yml
+    with:
+      workflow-name: 'Branch Protection Checks'
+      job-name: check-protection
+      run-id: ${{ github.run_id }}
+      conclusion: failure
+    secrets:
+      SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+

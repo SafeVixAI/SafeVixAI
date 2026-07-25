@@ -16,6 +16,10 @@ on:
         required: true
         default: '100'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
@@ -62,3 +66,16 @@ jobs:
           name: k6-load-results
           path: results.json
           retention-days: 30
+
+  notify-failure:
+    if: always() && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled'))
+    needs: [k6-smoke, k6-load]
+    uses: ./.github/workflows/notify-failure.yml
+    with:
+      workflow-name: 'Load Test'
+      job-name: k6-load
+      run-id: ${{ github.run_id }}
+      conclusion: failure
+    secrets:
+      SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+

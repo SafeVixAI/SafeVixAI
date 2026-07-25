@@ -9,6 +9,10 @@ on:
       - 'docs/SafeVixAI_MASTER.docx'
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: write
   actions: read
@@ -19,6 +23,7 @@ jobs:
   update:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    environment: production
 
     steps:
       - name: Checkout repository
@@ -62,3 +67,16 @@ jobs:
           branch: "docs-auto-update-${{ github.run_id }}"
           base: "main"
           add-paths: "docs/SafeVixAI_MASTER.docx"
+
+  notify-failure:
+    if: always() && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled'))
+    needs: [update]
+    uses: ./.github/workflows/notify-failure.yml
+    with:
+      workflow-name: 'Update Master Document'
+      job-name: update
+      run-id: ${{ github.run_id }}
+      conclusion: failure
+    secrets:
+      SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+

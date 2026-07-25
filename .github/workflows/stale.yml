@@ -6,6 +6,10 @@ on:
   schedule:
     - cron: '0 6 * * 1'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
   issues: write
@@ -46,3 +50,16 @@ jobs:
           exempt-pr-labels: security, dependencies, pinned
 
           operations-per-run: 100
+
+  notify-failure:
+    if: always() && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled'))
+    needs: [stale]
+    uses: ./.github/workflows/notify-failure.yml
+    with:
+      workflow-name: 'Stale Issue Management'
+      job-name: stale
+      run-id: ${{ github.run_id }}
+      conclusion: failure
+    secrets:
+      SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+

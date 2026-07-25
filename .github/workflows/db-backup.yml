@@ -6,6 +6,10 @@ on:
     - cron: '0 6 * * *'
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
@@ -131,3 +135,16 @@ jobs:
       - name: Notify restore test result
         if: failure()
         run: echo "⚠️ Backup restore verification failed — backup may be corrupted"
+
+  notify-failure:
+    if: always() && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled'))
+    needs: [backup, backup-production, restore-test]
+    uses: ./.github/workflows/notify-failure.yml
+    with:
+      workflow-name: 'Database Backup'
+      job-name: restore-test
+      run-id: ${{ github.run_id }}
+      conclusion: failure
+    secrets:
+      SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+

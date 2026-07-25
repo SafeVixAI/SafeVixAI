@@ -7,13 +7,37 @@ on:
       - main
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: write
 
 jobs:
+  validate-commits:
+    name: Validate Signed Commits
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4.2.2
+        with:
+          fetch-depth: 0
+      - name: Verify HEAD commit is signed
+        run: |
+          COMMIT_SIGNATURE=$(git verify-commit HEAD 2>&1 || true)
+          if echo "$COMMIT_SIGNATURE" | grep -q "gpg: Signature made"; then
+            echo "HEAD commit is signed"
+          else
+            echo "HEAD commit is NOT signed"
+            exit 1
+          fi
+
   deploy:
+    needs: [validate-commits]
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    environment: production
     steps:
       - name: Checkout code
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4.2.2
@@ -67,3 +91,16 @@ jobs:
         env:
           PLAUSIBLE_DOMAIN: ${{ secrets.PLAUSIBLE_DOMAIN || '' }}
           PLAUSIBLE_SRC: ${{ secrets.PLAUSIBLE_SRC || '' }}
+
+  notify-failure:
+    if: always() && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled'))
+    needs: [validate-commits, deploy]
+    uses: ./.github/workflows/notify-failure.yml
+    with:
+      workflow-name: 'Deploy Enterprise Docs'
+      job-name: deploy
+      run-id: ${{ github.run_id }}
+      conclusion: failure
+    secrets:
+      SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+

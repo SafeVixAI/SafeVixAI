@@ -7,6 +7,10 @@ on:
   workflow_call:
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
@@ -52,3 +56,16 @@ jobs:
             echo "  Run 1: $DIGEST1"
             echo "  Run 2: $DIGEST2"
           fi
+
+  notify-failure:
+    if: always() && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled'))
+    needs: [verify]
+    uses: ./.github/workflows/notify-failure.yml
+    with:
+      workflow-name: 'Reproducible Builds'
+      job-name: verify
+      run-id: ${{ github.run_id }}
+      conclusion: failure
+    secrets:
+      SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+

@@ -10,6 +10,10 @@ on:
         required: true
         default: 'http://localhost:8000'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
   checks: write
@@ -91,3 +95,16 @@ jobs:
       - name: Circuit breaker check
         run: |
           python -c "import httpx, os; r = httpx.get(os.environ['BACKEND_URL'] + '/health', timeout=10); print('Circuit breaker:', 'OK' if r.status_code == 200 else r.status_code)" 2>&1 || echo "Circuit breaker check skipped"
+
+  notify-failure:
+    if: always() && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled'))
+    needs: [chaos-test, redis-failover, db-connection-pool, circuit-breaker]
+    uses: ./.github/workflows/notify-failure.yml
+    with:
+      workflow-name: 'Chaos Engineering Tests'
+      job-name: circuit-breaker
+      run-id: ${{ github.run_id }}
+      conclusion: failure
+    secrets:
+      SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+

@@ -10,6 +10,10 @@ on:
   pull_request:
     branches: [main]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
   pull-requests: write
@@ -102,3 +106,16 @@ jobs:
             *-licenses.json
             *-LICENSES.md
           retention-days: 90
+
+  notify-failure:
+    if: always() && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled'))
+    needs: [backend, chatbot, frontend]
+    uses: ./.github/workflows/notify-failure.yml
+    with:
+      workflow-name: 'License Scan'
+      job-name: frontend
+      run-id: ${{ github.run_id }}
+      conclusion: failure
+    secrets:
+      SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+

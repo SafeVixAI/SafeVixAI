@@ -17,6 +17,10 @@ on:
   workflow_dispatch:
     # Allow manual triggering of the translation generation pipeline
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: write
   pull-requests: write
@@ -79,3 +83,16 @@ jobs:
           add-paths: |
             frontend/i18n/locales/**
             frontend/public/offline-data/translations/**
+
+  notify-failure:
+    if: always() && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled'))
+    needs: [i18n-translate]
+    uses: ./.github/workflows/notify-failure.yml
+    with:
+      workflow-name: 'Automated Weekly i18n Translation Sync'
+      job-name: i18n-translate
+      run-id: ${{ github.run_id }}
+      conclusion: failure
+    secrets:
+      SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+

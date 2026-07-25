@@ -11,6 +11,10 @@ on:
     paths: ['backend/migrations/versions/**', 'backend/models/**']
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
   checks: write
@@ -80,3 +84,16 @@ jobs:
           fi
           TOTAL=$(grep -h 'revision\s*=' migrations/versions/*.py 2>/dev/null | wc -l)
           echo "All $TOTAL revision IDs unique"
+
+  notify-failure:
+    if: always() && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled'))
+    needs: [migration-check]
+    uses: ./.github/workflows/notify-failure.yml
+    with:
+      workflow-name: 'Migration Safety Check'
+      job-name: migration-check
+      run-id: ${{ github.run_id }}
+      conclusion: failure
+    secrets:
+      SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+

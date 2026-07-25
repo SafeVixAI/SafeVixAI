@@ -19,6 +19,10 @@ on:
           - generate
           - update
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: write
   pull-requests: write
@@ -131,3 +135,16 @@ jobs:
             DESIGN.md
             SETUP.md
             SKILL.md
+
+  notify-failure:
+    if: always() && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled'))
+    needs: [wiki-sync]
+    uses: ./.github/workflows/notify-failure.yml
+    with:
+      workflow-name: 'Wiki Documentation Sync'
+      job-name: wiki-sync
+      run-id: ${{ github.run_id }}
+      conclusion: failure
+    secrets:
+      SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+

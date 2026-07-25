@@ -13,6 +13,10 @@ on:
     branches:
       - "main"
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
@@ -103,3 +107,16 @@ jobs:
           fi
         env:
           CHATBOT_URL: ${{ secrets.CHATBOT_URL || 'https://safevixai-chatbot.onrender.com' }}
+
+  notify-failure:
+    if: always() && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled'))
+    needs: [smoke-test]
+    uses: ./.github/workflows/notify-failure.yml
+    with:
+      workflow-name: 'Post-Deploy Smoke Tests'
+      job-name: smoke-test
+      run-id: ${{ github.run_id }}
+      conclusion: failure
+    secrets:
+      SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+

@@ -14,6 +14,10 @@ on:
         type: string
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   actions: read
   attestations: write
@@ -58,3 +62,16 @@ jobs:
           gh attestation verify \
             --repo ${{ github.repository }} \
             ghcr.io/${{ github.repository }}/backend:latest 2>&1 | head -5
+
+  notify-failure:
+    if: always() && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled'))
+    needs: [attest, container-attest]
+    uses: ./.github/workflows/notify-failure.yml
+    with:
+      workflow-name: 'SLSA Provenance'
+      job-name: container-attest
+      run-id: ${{ github.run_id }}
+      conclusion: failure
+    secrets:
+      SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+

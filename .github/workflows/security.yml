@@ -11,6 +11,10 @@ on:
   schedule:
     - cron: '0 2 * * 0' # Every Sunday at 2 AM UTC
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
   security-events: write
@@ -106,3 +110,16 @@ jobs:
         with:
           sarif_file: 'trivy-results.sarif'
         continue-on-error: true
+
+  notify-failure:
+    if: always() && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled'))
+    needs: [gitleaks, dependency-audit, sbom, trivy]
+    uses: ./.github/workflows/notify-failure.yml
+    with:
+      workflow-name: 'Security Scan'
+      job-name: trivy
+      run-id: ${{ github.run_id }}
+      conclusion: failure
+    secrets:
+      SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+

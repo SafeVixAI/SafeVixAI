@@ -6,6 +6,10 @@ on:
   schedule:
     - cron: '0 6 * * 0'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   actions: write
   contents: read
@@ -20,3 +24,16 @@ jobs:
         with:
           age: 7 days
           skip-tags: true
+
+  notify-failure:
+    if: always() && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled'))
+    needs: [cleanup]
+    uses: ./.github/workflows/notify-failure.yml
+    with:
+      workflow-name: 'Artifact Cleanup'
+      job-name: cleanup
+      run-id: ${{ github.run_id }}
+      conclusion: failure
+    secrets:
+      SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+

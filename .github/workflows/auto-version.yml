@@ -61,3 +61,16 @@ jobs:
           git commit -m "chore: bump version to ${{ steps.version.outputs.next }}"
           git tag -a "v${{ steps.version.outputs.next }}" -m "v${{ steps.version.outputs.next }}"
           git push origin main --tags
+
+  notify-failure:
+    if: always() && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled'))
+    needs: [tag]
+    uses: ./.github/workflows/notify-failure.yml
+    with:
+      workflow-name: 'Auto Version Tag'
+      job-name: tag
+      run-id: ${{ github.run_id }}
+      conclusion: failure
+    secrets:
+      SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+

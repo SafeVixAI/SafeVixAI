@@ -11,6 +11,10 @@ on:
     paths: ['terraform/**']
 
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
@@ -19,7 +23,28 @@ env:
   AWS_REGION: ap-south-1
 
 jobs:
+  validate-commits:
+    name: Validate Signed Commits
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4.2.2
+        with:
+          fetch-depth: 0
+      - name: Verify HEAD commit is signed
+        run: |
+          COMMIT_SIGNATURE=$(git verify-commit HEAD 2>&1 || true)
+          if echo "$COMMIT_SIGNATURE" | grep -q "gpg: Signature made"; then
+            echo "HEAD commit is signed"
+          elif [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "Skipping signed-commit check for pull_request"
+          else
+            echo "HEAD commit is NOT signed"
+            exit 1
+          fi
+
   validate:
+    needs: [validate-commits]
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -125,3 +150,16 @@ jobs:
       - name: Terraform apply
         working-directory: terraform
         run: terraform apply -no-color tfplan
+
+  notify-failure:
+    if: always() && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled'))
+    needs: [validate-commits, validate, plan, apply]
+    uses: ./.github/workflows/notify-failure.yml
+    with:
+      workflow-name: 'Terraform'
+      job-name: apply
+      run-id: ${{ github.run_id }}
+      conclusion: failure
+    secrets:
+      SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+

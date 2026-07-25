@@ -24,6 +24,10 @@ on:
   schedule:
     - cron: '21 8 * * 4'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
@@ -103,3 +107,16 @@ jobs:
             results.sarif
             /tmp/sarif-runs/*.sarif
           retention-days: 90
+
+  notify-failure:
+    if: always() && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled'))
+    needs: [codacy-security-scan]
+    uses: ./.github/workflows/notify-failure.yml
+    with:
+      workflow-name: 'Codacy Security Scan'
+      job-name: codacy-security-scan
+      run-id: ${{ github.run_id }}
+      conclusion: failure
+    secrets:
+      SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+

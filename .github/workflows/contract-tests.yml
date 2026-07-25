@@ -11,6 +11,10 @@ on:
   push:
     branches: [main]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
   checks: write
@@ -49,3 +53,16 @@ jobs:
         continue-on-error: true
         run: |
           python -m pytest tests/test_contract.py -v --tb=short || echo "Contract tests skipped"
+
+  notify-failure:
+    if: always() && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled'))
+    needs: [contract-test]
+    uses: ./.github/workflows/notify-failure.yml
+    with:
+      workflow-name: 'Contract Tests'
+      job-name: contract-test
+      run-id: ${{ github.run_id }}
+      conclusion: failure
+    secrets:
+      SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+

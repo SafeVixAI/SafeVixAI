@@ -13,6 +13,10 @@ on:
   pull_request:
     branches: [ "main" ]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
@@ -89,3 +93,16 @@ jobs:
           else
             echo "✅ No localhost URLs in render.yaml"
           fi
+
+  notify-failure:
+    if: always() && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled'))
+    needs: [render-config-check]
+    uses: ./.github/workflows/notify-failure.yml
+    with:
+      workflow-name: 'Render Deploy Readiness'
+      job-name: render-config-check
+      run-id: ${{ github.run_id }}
+      conclusion: failure
+    secrets:
+      SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+

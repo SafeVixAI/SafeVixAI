@@ -7,6 +7,10 @@ on:
   schedule:
     - cron: '0 2 * * 1'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
@@ -58,3 +62,16 @@ jobs:
           filename: tests/load/chatbot_api_load.js
         env:
           CHATBOT_URL: ${{ secrets.CHATBOT_URL || 'https://safevixai-chatbot.onrender.com' }}
+
+  notify-failure:
+    if: always() && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled'))
+    needs: [backend-load, frontend-load, chatbot-load]
+    uses: ./.github/workflows/notify-failure.yml
+    with:
+      workflow-name: 'Load Testing'
+      job-name: chatbot-load
+      run-id: ${{ github.run_id }}
+      conclusion: failure
+    secrets:
+      SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+

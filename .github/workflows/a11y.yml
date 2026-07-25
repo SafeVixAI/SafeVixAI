@@ -106,3 +106,15 @@ jobs:
           name: pa11y-report
           path: pa11y-output.txt
           retention-days: 30
+
+  notify-failure:
+    if: always() && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled'))
+    needs: [a11y]
+    uses: ./.github/workflows/notify-failure.yml
+    with:
+      workflow-name: 'Accessibility (a11y)'
+      job-name: a11y
+      run-id: ${{ github.run_id }}
+      conclusion: failure
+    secrets:
+      SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}

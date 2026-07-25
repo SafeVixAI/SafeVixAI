@@ -7,6 +7,10 @@ on:
     branches: [main]
     paths: ['frontend/**']
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
   deployments: write
@@ -42,3 +46,16 @@ jobs:
           LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
           NEXT_PUBLIC_BACKEND_URL: http://localhost:8000
           NEXT_PUBLIC_CHATBOT_URL: http://localhost:8010
+
+  notify-failure:
+    if: always() && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled'))
+    needs: [lighthouse]
+    uses: ./.github/workflows/notify-failure.yml
+    with:
+      workflow-name: 'Lighthouse CI'
+      job-name: lighthouse
+      run-id: ${{ github.run_id }}
+      conclusion: failure
+    secrets:
+      SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+

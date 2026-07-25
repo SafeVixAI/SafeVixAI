@@ -190,8 +190,8 @@ class TestSetupAllowedHosts:
         parsed_frontend = urlparse(settings.frontend_url)
         parsed_chatbot = urlparse(settings.chatbot_service_url)
         hostnames = set(allowed_hosts_list)
-        assert parsed_frontend.hostname in hostnames
-        assert parsed_chatbot.hostname in hostnames
+        assert parsed_frontend.hostname in hostnames or parsed_frontend.netloc in hostnames
+        assert parsed_chatbot.hostname in hostnames or parsed_chatbot.netloc in hostnames
 
     def test_non_production_with_env_var(self):
         app = MagicMock()

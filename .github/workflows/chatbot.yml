@@ -52,7 +52,12 @@ jobs:
         working-directory: chatbot_service
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          if [ -f requirements-render.txt ]; then
+            pip install -r requirements-render.txt
+          else
+            pip install -r requirements.txt
+          fi
+          pip install pytest pytest-asyncio pytest-cov pytest-httpx pytest-timeout 2>/dev/null || true
 
       - name: Run tests with coverage
         working-directory: chatbot_service

@@ -76,16 +76,6 @@ def app(monkeypatch):
 
     application.dependency_overrides[get_db] = override_db
     yield application
-    # Cleanup: close engine to prevent event loop contamination
-    import asyncio
-    try:
-        loop = asyncio.get_event_loop()
-        if loop.is_running():
-            loop.create_task(cleanup_engine())
-        elif not loop.is_closed():
-            loop.run_until_complete(cleanup_engine())
-    except Exception:
-        pass
 
 
 async def cleanup_engine():

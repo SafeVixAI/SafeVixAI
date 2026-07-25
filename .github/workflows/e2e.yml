@@ -76,7 +76,11 @@ jobs:
       - name: Install chatbot dependencies
         run: |
           cd chatbot_service
-          pip install -r requirements.txt
+          if [ -f requirements-render.txt ]; then
+            pip install -r requirements-render.txt
+          else
+            pip install -r requirements.txt
+          fi
           pip install uvicorn httpx
 
       - name: Install frontend dependencies

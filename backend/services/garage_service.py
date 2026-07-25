@@ -172,7 +172,7 @@ class GarageService:
         Uses high-performance Redis/in-memory caching and resilient circuit-breaker fallbacks.
         """
         # Ensure audits are properly tracked
-        logger.info(f"Initiating RTO registry synchronization for User: {user_id}, Vehicle: {vehicle_number}")
+        logger.info("Initiating RTO registry synchronization for User: %s, Vehicle: %s", user_id, vehicle_number)
 
         # 1. Determine targets
         if vehicle_number is None:
@@ -182,10 +182,13 @@ class GarageService:
             # Normalize and validate plate structure
             norm_number = vehicle_number.strip().upper()
             if not INDIAN_PLATE_PATTERN.match(norm_number):
-                logger.warning(f"Failed RTO sync: invalid Indian plate format '{vehicle_number}'")
-                raise ServiceValidationError(
+                logger.warning("Failed RTO sync: invalid Indian plate format '%s'", vehicle_number)
+                msg = (
                     f"Invalid Indian vehicle registration plate format: '{vehicle_number}'. "
                     "Expected format like TN-01-AB-1234, DL 03 CD 5678, or MH02EF9012."
+                )
+                raise ServiceValidationError(
+                    msg
                 )
             target_numbers = [norm_number]
 
@@ -200,10 +203,10 @@ class GarageService:
                 try:
                     cached_data = await cache.get_json(cache_key)
                 except Exception as e:
-                    logger.error(f"Redis cache lookup failed for {plate}: {str(e)}")
+                    logger.error("Redis cache lookup failed for %s: %s", plate, str(e))
 
             if cached_data is not None:
-                logger.info(f"Cache hit for vehicle registry record {plate}")
+                logger.info("Cache hit for vehicle registry record %s", plate)
                 vehicles_list.append(
                     VehicleGarageItem(
                         id=uuid.UUID(cached_data["id"]),
@@ -222,7 +225,7 @@ class GarageService:
             # 3. Simulate remote Parivahan RTO registry API latency & resilience
             state_code = cls._parse_state_code(plate)
             authority = STATE_AUTHORITIES.get(state_code, "Ministry of Road Transport and Highways")
-            logger.info(f"Connecting to upstream registry: {authority} for {plate}")
+            logger.info("Connecting to upstream registry: %s for %s", authority, plate)
 
             try:
                 # Simulate small dynamic network processing latency
@@ -267,9 +270,9 @@ class GarageService:
                 try:
                     # Cache record for 1 hour
                     await cache.set_json(cache_key, serializable, ttl_seconds=3600)
-                    logger.info(f"Successfully cached vehicle registry record {plate} in Redis")
+                    logger.info("Successfully cached vehicle registry record %s in Redis", plate)
                 except Exception as e:
-                    logger.error(f"Failed to cache vehicle {plate}: {str(e)}")
+                    logger.error("Failed to cache vehicle %s: %s", plate, str(e))
 
             vehicles_list.append(item)
 

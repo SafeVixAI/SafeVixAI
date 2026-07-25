@@ -4,13 +4,13 @@
 
 from __future__ import annotations
 
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from providers.router import ProviderRouter
-from providers.base import TemplateProvider
-from config import Settings
+import pytest
 
+from config import Settings
+from providers.base import TemplateProvider
+from providers.router import ProviderRouter
 
 pytestmark = pytest.mark.asyncio
 

@@ -3,7 +3,10 @@
 
 from __future__ import annotations
 
+import logging
+
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, Request, UploadFile
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.audit import AuditEvent, AuditLog
@@ -11,6 +14,7 @@ from core.database import get_db
 from core.limiter import limiter
 from core.rbac import Role, require_role
 from core.security import get_current_user_optional
+from models.road_issue import RoadIssue
 from models.schemas import (
     AuthorityPreviewResponse,
     ComplaintEventItem,
@@ -22,6 +26,8 @@ from models.schemas import (
 )
 from services.exceptions import ServiceValidationError
 from services.roadwatch_service import ALL_ROAD_ISSUE_STATUSES, RoadWatchService
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix='/api/v1/roads', tags=['RoadWatch'])
 
@@ -226,7 +232,6 @@ async def get_issue_details(
     """
     import uuid
 
-    from sqlalchemy import func, select
     try:
         report_uuid = uuid.UUID(issue_uuid)
     except ValueError as exc:
@@ -388,7 +393,7 @@ async def resolve_road_issue(
     """
     Mark a complaint resolved with attached resolution notes and evidence.
 
-    Restricted to authorized field officers or municipal operator roles. Saves evidence 
+    Restricted to authorized field officers or municipal operator roles. Saves evidence
     photos to isolated media storage and marks complaint states as 'resolved'.
 
     Args:
@@ -453,7 +458,7 @@ async def verify_road_report(
     """
     Verify a road report and trigger downstream geographic network synchronization.
 
-    Restricted to operator roles. Upon validation, the report is marked as 'verified', 
+    Restricted to operator roles. Upon validation, the report is marked as 'verified',
     submitted as a hazard node to OpenStreetMap, and added to the Waze CIFS feeds.
 
     Args:

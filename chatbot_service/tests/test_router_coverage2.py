@@ -23,7 +23,6 @@ from providers.base import (
 )
 from providers.router import ProviderRouter
 
-
 _REQUEST = ProviderRequest(
     message="What is the fine for drunk driving?",
     intent="challan",

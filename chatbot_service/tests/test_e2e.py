@@ -63,7 +63,7 @@ class FakeVectorStore:
 
     async def ensure_index(self):
         return []
-        
+
     async def build_index(self, *, force=False):
         return []
 

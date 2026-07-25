@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import csv
 import logging
+import re
 from pathlib import Path
 
 from models.schemas import FinePredictionRequest, FinePredictionResponse
@@ -86,7 +87,7 @@ class FinePredictionService:
                                 except ValueError:
                                     logger.debug("Fine prediction — invalid numeric value in state override: %s", norm_v_code)
             except Exception as e:
-                logger.error(f"Error parsing state fine overrides: {str(e)}")
+                logger.error("Error parsing state fine overrides: %s", str(e))
 
         return fines
 
@@ -117,7 +118,7 @@ class FinePredictionService:
                 ]
             )
 
-        logger.info(f"Analyzing driving telemetry risk profile for Vehicle: {payload.vehicle_number}, State: {state}")
+        logger.info("Analyzing driving telemetry risk profile for Vehicle: %s, State: %s", payload.vehicle_number, state)
 
         # 1. Multi-factor Exponential Risk Score calculation
         regional_factor = REGIONAL_RISK_FACTORS.get(state, 1.0)

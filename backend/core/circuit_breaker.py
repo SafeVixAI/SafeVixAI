@@ -92,9 +92,12 @@ class CircuitBreaker:
 
         if not self._should_allow():
             self._total_failures += 1
-            raise CircuitBreakerOpenError(
+            msg = (
                 f"Circuit breaker '{self.name}' is OPEN. "
                 f"Retry after {self._recovery_timeout - (time.time() - self._last_state_change):.0f}s"
+            )
+            raise CircuitBreakerOpenError(
+                msg
             )
 
         try:
@@ -122,7 +125,7 @@ class CircuitBreaker:
         if self._state == CircuitState.CLOSED:
             self._failure_count = 0
 
-    def _on_failure(self, exception: Exception) -> None:
+    def _on_failure(self, _exception: Exception) -> None:
         self._total_failures += 1
         self._failure_count += 1
         self._last_failure_time = time.time()

@@ -37,12 +37,12 @@ GEO_VERIFY_RADIUS_METERS = 200  # Officer must be within 200m of complaint
 
 
 def _haversine_meters(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
-    R = 6371000
+    r = 6371000
     phi1, phi2 = math.radians(lat1), math.radians(lat2)
     dp = math.radians(lat2 - lat1)
     dl = math.radians(lon2 - lon1)
     a = math.sin(dp / 2) ** 2 + math.cos(phi1) * math.cos(phi2) * math.sin(dl / 2) ** 2
-    return R * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+    return r * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
 
 
 class StartWorkRequest(BaseModel):

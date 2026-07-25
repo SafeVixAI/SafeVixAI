@@ -40,7 +40,4 @@ class PIIDetector:
         )
 
     def has_pii(self, text: str) -> bool:
-        for pattern in self._patterns.values():
-            if pattern.search(text):
-                return True
-        return False
+        return any(pattern.search(text) for pattern in self._patterns.values())

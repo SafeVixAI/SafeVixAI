@@ -9,7 +9,6 @@ Open-Meteo is free with no API key. OWM is the fallback if Open-Meteo fails.
 
 from __future__ import annotations
 
-import asyncio
 import json
 import logging
 
@@ -18,10 +17,10 @@ import httpx
 from config import Settings
 
 logger = logging.getLogger(__name__)
-from tools.open_meteo import OpenMeteoClient
+from tenacity import retry, retry_if_exception, stop_after_attempt, wait_exponential  # noqa: E402
 
+from tools.open_meteo import OpenMeteoClient  # noqa: E402
 
-from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception
 
 def is_retriable_http(exc: BaseException) -> bool:
     if isinstance(exc, httpx.HTTPStatusError):

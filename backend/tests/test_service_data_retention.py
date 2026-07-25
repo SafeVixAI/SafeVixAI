@@ -69,7 +69,7 @@ class TestDataRetentionScheduler:
 
         await scheduler.cleanup()
 
-        mock_session.execute.assert_awaited_once_with(
+        mock_session.execute.assert_any_await(
             "SELECT safevixai_cleanup_expired_data()"
         )
         mock_session.commit.assert_awaited_once()

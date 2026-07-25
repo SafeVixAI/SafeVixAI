@@ -11,15 +11,13 @@ import httpx
 import pytest
 
 from providers.base import ProviderRequest, ProviderUnavailableError
-from providers.gemini_provider import GeminiProvider, GEMINI_BASE
+from providers.gemini_provider import GEMINI_BASE, GeminiProvider
 from providers.groq_provider import (
-    GroqProvider,
-    _estimate_tokens,
-    _estimate_request_tokens,
     _GROQ_TPM_GUARD,
+    GroqProvider,
+    _estimate_request_tokens,
+    _estimate_tokens,
 )
-
-
 
 
 @pytest.fixture

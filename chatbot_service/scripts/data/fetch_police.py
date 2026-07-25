@@ -4,15 +4,22 @@
 from __future__ import annotations
 
 import logging
+
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 LOGGER = logging.getLogger(__name__)
 
 
 from pathlib import Path
+
 ROOT_DIR = Path(__file__).resolve().parents[2]
 
-from _overpass_utils import build_arg_parser, build_india_query, fetch_elements, normalize_row, write_rows
-
+from _overpass_utils import (
+    build_arg_parser,
+    build_india_query,
+    fetch_elements,
+    normalize_row,
+    write_rows,
+)
 
 DEFAULT_OUTPUT = ROOT_DIR / 'chatbot_service' / 'data' / 'emergency' / 'police_stations.csv'
 SELECTORS = [

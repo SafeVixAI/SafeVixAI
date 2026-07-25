@@ -19,7 +19,7 @@ _MAX_AUDIO_BYTES = 10 * 1024 * 1024
 _ALLOWED_CONTENT_TYPES = {'audio/wav', 'audio/mpeg', 'audio/ogg', 'audio/webm', 'audio/flac'}
 
 
-from limiter import limiter
+from limiter import limiter  # noqa: E402
 
 
 def get_speech_service(request: Request) -> IndicSeamlessService:
@@ -69,7 +69,7 @@ async def translate_speech(
     except RuntimeError as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
     except Exception as exc:
-        logger.error('Speech translation error: %s', exc, exc_info=True)
+        logger.exception('Speech translation error: %s', exc)
         raise HTTPException(status_code=500, detail='Speech translation failed.') from exc
 
     payload = speech_result_to_dict(result)

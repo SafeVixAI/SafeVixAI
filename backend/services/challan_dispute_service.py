@@ -67,7 +67,7 @@ class ChallanDisputeService:
         Cites precise Motor Vehicles Act sections, state motor rules, supreme court case precedents,
         and provides evidence checklists and Virtual Court filing instructions.
         """
-        logger.info(f"Formulating formal legal dispute appeal for Challan Ref: {payload.challan_ref}")
+        logger.info("Formulating formal legal dispute appeal for Challan Ref: %s", payload.challan_ref)
 
         dispute_ref = f"DSP-{uuid.uuid4().hex[:8].upper()}"
         code = payload.violation_code.strip()

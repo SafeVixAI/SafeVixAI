@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 import json
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from cache.llm_cache import LLMResponseCache, CacheEntry
+import pytest
+
+from cache.llm_cache import CacheEntry, LLMResponseCache
 
 
 class TestCacheEntry:

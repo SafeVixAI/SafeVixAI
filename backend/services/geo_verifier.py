@@ -17,12 +17,12 @@ logger = logging.getLogger("safevixai.geo_verifier")
 
 def _haversine_m(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     """Calculate the great-circle distance between two points in meters."""
-    R = 6371000.0  # Radius of earth in meters
+    r = 6371000.0  # Radius of earth in meters
     phi1, phi2 = math.radians(lat1), math.radians(lat2)
     dp = math.radians(lat2 - lat1)
     dl = math.radians(lon2 - lon1)
     a = math.sin(dp / 2) ** 2 + math.cos(phi1) * math.cos(phi2) * math.sin(dl / 2) ** 2
-    return R * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+    return r * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
 
 
 class GeoVerifier:
@@ -41,7 +41,7 @@ class GeoVerifier:
     ) -> tuple[bool, float]:
         """
         Verify that the officer's resolution location is close enough to the complaint.
-        
+
         Returns:
             (is_verified, distance_meters)
         """
@@ -81,7 +81,7 @@ class GeoVerifier:
     ) -> tuple[bool, str]:
         """
         Compare the GPS coordinates inside the photo EXIF headers with the complaint location.
-        
+
         Returns:
             (is_verified, message)
         """

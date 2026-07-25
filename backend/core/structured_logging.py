@@ -95,7 +95,8 @@ class TimingContext:
             self.duration_ms = (time.perf_counter() - self.start_time) * 1000
             self.logger.log(
                 self.level,
-                f"{self.message} completed in {self.duration_ms:.2f}ms",
+                "%s completed in %.2fms",
+                self.message, self.duration_ms,
                 extra={"duration_ms": round(self.duration_ms, 2)},
             )
 
@@ -105,7 +106,7 @@ def setup_structured_logging(
     json_format: bool = True,
 ) -> None:
     """Setup structured logging for the application.
-    
+
     Args:
         level: Logging level
         json_format: Use JSON format (True) or text format (False)
@@ -144,10 +145,10 @@ def setup_structured_logging(
 
 def get_logger(name: str) -> logging.Logger:
     """Get a logger with correlation ID support.
-    
+
     Args:
         name: Logger name
-        
+
     Returns:
         Configured logger instance
     """

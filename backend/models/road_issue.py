@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 import uuid
-from datetime import date, datetime
+from datetime import UTC, date, datetime
 
 from geoalchemy2 import Geometry
 from sqlalchemy import BigInteger, Date, DateTime, Float, Integer, String, Text
@@ -40,7 +40,7 @@ class RoadIssue(Base):
     complaint_ref: Mapped[str | None] = mapped_column(String(128), nullable=True)
     status: Mapped[str] = mapped_column(String(32), default='open')
     status_updated: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC))
 
     # Enterprise extensions
     category: Mapped[str] = mapped_column(String(32), default='roads', index=True)

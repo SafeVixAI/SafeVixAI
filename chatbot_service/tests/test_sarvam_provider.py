@@ -3,9 +3,13 @@
 
 from __future__ import annotations
 
-
-from providers.sarvam_provider import SarvamProvider, Sarvam105BProvider, INDIAN_LANGUAGE_CODES, HIGH_STAKES_INTENTS
 from providers.router import detect_lang
+from providers.sarvam_provider import (
+    HIGH_STAKES_INTENTS,
+    INDIAN_LANGUAGE_CODES,
+    Sarvam105BProvider,
+    SarvamProvider,
+)
 
 
 class TestIndianLanguageCodes:
@@ -38,8 +42,9 @@ class TestHighStakesIntents:
 
 class TestSarvamProviderRouting:
     def _make_settings(self):
-        from config import Settings
         from pathlib import Path
+
+        from config import Settings
         return Settings(
             environment="test",
             service_name="test",

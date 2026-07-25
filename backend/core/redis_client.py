@@ -5,11 +5,13 @@ from __future__ import annotations
 
 import asyncio
 import collections
+import contextlib
 import json
 import time
 import uuid
 from typing import Any
 
+import redis as redis_module
 from redis.asyncio import Redis
 
 # Max age for stale cache entries (24 hours) — served when live data unavailable
@@ -17,7 +19,7 @@ STALE_CACHE_MAX_AGE_SECONDS = 86400
 
 
 # Shared Redis connection pool (avoids per-request TCP connection overhead)
-_redis_pool: redis.asyncio.ConnectionPool | None = None
+_redis_pool: redis_module.asyncio.ConnectionPool | None = None
 _redis_pool_url: str | None = None
 
 
@@ -46,7 +48,7 @@ def get_redis_client(
         url = redis_url
         if tls_enabled and url.startswith("redis://"):
             url = url.replace("redis://", "rediss://", 1)
-        _redis_pool = redis.asyncio.ConnectionPool.from_url(
+        _redis_pool = redis_module.asyncio.ConnectionPool.from_url(
             url,
             max_connections=20,
             pool_timeout=5,
@@ -61,10 +63,8 @@ async def close_redis_pool() -> None:
     """Close the shared Redis connection pool (called during app shutdown)."""
     global _redis_pool, _redis_pool_url
     if _redis_pool is not None:
-        try:
+        with contextlib.suppress(Exception):
             await _redis_pool.aclose()
-        except Exception:
-            pass
         _redis_pool = None
         _redis_pool_url = None
 
@@ -188,10 +188,8 @@ class CacheHelper:
             return value
         finally:
             if acquired and self._client:
-                try:
+                with contextlib.suppress(Exception):
                     await self._client.delete(lock_key)
-                except Exception:
-                    pass
 
     async def get_json_stale(self, key: str, max_age_seconds: int = STALE_CACHE_MAX_AGE_SECONDS) -> Any | None:
         """Get cached value even if expired (stale-while-revalidate).

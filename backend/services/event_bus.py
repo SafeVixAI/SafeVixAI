@@ -90,7 +90,7 @@ class DomainEvent:
 class EventBus:
     """
     In-process async event bus with ordered delivery guarantees.
-    
+
     Supports:
     - Multiple handlers per event type
     - Wildcard subscriptions (subscribe to '*' for all events)
@@ -172,10 +172,9 @@ class EventBus:
             })
         except Exception as e:
             self._metrics["handler_failures"] += 1
-            logger.error(
+            logger.exception(
                 "Handler %s failed for event %s: %s",
                 handler.__name__, event.event_type, e,
-                exc_info=True,
             )
             self._dead_letter.append({
                 "event": event.to_dict(),

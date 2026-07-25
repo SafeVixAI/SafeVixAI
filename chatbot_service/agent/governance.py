@@ -61,13 +61,13 @@ class AIGovernance:
 
         # 1. Hallucination detection
         result.hallucination_score = self._detect_hallucination(response_text, retrieved_context)
-        
+
         # 2. Factuality scoring
         result.factuality_score = self._score_factuality(response_text, tool_results)
-        
+
         # 3. Citation extraction
         result.citations = self._extract_citations(response_text, retrieved_context)
-        
+
         # 4. Flag if below thresholds
         if result.hallucination_score < _HALLUCINATION_THRESHOLD:
             result.flagged = True
@@ -75,13 +75,13 @@ class AIGovernance:
         elif result.factuality_score < _FACTUALITY_MIN_SCORE:  # pragma: no branch
             result.flagged = True
             result.flag_reason = "Low factuality score"
-        
+
         # 5. Prompt versioning
         result.prompt_version = self._get_prompt_version(prompt)
-        
+
         # 6. Log for audit
         await self._log_audit(result, prompt)
-        
+
         return result
 
     def _detect_hallucination(self, response: str, context: list[dict]) -> float:
@@ -119,26 +119,26 @@ class AIGovernance:
 
         # 2. Named entity consistency — extract capitalized phrases (likely named entities)
         import re
-        response_entities = set(
+        response_entities = {
             m.group(0).lower()
             for m in re.finditer(r'\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\b', response)
-        )
-        context_entities = set(
+        }
+        context_entities = {
             m.group(0).lower()
             for m in re.finditer(r'\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\b', combined_context)
-        )
+        }
         if response_entities:
             entity_overlap = len(response_entities & context_entities) / len(response_entities)
         else:
             entity_overlap = 1.0  # No entities to check
 
         # 3. Penalize if response has numeric values not found in context
-        response_numbers = set(
+        response_numbers = {
             m.group(0) for m in re.finditer(r'\b\d+(?:\.\d+)?\b', response_lower)
-        )
-        context_numbers = set(
+        }
+        context_numbers = {
             m.group(0) for m in re.finditer(r'\b\d+(?:\.\d+)?\b', combined_context)
-        )
+        }
         if response_numbers:
             number_support = len(response_numbers & context_numbers) / len(response_numbers)
         else:
@@ -150,12 +150,12 @@ class AIGovernance:
 
     def _score_factuality(self, response: str, tools: list[dict]) -> float:
         """Score factuality based on tool result alignment.
-        
+
         Returns a score between 0 and 1.
         """
         if not tools:
             return 0.5  # Neutral if no tools used
-        
+
         # Check if response mentions tool-provided facts
         tool_facts = []
         for tool in tools:
@@ -163,10 +163,10 @@ class AIGovernance:
                 payload = tool["payload"]
                 if isinstance(payload, dict):  # pragma: no branch
                     tool_facts.extend(str(v).lower() for v in payload.values() if isinstance(v, str))
-        
+
         if not tool_facts:
             return 0.5
-        
+
         response_lower = response.lower()
         matches = sum(1 for fact in tool_facts if fact in response_lower)
         return min(1.0, matches / max(1, len(tool_facts)))
@@ -186,12 +186,12 @@ class AIGovernance:
     def _get_prompt_version(self, prompt: str) -> str:
         """Get or create prompt version hash."""
         prompt_hash = hashlib.sha256(prompt.encode()).hexdigest()[:8]
-        
+
         # Check if we've seen this prompt before
         for version, hash_val in self._prompt_versions.items():
             if hash_val == prompt_hash:
                 return version
-        
+
         # New prompt version
         version = f"v{len(self._prompt_versions) + 1}"
         self._prompt_versions[version] = prompt_hash
@@ -201,7 +201,7 @@ class AIGovernance:
         """Log governance result for audit trail."""
         if not self._redis:
             return
-        
+
         try:
             audit_entry = {
                 "timestamp": time.time(),
@@ -213,7 +213,7 @@ class AIGovernance:
                 "citations": result.citations,
                 "cost_estimate": result.cost_estimate,
             }
-            
+
             # Store in Redis with 30-day TTL
             await self._redis.rpush(
                 "audit:ai_governance",

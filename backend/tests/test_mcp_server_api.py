@@ -133,21 +133,18 @@ class TestReportRoadIssue:
     @pytest.mark.asyncio
     async def test_valid_report_submission(self):
         """Test successful road issue report."""
+        from types import SimpleNamespace
+        mock_result = SimpleNamespace(
+            uuid="test-uuid-123",
+            issue_id="test-uuid-123",
+            complaint_ref="CR-2026-001",
+        )
         mock_service = MagicMock()
-        mock_service.submit_report = AsyncMock()
-        mock_result = MagicMock()
-        mock_result.issue_id = "test-uuid-123"
-        mock_result.complaint_ref = "CR-2026-001"
         mock_service.submit_report = AsyncMock(return_value=mock_result)
 
-        mock_cache = MagicMock()
-        mock_cache.close = AsyncMock()
-
-        mock_overpass = MagicMock()
-        mock_overpass.aclose = AsyncMock()
-
-        mock_geocoding = MagicMock()
-        mock_geocoding.aclose = AsyncMock()
+        mock_cache = AsyncMock()
+        mock_overpass = AsyncMock()
+        mock_geocoding = AsyncMock()
 
         async def mock_build():
             return (mock_service, mock_cache, mock_overpass, mock_geocoding)
@@ -156,7 +153,7 @@ class TestReportRoadIssue:
              patch("core.database.get_async_session") as mock_session:
 
             async def mock_gen():
-                yield MagicMock()
+                yield MagicMock(spec_set=["execute", "commit", "rollback"])
 
             mock_session.side_effect = mock_gen
 

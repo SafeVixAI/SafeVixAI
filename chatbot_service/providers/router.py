@@ -17,9 +17,16 @@ from __future__ import annotations
 import asyncio
 import logging
 import time
+from collections.abc import AsyncIterator
 
-from cache.llm_cache import LLMResponseCache, CacheEntry
+from cache.llm_cache import CacheEntry, LLMResponseCache
 from config import Settings
+from core.alert import get_alert_service
+from core.metrics import (
+    chatbot_circuit_breaker_trips_total,
+    record_token_cost,
+    update_circuit_breaker_gauges,
+)
 from providers.base import (
     InvalidProviderKeyError,
     ModelUnavailableError,
@@ -31,29 +38,21 @@ from providers.base import (
     TemplateProvider,
 )
 from providers.lang_detection import detect_lang
+from providers.openai_compat import OpenAICompatibleProvider
 from providers.provider_registry import (
-    create_default_providers,
     DEFAULT_FALLBACK_CHAIN,
-    get_provider_configs,
+    create_default_providers,
 )
 from providers.sarvam_provider import (
-    INDIAN_LANGUAGE_CODES,
     HIGH_STAKES_INTENTS,
+    INDIAN_LANGUAGE_CODES,
 )
-from providers.openai_compat import OpenAICompatibleProvider
-
-from core.alert import get_alert_service
-from core.metrics import (
-    chatbot_circuit_breaker_trips_total,
-    update_circuit_breaker_gauges,
-    record_token_cost,
-)
-
 
 logger = logging.getLogger("safevixai.chatbot.providers")
 
 # Backward-compatible re-export for tests that import from providers.router
 from providers.lang_detection import detect_lang as _detect_lang  # noqa: E402
+
 detect_lang = _detect_lang
 del _detect_lang
 
@@ -119,7 +118,7 @@ class ProviderRouter:
             base_url = cfg.get("base_url") or ""
             model = cfg.get("default_model") or ""
             is_custom = cfg.get("is_custom", False)
-            extra_headers = cfg.get("extra_headers") or {}
+            cfg.get("extra_headers") or {}
 
             if is_custom or name not in self.providers:
                 provider = OpenAICompatibleProvider(
@@ -253,7 +252,7 @@ class ProviderRouter:
         import uuid
         if not request.correlation_id:
             request.correlation_id = str(uuid.uuid4())
-            
+
         logger.info(
             "LLM generate [%s] - Intent: %s - Provider: %s",
             request.correlation_id,
@@ -291,7 +290,8 @@ class ProviderRouter:
 
         try:
             if not await self._is_provider_available_async(primary):
-                raise ProviderUnavailableError(f"{primary} is temporarily disabled by circuit breaker")
+                msg = f"{primary} is temporarily disabled by circuit breaker"
+                raise ProviderUnavailableError(msg)
             result = await self._generate_with_timeout(provider, request)
 
             confidence = self._calculate_confidence(result, request.intent, primary)
@@ -330,7 +330,7 @@ class ProviderRouter:
                         total_tokens=result.total_tokens,
                     ),
                 )
-            
+
             return result
         except Exception as primary_err:
             self._mark_provider_failure(primary, primary_err)
@@ -410,8 +410,9 @@ class ProviderRouter:
             user_message=request.message or "",
         )
 
+        msg = f"All providers exhausted. Error: {error_msg}"
         raise RuntimeError(
-            f"All providers exhausted. Error: {error_msg}"
+            msg
         ) from primary_err
 
     def _calculate_confidence(
@@ -496,7 +497,7 @@ class ProviderRouter:
         import uuid
         if not request.correlation_id:
             request.correlation_id = str(uuid.uuid4())
-            
+
         logger.info(
             "LLM stream_generate [%s] - Intent: %s - Provider: %s",
             request.correlation_id,
@@ -509,7 +510,8 @@ class ProviderRouter:
 
         try:
             if not await self._is_provider_available_async(primary):
-                raise ProviderUnavailableError(f"{primary} is temporarily disabled by circuit breaker")
+                msg = f"{primary} is temporarily disabled by circuit breaker"
+                raise ProviderUnavailableError(msg)
 
             stream_method = getattr(provider, 'stream', None)
             if stream_method is None:
@@ -552,9 +554,10 @@ class ProviderRouter:
             async with asyncio.timeout(timeout):
                 async for token in provider.stream(request):
                     yield token
-        except asyncio.TimeoutError:
+        except TimeoutError:
+            msg = f"{provider.name} streaming timed out after {timeout:.1f}s"
             raise TimeoutError(
-                f"{provider.name} streaming timed out after {timeout:.1f}s"
+                msg
             )
 
     async def _generate_with_timeout(
@@ -571,8 +574,9 @@ class ProviderRouter:
                 timeout=timeout,
             )
         except TimeoutError as exc:
+            msg = f"{provider.name} timed out after {timeout:.1f}s"
             raise TimeoutError(
-                f"{provider.name} timed out after {timeout:.1f}s"
+                msg
             ) from exc
 
     def _provider_unavailable(self, provider_name: str) -> bool:
@@ -591,11 +595,11 @@ class ProviderRouter:
         """Check if provider is available, using in-memory fast-path and Redis fallback."""
         if provider_name == 'template':
             return True
-            
+
         # TokenBucket Rate Limiting (Phase 18)
         limiter = self._rate_limiters.get(provider_name)
         if limiter and not limiter.allow(1):
-            logger.warning(f"Rate limit exceeded for provider {provider_name} via TokenBucket.")
+            logger.warning("Rate limit exceeded for provider %s via TokenBucket.", provider_name)
             return False
 
         now = time.time()

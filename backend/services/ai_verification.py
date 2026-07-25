@@ -21,7 +21,7 @@ from __future__ import annotations
 import logging
 import re
 from dataclasses import dataclass, field
-from datetime import UTC
+from datetime import UTC, datetime
 from typing import Any
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -375,6 +375,3 @@ class AIVerificationPipeline:
 
         return flags
 
-
-# Import for rate limit check
-from datetime import datetime

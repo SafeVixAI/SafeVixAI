@@ -238,7 +238,8 @@ async def calculate_challan(
         if inspect.isawaitable(candidate):
             candidate = await candidate
         if not isinstance(candidate, ChallanResponse):
-            raise TypeError("Unexpected challan result shape")
+            msg = "Unexpected challan result shape"
+            raise TypeError(msg)
         result = candidate
     except Exception as exc:
         legacy = getattr(service, "calculate_fine", None)

@@ -10,7 +10,7 @@ from __future__ import annotations
 import abc
 from typing import Generic, TypeVar
 
-from fastapi import Request
+from fastapi import FastAPI, Request
 
 T = TypeVar("T")
 R = TypeVar("R")
@@ -56,13 +56,15 @@ class CQRSBus:
     async def execute_command(self, command: Command[R]) -> R:
         handler = self._command_handlers.get(type(command))
         if not handler:
-            raise NotImplementedError(f"No handler registered for command {type(command).__name__}")
+            msg = f"No handler registered for command {type(command).__name__}"
+            raise NotImplementedError(msg)
         return await handler.handle(command)
 
     async def execute_query(self, query: Query[R]) -> R:
         handler = self._query_handlers.get(type(query))
         if not handler:
-            raise NotImplementedError(f"No handler registered for query {type(query).__name__}")
+            msg = f"No handler registered for query {type(query).__name__}"
+            raise NotImplementedError(msg)
         return await handler.handle(query)
 
 

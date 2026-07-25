@@ -10,7 +10,7 @@ files_to_recover = [
     "test_router_idempotency.py"
 ]
 
-with open(transcript_path, 'r', encoding='utf-8') as f:
+with open(transcript_path, encoding='utf-8') as f:
     for line in f:
         if any(filename in line for filename in files_to_recover):
             try:
@@ -23,9 +23,7 @@ with open(transcript_path, 'r', encoding='utf-8') as f:
                             target = args.get('TargetFile', '')
                             for filename in files_to_recover:
                                 if filename in target:
-                                    print(f"FOUND {filename} in step {data.get('step_index')}!")
                                     with open(f"recovered_{filename}", 'w', encoding='utf-8') as out:
                                         out.write(args.get('CodeContent', ''))
-            except Exception as e:
+            except Exception:
                 pass
-print("Recovery search complete.")

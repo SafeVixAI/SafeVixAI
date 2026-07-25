@@ -43,7 +43,7 @@ SUPPORTED_CATEGORIES = {
     'showroom',
 }
 
-from services.city_center_repo import (
+from services.city_center_repo import (  # noqa: E402
     _HARDCODED_CENTERS,
     _OFFLINE_CENTERS,
 )
@@ -199,7 +199,8 @@ class EmergencyLocatorService:
             return cached
         center = CITY_CENTERS.get(lookup_key)
         if center is None:
-            raise ServiceValidationError(f'Unknown offline bundle city: {city}')
+            msg = f'Unknown offline bundle city: {city}'
+            raise ServiceValidationError(msg)
         lat, lon = center
         categories = ['hospital', 'police', 'ambulance', 'fire', 'towing', 'pharmacy']
         database_items, _ = await self._query_database(
@@ -482,10 +483,10 @@ class EmergencyLocatorService:
         Returns results with confidence metadata in source field.
         Also queries Healthsites.io as a secondary source when Overpass returns < 5 results.
         """
-        EXPANSION_STEPS = [initial_radius, 15000, 25000]
+        expansion_steps = [initial_radius, 15000, 25000]
         all_results: list[EmergencyServiceItem] = []
 
-        for radius in EXPANSION_STEPS:
+        for radius in expansion_steps:
             try:
                 results = await self.overpass_service.search_services(
                     lat=lat,

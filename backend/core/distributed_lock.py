@@ -7,7 +7,7 @@ import asyncio
 import logging
 import uuid
 from collections.abc import AsyncGenerator
-from contextlib import asynccontextmanager
+from contextlib import asynccontextmanager, suppress
 
 from core.redis_client import CacheHelper, create_cache
 
@@ -77,10 +77,8 @@ class Redlock:
                 logger.warning("Redis lock release failed, checking in-memory: %s", e)
 
         if self.name in _memory_locks:
-            try:
+            with suppress(RuntimeError):
                 _memory_locks[self.name].release()
-            except RuntimeError:
-                pass
         self._has_lock = False
 
 

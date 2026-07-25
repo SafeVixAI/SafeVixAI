@@ -23,7 +23,7 @@ for parent in Path(__file__).resolve().parents:
         if str(parent) not in sys.path:
             sys.path.insert(0, str(parent))
         break
-from core.alert import get_alert_service
+from core.alert import get_alert_service  # noqa: E402
 
 logger = logging.getLogger("safevixai.backend.overpass")
 
@@ -149,7 +149,8 @@ class OverpassService:
                 status_code=0,
                 error_msg="Circuit breaker OPEN — too many failures",
             )
-            raise ExternalServiceError("Overpass API temporarily unavailable")
+            msg = "Overpass API temporarily unavailable"
+            raise ExternalServiceError(msg)
         except ExternalServiceError:
             raise
 
@@ -185,7 +186,8 @@ class OverpassService:
             status_code=0,
             error_msg=f"All {len(self.settings.overpass_urls)} mirrors failed: {last_error}",
         )
-        raise ExternalServiceError('Overpass API unavailable') from last_error
+        msg = 'Overpass API unavailable'
+        raise ExternalServiceError(msg) from last_error
 
     def _build_service_query(self, *, lat: float, lon: float, radius: int) -> str:
         return f"""

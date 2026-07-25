@@ -2,8 +2,10 @@
 # Copyright (c) 2026 SafeVixAI Team
 
 from __future__ import annotations
+
 import math
-from typing import Callable
+from collections.abc import Callable
+
 
 def default_tokenizer(text: str) -> list[str]:
     import re
@@ -14,42 +16,42 @@ class BM25:
         self.k1 = k1
         self.b = b
         self.tokenizer = tokenizer
-        
+
         self.doc_len: list[int] = []
         self.doc_freqs: list[dict[str, int]] = []
         self.idf: dict[str, float] = {}
         self.nd = len(corpus)
         self.avgdl = 0.0
-        
+
         if self.nd == 0:
             return
-            
+
         nd_word = {}
         sum_dl = 0
-        
+
         for document in corpus:
             tokens = self.tokenizer(document)
             self.doc_len.append(len(tokens))
             sum_dl += len(tokens)
-            
+
             frequencies = {}
             for token in tokens:
                 frequencies[token] = frequencies.get(token, 0) + 1
             self.doc_freqs.append(frequencies)
-            
+
             for token in frequencies:
                 nd_word[token] = nd_word.get(token, 0) + 1
-                
+
         self.avgdl = sum_dl / self.nd
-        
+
         for word, freq in nd_word.items():
             self.idf[word] = math.log(1 + (self.nd - freq + 0.5) / (freq + 0.5))
-            
+
     def get_scores(self, query: str) -> list[float]:
         scores = [0.0] * self.nd
         if self.nd == 0:
             return scores
-            
+
         tokens = self.tokenizer(query)
         for index in range(self.nd):
             score = 0.0

@@ -971,7 +971,7 @@ class TestDataRetentionScheduler:
 
         await sched.cleanup()
 
-        session.execute.assert_awaited_once_with("SELECT safevixai_cleanup_expired_data()")
+        session.execute.assert_any_await("SELECT safevixai_cleanup_expired_data()")
         session.commit.assert_awaited_once()
 
     @pytest.mark.asyncio

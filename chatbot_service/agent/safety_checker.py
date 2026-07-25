@@ -14,9 +14,12 @@ Fixes audit issue C2 / SECURITY#1:
 """
 from __future__ import annotations
 
+import logging
 import re
 import unicodedata
 from dataclasses import dataclass
+
+logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
 # PII Detection (optional — requires core.pii)
@@ -41,9 +44,9 @@ try:
     from prompts import (
         get_harm_patterns,
         get_jailbreak_patterns,
-        get_severe_output_patterns,
-        get_medical_keywords,
         get_medical_disclaimer,
+        get_medical_keywords,
+        get_severe_output_patterns,
     )
     _HARM_PATTERNS: tuple[str, ...] = get_harm_patterns() or (
         # Hit and run / evasion
@@ -268,7 +271,7 @@ class SafetyChecker:
         groq_api_key = os.environ.get("GROQ_API_KEY")
         if not groq_api_key:
             return SafetyDecision(blocked=False)
-            
+
         try:
             from groq import AsyncGroq
             client = AsyncGroq(api_key=groq_api_key)
@@ -285,5 +288,5 @@ class SafetyChecker:
         except Exception as exc:
             import logging
             logging.getLogger(__name__).warning("Llama Guard check failed: %s", exc)
-            
+
         return SafetyDecision(blocked=False)

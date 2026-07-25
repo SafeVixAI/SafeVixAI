@@ -11,7 +11,7 @@ from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
-from rag.embeddings import normalize_text
+from rag.embeddings import normalize_text  # noqa: E402
 
 try:
     from pypdf import PdfReader

@@ -8,19 +8,20 @@ from __future__ import annotations
 import os
 import time
 from unittest.mock import ANY, AsyncMock, MagicMock, call, patch
+from urllib.parse import urlparse
 
 import httpx
 import pytest
 
 from providers.base import (
     HttpProvider,
-    ProviderRequest,
-    ProviderResult,
-    RateLimitError,
-    QuotaExhaustedError,
     InvalidProviderKeyError,
     ModelUnavailableError,
+    ProviderRequest,
+    ProviderResult,
     ProviderUnavailableError,
+    QuotaExhaustedError,
+    RateLimitError,
     TemplateProvider,
     _count_tokens,
     _enforce_token_budget,
@@ -30,21 +31,29 @@ from providers.base import (
     raise_for_provider_status,
 )
 from providers.cerebras_provider import CerebrasProvider
+from providers.circuit_breaker import CircuitBreaker, TokenBucket
 from providers.gemini_provider import GeminiProvider
 from providers.github_models_provider import GitHubModelsProvider
 from providers.groq_provider import GroqProvider, _estimate_request_tokens
+from providers.lang_detection import detect_lang
+from providers.local_provider import LocalOllamaProvider, LocalVLLMProvider
 from providers.mistral_provider import MistralProvider
 from providers.nvidia_nim_provider import NvidiaNimProvider
-from providers.openrouter_provider import OpenRouterProvider
-from providers.sarvam_provider import INDIAN_LANGUAGE_CODES, HIGH_STAKES_INTENTS, Sarvam105BProvider, SarvamProvider
-from providers.together_provider import TogetherProvider
 from providers.openai_compat import OpenAICompatibleProvider
-from providers.local_provider import LocalOllamaProvider, LocalVLLMProvider
-from providers.circuit_breaker import CircuitBreaker, TokenBucket
-from providers.lang_detection import detect_lang
-from providers.provider_registry import DEFAULT_FALLBACK_CHAIN, create_default_providers, get_provider_configs
+from providers.openrouter_provider import OpenRouterProvider
+from providers.provider_registry import (
+    DEFAULT_FALLBACK_CHAIN,
+    create_default_providers,
+    get_provider_configs,
+)
 from providers.router import ProviderRouter
-from urllib.parse import urlparse
+from providers.sarvam_provider import (
+    HIGH_STAKES_INTENTS,
+    INDIAN_LANGUAGE_CODES,
+    Sarvam105BProvider,
+    SarvamProvider,
+)
+from providers.together_provider import TogetherProvider
 
 _BASE_REQUEST = ProviderRequest(message="hello", intent="general", history=[])
 _INDIC_REQUEST = ProviderRequest(message="\u0928\u092e\u0938\u094d\u0924\u0947", intent="general", history=[])

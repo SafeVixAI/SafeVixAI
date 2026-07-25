@@ -5,11 +5,11 @@ from __future__ import annotations
 import pytest
 
 from rag.evaluation import (
-    ndcg_at_k,
-    recall_at_k,
-    precision_at_k,
-    mean_reciprocal_rank,
     compute_all_metrics,
+    mean_reciprocal_rank,
+    ndcg_at_k,
+    precision_at_k,
+    recall_at_k,
 )
 
 

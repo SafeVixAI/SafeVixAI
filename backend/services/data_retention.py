@@ -32,7 +32,7 @@ class DataRetentionScheduler:
     async def start(self, interval_seconds: int = 86400) -> None:
         """
         Start the background cleanup scheduler.
-        
+
         Args:
             interval_seconds: How often to run cleanup (default: 86400 = 24 hours)
         """

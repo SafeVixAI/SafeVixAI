@@ -17,7 +17,7 @@ for parent in Path(__file__).resolve().parents:  # pragma: no branch
         if str(parent) not in sys.path:
             sys.path.insert(0, str(parent))
         break
-from core.alert import get_alert_service
+from core.alert import get_alert_service  # noqa: E402
 
 logger = logging.getLogger("safevixai.chatbot.tools")
 
@@ -98,18 +98,18 @@ class BackendToolClient:
         await self._client.aclose()
 
 
-from tools.challan_tool import ChallanTool
-from tools.drug_info import DrugInfoTool
-from tools.first_aid_tool import FirstAidTool
-from tools.geocoding import GeocodingClient
-from tools.legal_search_tool import LegalSearchTool
-from tools.open_meteo import OpenMeteoClient
-from tools.road_infra_tool import RoadInfrastructureTool
-from tools.road_issues_tool import RoadIssuesTool
-from tools.sos_tool import SosTool
-from tools.submit_report_tool import SubmitReportTool
-from tools.weather_tool import WeatherTool
-from tools.what3words import What3WordsTool
+from tools.challan_tool import ChallanTool  # noqa: E402
+from tools.drug_info import DrugInfoTool  # noqa: E402
+from tools.first_aid_tool import FirstAidTool  # noqa: E402
+from tools.geocoding import GeocodingClient  # noqa: E402
+from tools.legal_search_tool import LegalSearchTool  # noqa: E402
+from tools.open_meteo import OpenMeteoClient  # noqa: E402
+from tools.road_infra_tool import RoadInfrastructureTool  # noqa: E402
+from tools.road_issues_tool import RoadIssuesTool  # noqa: E402
+from tools.sos_tool import SosTool  # noqa: E402
+from tools.submit_report_tool import SubmitReportTool  # noqa: E402
+from tools.weather_tool import WeatherTool  # noqa: E402
+from tools.what3words import What3WordsTool  # noqa: E402
 
 __all__ = [
     'BackendToolClient',

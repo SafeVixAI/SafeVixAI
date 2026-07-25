@@ -122,7 +122,8 @@ class Settings(BaseSettings):
     @classmethod
     def normalize_database_url(cls, value: Any) -> str:
         if not isinstance(value, str):
-            raise ValueError('database_url must be a string')
+            msg = 'database_url must be a string'
+            raise ValueError(msg)
         normalized = value.strip()
         if normalized.startswith('postgres://'):
             normalized = normalized.replace('postgres://', 'postgresql://', 1)
@@ -172,7 +173,8 @@ class Settings(BaseSettings):
         if value is None:
             return None
         if not isinstance(value, str):
-            raise ValueError('local_upload_base_url must be a string')
+            msg = 'local_upload_base_url must be a string'
+            raise ValueError(msg)
         normalized = value.strip()
         if not normalized:
             return None
@@ -186,7 +188,8 @@ class Settings(BaseSettings):
         if value is None:
             return 'https://api.openrouteservice.org'
         if not isinstance(value, str):
-            raise ValueError('openrouteservice_base_url must be a string')
+            msg = 'openrouteservice_base_url must be a string'
+            raise ValueError(msg)
         normalized = value.strip()
         if not normalized:
             return 'https://api.openrouteservice.org'
@@ -198,7 +201,8 @@ class Settings(BaseSettings):
         if value is None:
             return 'http://localhost:8010/api/v1'
         if not isinstance(value, str):
-            raise ValueError('chatbot_service_url must be a string')
+            msg = 'chatbot_service_url must be a string'
+            raise ValueError(msg)
         normalized = value.strip()
         if not normalized:
             return 'http://localhost:8010/api/v1'
@@ -213,7 +217,8 @@ class Settings(BaseSettings):
         if value is None:
             return None
         if not isinstance(value, str):
-            raise ValueError('frontend_url must be a string')
+            msg = 'frontend_url must be a string'
+            raise ValueError(msg)
         normalized = value.strip()
         if not normalized:
             return None
@@ -224,7 +229,8 @@ class Settings(BaseSettings):
 def get_settings() -> Settings:
     settings = Settings()
     if settings.environment == 'production' and settings.cors_origins_env.strip() == '*':
-        raise RuntimeError('CORS_ORIGINS must list explicit origins when ENVIRONMENT=production')
+        msg = 'CORS_ORIGINS must list explicit origins when ENVIRONMENT=production'
+        raise RuntimeError(msg)
     try:
         settings.data_dir.mkdir(parents=True, exist_ok=True)
         settings.upload_dir.mkdir(parents=True, exist_ok=True)

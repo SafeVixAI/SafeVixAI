@@ -14,8 +14,8 @@ from __future__ import annotations
 
 import json
 import os
+from collections.abc import AsyncIterator
 from dataclasses import replace
-from typing import AsyncIterator
 from unittest.mock import AsyncMock, MagicMock
 
 import httpx

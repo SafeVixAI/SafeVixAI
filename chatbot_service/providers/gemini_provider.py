@@ -18,7 +18,14 @@ import logging
 import os
 
 import httpx
-from providers.base import HttpProvider, ProviderRequest, ProviderResult, build_messages, raise_for_provider_status
+
+from providers.base import (
+    HttpProvider,
+    ProviderRequest,
+    ProviderResult,
+    build_messages,
+    raise_for_provider_status,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -115,7 +122,8 @@ class GeminiProvider(HttpProvider):
     async def generate(self, request: ProviderRequest) -> ProviderResult:
         api_key = self._api_key
         if not api_key:
-            raise RuntimeError("GeminiProvider: Missing env var 'GEMINI_API_KEY' or 'GOOGLE_API_KEY'")
+            msg = "GeminiProvider: Missing env var 'GEMINI_API_KEY' or 'GOOGLE_API_KEY'"
+            raise RuntimeError(msg)
 
         model = request.provider_model or self._model
 
@@ -161,16 +169,22 @@ class GeminiProvider(HttpProvider):
         try:
             candidates = data.get("candidates", [])
             if not candidates:
-                raise KeyError("empty candidates")
+                msg = "empty candidates"
+                raise KeyError(msg)
             parts = candidates[0].get("content", {}).get("parts", [])
             if not parts:
-                raise KeyError("empty parts")
+                msg = "empty parts"
+                raise KeyError(msg)
             text = parts[0].get("text", "")
             if not text:
-                raise KeyError("empty text")
+                msg = "empty text"
+                raise KeyError(msg)
         except (KeyError, IndexError, TypeError) as exc:
-            raise RuntimeError(
+            msg = (
                 f"GeminiProvider: unexpected response structure: {exc}. "
                 f"Response keys: {list(data.keys())}"
+            )
+            raise RuntimeError(
+                msg
             ) from exc
         return ProviderResult(text=text, provider=self.name, model=model)

@@ -54,7 +54,7 @@ class EscalationPrediction:
 class EscalationPredictor:
     """
     Heuristic-based escalation risk predictor.
-    
+
     Scoring factors:
     1. Issue severity (40% weight)
     2. Time since filing / SLA proximity (25% weight)

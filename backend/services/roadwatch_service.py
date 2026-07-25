@@ -8,6 +8,7 @@ import logging
 import uuid
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import Any
 
 import aiofiles
 import httpx
@@ -302,7 +303,8 @@ class RoadWatchService:
     ) -> RoadReportResponse:
         normalized_issue_type = issue_type.strip()
         if len(normalized_issue_type) < 2:
-            raise ServiceValidationError('issue_type must contain at least 2 non-space characters')
+            msg = 'issue_type must contain at least 2 non-space characters'
+            raise ServiceValidationError(msg)
         normalized_description = description.strip() if description and description.strip() else None
 
         issue_uuid = uuid.uuid4()
@@ -492,7 +494,9 @@ class RoadWatchService:
 
         # Set AI classification / YOLOv8 parameters
         ai_model_version = "v1.0.0-rule"
-        ai_detection_payload = ai_classification if 'ai_classification' in locals() else {}
+        ai_classification = {}  # noqa: F841
+        ai_detection_payload = ai_classification
+        ai_classification = ai_detection_payload  # noqa: F841
         ai_conf = None
 
         if photo_url and getattr(photo_url, "yolov8_result", None):
@@ -605,7 +609,8 @@ class RoadWatchService:
         try:
             report_uuid = uuid.UUID(report_id)
         except ValueError as exc:
-            raise ServiceValidationError('report_id must be a valid UUID') from exc
+            msg = 'report_id must be a valid UUID'
+            raise ServiceValidationError(msg) from exc
 
         lat_expr = func.ST_Y(RoadIssue.location).label('lat')
         lon_expr = func.ST_X(RoadIssue.location).label('lon')
@@ -615,7 +620,8 @@ class RoadWatchService:
             )
         ).first()
         if row is None:
-            raise ServiceValidationError('Road report not found')
+            msg = 'Road report not found'
+            raise ServiceValidationError(msg)
 
         issue, lat, lon = row
         issue.status = 'acknowledged'
@@ -680,9 +686,12 @@ class RoadWatchService:
         try:
             content_type = (photo.content_type or '').lower()
             if content_type and content_type not in self.settings.allowed_upload_content_types:
-                raise ServiceValidationError(
+                msg = (
                     f'Unsupported photo content type "{content_type}". '
                     f'Allowed types: {", ".join(self.settings.allowed_upload_content_types)}'
+                )
+                raise ServiceValidationError(
+                    msg
                 )
 
             suffix = Path(photo.filename).suffix.lower() or UPLOAD_EXTENSION_BY_CONTENT_TYPE.get(content_type, '.jpg')

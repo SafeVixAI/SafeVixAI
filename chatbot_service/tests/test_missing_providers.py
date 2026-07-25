@@ -25,16 +25,15 @@ from providers.nvidia_nim_provider import NvidiaNimProvider
 from providers.openai_compat import OpenAICompatibleProvider as OpenAiCompatProvider
 from providers.openrouter_provider import OpenRouterProvider
 from providers.sarvam_provider import (
-    INDIAN_LANGUAGE_CODES,
     HIGH_STAKES_INTENTS,
-    SarvamProvider,
+    INDIAN_LANGUAGE_CODES,
     Sarvam105BProvider,
+    SarvamProvider,
 )
 from providers.together_provider import TogetherProvider
 
 pytestmark = pytest.mark.skip(reason="Provider APIs have been refactored; tests need rewrite for current interfaces")
 
-from urllib.parse import urlparse
 
 
 # ═══════════════════════════════════════════════════════════════════

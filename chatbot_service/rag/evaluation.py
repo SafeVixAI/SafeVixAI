@@ -37,7 +37,7 @@ def compute_all_metrics(
     k: int,
     rank_positions: list[int],
 ) -> dict[str, float]:
-    actual_k = min(k, len(relevance_scores))
+    min(k, len(relevance_scores))
     relevant = sum(1 for s in relevance_scores[:k] if s > 0)
     return {
         "ndcg@k": ndcg_at_k(relevance_scores, k),

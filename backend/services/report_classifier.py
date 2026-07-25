@@ -86,7 +86,7 @@ class ReportClassifier:
 
     def _extract_matched_keywords(self, text: str) -> list[str]:
         matched = []
-        for category, config in ISSUE_CATEGORIES.items():
+        for _category, config in ISSUE_CATEGORIES.items():
             for keyword in config["keywords"]:
                 if keyword in text:
                     matched.append(keyword)

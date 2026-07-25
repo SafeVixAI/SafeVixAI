@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 import pytest
+
 from agent.governance import AIGovernance, GovernanceResult
 
 
@@ -146,7 +147,7 @@ class TestGovernanceEvaluation:
             tool_results=sample_tools,
             prompt="What is the speed limit?",
         )
-        
+
         assert isinstance(result, GovernanceResult)
         assert result.prompt_version is not None
         assert result.hallucination_score >= 0
@@ -161,7 +162,7 @@ class TestGovernanceEvaluation:
             tool_results=sample_tools,
             prompt="What is the speed limit?",
         )
-        
+
         assert isinstance(result, GovernanceResult)
         assert result.citations is not None
         assert len(result.citations) > 0

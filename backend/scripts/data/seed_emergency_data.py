@@ -66,7 +66,7 @@ async def query_overpass(query: str, retries: int = 3) -> dict:
         "Accept": "application/json",
     }
     async with httpx.AsyncClient(timeout=60, headers=headers) as client:
-        for attempt in range(retries):
+        for _attempt in range(retries):
             for url in OVERPASS_URLS:
                 try:
                     resp = await client.post(url, data={"data": query})

@@ -16,7 +16,6 @@ from tools.open_meteo import OpenMeteoClient
 from tools.submit_report_tool import SubmitReportTool
 from tools.what3words import What3WordsTool
 
-
 _SETTINGS = Settings(
     environment='test',
     service_name='test',

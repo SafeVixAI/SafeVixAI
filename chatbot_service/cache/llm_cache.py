@@ -22,8 +22,10 @@ logger = logging.getLogger(__name__)
 _DEFAULT_TTL_SECONDS = 3600  # 1 hour
 
 
-import asyncpg
-from rag.embeddings import build_embedding_function
+import asyncpg  # noqa: E402
+
+from rag.embeddings import build_embedding_function  # noqa: E402
+
 
 @dataclass(slots=True)
 class CacheEntry:
@@ -74,7 +76,7 @@ class LLMResponseCache:
                     )
                 ''')
                 # Index for cosine similarity (vector_cosine_ops) -> 1 - cosine_distance
-                await conn.execute(f'''
+                await conn.execute('''
                     CREATE INDEX IF NOT EXISTS llm_semantic_cache_emb_idx
                     ON llm_semantic_cache USING hnsw (embedding vector_cosine_ops)
                 ''')
@@ -119,7 +121,7 @@ class LLMResponseCache:
                 emb = self._embedding_function([message])[0]
                 emb_str = f"[{','.join(str(x) for x in emb)}]"
                 tools_str = json.dumps(tool_summaries[:4], sort_keys=True)
-                
+
                 async with pool.acquire() as conn:
                     # Using cosine similarity (<=> is cosine distance in pgvector)
                     # Similarity = 1 - (<=>)
@@ -130,7 +132,7 @@ class LLMResponseCache:
                         ORDER BY embedding <=> $1::vector
                         LIMIT 1
                     ''', emb_str, intent, tools_str)
-                    
+
                     if row and row['similarity'] >= self.similarity_threshold:
                         logger.info("Semantic cache hit! Similarity: %.3f", row['similarity'])
                         data = json.loads(row['response_data'])
@@ -165,7 +167,7 @@ class LLMResponseCache:
                 emb = self._embedding_function([message])[0]
                 emb_str = f"[{','.join(str(x) for x in emb)}]"
                 tools_str = json.dumps(tool_summaries[:4], sort_keys=True)
-                
+
                 async with pool.acquire() as conn:
                     await conn.execute('''
                         INSERT INTO llm_semantic_cache (hash_key, message, intent, tools, response_data, embedding)

@@ -71,9 +71,9 @@ class TestGeminiStream:
             history=[{"role": "assistant", "content": "previous response"}],
         )
         stream_data = (
-            'data: {"candidates":[{"content":{"parts":[{"text":"hello"}]}}]}\n\n'
-            'data: [DONE]\n\n'
-        ).encode()
+            b'data: {"candidates":[{"content":{"parts":[{"text":"hello"}]}}]}\n\n'
+            b'data: [DONE]\n\n'
+        )
         resp = MagicMock()
         resp.status_code = 200
         resp.headers = {}
@@ -94,10 +94,10 @@ class TestGeminiStream:
         """Line 84: empty data_str after stripping is skipped."""
         provider = GeminiProvider(api_key="test-key")
         stream_data = (
-            'data: \n\n'
-            'data: {"candidates":[{"content":{"parts":[{"text":"world"}]}}]}\n\n'
-            'data: [DONE]\n\n'
-        ).encode()
+            b'data: \n\n'
+            b'data: {"candidates":[{"content":{"parts":[{"text":"world"}]}}]}\n\n'
+            b'data: [DONE]\n\n'
+        )
         resp = MagicMock()
         resp.status_code = 200
         resp.headers = {}

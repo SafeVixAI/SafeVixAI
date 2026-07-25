@@ -99,7 +99,7 @@ async def update_user_profile(
     update_data = profile_update.model_dump(exclude_unset=True)
 
     if "emergency_contacts" in update_data and update_data["emergency_contacts"] is not None:
-        update_data["emergency_contacts"] = [contact for contact in update_data["emergency_contacts"]]
+        update_data["emergency_contacts"] = list(update_data["emergency_contacts"])
 
     for key, value in update_data.items():
         setattr(profile, key, value)

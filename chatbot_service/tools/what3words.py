@@ -11,13 +11,13 @@ This is a jury-demo moment: SOS says "Location: ///filled.count.soap"
 
 from __future__ import annotations
 
-import asyncio
 import json
 import logging
 import os
 
 import httpx
-from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception
+from tenacity import retry, retry_if_exception, stop_after_attempt, wait_exponential
+
 
 def is_retriable_http(exc: BaseException) -> bool:
     if isinstance(exc, httpx.HTTPStatusError):

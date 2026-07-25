@@ -156,9 +156,12 @@ class ChallanService:
 
         rule = self._find_rule(violation_code)
         if rule is None:
-            raise ServiceValidationError(
+            msg = (
                 f'Unsupported violation code "{query.violation_code}". '
                 'Known examples include 183, 185, 181, 194D, 194B, and 179.'
+            )
+            raise ServiceValidationError(
+                msg
             )
 
         base_fine = rule.fine_for_vehicle(vehicle_class)
@@ -218,11 +221,13 @@ class ChallanService:
             )
             row = result.mappings().first()
         except (SQLAlchemyError, DBAPIError, AttributeError, RuntimeError) as exc:
-            raise ExternalServiceError('Challan database lookup is unavailable') from exc
+            msg = 'Challan database lookup is unavailable'
+            raise ExternalServiceError(msg) from exc
 
         if row is None:
+            msg = f'Unsupported or unseeded violation code "{query.violation_code}" for vehicle "{query.vehicle_class}".'
             raise ServiceValidationError(
-                f'Unsupported or unseeded violation code "{query.violation_code}" for vehicle "{query.vehicle_class}".'
+                msg
             )
 
         base_fine = int(row["base_fine"])
@@ -414,14 +419,16 @@ class ChallanService:
     def _normalize_vehicle_class(value: str) -> str:
         normalized = re.sub(r'[^A-Z0-9_ ]', '', value.strip().upper()).replace(' ', '_')
         if not normalized:
-            raise ServiceValidationError('vehicle_class is required')
+            msg = 'vehicle_class is required'
+            raise ServiceValidationError(msg)
         return VEHICLE_CLASS_ALIASES.get(normalized, normalized.lower())
 
     @staticmethod
     def _normalize_state_code(value: str) -> str:
         cleaned = value.strip().upper()
         if not cleaned:
-            raise ServiceValidationError('state_code is required')
+            msg = 'state_code is required'
+            raise ServiceValidationError(msg)
         if '(' in cleaned and ')' in cleaned:
             inside = cleaned.split('(')[-1].split(')')[0].strip()
             if inside:

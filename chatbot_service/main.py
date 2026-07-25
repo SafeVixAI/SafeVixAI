@@ -335,7 +335,6 @@ def create_app() -> FastAPI:
             "magnetometer=(), "
             "payment=()"
         )
-        get_settings().environment == "production"
         response.headers["Content-Security-Policy"] = (
             "default-src 'self'; "
             "script-src 'self' 'unsafe-inline'; "

@@ -81,10 +81,10 @@ async def start_tracking(
     async for session in get_async_session():
         await session.execute(
             text("""
-                INSERT INTO live_tracking 
+                INSERT INTO live_tracking
                     (session_id, user_id, user_name, blood_group, vehicle_number,
                      latitude, longitude, battery_percent, expires_at)
-                VALUES 
+                VALUES
                     (:session_id, :user_id, :user_name, :blood_group, :vehicle_number,
                      :latitude, :longitude, :battery_percent, :expires_at)
             """),
@@ -144,13 +144,13 @@ async def update_location(
     async for session in get_async_session():
         result = await session.execute(
             text("""
-                UPDATE live_tracking 
+                UPDATE live_tracking
                 SET latitude = :lat, longitude = :lon, accuracy = :accuracy,
                     speed_kmh = :speed, battery_percent = :battery,
                     updated_at = NOW()
-                WHERE session_id = :session_id 
+                WHERE session_id = :session_id
                   AND user_id = :user_id
-                  AND is_active = true 
+                  AND is_active = true
                   AND expires_at > NOW()
                 RETURNING session_id
             """),
@@ -246,8 +246,8 @@ async def stop_tracking(
     async for session in get_async_session():
         result = await session.execute(
             text("""
-                UPDATE live_tracking 
-                SET is_active = false 
+                UPDATE live_tracking
+                SET is_active = false
                 WHERE session_id = :session_id
                   AND user_id = :user_id
                 RETURNING session_id

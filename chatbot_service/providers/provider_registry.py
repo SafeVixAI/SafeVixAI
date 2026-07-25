@@ -15,6 +15,7 @@ DEFAULT_PROVIDER_CONFIGS: dict[str, type[TemplateProvider]] = {}
 
 # Lazy imports to avoid circular deps at module level
 def _build_config() -> dict[str, type[TemplateProvider]]:
+    from providers.base import TemplateProvider
     from providers.cerebras_provider import CerebrasProvider
     from providers.gemini_provider import GeminiProvider
     from providers.github_models_provider import GitHubModelsProvider
@@ -24,7 +25,6 @@ def _build_config() -> dict[str, type[TemplateProvider]]:
     from providers.openrouter_provider import OpenRouterProvider
     from providers.sarvam_provider import Sarvam105BProvider, SarvamProvider
     from providers.together_provider import TogetherProvider
-    from providers.base import TemplateProvider
 
     return {
         'groq': GroqProvider,

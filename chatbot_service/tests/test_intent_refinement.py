@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import pytest
+
 from agent.intent_detector import IntentDetector
 
 

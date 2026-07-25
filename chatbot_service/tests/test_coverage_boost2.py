@@ -11,9 +11,8 @@ from fastapi import HTTPException
 from fastapi.testclient import TestClient
 
 import main
-from api.chat import get_engine as chat_get_engine, verify_internal_auth
-
-
+from api.chat import get_engine as chat_get_engine
+from api.chat import verify_internal_auth
 
 # ============================================================ #
 # FAKE CLASSES (same pattern as test_coverage_boost.py)        #
@@ -251,8 +250,9 @@ class TestLimiter:
 
     def test_import_fallback_path_noop(self):
         """Test that the except ImportError path defines _NoopLimiter (around line 9-14)."""
-        import limiter as lim_mod
         import inspect
+
+        import limiter as lim_mod
         source = inspect.getsource(lim_mod)
         assert "class _NoopLimiter" in source
         assert "def limit" in source
@@ -261,6 +261,7 @@ class TestLimiter:
     def test_import_success_path_has_slowapi(self):
         """When slowapi is available, limiter is a slowapi.Limiter."""
         from slowapi import Limiter as SlowapiLimiter
+
         import limiter as lim_mod
         assert isinstance(lim_mod.limiter, SlowapiLimiter)
 
@@ -751,6 +752,7 @@ class TestDrugInfoNonRetryable:
     async def test_non_retryable_status_breaks_loop(self):
         """HTTP 404 breaks immediately without retry."""
         import httpx
+
         from tools.drug_info import DrugInfoTool
 
         mock_response = MagicMock()
@@ -770,6 +772,7 @@ class TestDrugInfoNonRetryable:
     async def test_retryable_status_retries_then_fails(self):
         """HTTP 429 retries 3 times then returns None."""
         import httpx
+
         from tools.drug_info import DrugInfoTool
 
         mock_response = MagicMock()
@@ -789,6 +792,7 @@ class TestDrugInfoNonRetryable:
     async def test_network_error_retries_then_fails(self):
         """RequestError retries 3 times then returns None."""
         import httpx
+
         from tools.drug_info import DrugInfoTool
 
         tool = DrugInfoTool(timeout=5.0)

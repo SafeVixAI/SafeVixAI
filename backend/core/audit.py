@@ -9,13 +9,13 @@ from __future__ import annotations
 import json
 import logging
 from datetime import UTC, datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 logger = logging.getLogger("safevixai.audit")
 
 
-class AuditEvent(str, Enum):
+class AuditEvent(StrEnum):
     AUTH_LOGIN = "auth.login"
     AUTH_LOGOUT = "auth.logout"
     AUTH_FAILED = "auth.failed"

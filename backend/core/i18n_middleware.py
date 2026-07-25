@@ -9,18 +9,18 @@ import time
 from collections import defaultdict
 from pathlib import Path
 
-for parent in Path(__file__).resolve().parents:
-    if (parent / 'alert_service.py').exists():
-        if str(parent) not in sys.path:
-            sys.path.insert(0, str(parent))
-        break
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from slowapi.errors import RateLimitExceeded
 
-from core.alert import get_alert_service
-from i18n.locales import translate_message
+for parent in Path(__file__).resolve().parents:
+    if (parent / 'alert_service.py').exists():
+        if str(parent) not in sys.path:
+            sys.path.insert(0, str(parent))
+        break
+from core.alert import get_alert_service  # noqa: E402
+from i18n.locales import translate_message  # noqa: E402
 
 logger = logging.getLogger("safevixai.backend.i18n")
 
@@ -57,10 +57,7 @@ async def localized_http_exception_handler(request: Request, exc: HTTPException)
     locale = getattr(request.state, "locale", DEFAULT_LOCALE)
     detail = exc.detail
 
-    if isinstance(detail, str):
-        translated_detail = translate_message(detail, locale)
-    else:
-        translated_detail = detail
+    translated_detail = translate_message(detail, locale) if isinstance(detail, str) else detail
 
     return JSONResponse(
         status_code=exc.status_code,
@@ -108,7 +105,7 @@ _RATE_LIMIT_ALERT_THRESHOLD = 20
 _RATE_LIMIT_WINDOW_SECONDS = 300  # 5 minutes
 
 
-async def localized_rate_limit_exceeded_handler(request: Request, exc: RateLimitExceeded):
+async def localized_rate_limit_exceeded_handler(request: Request, _exc: RateLimitExceeded):
     """Localizes RateLimitExceeded exceptions and monitors rate limit hit rate."""
     locale = getattr(request.state, "locale", DEFAULT_LOCALE)
     msg = translate_message("Rate limit exceeded", locale)

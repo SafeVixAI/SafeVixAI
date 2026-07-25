@@ -4,8 +4,10 @@
 from __future__ import annotations
 
 from pathlib import Path
-from unittest.mock import MagicMock, patch, AsyncMock
+from unittest.mock import AsyncMock, MagicMock, patch
+
 import pytest
+
 from rag.document_loader import LoadedDocument
 from rag.vectorstore import DocumentChunk, LocalVectorStore
 
@@ -21,13 +23,13 @@ class TestLocalVectorStoreEnsureIndexExtras:
         mock_pool = MagicMock()
         mock_conn = AsyncMock()
         mock_pool.acquire.return_value.__aenter__.return_value = mock_conn
-        
+
         # count is 0
         mock_conn.fetchval.return_value = 0
         store._pool = mock_pool
-        
+
         store.build_index = AsyncMock(return_value=[])
-        
+
         result = await store.ensure_index()
         store.build_index.assert_called_once_with(force=True)
 
@@ -42,7 +44,7 @@ class TestLocalVectorStoreBuildIndexExtras:
         )
         cached = [DocumentChunk('a', 's', 't', 'c', 'x')]
         store._chunks = cached
-        
+
         result = await store.build_index(force=False)
         assert result is cached
 
@@ -58,11 +60,11 @@ class TestLocalVectorStoreSearchExtras:
         mock_pool = MagicMock()
         mock_conn = AsyncMock()
         mock_pool.acquire.return_value.__aenter__.return_value = mock_conn
-        
+
         # Raise exception on fetch
         mock_conn.fetch.side_effect = RuntimeError("Database error")
         store._pool = mock_pool
-        
+
         results = await store.search("query text")
         assert results == []
 
@@ -78,10 +80,10 @@ class TestLocalVectorStoreStatsExtras:
         mock_pool = MagicMock()
         mock_conn = AsyncMock()
         mock_pool.acquire.return_value.__aenter__.return_value = mock_conn
-        
+
         mock_conn.fetchval.side_effect = RuntimeError("Database error")
         store._pool = mock_pool
-        
+
         stats = await store.stats()
         assert stats["chunks"] == 0
         assert stats["categories"] == 0

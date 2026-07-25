@@ -3,11 +3,10 @@
 
 from __future__ import annotations
 
-
 import pytest
 from redis.exceptions import RedisError
 
-from memory.redis_memory import ConversationMemoryStore, _MAX_IN_MEMORY_SESSIONS
+from memory.redis_memory import _MAX_IN_MEMORY_SESSIONS, ConversationMemoryStore
 
 
 class FakeRedisClient:

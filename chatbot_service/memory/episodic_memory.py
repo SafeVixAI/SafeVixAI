@@ -4,9 +4,9 @@
 import logging
 from pathlib import Path
 
-from providers.router import ProviderRouter
 from providers.base import ProviderRequest
-from rag.vectorstore import LocalVectorStore, DocumentChunk
+from providers.router import ProviderRouter
+from rag.vectorstore import DocumentChunk, LocalVectorStore
 
 logger = logging.getLogger(__name__)
 
@@ -49,7 +49,7 @@ class EpisodicMemoryAgent:
         try:
             result = await self.router.generate(request)
             facts = result.text.strip()
-            
+
             if facts and facts != "NO_FACTS" and "NO_FACTS" not in facts:
                 # Store in vector database
                 import uuid
@@ -61,7 +61,7 @@ class EpisodicMemoryAgent:
                     category=user_id,
                     content=facts
                 )
-                
+
                 await self.vectorstore._upsert_pg([chunk])
                 logger.info("Stored episodic memory for user %s from session %s", user_id, session_id)
 

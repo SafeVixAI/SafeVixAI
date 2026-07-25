@@ -3,12 +3,17 @@
 from __future__ import annotations
 
 import json
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 
 from agent.graph import ChatEngine
 from agent.multi_agent import (
-    ChatState, EmergencyDispatchAgent, LegalAgent, SupervisorAgent, MultiAgentGraph
+    ChatState,
+    EmergencyDispatchAgent,
+    LegalAgent,
+    MultiAgentGraph,
+    SupervisorAgent,
 )
 from agent.state import ChatRequest, ConversationContext, RetrievedContext, ToolContext
 from providers.base import ProviderResult
@@ -23,14 +28,22 @@ class FakeMemoryStore:
         return payload
     async def get_history(self, session_id, *, limit=20):
         return self._memory.get(session_id, [])[-limit:]
-    async def ping(self): return True
-    async def close(self): pass
+    async def ping(self):
+        return True
+
+    async def close(self):
+        pass
 
 class FakeVectorStore:
     def __init__(self, chunks=1, categories=1):
-        self.chunks = chunks; self.categories = categories
-    async def ensure_index(self): return []
-    async def build_index(self, *, force=False): return []
+        self.chunks = chunks
+        self.categories = categories
+
+    async def ensure_index(self):
+        return []
+
+    async def build_index(self, *, force=False):
+        return []
     async def stats(self):
         return {"chunks": self.chunks, "categories": self.categories, "database": "pgvector", "embedding_model": "test"}
 
@@ -63,8 +76,10 @@ class FakeContextAssembler:
         self._tools = tools if tools is not None else [ToolContext(name="test", summary="Tool", payload={}, sources=["tool:test"])]
     async def assemble(self, **kwargs):
         ctx = ConversationContext(session_id=kwargs["session_id"], message=kwargs["message"], intent=kwargs["intent"])
-        for r in self._retrieved: ctx.retrieved.append(r)
-        for t in self._tools: ctx.tools.append(t)
+        for r in self._retrieved:
+            ctx.retrieved.append(r)
+        for t in self._tools:
+            ctx.tools.append(t)
         return ctx
 
 class FakeGovernance:

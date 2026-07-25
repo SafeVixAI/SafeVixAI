@@ -32,7 +32,6 @@ from providers.sarvam_provider import (
     SarvamProvider,
 )
 
-
 _REQUEST = ProviderRequest(
     message="What is the fine for drunk driving?",
     intent="challan",
@@ -276,7 +275,7 @@ class TestGenerateFallback:
     @pytest.mark.asyncio
     async def test_timeout_falls_to_next(self):
         slow = _mock_prov("slow")
-        slow.generate = AsyncMock(side_effect=asyncio.TimeoutError("timeout"))
+        slow.generate = AsyncMock(side_effect=TimeoutError("timeout"))
         fast = _mock_prov("fast", "fast result")
         r = _router({"slow": slow, "fast": fast, "template": TemplateProvider()},
                     default_llm_provider="slow", http_timeout_seconds=0.1)

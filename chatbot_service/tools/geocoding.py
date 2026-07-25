@@ -21,6 +21,7 @@ import time
 import httpx
 from tenacity import retry, retry_if_exception, stop_after_attempt, wait_exponential
 
+
 def is_retriable_geocoding(exc: BaseException) -> bool:
     if isinstance(exc, httpx.HTTPStatusError):
         # Do not retry on 4xx errors (like 403 Forbidden, 404 Not Found), EXCEPT 429 Too Many Requests

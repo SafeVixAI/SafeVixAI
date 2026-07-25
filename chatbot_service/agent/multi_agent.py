@@ -2,15 +2,16 @@
 # Copyright (c) 2026 SafeVixAI Team
 
 import logging
+from collections.abc import AsyncGenerator
 from dataclasses import dataclass, field
-from typing import Any, AsyncGenerator
+from typing import Any
 
 from agent.context_assembler import ContextAssembler
 from agent.state import ConversationContext
 from agent.tool_summarizer import ToolPayloadSummarizer
+from memory.episodic_memory import EpisodicMemoryAgent
 from providers.base import ProviderRequest
 from providers.router import ProviderRouter
-from memory.episodic_memory import EpisodicMemoryAgent
 
 logger = logging.getLogger(__name__)
 
@@ -28,15 +29,15 @@ class ChatState:
     client_ip: str | None = None
     provider_hint: str | None = None
     provider_model: str | None = None
-    
+
     # Context
     context: ConversationContext = field(default=None) # type: ignore
-    
+
     # Results
     final_response: str | None = None
     final_sources: list[str] = field(default_factory=list)
     blocked: bool = False
-    
+
     # Stream queue
     stream_events: list[dict] = field(default_factory=list)
 
@@ -63,10 +64,10 @@ class EmergencyDispatchAgent:
         # Generate a fast deterministic response
         loc_tool = next((t for t in context.tools if t.name in ('geocoding', 'what3words')), None)
         loc_str = loc_tool.summary if loc_tool else "unknown location"
-        
+
         state.final_response = f"EMERGENCY DISPATCH PROTOCOL INITIATED. Location recognized as: {loc_str}. Help is being notified. Please stay calm and safe."
         state.final_sources = ['policy:emergency-dispatch'] + [s for t in context.tools for s in t.sources]
-        
+
 
 class LegalAgent:
     """Restricts RAG retrieval scope exclusively to legal/challan documents."""
@@ -125,7 +126,7 @@ class MultiAgentGraph:
         self.provider_router = provider_router
         self.tool_summarizer = ToolPayloadSummarizer()
         self.episodic_memory_agent = episodic_memory_agent
-        
+
         # Sub-agents
         self.emergency_agent = EmergencyDispatchAgent(context_assembler)
         self.legal_agent = LegalAgent(context_assembler)
@@ -152,7 +153,7 @@ class MultiAgentGraph:
 
         # 3. Compress Tool Contexts
         compressed_tools = self._compress_tool_payloads(state)
-        
+
         document_snippets = [
             f'{item.title} ({item.source}): {item.snippet}'
             for item in state.context.retrieved
@@ -179,12 +180,12 @@ class MultiAgentGraph:
                 provider_model=state.provider_model,
             )
         )
-        
+
         state.final_response = provider_result.text
-        
+
         # 5. Extract episodic memory asynchronously
         self._dispatch_memory(state)
-        
+
         return state
 
     async def stream_execute(self, state: ChatState) -> AsyncGenerator[dict, None]:
@@ -219,7 +220,7 @@ class MultiAgentGraph:
             provider_hint=state.provider_hint,
             provider_model=state.provider_model,
         )
-        
+
         async for event in self.provider_router.stream_generate(req):
             yield event
 

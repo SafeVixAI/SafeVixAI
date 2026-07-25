@@ -10,12 +10,12 @@ import logging
 import os
 from dataclasses import dataclass
 
-import asyncpg
-from rag.bm25 import BM25
-from rag.vectorstore import LocalVectorStore, DocumentChunk
 from redis.asyncio import Redis
 from redis.exceptions import RedisError
+
 from core.metrics import chatbot_rag_cache_hit, chatbot_rag_cache_miss
+from rag.bm25 import BM25
+from rag.vectorstore import DocumentChunk, LocalVectorStore
 
 logger = logging.getLogger(__name__)
 
@@ -140,7 +140,7 @@ class Retriever:
         if chunks:
             bm25 = self._get_bm25(chunks)
             scores = bm25.get_scores(query)
-            sparse_matches = list(zip(chunks, scores))
+            sparse_matches = list(zip(chunks, scores, strict=False))
             sparse_matches.sort(key=lambda x: x[1], reverse=True)
             sparse_matches = sparse_matches[:k * 2]
 
@@ -183,7 +183,7 @@ class Retriever:
                     self._cross_encoder = CrossEncoder(self.cross_encoder_model)
                 pairs = [[query, res.content] for res in results]
                 rerank_scores = self._cross_encoder.predict(pairs)
-                for res, r_score in zip(results, rerank_scores):
+                for res, r_score in zip(results, rerank_scores, strict=False):
                     res.score = float(r_score)
                 results.sort(key=lambda x: x.score, reverse=True)
             except Exception as exc:

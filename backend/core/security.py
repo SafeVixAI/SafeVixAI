@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import importlib
 import logging
 import os
 import re
@@ -41,10 +42,12 @@ class SecurityState:
         secret = os.environ.get("JWT_SECRET_KEY")
         if secret:
             if env == "production" and len(secret.encode("utf-8")) < 32:
-                raise RuntimeError("JWT_SECRET_KEY must be at least 32 bytes when ENVIRONMENT=production")
+                msg = "JWT_SECRET_KEY must be at least 32 bytes when ENVIRONMENT=production"
+                raise RuntimeError(msg)
             self._secret_key = secret
         elif env == "production":
-            raise RuntimeError("JWT_SECRET_KEY is required when ENVIRONMENT=production")
+            msg = "JWT_SECRET_KEY is required when ENVIRONMENT=production"
+            raise RuntimeError(msg)
         else:
             self._secret_key = secrets.token_urlsafe(64)
             logger.warning(
@@ -256,7 +259,7 @@ def create_secure_cookie_response(
     expires_delta: timedelta | None = None,
 ) -> JSONResponse:
     """Create a JSON response with a secure HttpOnly cookie containing the JWT.
-    
+
     Phase 0.2: Prevents XSS attacks by making JWT inaccessible to JavaScript.
     """
     response = JSONResponse(content=content, status_code=status_code)
@@ -291,7 +294,7 @@ def _normalize_user_payload(payload: dict[str, Any], *, provider: str) -> dict[s
     try:
         Role(raw_role)
     except ValueError:
-        logger.warning(f"Invalid role claim '{raw_role}' in token payload, rejecting token")
+        logger.warning("Invalid role claim '%s' in token payload, rejecting token", raw_role)
         raise HTTPException(status_code=401, detail="Invalid role claim in token")
 
     return {
@@ -305,7 +308,7 @@ def _normalize_user_payload(payload: dict[str, Any], *, provider: str) -> dict[s
 
 def require_role(required_role: str | Role):
     """FastAPI dependency that enforces role-based access.
-    
+
     Accepts a Role enum or role string (e.g. 'admin', 'operator').
     Delegates to core.rbac for the actual permission check.
     """
@@ -314,7 +317,8 @@ def require_role(required_role: str | Role):
         try:
             role_enum = Role(required_role)
         except ValueError:
-            raise ValueError(f"Invalid required role: {required_role}")
+            msg = f"Invalid required role: {required_role}"
+            raise ValueError(msg)
     else:
         role_enum = required_role
     return rbac_require_role(role_enum)
@@ -334,7 +338,8 @@ def _decode_app_token(token: str) -> dict[str, Any]:
 
 def _decode_supabase_token(token: str) -> dict[str, Any]:
     if not SUPABASE_JWT_SECRET:
-        raise jwt.InvalidTokenError("SUPABASE_JWT_SECRET is not configured")
+        msg = "SUPABASE_JWT_SECRET is not configured"
+        raise jwt.InvalidTokenError(msg)
     payload = jwt.decode(
         token,
         SUPABASE_JWT_SECRET,
@@ -355,12 +360,9 @@ def _decode_bearer_token(token: str) -> dict[str, Any]:
             return _decode_supabase_token(token)
         except (jwt.InvalidTokenError, jwt.ExpiredSignatureError):
             # Phase 0.3: Try JWKS verification if available
-            try:
-                from core.jwks import JWKSManager
-                # This will be called from request context where app.state is available
-                # For now, fall back to static secret
-                logger.debug("JWT verification failed; JWKS not available in this context")
-            except ImportError:
+            if importlib.util.find_spec("core.jwks"):
+                logger.debug("JWKS module available but not used in this context")
+            else:
                 logger.debug("JWKS module not available — falling back to static secret")
             logger.info("Bearer token rejected by app, Supabase, and JWKS validators")
             raise _unauthorized() from app_error

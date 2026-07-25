@@ -76,12 +76,12 @@ def get_replica_engine() -> AsyncEngine | None:
 
 
 @event.listens_for(engine.sync_engine, 'before_cursor_execute')
-def _before_cursor_execute(conn, cursor, statement, parameters, context, executemany):
+def _before_cursor_execute(conn, _cursor, _statement, _parameters, _context, _executemany):
     conn._query_start_time = time.monotonic()
 
 
 @event.listens_for(engine.sync_engine, 'after_cursor_execute')
-def _after_cursor_execute(conn, cursor, statement, parameters, context, executemany):
+def _after_cursor_execute(conn, _cursor, statement, _parameters, _context, _executemany):
     total = (time.monotonic() - conn._query_start_time) * 1000
     if total > SLOW_QUERY_THRESHOLD_MS:
         logger.warning('SLOW QUERY (%.0fms) — %s', total, statement[:200])
@@ -89,11 +89,11 @@ def _after_cursor_execute(conn, cursor, statement, parameters, context, executem
 
 if get_replica_engine() is not None:
     @event.listens_for(_replica_engine.sync_engine, 'before_cursor_execute')
-    def _replica_before_cursor_execute(conn, cursor, statement, parameters, context, executemany):
+    def _replica_before_cursor_execute(conn, _cursor, _statement, _parameters, _context, _executemany):
         conn._query_start_time = time.monotonic()
 
     @event.listens_for(_replica_engine.sync_engine, 'after_cursor_execute')
-    def _replica_after_cursor_execute(conn, cursor, statement, parameters, context, executemany):
+    def _replica_after_cursor_execute(conn, _cursor, statement, _parameters, _context, _executemany):
         total = (time.monotonic() - conn._query_start_time) * 1000
         if total > SLOW_QUERY_THRESHOLD_MS:
             logger.warning('SLOW QUERY ON REPLICA (%.0fms) — %s', total, statement[:200])

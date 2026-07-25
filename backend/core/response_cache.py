@@ -127,7 +127,7 @@ response_cache = ResponseCache(default_ttl=300, max_size=1000)
 
 def cache_response(ttl: int = 300, key_prefix: str = "api"):
     """Decorator to cache FastAPI endpoint responses.
-    
+
     Args:
         ttl: Time-to-live in seconds
         key_prefix: Prefix for cache keys
@@ -161,14 +161,14 @@ def cache_response(ttl: int = 300, key_prefix: str = "api"):
 
 def invalidate_cache_pattern(pattern: str) -> int:
     """Invalidate cache entries matching pattern.
-    
+
     Args:
         pattern: Pattern to match cache keys
-        
+
     Returns:
         Number of invalidated entries
     """
-    keys_to_delete = [key for key in response_cache._cache.keys() if pattern in key]
+    keys_to_delete = [key for key in response_cache._cache if pattern in key]
     for key in keys_to_delete:
         del response_cache._cache[key]
     return len(keys_to_delete)

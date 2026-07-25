@@ -1,10 +1,11 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2026 SafeVixAI Team
 import glob
+
 for f in glob.glob('tests/*.py'):
-    with open(f, 'r', encoding='utf-8') as file:
+    with open(f, encoding='utf-8') as file:
         content = file.read()
-    
+
     if "def search(self, message):" in content:
         content = content.replace(
             "def search(self, message):",
@@ -12,7 +13,7 @@ for f in glob.glob('tests/*.py'):
         )
         with open(f, 'w', encoding='utf-8') as file:
             file.write(content)
-            
+
     if "def search(self, message: str) -> list:" in content:
         content = content.replace(
             "def search(self, message: str) -> list:",

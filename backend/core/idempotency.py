@@ -9,7 +9,7 @@ header return the cached response instead of executing the operation again.
 Usage:
     Add `IdempotencyMiddleware` to FastAPI app middleware stack.
     Clients send `Idempotency-Key: <unique-uuid>` header with POST/PUT requests.
-    
+
 Phase 0.5: Prevents duplicate side effects from network retries.
 """
 from __future__ import annotations

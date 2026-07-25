@@ -24,7 +24,7 @@ STALE_CONNECTION_TIMEOUT_SECONDS = 60
 STALE_CLEANUP_INTERVAL_SECONDS = 30
 MAX_CONNECTIONS = 500
 
-from pydantic import BaseModel, Field, ValidationError, model_validator
+from pydantic import BaseModel, Field, ValidationError, model_validator  # noqa: E402
 
 
 class WSLocationUpdate(BaseModel):

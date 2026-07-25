@@ -63,7 +63,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
                 response.headers["Cache-Control"] = "public, max-age=60, stale-while-revalidate=30"
             elif path.startswith("/api/v1/emergency/sos"):
                 response.headers["Cache-Control"] = "public, max-age=120, stale-while-revalidate=60"
-            elif path.startswith("/api/v1/challan/calculate") or path.startswith("/api/v1/challan/predict"):
+            elif path.startswith(("/api/v1/challan/calculate", "/api/v1/challan/predict")):
                 response.headers["Cache-Control"] = "public, max-age=300, stale-while-revalidate=60"
             elif path.startswith("/api/v1/roadwatch/feed"):
                 response.headers["Cache-Control"] = "public, max-age=120, stale-while-revalidate=60"
@@ -75,7 +75,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
             # ── User-specific / private ──
             elif path.startswith("/api/v1/user/"):
                 response.headers["Cache-Control"] = "private, max-age=60, stale-while-revalidate=30"
-            elif path.startswith("/api/v1/providers/") or path.startswith("/api/v1/officers/") or path.startswith("/api/v1/garage/"):
+            elif path.startswith(("/api/v1/providers/", "/api/v1/officers/", "/api/v1/garage/")):
                 response.headers["Cache-Control"] = "private, max-age=30"
 
         return response

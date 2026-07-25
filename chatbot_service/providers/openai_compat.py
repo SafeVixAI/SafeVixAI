@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import logging
 
-from providers.base import HttpProvider, ProviderRequest, ProviderResult
+from providers.base import HttpProvider
 
 logger = logging.getLogger(__name__)
 
@@ -21,8 +21,6 @@ class OpenAICompatibleProvider(HttpProvider):
     Configured at runtime with base_url, api_key, and model.
     Supports any OpenAI-compatible chat completions API (Ollama, vLLM, LocalAI, etc.)
     """
-
-    name = "custom"
 
     def __init__(
         self,

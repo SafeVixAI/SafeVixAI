@@ -10,11 +10,11 @@ CHATBOT_DIR = Path(__file__).resolve().parent.parent
 if str(CHATBOT_DIR) not in sys.path:
     sys.path.insert(0, str(CHATBOT_DIR))
 
-from config import get_settings
-from rag.vectorstore import LocalVectorStore
+import asyncio  # noqa: E402
 
+from config import get_settings  # noqa: E402
+from rag.vectorstore import LocalVectorStore  # noqa: E402
 
-import asyncio
 
 async def main() -> None:
     settings = get_settings()
@@ -23,7 +23,6 @@ async def main() -> None:
         data_dir=settings.rag_data_dir
     )
     await vectorstore.build_index(force=True)
-    print(await vectorstore.stats())
 
 
 if __name__ == '__main__':

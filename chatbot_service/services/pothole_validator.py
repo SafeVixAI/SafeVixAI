@@ -1,10 +1,11 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2026 SafeVixAI Team
 
-import os
-import logging
-from PIL import Image
 import io
+import logging
+import os
+
+from PIL import Image
 
 logger = logging.getLogger(__name__)
 
@@ -30,12 +31,13 @@ class PotholeValidator:
                 if os.path.exists(p):
                     selected_path = p
                     break
-            
+
             if not selected_path:
-                logger.error(f"YOLO model file not found in paths: {paths_to_check}")
-                raise FileNotFoundError("YOLO model not found in target directories.")
-            
-            logger.info(f"Loading YOLOv8 pothole model from {selected_path}")
+                logger.error("YOLO model file not found in paths: %s", paths_to_check)
+                msg = "YOLO model not found in target directories."
+                raise FileNotFoundError(msg)
+
+            logger.info("Loading YOLOv8 pothole model from %s", selected_path)
             cls._model = YOLO(selected_path)
         return cls._model
 
@@ -52,7 +54,7 @@ class PotholeValidator:
             model = cls.get_model()
             image = Image.open(io.BytesIO(image_bytes))
             results = model(image)
-            
+
             anomaly_detected = False
             max_confidence = 0.0
             boxes_data = []
@@ -63,13 +65,13 @@ class PotholeValidator:
                     conf = float(box.conf[0])
                     cls_id = int(box.cls[0])
                     class_name = model.names[cls_id]
-                    
+
                     # Accept any anomaly detection above threshold
                     if conf > 0.25:
                         anomaly_detected = True
                         if conf > max_confidence:  # pragma: no branch
                             max_confidence = conf
-                        
+
                         xyxy = box.xyxy[0].tolist()
                         boxes_data.append({
                             "class": class_name,

@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 
 def generate_pole_qr(city: str, ward_id: str, sequence: int) -> str:
     """Generate a deterministic QR code string for a pole.
-    
+
     Format: SVAI-{CITY_CODE}-{WARD}-{SEQ:04d}
     Example: SVAI-CHN-W050-0001
     """
@@ -147,13 +147,13 @@ class StreetlightService:
     ) -> list[dict[str, Any]]:
         """
         Simple predictive maintenance scoring.
-        
+
         Score based on:
         - Failure frequency (failure_count)
         - Time since last maintenance
         - Overdue maintenance flag
         - Pole age
-        
+
         Returns top_n poles most likely to need maintenance.
         """
         stmt = select(StreetlightPole).where(StreetlightPole.is_operational)

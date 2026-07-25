@@ -8,9 +8,8 @@ import csv
 import json
 import urllib.parse
 import urllib.request
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Iterable
-
 
 DEFAULT_ENDPOINTS = (
     'https://overpass-api.de/api/interpreter',

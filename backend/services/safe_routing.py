@@ -35,9 +35,11 @@ def _validate_coords(origin: tuple[float, float], dest: tuple[float, float]) -> 
     """Validate coordinate ranges before making external API calls."""
     for label, (lat, lon) in [("origin", origin), ("dest", dest)]:
         if not (-90 <= lat <= 90):
-            raise ServiceValidationError(f"{label} latitude {lat} out of range (-90..90)")
+            msg = f"{label} latitude {lat} out of range (-90..90)"
+            raise ServiceValidationError(msg)
         if not (-180 <= lon <= 180):
-            raise ServiceValidationError(f"{label} longitude {lon} out of range (-180..180)")
+            msg = f"{label} longitude {lon} out of range (-180..180)"
+            raise ServiceValidationError(msg)
 
 
 def is_nighttime() -> bool:
@@ -86,7 +88,8 @@ async def get_safe_route(
             }
         except (KeyError, IndexError, TypeError) as exc:
             logger.error("ORS response parse failed: %s", exc, extra={"service": "safe_routing"})
-            raise ExternalServiceError("Invalid response from ORS routing service") from exc
+            msg = "Invalid response from ORS routing service"
+            raise ExternalServiceError(msg) from exc
 
     return await _osrm_fallback(origin, dest, safety_mode)
 
@@ -135,15 +138,18 @@ async def _osrm_fallback(
         data = await cb.call(_do_osrm_safe_request, origin, dest)
     except CircuitBreakerOpenError:
         logger.error("OSRM fallback circuit breaker OPEN for coords %s, %s", origin, dest, extra={"service": "safe_routing"})
-        raise ExternalServiceError("Routing service unavailable — try again later")
+        msg = "Routing service unavailable — try again later"
+        raise ExternalServiceError(msg)
     except (httpx.TimeoutException, httpx.HTTPError) as exc:
         logger.error("OSRM fallback HTTP error: %s", exc, extra={"service": "safe_routing"})
-        raise ExternalServiceError("Routing service unavailable — try again later") from exc
+        msg = "Routing service unavailable — try again later"
+        raise ExternalServiceError(msg) from exc
 
     routes = data.get('routes') or []
     if not routes:
         logger.error("OSRM returned empty routes for coords %s → %s", origin, dest, extra={"service": "safe_routing"})
-        raise ExternalServiceError("No route found between the given locations")
+        msg = "No route found between the given locations"
+        raise ExternalServiceError(msg)
 
     route = routes[0]
     return {

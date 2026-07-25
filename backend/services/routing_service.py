@@ -29,7 +29,7 @@ for parent in Path(__file__).resolve().parents:
         if str(parent) not in sys.path:
             sys.path.insert(0, str(parent))
         break
-from core.alert import get_alert_service
+from core.alert import get_alert_service  # noqa: E402
 
 logger = logging.getLogger("safevixai.backend.routing")
 
@@ -60,7 +60,8 @@ class RoutingService:
         alternatives: int = 2,
     ) -> RoutePreviewResponse:
         if self._same_point(origin_lat, origin_lon, destination_lat, destination_lon):
-            raise ServiceValidationError('Origin and destination are too close to calculate a route.')
+            msg = 'Origin and destination are too close to calculate a route.'
+            raise ServiceValidationError(msg)
 
         requested_alternatives = max(0, min(int(alternatives), 2))
         cache_key = (
@@ -104,7 +105,8 @@ class RoutingService:
                     status_code=0,
                     error_msg="Circuit breaker OPEN — too many ORS failures",
                 )
-                raise ExternalServiceError('Unable to reach ORS routing provider.')
+                msg = 'Unable to reach ORS routing provider.'
+                raise ExternalServiceError(msg)
             except ExternalServiceError:
                 raise
         else:
@@ -131,7 +133,8 @@ class RoutingService:
                     status_code=0,
                     error_msg="Circuit breaker OPEN — too many OSRM failures",
                 )
-                raise ExternalServiceError('Unable to reach OSRM routing provider.')
+                msg = 'Unable to reach OSRM routing provider.'
+                raise ExternalServiceError(msg)
 
         data = response.json()
         if response.status_code >= 400:
@@ -140,7 +143,8 @@ class RoutingService:
         # ORS wraps routes under 'routes', OSRM under 'routes' too
         routes_data = data.get('routes') or []
         if not routes_data:
-            raise ExternalServiceError('Routing provider returned no route.')
+            msg = 'Routing provider returned no route.'
+            raise ExternalServiceError(msg)
 
         if is_ors:
             routes = [self._normalize_ors_route(r, index=idx) for idx, r in enumerate(routes_data, start=1)]
@@ -185,7 +189,8 @@ class RoutingService:
                 status_code=0,
                 error_msg=str(exc),
             )
-            raise ExternalServiceError('Unable to reach ORS routing provider.') from exc
+            msg = 'Unable to reach ORS routing provider.'
+            raise ExternalServiceError(msg) from exc
 
     async def _do_osrm_request(self, url: str, params: dict) -> httpx.Response:
         try:
@@ -198,7 +203,8 @@ class RoutingService:
                 status_code=0,
                 error_msg=str(exc),
             )
-            raise ExternalServiceError('Unable to reach OSRM routing provider.') from exc
+            msg = 'Unable to reach OSRM routing provider.'
+            raise ExternalServiceError(msg) from exc
 
     @staticmethod
     def _same_point(
@@ -269,7 +275,8 @@ class RoutingService:
                     continue
 
         if len(path) < 2:
-            raise ExternalServiceError('ORS returned invalid route geometry.')
+            msg = 'ORS returned invalid route geometry.'
+            raise ExternalServiceError(msg)
 
         summary = route_data.get('summary') or {}
         steps: list[RouteInstruction] = []
@@ -320,7 +327,8 @@ class RoutingService:
                             continue
 
         if len(path) < 2:
-            raise ExternalServiceError('Routing provider returned invalid path coordinates.')
+            msg = 'Routing provider returned invalid path coordinates.'
+            raise ExternalServiceError(msg)
 
         steps: list[RouteInstruction] = []
         legs = route_data.get('legs') or []

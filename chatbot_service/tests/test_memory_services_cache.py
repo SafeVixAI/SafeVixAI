@@ -16,7 +16,6 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-
 # ═══════════════════════════════════════════════════════════════════
 # PIIDetector (core/pii.py)
 # ═══════════════════════════════════════════════════════════════════
@@ -368,7 +367,7 @@ class TestMetrics:
         update_circuit_breaker_gauges({"groq"}, ["groq", "gemini", "cerebras"])
 
     def test_metrics_response(self) -> None:
-        from core.metrics import metrics_response, metrics_content_type
+        from core.metrics import metrics_content_type, metrics_response
         resp = metrics_response()
         assert isinstance(resp, bytes)
         ctype = metrics_content_type()
@@ -597,7 +596,7 @@ class TestTaskQueue:
 
     @pytest.mark.asyncio
     async def test_get_job_found(self, mock_redis) -> None:
-        from core.queue import TaskQueue, Job
+        from core.queue import Job, TaskQueue
         mock_redis.hget.return_value = json.dumps(Job(
             job_id="j1", task_name="t1", args=[], kwargs={}
         ).to_dict())
@@ -616,7 +615,7 @@ class TestTaskQueue:
 
     @pytest.mark.asyncio
     async def test_update_progress(self, mock_redis) -> None:
-        from core.queue import TaskQueue, Job
+        from core.queue import Job, TaskQueue
         job = Job(job_id="j1", task_name="t1", args=[], kwargs={})
         mock_redis.hget.return_value = json.dumps(job.to_dict())
         tq = TaskQueue(mock_redis)
@@ -651,7 +650,7 @@ class TestQueueUtilities:
         assert _TASK_REGISTRY["my_task"] is my_func
 
     def test_set_get_global_chat_engine(self) -> None:
-        from core.queue import set_global_chat_engine, get_global_chat_engine
+        from core.queue import get_global_chat_engine, set_global_chat_engine
         set_global_chat_engine("test-engine")
         assert get_global_chat_engine() == "test-engine"
         set_global_chat_engine(None)
@@ -678,8 +677,7 @@ class TestLLMResponseCacheNoRedis:
 
     @pytest.mark.asyncio
     async def test_set_no_redis(self) -> None:
-        from cache.llm_cache import CacheEntry
-        from cache.llm_cache import LLMResponseCache
+        from cache.llm_cache import CacheEntry, LLMResponseCache
         cache = LLMResponseCache(None)
         entry = CacheEntry(text="hi", provider="groq", model="llama")
         await cache.set("hello", "general", [], entry)

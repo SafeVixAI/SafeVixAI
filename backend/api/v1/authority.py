@@ -236,6 +236,6 @@ async def get_pending_complaints(
     ]
 
 
-import logging
+import logging  # noqa: E402
 
 logger = logging.getLogger(__name__)

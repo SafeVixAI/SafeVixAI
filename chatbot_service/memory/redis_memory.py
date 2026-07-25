@@ -6,7 +6,7 @@ from __future__ import annotations
 import json
 import logging
 from collections import OrderedDict
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from redis.asyncio import Redis
@@ -43,7 +43,7 @@ class ConversationMemoryStore:
             'role': role,
             'content': content,
             'metadata': metadata or {},
-            'timestamp': datetime.now(timezone.utc).isoformat(),
+            'timestamp': datetime.now(UTC).isoformat(),
         }
         # LRU-lite: move touched session to end; evict oldest if cap exceeded
         if session_id in self._memory:

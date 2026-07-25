@@ -4,14 +4,12 @@
 from __future__ import annotations
 
 import json
-import urllib.request
 import urllib.error
+import urllib.request
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from unittest.mock import MagicMock, patch
 
 import pytest
-from unittest.mock import patch, MagicMock
-import json
-
 
 try:
     from config import get_settings

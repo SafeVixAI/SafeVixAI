@@ -56,14 +56,14 @@ class ChallanTool:
         state_match = STATE_PATTERN.search(message)
         vehicle_class = self._infer_vehicle_class(message)
         is_repeat = any(term in message.lower() for term in ('repeat', 'second time', 'again'))
-        
+
         if state_match:
             resolved_state_code = state_match.group(0).upper()
         else:
             ip_info = await detect_state_from_ip(client_ip)
             state_name = ip_info.get('state', '').lower()
             resolved_state_code = STATE_TO_CODE.get(state_name, 'TN')
-            
+
         return await self.calculate(
             violation_code=violation_match.group(0).upper(),
             vehicle_class=vehicle_class,

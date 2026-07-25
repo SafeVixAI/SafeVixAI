@@ -28,7 +28,7 @@ class ToolPayloadSummarizer:
                 return f"Weather: {w.get('description', 'Unknown')}, Temp: {main.get('temp', 'N/A')}K"
             return json.dumps(data)
         except Exception as e:
-            logger.warning(f"Error summarizing weather: {e}")
+            logger.warning("Error summarizing weather: %s", e)
             return json.dumps(data)
 
     @staticmethod
@@ -46,7 +46,7 @@ class ToolPayloadSummarizer:
                 return f"Location: {data['display_name']}"
             return json.dumps(data)
         except Exception as e:
-            logger.warning(f"Error summarizing geocoding: {e}")
+            logger.warning("Error summarizing geocoding: %s", e)
             return json.dumps(data)
 
     @staticmethod
@@ -57,14 +57,14 @@ class ToolPayloadSummarizer:
                 return f"What3Words: ///{data['words']}"
             return json.dumps(data)
         except Exception as e:
-            logger.warning(f"Error summarizing w3w: {e}")
+            logger.warning("Error summarizing w3w: %s", e)
             return json.dumps(data)
 
     def summarize(self, tool_name: str, payload: Any) -> str:
         """Route to specific summarizers based on heuristic matching of payload or tool name."""
         if not payload:
             return "No data"
-        
+
         if isinstance(payload, str):
             try:
                 data = json.loads(payload)

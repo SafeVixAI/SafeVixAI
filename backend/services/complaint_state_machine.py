@@ -23,7 +23,7 @@ State Diagram:
     citizen_confirmed ──→ closed (final state)
     citizen_rejected ──→ reopened (auto-escalate)
     reopened ──→ assigned (re-routed with higher severity)
-    
+
     Any active → escalated (severity bump, stays in current status)
 """
 
@@ -131,7 +131,7 @@ class ComplaintStateMachine:
     ) -> TransitionResult:
         """
         Perform a validated state transition.
-        
+
         - Validates the transition is allowed
         - Updates the issue status
         - Creates audit trail event
@@ -142,7 +142,8 @@ class ComplaintStateMachine:
         stmt = select(RoadIssue).where(RoadIssue.uuid == complaint_uuid)
         issue = (await db.execute(stmt)).scalar_one_or_none()
         if not issue:
-            raise ValueError(f"Complaint with UUID {complaint_uuid} not found")
+            msg = f"Complaint with UUID {complaint_uuid} not found"
+            raise ValueError(msg)
 
         old_status = issue.status
 
@@ -253,7 +254,8 @@ class ComplaintStateMachine:
         stmt = select(RoadIssue).where(RoadIssue.uuid == complaint_uuid)
         issue = (await db.execute(stmt)).scalar_one_or_none()
         if not issue:
-            raise ValueError(f"Complaint with UUID {complaint_uuid} not found")
+            msg = f"Complaint with UUID {complaint_uuid} not found"
+            raise ValueError(msg)
 
         old_severity = issue.severity
         old_tier = getattr(issue, 'escalation_tier', 0) or 0

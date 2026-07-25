@@ -11,7 +11,6 @@ from dotenv import load_dotenv
 from pydantic import Field, computed_field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-
 ROOT_DIR = Path(__file__).resolve().parent
 load_dotenv(ROOT_DIR / '.env')
 
@@ -153,13 +152,14 @@ class Settings(BaseSettings):
 def get_settings() -> Settings:
     settings = Settings()
     if settings.environment == "production" and "*" in settings.cors_origins_list:
-        raise RuntimeError("CORS_ORIGINS must list explicit origins when ENVIRONMENT=production")
+        msg = "CORS_ORIGINS must list explicit origins when ENVIRONMENT=production"
+        raise RuntimeError(msg)
     if settings.environment != "test":
         settings.chroma_persist_dir.mkdir(parents=True, exist_ok=True)
         settings.rag_data_dir.mkdir(parents=True, exist_ok=True)
     return settings
 
-import logging as _logging
+import logging as _logging  # noqa: E402
 
 _logging.getLogger(__name__).info(
     "Module config loaded for environment=%s", get_settings().environment,

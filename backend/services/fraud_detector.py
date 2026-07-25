@@ -69,7 +69,7 @@ class FraudDetector:
     ) -> tuple[bool, int]:
         """
         Enforce rate limits per phone number to prevent citizen spamming.
-        
+
         Returns:
             (is_allowed, recent_count)
         """

@@ -2,13 +2,14 @@
 # Copyright (c) 2026 SafeVixAI Team
 
 import logging
-from fastapi import APIRouter, File, UploadFile, HTTPException, Depends, Request
+
+from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile
 
 logger = logging.getLogger(__name__)
 
-from services.pothole_validator import PotholeValidator
-from api.chat import verify_internal_auth
-from limiter import limiter
+from api.chat import verify_internal_auth  # noqa: E402
+from limiter import limiter  # noqa: E402
+from services.pothole_validator import PotholeValidator  # noqa: E402
 
 router = APIRouter(prefix='/api/v1/ai', tags=['AI'])
 
@@ -28,18 +29,18 @@ async def validate_image(
         content_type = (file.content_type or '').lower()
         if not content_type.startswith("image/"):
             raise HTTPException(status_code=400, detail="Only image files are allowed.")
-        
+
         contents = await file.read()
         if len(contents) == 0:
             raise HTTPException(status_code=400, detail="Empty file uploaded.")
         if len(contents) > MAX_IMAGE_BYTES:
             raise HTTPException(status_code=413, detail=f"Image too large (max {MAX_IMAGE_BYTES // 1024 // 1024} MB).")
-            
+
         result = PotholeValidator.validate_image(contents)
         return result
     except HTTPException:
         raise
-    except Exception as e:
+    except Exception:
         logger.exception("Image validation endpoint failed")
         raise HTTPException(status_code=500, detail="Internal server error")
 

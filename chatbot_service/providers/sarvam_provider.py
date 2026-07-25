@@ -27,11 +27,16 @@ HIGH_STAKES_INTENTS = {
 # Exported symbols — used by providers/router.py for language-based routing decisions
 __all__ = ['INDIAN_LANGUAGE_CODES', 'HIGH_STAKES_INTENTS', 'SarvamProvider', 'Sarvam105BProvider']
 
-import logging
-import os
+import logging  # noqa: E402
+import os  # noqa: E402
 
-import httpx
-from providers.base import HttpProvider, ProviderRequest, ProviderResult, build_messages, raise_for_provider_status
+from providers.base import (  # noqa: E402
+    HttpProvider,
+    ProviderRequest,
+    ProviderResult,
+    build_messages,
+    raise_for_provider_status,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -71,7 +76,8 @@ class SarvamProvider(HttpProvider):
 
     def _get_api_key(self) -> str:  # type: ignore[override]
         if not self._api_key:
-            raise RuntimeError("Neither SARVAM_API_KEY nor HF_TOKEN")
+            msg = "Neither SARVAM_API_KEY nor HF_TOKEN"
+            raise RuntimeError(msg)
         return self._api_key
 
     def default_model(self) -> str:
@@ -126,14 +132,19 @@ class SarvamProvider(HttpProvider):
         try:
             choices = data.get("choices", [])
             if not choices:
-                raise KeyError("empty choices")
+                msg = "empty choices"
+                raise KeyError(msg)
             text = choices[0].get("message", {}).get("content", "")
             if not text:
-                raise KeyError("empty content")
+                msg = "empty content"
+                raise KeyError(msg)
         except (KeyError, IndexError, TypeError) as exc:
-            raise RuntimeError(
+            msg = (
                 f"SarvamProvider: unexpected response structure: {exc}. "
                 f"Response keys: {list(data.keys())}"
+            )
+            raise RuntimeError(
+                msg
             ) from exc
         return ProviderResult(text=text, provider=self.name, model=model, india_badge=True)
 

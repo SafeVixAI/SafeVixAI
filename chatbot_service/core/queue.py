@@ -6,11 +6,12 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
-import uuid
-import time
 import sys
+import time
+import uuid
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Callable, Optional
+from typing import Any
 
 # Make sure project root is in path for alert_service
 for parent in Path(__file__).resolve().parents:  # pragma: no branch
@@ -18,9 +19,9 @@ for parent in Path(__file__).resolve().parents:  # pragma: no branch
         if str(parent) not in sys.path:
             sys.path.insert(0, str(parent))
         break
-from core.alert import get_alert_service
+from redis.asyncio import Redis  # noqa: E402
 
-from redis.asyncio import Redis
+from core.alert import get_alert_service  # noqa: E402
 
 logger = logging.getLogger("safevixai.chatbot.queue")
 
@@ -103,11 +104,11 @@ class TaskQueue:
     def __init__(self, redis_client: Redis, queue_name: str = "chatbot_default"):
         self.redis = redis_client
         self.queue_key = f"svai:queue:{queue_name}"
-        
+
     async def enqueue(self, task_name: str, *args, retries: int = 3, **kwargs) -> str:
         if task_name not in _TASK_REGISTRY:  # pragma: no branch
             logger.warning("Enqueueing unregistered chatbot task: %s", task_name)
-            
+
         job_id = str(uuid.uuid4())
         job = Job(
             job_id=job_id,
@@ -116,13 +117,13 @@ class TaskQueue:
             kwargs=kwargs,
             retries_left=retries,
         )
-        
+
         await self.redis.hset("svai:chatbot_jobs", job_id, json.dumps(job.to_dict()))
         await self.redis.rpush(self.queue_key, job_id)
         logger.info("Enqueued chatbot background job: %s (task: %s)", job_id, task_name)
         return job_id
 
-    async def get_job(self, job_id: str) -> Optional[Job]:
+    async def get_job(self, job_id: str) -> Job | None:
         raw = await self.redis.hget("svai:chatbot_jobs", job_id)
         if not raw:
             return None
@@ -169,7 +170,7 @@ class BackgroundWorker:
                 res = await self.redis.blpop(self.queue_key, timeout=2)
                 if not res:
                     continue
-                    
+
                 _, job_id = res
                 await self._process_job(job_id)
             except asyncio.CancelledError:
@@ -186,11 +187,11 @@ class BackgroundWorker:
 
         job_dict = json.loads(raw)
         job = Job.from_dict(job_dict)
-        
+
         job.status = "running"
         job.started_at = time.time()
         await self.redis.hset("svai:chatbot_jobs", job_id, json.dumps(job.to_dict()))
-        
+
         func = _TASK_REGISTRY.get(job.task_name)
         if not func:
             err_msg = f"Task function for '{job.task_name}' is not registered."
@@ -209,7 +210,7 @@ class BackgroundWorker:
                 res = await func(q, job_id, *job.args, **job.kwargs)
             else:
                 res = func(q, job_id, *job.args, **job.kwargs)
-                
+
             job.status = "success"
             job.progress = 100
             job.result = res
@@ -228,14 +229,14 @@ class BackgroundWorker:
                 job.status = "failed"
                 job.error = str(exc)
                 logger.error("Chatbot job %s permanently failed. Sending alert.", job_id)
-                
+
                 get_alert_service().alert_external_api_failed(
                     service_name=f"Chatbot Background Job: {job.task_name}",
                     endpoint="Queue worker",
                     status_code=500,
                     error_msg=f"Chatbot job {job_id} permanently failed after retries: {str(exc)}"
                 )
-                
+
         job.completed_at = time.time()
         await self.redis.hset("svai:chatbot_jobs", job_id, json.dumps(job.to_dict()))
 

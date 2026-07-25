@@ -14,7 +14,6 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-
 # ═══════════════════════════════════════════════════════════════════
 # ToolPayloadSummarizer (agent/tool_summarizer.py)
 # ═══════════════════════════════════════════════════════════════════
@@ -115,9 +114,9 @@ class TestToolPayloadSummarizer:
 class TestEmergencyDispatchAgent:
     @pytest.mark.asyncio
     async def test_execute_with_location_tool(self) -> None:
+        from agent.context_assembler import ContextAssembler
         from agent.multi_agent import ChatState, EmergencyDispatchAgent
         from agent.tool_summarizer import ToolPayloadSummarizer
-        from agent.context_assembler import ContextAssembler
 
         mock_assembler = MagicMock(spec=ContextAssembler)
         mock_context = MagicMock()
@@ -144,8 +143,8 @@ class TestEmergencyDispatchAgent:
 
     @pytest.mark.asyncio
     async def test_execute_no_location_tool(self) -> None:
-        from agent.multi_agent import ChatState, EmergencyDispatchAgent
         from agent.context_assembler import ContextAssembler
+        from agent.multi_agent import ChatState, EmergencyDispatchAgent
 
         mock_assembler = MagicMock(spec=ContextAssembler)
         mock_context = MagicMock()
@@ -166,8 +165,8 @@ class TestEmergencyDispatchAgent:
 
     @pytest.mark.asyncio
     async def test_legal_agent(self) -> None:
-        from agent.multi_agent import ChatState, LegalAgent
         from agent.context_assembler import ContextAssembler
+        from agent.multi_agent import ChatState, LegalAgent
 
         mock_assembler = MagicMock(spec=ContextAssembler)
         mock_context = MagicMock()

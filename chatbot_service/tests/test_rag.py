@@ -92,14 +92,14 @@ async def test_retriever_bm25_coverage():
     chunk2 = DocumentChunk(chunk_id="2", source="s2", title="t2", category="c2", content="hello world")
     mock_store.search = AsyncMock(return_value=[(chunk1, 0.9)])
     mock_store.ensure_index = AsyncMock(return_value=[chunk1, chunk2])
-    
+
     retriever = Retriever(mock_store, default_top_k=5, min_score=0.0)
-    
+
     # 1st call hits bm25 init
     results1 = await retriever.retrieve("hello")
     # 2nd call hits cached bm25
     results2 = await retriever.retrieve("hello")
-    
+
     # Test RRF bounds and results
     assert len(results1) > 0
     assert len(results2) > 0
@@ -112,7 +112,7 @@ async def test_retriever_cross_encoder_mock():
     chunk2 = DocumentChunk(chunk_id="2", source="s2", title="t2", category="c2", content="hello again")
     mock_store.search = AsyncMock(return_value=[(chunk1, 0.9), (chunk2, 0.8)])
     mock_store.ensure_index = AsyncMock(return_value=[chunk1, chunk2])
-    
+
     # Enable cross-encoder but let it fail or mock it
     retriever = Retriever(mock_store, default_top_k=5, min_score=0.0, cross_encoder_model="dummy-model")
     results = await retriever.retrieve("hello")

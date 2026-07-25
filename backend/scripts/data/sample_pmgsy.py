@@ -44,7 +44,7 @@ def sample(total_limit: int = 5000, per_state: int = 200) -> None:
         buckets[state].append(feat)
 
     selected = []
-    for state, feats in sorted(buckets.items()):
+    for _state, feats in sorted(buckets.items()):
         chosen = feats[:per_state]
         selected.extend(chosen)
         if len(selected) >= total_limit:

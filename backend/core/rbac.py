@@ -14,12 +14,12 @@ Roles:
 """
 from __future__ import annotations
 
-from enum import Enum
+from enum import StrEnum
 
 from fastapi import Depends, HTTPException
 
 
-class Role(str, Enum):
+class Role(StrEnum):
     """User roles with hierarchical permissions."""
     ADMIN = "admin"
     OPERATOR = "operator"

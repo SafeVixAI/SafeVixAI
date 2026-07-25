@@ -93,8 +93,8 @@ def _format_timestamp(iso_str: str | None) -> str:
 
 # ── CIFS Feed Endpoint ────────────────────────────────────────────────────────
 
-import time
-from collections import defaultdict
+import time  # noqa: E402
+from collections import defaultdict  # noqa: E402
 
 
 class TokenBucket:

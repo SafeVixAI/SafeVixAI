@@ -1,13 +1,15 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2026 SafeVixAI Team
-import pytest
-from unittest.mock import AsyncMock, patch
 from pathlib import Path
+from unittest.mock import AsyncMock, patch
+
+import pytest
 
 from agent.context_assembler import ConversationContext
 from memory.episodic_memory import EpisodicMemoryAgent
 from providers.base import ProviderRequest, ProviderResult
 from rag.vectorstore import DocumentChunk
+
 
 @pytest.fixture
 def mock_router():
@@ -40,7 +42,7 @@ async def test_extract_and_store_success(agent, mock_router):
         {"role": "assistant", "content": "Noted."}
     ]
     await agent.extract_and_store("session_1", "user_123", history)
-    
+
     mock_router.generate.assert_called_once()
     agent.vectorstore._upsert_pg.assert_called_once()
     args = agent.vectorstore._upsert_pg.call_args[0][0]
@@ -82,7 +84,7 @@ async def test_extract_and_store_exception(agent, mock_router):
 async def test_retrieve_memory(agent):
     chunk = DocumentChunk(chunk_id="1", source="s", title="t", category="user_1", content="Fact 1")
     agent.vectorstore.search.return_value = [(chunk, 0.9)]
-    
+
     results = await agent.retrieve_memory("user_1", "What is my condition?")
     agent.vectorstore.search.assert_called_once_with("What is my condition?", top_k=3, scopes={"user_1"})
     assert results == ["Fact 1"]

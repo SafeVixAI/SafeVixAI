@@ -1,7 +1,14 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2026 SafeVixAI Team
 
-from prometheus_client import Counter, Gauge, Histogram, CollectorRegistry, generate_latest, CONTENT_TYPE_LATEST
+from prometheus_client import (
+    CONTENT_TYPE_LATEST,
+    CollectorRegistry,
+    Counter,
+    Gauge,
+    Histogram,
+    generate_latest,
+)
 
 REGISTRY = CollectorRegistry(auto_describe=True)
 

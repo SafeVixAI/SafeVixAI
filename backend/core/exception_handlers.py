@@ -45,13 +45,13 @@ def register_exception_handlers(app: FastAPI) -> None:
         )
 
     try:
-        from sqlalchemy.exc import IntegrityError as SAIntegrityError
+        from sqlalchemy.exc import IntegrityError as sa_integrity_error  # noqa: N813
     except ImportError:
-        SAIntegrityError = None
+        sa_integrity_error = None
 
-    if SAIntegrityError is not None:
-        @app.exception_handler(SAIntegrityError)
-        async def sqlalchemy_integrity_error_handler(request: Request, exc: SAIntegrityError) -> JSONResponse:
+    if sa_integrity_error is not None:
+        @app.exception_handler(sa_integrity_error)
+        async def sqlalchemy_integrity_error_handler(request: Request, exc: sa_integrity_error) -> JSONResponse:
             logger.error("Database integrity error on %s: %s", request.url.path, str(exc))
             return JSONResponse(
                 status_code=409,

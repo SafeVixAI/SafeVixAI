@@ -7,30 +7,30 @@ import sys
 import time
 from pathlib import Path
 
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from sqlalchemy.ext.asyncio import AsyncSession
+
 for parent in Path(__file__).resolve().parents:
     if (parent / 'alert_service.py').exists():
         if str(parent) not in sys.path:
             sys.path.insert(0, str(parent))
         break
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from core.alert import get_alert_service
-from core.audit import AuditLog
-from core.database import get_db
-from core.limiter import limiter
-from core.metrics import (
+from core.alert import get_alert_service  # noqa: E402
+from core.audit import AuditLog  # noqa: E402
+from core.database import get_db  # noqa: E402
+from core.limiter import limiter  # noqa: E402
+from core.metrics import (  # noqa: E402
     emergency_lookup_time,
     emergency_lookup_total,
     emergency_services_found,
     sos_dispatch_total,
     sos_response_time,
 )
-from core.security import get_current_user_optional
-from models.schemas import EmergencyNumbersResponse, EmergencyResponse, SosResponse
-from models.sos_incident import SosIncident
-from services.emergency_locator import EMERGENCY_NUMBERS, EmergencyLocatorService
-from services.exceptions import ExternalServiceError
+from core.security import get_current_user_optional  # noqa: E402
+from models.schemas import EmergencyNumbersResponse, EmergencyResponse, SosResponse  # noqa: E402
+from models.sos_incident import SosIncident  # noqa: E402
+from services.emergency_locator import EMERGENCY_NUMBERS, EmergencyLocatorService  # noqa: E402
+from services.exceptions import ExternalServiceError  # noqa: E402
 
 router = APIRouter(prefix='/api/v1/emergency', tags=['Emergency'])
 
@@ -55,7 +55,7 @@ async def get_nearby_services(
     """
     Retrieve nearest active emergency responder stations and services.
 
-    Queries database and Overpass API to locate nearby medical, police, fire, 
+    Queries database and Overpass API to locate nearby medical, police, fire,
     and highway helpline responders filtered by dynamic radius and categories.
 
     Args:
@@ -101,7 +101,7 @@ async def get_sos_payload(
     """
     Synthesize an emergency SOS response package for offline/online sync.
 
-    Fetches critical numbers, nearby hospitals, and police contacts based on 
+    Fetches critical numbers, nearby hospitals, and police contacts based on
     current GPS coordinates, optimized to keep offline sync payloads lightweight.
 
     Args:
@@ -218,7 +218,7 @@ async def get_emergency_numbers(
     """
     Retrieve national static emergency responder hotlines.
 
-    Returns the unified catalog of primary emergency dispatch numbers including 
+    Returns the unified catalog of primary emergency dispatch numbers including
     Police, Ambulance, Fire, Women Helpline, and National Emergency Response.
 
     Args:
@@ -241,7 +241,7 @@ async def safe_spaces(
     """
     Identify secure spaces and localized emergency resources for women safety.
 
-    Queries police checkpoints, transit terminals, and operational municipal 
+    Queries police checkpoints, transit terminals, and operational municipal
     buildings within a specified circular search radius.
 
     Args:

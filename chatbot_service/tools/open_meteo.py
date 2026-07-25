@@ -9,12 +9,12 @@ Endpoint: https://api.open-meteo.com/v1/forecast
 
 from __future__ import annotations
 
-import asyncio
 import json
 import logging
 
 import httpx
-from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception
+from tenacity import retry, retry_if_exception, stop_after_attempt, wait_exponential
+
 
 def is_retriable_http(exc: BaseException) -> bool:
     if isinstance(exc, httpx.HTTPStatusError):
@@ -22,7 +22,7 @@ def is_retriable_http(exc: BaseException) -> bool:
     return True
 
 
-from config import Settings
+from config import Settings  # noqa: E402
 
 logger = logging.getLogger(__name__)
 

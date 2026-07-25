@@ -71,7 +71,7 @@ class JWKSManager:
 
     async def get_signing_key(self) -> tuple[str, str]:
         """Get the current signing key and its kid.
-        
+
         Returns:
             Tuple of (key, kid) for signing tokens.
         """
@@ -89,7 +89,7 @@ class JWKSManager:
 
     async def verify_token(self, token: str) -> dict[str, Any]:
         """Verify a JWT token using current or historical keys.
-        
+
         Tries current key first, then falls back to historical keys
         during the rotation window.
         """

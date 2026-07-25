@@ -14,7 +14,6 @@ from config import Settings
 from providers.base import ProviderRequest, ProviderResult, RateLimitError
 from providers.router import ProviderRouter
 
-
 pytestmark = pytest.mark.asyncio
 
 

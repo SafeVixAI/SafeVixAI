@@ -431,17 +431,17 @@ async def get_etl_log(request: Request,
     return {
         'logs': [
             {
-                'id': l.id, 'pipeline': l.pipeline_name,
-                'started_at': l.started_at.isoformat(),
-                'finished_at': l.finished_at.isoformat() if l.finished_at else None,
-                'status': l.status,
-                'records_fetched': l.records_fetched,
-                'records_inserted': l.records_inserted,
-                'records_updated': l.records_updated,
-                'records_skipped': l.records_skipped,
-                'error': l.error_message,
+                'id': log_entry.id, 'pipeline': log_entry.pipeline_name,
+                'started_at': log_entry.started_at.isoformat(),
+                'finished_at': log_entry.finished_at.isoformat() if log_entry.finished_at else None,
+                'status': log_entry.status,
+                'records_fetched': log_entry.records_fetched,
+                'records_inserted': log_entry.records_inserted,
+                'records_updated': log_entry.records_updated,
+                'records_skipped': log_entry.records_skipped,
+                'error': log_entry.error_message,
             }
-            for l in logs
+            for log_entry in logs
         ],
     }
 

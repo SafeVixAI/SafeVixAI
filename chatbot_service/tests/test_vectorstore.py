@@ -5,15 +5,15 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from unittest.mock import MagicMock, patch, AsyncMock
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
 from rag.document_loader import (
     EXCLUDED_DATA_DIRS,
-    LoadedDocument,
     MAX_CSV_ROWS,
     MAX_TEXT_CHARS,
+    LoadedDocument,
     _read_csv,
     _read_json,
     _read_pdf,
@@ -491,7 +491,7 @@ class TestLocalVectorStoreEnsureIndex:
         mock_conn = AsyncMock()
         mock_pool.acquire.return_value.__aenter__.return_value = mock_conn
         mock_conn.fetchval.return_value = 1
-        
+
         mock_row = {
             "chunk_id": "a:1", "source": "a", "title": "t", "category": "c", "content": "x"
         }
@@ -514,14 +514,14 @@ class TestLocalVectorStoreBuildIndex:
         )
         mock_docs = [LoadedDocument('a', 't', 'c', 'x')]
         mock_chunks = [DocumentChunk('a:1', 'a', 't', 'c', 'x')]
-        
+
         store.init_db = AsyncMock()
         store._upsert_pg = AsyncMock()
-        
+
         with patch('rag.vectorstore.load_documents', return_value=mock_docs):
             with patch.object(LocalVectorStore, '_chunk_document', return_value=mock_chunks):
                 result = await store.build_index(force=True)
-                
+
         store.init_db.assert_called_once()
         store._upsert_pg.assert_called_once_with(mock_chunks)
         assert result == mock_chunks
@@ -539,7 +539,7 @@ class TestLocalVectorStoreSearch:
         mock_pool = MagicMock()
         mock_conn = AsyncMock()
         mock_pool.acquire.return_value.__aenter__.return_value = mock_conn
-        
+
         mock_row = {
             "chunk_id": "a:1", "source": "a", "title": "t", "category": "c", "content": "x", "score": 0.1
         }
@@ -547,7 +547,7 @@ class TestLocalVectorStoreSearch:
         store._pool = mock_pool
 
         results = await store.search("query text", top_k=5)
-        
+
         assert len(results) == 1
         chunk, score = results[0]
         assert chunk.chunk_id == "a:1"
@@ -565,13 +565,13 @@ class TestLocalVectorStoreStats:
         mock_pool = MagicMock()
         mock_conn = AsyncMock()
         mock_pool.acquire.return_value.__aenter__.return_value = mock_conn
-        
+
         mock_conn.fetchval.side_effect = [100, 5]
         store._pool = mock_pool
         store._chunks = [1]*100
 
         stats = await store.stats()
-        
+
         assert stats["chunks"] == 100
         assert stats["categories"] == 5
         assert stats["database"] == "pgvector"

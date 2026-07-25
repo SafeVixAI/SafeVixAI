@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2026 SafeVixAI Team
 
-import logging
 import json
+import logging
 from dataclasses import dataclass
 from typing import Any
 
@@ -39,7 +39,7 @@ class PlanAndExecuteAgent:
                 document_snippets=[],
             )
             resp = await self.provider_router.generate(req)
-            
+
             # Simple json parse (assume the model outputs valid json)
             text = resp.text
             start = text.find('[')
@@ -49,7 +49,7 @@ class PlanAndExecuteAgent:
                 return [PlanStep(step=s.get('step'), tool_name=s.get('tool_name')) for s in raw_steps]
         except Exception as e:
             logger.warning("Failed to generate plan: %s", e)
-            
+
         return [PlanStep(step=message)]
 
     async def execute_step(self, step: PlanStep, context: dict) -> str:
@@ -68,7 +68,7 @@ class PlanAndExecuteAgent:
                     return str(res)
             except Exception as e:
                 return f"Tool {step.tool_name} failed: {e}"
-        
+
         # Fallback to LLM reasoning if no tool
         req = ProviderRequest(
             message=f"Solve this step: {step.step}\nContext: {json.dumps(context)}",
@@ -88,7 +88,7 @@ class PlanAndExecuteAgent:
             step.result = result
             step.completed = True
             results.append(f"Step: {step.step}\nResult: {result}")
-            
+
         # Final synthesis
         synthesis_req = ProviderRequest(
             message=message,

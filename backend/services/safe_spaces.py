@@ -36,9 +36,11 @@ async def get_safe_spaces(lat: float, lon: float, radius_m: int = 1000) -> dict:
     Falls back to an empty list with a warning if all endpoints are rate-limited.
     """
     if not (-90 <= lat <= 90) or not (-180 <= lon <= 180):
-        raise ServiceValidationError(f"Invalid coordinates: lat={lat}, lon={lon}")
+        msg = f"Invalid coordinates: lat={lat}, lon={lon}"
+        raise ServiceValidationError(msg)
     if radius_m is not None and (radius_m < 100 or radius_m > 100000):
-        raise ServiceValidationError(f"Invalid radius: {radius_m}")
+        msg = f"Invalid radius: {radius_m}"
+        raise ServiceValidationError(msg)
     global _CLIENT
     if _CLIENT is None or _CLIENT.is_closed:
         _CLIENT = httpx.AsyncClient(timeout=20.0)

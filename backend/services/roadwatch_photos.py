@@ -8,6 +8,7 @@ from __future__ import annotations
 import contextlib
 import io
 import logging
+import uuid
 from pathlib import Path
 
 import aiofiles
@@ -95,13 +96,15 @@ async def read_upload_chunks(photo: UploadFile, max_bytes: int) -> tuple[list[by
         if first_chunk:
             first_chunk = False
             if not is_valid_image_magic(chunk[:12]):
+                msg = 'Uploaded file does not appear to be a valid JPEG, PNG, or WebP image.'
                 raise ServiceValidationError(
-                    'Uploaded file does not appear to be a valid JPEG, PNG, or WebP image.'
+                    msg
                 )
         written += len(chunk)
         if written > max_bytes:
+            msg = f'Photo exceeds max upload size of {max_bytes // (1024 * 1024)} MB'
             raise ServiceValidationError(
-                f'Photo exceeds max upload size of {max_bytes // (1024 * 1024)} MB'
+                msg
             )
         chunks.append(chunk)
 

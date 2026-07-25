@@ -44,7 +44,7 @@ async def get_tenant_id(request: Request) -> str | None:
 
 def apply_tenant_filter(session: AsyncSession, tenant_id: str | None) -> None:
     """Apply tenant filter to all queries in the session.
-    
+
     This uses SQLAlchemy 2.0 event listeners to automatically add
     org_id filters to queries on tenant-aware tables via do_orm_execute.
     """
@@ -65,7 +65,7 @@ def apply_tenant_filter(session: AsyncSession, tenant_id: str | None) -> None:
 
 class TenantAwareQuery:
     """Helper class for tenant-aware database queries.
-    
+
     Usage:
         async with AsyncSessionLocal() as session:
             query = TenantAwareQuery(session, tenant_id)

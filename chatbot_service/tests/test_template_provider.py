@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import pytest
 
-from providers.base import TemplateProvider, ProviderRequest
+from providers.base import ProviderRequest, TemplateProvider
 
 
 @pytest.fixture

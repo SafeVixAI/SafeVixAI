@@ -431,14 +431,14 @@ class CivicDataExporter:
                 'records_fetched', 'records_inserted', 'records_updated',
                 'records_skipped', 'error_message',
             ])
-            for l in logs:
+            for log_entry in logs:
                 writer.writerow([
-                    l.id, l.pipeline_name,
-                    l.started_at.isoformat() if l.started_at else '',
-                    l.finished_at.isoformat() if l.finished_at else '',
-                    l.status, l.records_fetched, l.records_inserted,
-                    l.records_updated, l.records_skipped,
-                    l.error_message or '',
+                    log_entry.id, log_entry.pipeline_name,
+                    log_entry.started_at.isoformat() if log_entry.started_at else '',
+                    log_entry.finished_at.isoformat() if log_entry.finished_at else '',
+                    log_entry.status, log_entry.records_fetched, log_entry.records_inserted,
+                    log_entry.records_updated, log_entry.records_skipped,
+                    log_entry.error_message or '',
                 ])
         return len(logs)
 

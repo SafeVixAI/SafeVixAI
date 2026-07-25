@@ -4,15 +4,14 @@
 from __future__ import annotations
 
 import asyncio
-import json
 import logging
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 from pathlib import Path
 
 import asyncpg
 
 from rag.document_loader import LoadedDocument, load_documents
-from rag.embeddings import build_embedding_function, normalize_text, score_query
+from rag.embeddings import build_embedding_function, normalize_text
 
 logger = logging.getLogger(__name__)
 
@@ -83,10 +82,10 @@ class LocalVectorStore:
 
         await self.init_db()
         pool = await self._get_pool()
-        
+
         async with pool.acquire() as conn:
             count = await conn.fetchval(f'SELECT COUNT(*) FROM {self.collection_name}')
-            
+
             if count > 0:
                 rows = await conn.fetch(f'SELECT chunk_id, source, title, category, content FROM {self.collection_name}')
                 self._chunks = [DocumentChunk(**dict(row)) for row in rows]
@@ -97,14 +96,14 @@ class LocalVectorStore:
     async def build_index(self, *, force: bool = False) -> list[DocumentChunk]:
         if self._chunks and not force:
             return self._chunks
-            
+
         await self.init_db()
-        
+
         documents = load_documents(self.data_dir)
         chunks: list[DocumentChunk] = []
         for document in documents:
             chunks.extend(self._chunk_document(document))
-            
+
         self._chunks = self._filter_chunks(chunks)
         await self._upsert_pg(self._chunks)
         return self._chunks
@@ -116,9 +115,9 @@ class LocalVectorStore:
     async def _upsert_pg(self, chunks: list[DocumentChunk]) -> None:
         if not chunks:
             return
-            
+
         pool = await self._get_pool()
-        
+
         # We need to compute embeddings for all chunks before inserting
         contents = [chunk.content for chunk in chunks]
         try:
@@ -129,7 +128,7 @@ class LocalVectorStore:
 
         async with pool.acquire() as conn:
             async with conn.transaction():
-                for chunk, embedding in zip(chunks, embeddings):
+                for chunk, embedding in zip(chunks, embeddings, strict=False):
                     # pgvector expects string representation like '[1.2, 0.5, ...]'
                     emb_str = f"[{','.join(str(x) for x in embedding)}]"
                     await conn.execute(
@@ -154,7 +153,7 @@ class LocalVectorStore:
         scopes: set[str] | None = None,
     ) -> list[tuple[DocumentChunk, float]]:
         pool = await self._get_pool()
-        
+
         try:
             query_results = await asyncio.to_thread(self._embedding_function, [query])
             query_embedding = query_results[0]
@@ -185,7 +184,7 @@ class LocalVectorStore:
                     LIMIT $2
                 '''
                 rows = await conn.fetch(query_sql, *args)
-                
+
                 matches = []
                 for row in rows:
                     if row['category'] in EXCLUDED_INDEX_CATEGORIES:
@@ -213,7 +212,7 @@ class LocalVectorStore:
                 logger.warning('Unable to count pgvector chunks: %s', exc)
                 count = 0
                 categories = 0
-                
+
         return {
             'chunks': count,
             'categories': categories,

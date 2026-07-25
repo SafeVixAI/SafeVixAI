@@ -15,7 +15,7 @@ class RoadWatchModerationService:
     def __init__(self, settings: Any) -> None:
         self.settings = settings
 
-    async def moderate_text(self, description: str | None, issue_type: str) -> dict[str, Any]:
+    async def moderate_text(self, description: str | None, _issue_type: str) -> dict[str, Any]:
         """Verify text content against prohibited terms and compliance criteria."""
         if not description:
             return {"approved": True, "reason": "No description provided"}

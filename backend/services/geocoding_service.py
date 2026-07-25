@@ -24,7 +24,7 @@ for parent in Path(__file__).resolve().parents:
         if str(parent) not in sys.path:
             sys.path.insert(0, str(parent))
         break
-from core.alert import get_alert_service
+from core.alert import get_alert_service  # noqa: E402
 
 logger = logging.getLogger("safevixai.backend.geocoding")
 
@@ -77,7 +77,8 @@ class GeocodingService:
             except Exception as e:
                 logger.warning("BigDataCloud reverse geocode failed: %s", e, extra={"service": "geocoding"})
                 errors.append(e)
-        raise GeocodingError(f"All providers failed: {errors}")
+        msg = f"All providers failed: {errors}"
+        raise GeocodingError(msg)
 
     async def reverse(self, *, lat: float, lon: float) -> GeocodeResult:
         if self.cache is None:
@@ -145,14 +146,16 @@ class GeocodingService:
         payload = await self._get(self.settings.photon_url, '/api/', {'q': query, 'limit': 5, 'lang': 'en'})
         features = payload.get('features') if isinstance(payload, dict) else None
         if not features:
-            raise GeocodingError('Photon geocoding unavailable')
+            msg = 'Photon geocoding unavailable'
+            raise GeocodingError(msg)
         return [self._normalize_photon(feature) for feature in features if feature]
 
     async def _reverse_photon(self, *, lat: float, lon: float) -> GeocodeResult:
         payload = await self._get(self.settings.photon_url, '/reverse', {'lat': lat, 'lon': lon, 'limit': 1})
         features = payload.get('features') if isinstance(payload, dict) else None
         if not features:
-            raise GeocodingError('Photon geocoding unavailable')
+            msg = 'Photon geocoding unavailable'
+            raise GeocodingError(msg)
         return self._normalize_photon(features[0])
 
     async def _search_nominatim(self, query: str) -> list[GeocodeResult]:
@@ -181,7 +184,8 @@ class GeocodingService:
             return await cb.call(self._do_get_nominatim, path, params)
         except CircuitBreakerOpenError:
             logger.warning("Nominatim circuit breaker OPEN")
-            raise GeocodingError("Nominatim unavailable (circuit breaker open)")
+            msg = "Nominatim unavailable (circuit breaker open)"
+            raise GeocodingError(msg)
 
     async def _do_get_nominatim(self, path: str, params: dict) -> dict | list:
         async with self._rate_limit_lock:
@@ -192,7 +196,8 @@ class GeocodingService:
                 response = await self._client.get(f'{self.settings.nominatim_url}{path}', params=params)
                 response.raise_for_status()
             except httpx.HTTPError as exc:
-                raise GeocodingError('Nominatim geocoding unavailable') from exc
+                msg = 'Nominatim geocoding unavailable'
+                raise GeocodingError(msg) from exc
             finally:
                 self._last_nominatim_request_at = time.monotonic()
         return response.json()
@@ -203,14 +208,16 @@ class GeocodingService:
             return await cb.call(self._do_get, base_url, path, params)
         except CircuitBreakerOpenError:
             logger.warning("Photon circuit breaker OPEN")
-            raise GeocodingError("Photon unavailable (circuit breaker open)")
+            msg = "Photon unavailable (circuit breaker open)"
+            raise GeocodingError(msg)
 
     async def _do_get(self, base_url: str, path: str, params: dict) -> dict | list:
         try:
             response = await self._client.get(f'{base_url}{path}', params=params)
             response.raise_for_status()
         except httpx.HTTPError as exc:
-            raise GeocodingError('Photon geocoding unavailable') from exc
+            msg = 'Photon geocoding unavailable'
+            raise GeocodingError(msg) from exc
         return response.json()
 
     @staticmethod

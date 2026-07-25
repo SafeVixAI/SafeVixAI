@@ -4,16 +4,17 @@
 from __future__ import annotations
 
 import html as _html
+
 from fastapi import APIRouter, Depends, Header, HTTPException, Request
 from fastapi.responses import HTMLResponse
 
 from agent.graph import ChatEngine
 from config import get_settings
-from memory.redis_memory import ConversationMemoryStore
+from core.queue import TaskQueue, task
+
 # S18: Import limiter for per-IP rate limiting on admin endpoints (5/min)
 from limiter import limiter
-from core.queue import task, TaskQueue
-
+from memory.redis_memory import ConversationMemoryStore
 
 router = APIRouter(tags=['Admin'])
 
@@ -101,6 +102,7 @@ async def provider_health(
 ) -> dict:
     import asyncio
     import time
+
     from providers.base import ProviderRequest
 
     provider_router = engine.provider_router
@@ -131,7 +133,7 @@ async def provider_health(
     for res in results:
         if isinstance(res, tuple):  # pragma: no branch
             matrix[res[0]] = res[1]
-    
+
     return {'status': 'completed', 'providers': matrix}
 
 
@@ -146,6 +148,7 @@ async def provider_health_dashboard(
     """C11: Provider health dashboard UI — renders provider status as HTML."""
     import asyncio
     import time
+
     from providers.base import ProviderRequest
 
     provider_router = engine.provider_router
@@ -246,10 +249,12 @@ async def provider_health_dashboard(
 @task("rebuild_rag_index")
 async def rebuild_rag_index_task(q: TaskQueue, job_id: str):
     import logging
+
     from core.queue import get_global_chat_engine
     engine = get_global_chat_engine()
     if not engine:
-        raise ValueError("ChatEngine is not initialized globally.")
+        msg = "ChatEngine is not initialized globally."
+        raise ValueError(msg)
     logger = logging.getLogger("safevixai.chatbot.tasks")
     logger.info("Starting background RAG index rebuild...")
     stats = await engine.rebuild_index()

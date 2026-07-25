@@ -6,11 +6,10 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 import re
 import unicodedata
 from dataclasses import dataclass, field
-
-import os
 
 import httpx
 
@@ -19,10 +18,10 @@ logger = logging.getLogger(__name__)
 # Load from versioned YAML prompts with in-memory fallback defaults
 try:
     from prompts import (
-        get_system_prompt,
-        get_prohibited_patterns,
         get_max_history,
         get_max_response_tokens,
+        get_prohibited_patterns,
+        get_system_prompt,
     )
     SYSTEM_PROMPT = get_system_prompt() or (
         "You are SafeVixAI, an AI assistant built for Indian road safety and emergency response. "
@@ -118,13 +117,17 @@ def raise_for_provider_status(response: httpx.Response, *, provider: str, model:
             retry_after = 60
         raise RateLimitError(provider, retry_after)
     if response.status_code == 402:
-        raise QuotaExhaustedError(f"{provider} quota exhausted for model {model}")
+        msg = f"{provider} quota exhausted for model {model}"
+        raise QuotaExhaustedError(msg)
     if response.status_code == 403:
-        raise InvalidProviderKeyError(f"{provider} rejected API key or access for model {model}")
+        msg = f"{provider} rejected API key or access for model {model}"
+        raise InvalidProviderKeyError(msg)
     if response.status_code == 404 and "model" in body_lower:
-        raise ModelUnavailableError(f"{provider} model unavailable or deprecated: {model}")
+        msg = f"{provider} model unavailable or deprecated: {model}"
+        raise ModelUnavailableError(msg)
     if response.status_code in {500, 503, 504}:
-        raise ProviderUnavailableError(f"{provider} unavailable ({response.status_code}): {body}")
+        msg = f"{provider} unavailable ({response.status_code}): {body}"
+        raise ProviderUnavailableError(msg)
     response.raise_for_status()
 
 
@@ -192,7 +195,7 @@ def check_prompt_injection(message: str) -> bool:
     return any(pattern in normalized for pattern in PROHIBITED_PATTERNS)
 
 
-def _enforce_token_budget(request: 'ProviderRequest') -> 'ProviderRequest':
+def _enforce_token_budget(request: ProviderRequest) -> ProviderRequest:
     """
     P1-11: Truncate inputs to stay within the character-based token budget.
 
@@ -367,8 +370,9 @@ class HttpProvider:
 
     def _get_api_key(self) -> str:
         if not self._api_key:
+            msg = f"{self.__class__.__name__}: Missing env var '{self.api_key_env()}'"
             raise RuntimeError(
-                f"{self.__class__.__name__}: Missing env var '{self.api_key_env()}'"
+                msg
             )
         return self._api_key
 
@@ -386,7 +390,7 @@ class HttpProvider:
         """
         request = _enforce_token_budget(request)
         if check_prompt_injection(request.message):
-            logger.warning(f"Prompt injection blocked in HttpProvider.stream. Message: {request.message[:50]}...")
+            logger.warning("Prompt injection blocked in HttpProvider.stream. Message: %.50s...", request.message)
             return
 
         api_key = self._get_api_key()
@@ -433,7 +437,7 @@ class HttpProvider:
     async def generate(self, request: ProviderRequest) -> ProviderResult:
         request = _enforce_token_budget(request)
         if check_prompt_injection(request.message):
-            logger.warning(f"Prompt injection blocked in HttpProvider. Message: {request.message[:50]}...")
+            logger.warning("Prompt injection blocked in HttpProvider. Message: %.50s...", request.message)
             return ProviderResult(
                 text="I cannot fulfill this request. I am SafeVixAI, an AI assistant focused strictly on Indian road safety and emergency response.",
                 provider=self.name,
@@ -460,13 +464,13 @@ class HttpProvider:
         raise_for_provider_status(resp, provider=self.name, model=model)
         data = resp.json()
         text = data["choices"][0]["message"]["content"]
-        
+
         # C8: Extract token counts from provider response (OpenAI-compatible format)
         usage = data.get("usage", {})
         prompt_tokens = usage.get("prompt_tokens", 0)
         completion_tokens = usage.get("completion_tokens", 0)
         total_tokens = usage.get("total_tokens", prompt_tokens + completion_tokens)
-        
+
         # Fallback to approximation if provider doesn't return usage
         if not prompt_tokens and not completion_tokens:
             messages = build_messages(request)
@@ -474,7 +478,7 @@ class HttpProvider:
             prompt_tokens = _count_tokens(prompt_text)
             completion_tokens = _count_tokens(text)
             total_tokens = prompt_tokens + completion_tokens
-        
+
         return ProviderResult(
             text=text,
             provider=self.name,
@@ -496,7 +500,7 @@ class TemplateProvider:
 
     async def generate(self, request: ProviderRequest) -> ProviderResult:
         if check_prompt_injection(request.message):
-            logger.warning(f"Prompt injection blocked in TemplateProvider. Message: {request.message[:50]}...")
+            logger.warning("Prompt injection blocked in TemplateProvider. Message: %.50s...", request.message)
             return ProviderResult(
                 text="I cannot fulfill this request. I am SafeVixAI, an AI assistant focused strictly on Indian road safety and emergency response.",
                 provider=self.name,

@@ -18,13 +18,15 @@ class Coordinates:
 
     def __post_init__(self) -> None:
         if not (-90.0 <= self.lat <= 90.0):
-            raise ValueError(f"lat must be in [-90, 90], got {self.lat}")
+            msg = f"lat must be in [-90, 90], got {self.lat}"
+            raise ValueError(msg)
         if not (-180.0 <= self.lon <= 180.0):
-            raise ValueError(f"lon must be in [-180, 180], got {self.lon}")
+            msg = f"lon must be in [-180, 180], got {self.lon}"
+            raise ValueError(msg)
 
     def distance_to(self, other: Coordinates) -> Distance:
         """Haversine distance to another coordinate pair."""
-        R = 6371_000  # Earth radius in meters
+        r = 6371_000  # Earth radius in meters
         dlat = math.radians(other.lat - self.lat)
         dlon = math.radians(other.lon - self.lon)
         a = (
@@ -34,7 +36,7 @@ class Coordinates:
             * math.sin(dlon / 2) ** 2
         )
         c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
-        return Distance(meters=R * c)
+        return Distance(meters=r * c)
 
     def as_tuple(self) -> tuple[float, float]:
         return (self.lat, self.lon)
@@ -48,7 +50,8 @@ class Severity:
 
     def __post_init__(self) -> None:
         if not (1 <= self.level <= 5):
-            raise ValueError(f"Severity must be 1-5, got {self.level}")
+            msg = f"Severity must be 1-5, got {self.level}"
+            raise ValueError(msg)
 
     @property
     def label(self) -> str:
@@ -72,7 +75,8 @@ class Distance:
 
     def __post_init__(self) -> None:
         if self.meters < 0:
-            raise ValueError(f"Distance must be non-negative, got {self.meters}")
+            msg = f"Distance must be non-negative, got {self.meters}"
+            raise ValueError(msg)
 
     @property
     def kilometers(self) -> float:

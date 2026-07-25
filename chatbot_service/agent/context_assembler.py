@@ -11,6 +11,7 @@ from agent.state import ConversationContext, RetrievedContext, ToolContext
 from memory.tiered_memory import TieredMemory
 from rag.retriever import Retriever
 from tools.challan_tool import ChallanTool
+from tools.drug_info import DrugInfoTool
 from tools.first_aid_tool import FirstAidTool
 from tools.legal_search_tool import LegalSearchTool
 from tools.road_infra_tool import RoadInfrastructureTool
@@ -18,8 +19,6 @@ from tools.road_issues_tool import RoadIssuesTool
 from tools.sos_tool import SosTool
 from tools.submit_report_tool import SubmitReportTool
 from tools.weather_tool import WeatherTool
-
-from tools.drug_info import DrugInfoTool
 
 logger = logging.getLogger(__name__)
 
@@ -259,7 +258,7 @@ class ContextAssembler:
                     sources=['tool:first_aid'],
                 )
             )
-            
+
         # Extract potential drug name from message for OpenFDA
         words = context.message.lower().replace('?', '').replace(',', '').split()
         potential_drugs = [w for w in words if len(w) > 4 and w not in {'please', 'about', 'effects', 'dosage', 'should', 'take'}]

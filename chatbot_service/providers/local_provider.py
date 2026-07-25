@@ -3,16 +3,12 @@
 
 from __future__ import annotations
 
-import json
-from typing import AsyncGenerator
-
-from providers.base import ProviderRequest, ProviderResult, TemplateProvider
 from providers.openai_compat import OpenAICompatibleProvider
 
 
 class LocalOllamaProvider(OpenAICompatibleProvider):
     """Local provider adapter handling native Ollama generation and OpenAI wrappers."""
-    
+
     def __init__(
         self,
         base_url: str = "http://localhost:11434/v1",
@@ -29,7 +25,7 @@ class LocalOllamaProvider(OpenAICompatibleProvider):
 
 class LocalVLLMProvider(OpenAICompatibleProvider):
     """Local provider adapter handling vLLM OpenAI wrapper."""
-    
+
     def __init__(
         self,
         base_url: str = "http://localhost:8000/v1",

@@ -201,10 +201,7 @@ def _normalize_rule_row(row: dict[str, str]) -> dict[str, str] | None:
     seed_repeat = _parse_money(row.get('repeat_fine_inr') or '')
     seed_vehicle_class = _normalize_seed_vehicle_class(row.get('vehicle_type') or qualifier or '')
     if qualifier == 'REPEAT':
-        if seed_base is not None:
-            repeat_fines = {seed_vehicle_class: seed_base}
-        else:
-            repeat_fines = {}
+        repeat_fines = {seed_vehicle_class: seed_base} if seed_base is not None else {}
     else:
         repeat_fines = _extract_fines(row, prefix='repeat_fine')
         if seed_base is not None:

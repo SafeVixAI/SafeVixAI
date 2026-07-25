@@ -11,9 +11,8 @@ from fastapi.testclient import TestClient
 
 import main
 from agent.state import ChatResponse
-from api.chat import get_engine as chat_get_engine, verify_internal_auth
-
-
+from api.chat import get_engine as chat_get_engine
+from api.chat import verify_internal_auth
 
 # ============================================================ #
 # FAKE CLASSES (same pattern as test_admin.py)                 #
@@ -682,8 +681,9 @@ class TestLimiterCoverage:
 
     def test_limiter_import_success_default(self):
         """limiter is a slowapi Limiter instance by default."""
-        import limiter as limiter_mod
         from slowapi import Limiter as SlowapiLimiter
+
+        import limiter as limiter_mod
         assert isinstance(limiter_mod.limiter, SlowapiLimiter)
 
     def test_noop_limiter_behavior_replica(self):
@@ -704,8 +704,9 @@ class TestLimiterCoverage:
 
     def test_limiter_import_fallback_path(self):
         """When slowapi is unavailable, the except block defines _NoopLimiter."""
-        import limiter as limiter_mod
         import inspect
+
+        import limiter as limiter_mod
         source = inspect.getsource(limiter_mod)
         assert "except ImportError" in source
         assert "_NoopLimiter" in source

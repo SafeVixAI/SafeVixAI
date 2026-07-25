@@ -63,7 +63,7 @@ async def generate_bundles(cities_filter: list[str] | None = None) -> None:
                 await asyncio.sleep(2.0)
 
         except Exception as e:
-            logger.error(f"  -> ERROR ({city}): {str(e)}", exc_info=True)
+            logger.exception("  -> ERROR (%s): %s", city, str(e))
 
     await cache.close()
     if hasattr(overpass, 'close'):

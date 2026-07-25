@@ -2,10 +2,11 @@
 # Copyright (c) 2026 SafeVixAI Team
 from __future__ import annotations
 
+from unittest.mock import AsyncMock, MagicMock, patch
+
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
-from unittest.mock import AsyncMock, MagicMock, patch
 
 from api.providers import router as providers_router
 

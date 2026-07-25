@@ -39,12 +39,12 @@ class SpatialCluster:
 
 def _haversine(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     """Haversine distance in meters."""
-    R = 6371000
+    r = 6371000
     phi1, phi2 = math.radians(lat1), math.radians(lat2)
     dp = math.radians(lat2 - lat1)
     dl = math.radians(lon2 - lon1)
     a = math.sin(dp / 2) ** 2 + math.cos(phi1) * math.cos(phi2) * math.sin(dl / 2) ** 2
-    return R * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+    return r * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
 
 
 def dbscan_cluster(
@@ -54,14 +54,14 @@ def dbscan_cluster(
 ) -> list[SpatialCluster]:
     """
     Pure-Python DBSCAN implementation for spatial complaint clustering.
-    
+
     No sklearn dependency — works on any machine.
-    
+
     Args:
         points: list of dicts with 'lat', 'lon', 'uuid', 'issue_type', 'severity'
         eps_meters: neighborhood radius in meters (default 200m)
         min_samples: minimum points to form a cluster (default 3)
-    
+
     Returns:
         list of SpatialCluster objects
     """
@@ -132,7 +132,7 @@ def dbscan_cluster(
         # Max distance from centroid = radius
         max_dist = max(
             _haversine(centroid_lat, centroid_lon, lat, lon)
-            for lat, lon in zip(lats, lons)
+            for lat, lon in zip(lats, lons, strict=False)
         )
 
         type_counts = Counter(types)
@@ -169,7 +169,7 @@ class ComplaintClusterService:
     ) -> list[SpatialCluster]:
         """
         Find complaint clusters using DBSCAN spatial clustering.
-        
+
         Args:
             db: database session
             city: filter by city name
@@ -177,7 +177,7 @@ class ComplaintClusterService:
             eps_meters: cluster radius in meters
             min_samples: minimum complaints per cluster
             status_filter: list of statuses to include
-        
+
         Returns:
             list of SpatialCluster objects sorted by point_count descending
         """
@@ -235,7 +235,7 @@ class ComplaintClusterService:
     ) -> list[dict[str, Any]]:
         """
         Get top N complaint hotspots for a city.
-        
+
         Returns simplified dict format suitable for API responses.
         """
         clusters = await ComplaintClusterService.find_clusters(

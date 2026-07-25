@@ -3,8 +3,12 @@
 
 from __future__ import annotations
 
-
-from providers.base import check_prompt_injection, _sanitize_rag_snippet, build_messages, ProviderRequest
+from providers.base import (
+    ProviderRequest,
+    _sanitize_rag_snippet,
+    build_messages,
+    check_prompt_injection,
+)
 
 
 class TestDirectInjection:

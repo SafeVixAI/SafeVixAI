@@ -9,6 +9,7 @@ import httpx
 import pytest
 
 from config import Settings
+from rag.retriever import RetrievalResult, Retriever
 from tools import BackendToolClient
 from tools.geocoding import GeocodingClient
 from tools.legal_search_tool import LegalSearchTool
@@ -16,8 +17,6 @@ from tools.road_infra_tool import RoadInfrastructureTool
 from tools.road_issues_tool import RoadIssuesTool
 from tools.sos_tool import SosTool
 from tools.what3words import What3WordsTool
-from rag.retriever import RetrievalResult, Retriever
-
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -508,9 +507,9 @@ class TestLegalSearchTool:
         ]
         retriever.retrieve.return_value = expected
         tool = LegalSearchTool(retriever=retriever)
-    
+
         results = await tool.search("drunk driving", top_k=4)
-    
+
         assert results == expected
         retriever.retrieve.assert_called_once_with(
             "drunk driving", top_k=4, scopes={'legal'},
@@ -521,9 +520,9 @@ class TestLegalSearchTool:
         retriever = MagicMock(spec=Retriever)
         retriever.retrieve.return_value = []
         tool = LegalSearchTool(retriever=retriever)
-    
+
         results = await tool.search("non existent law")
-    
+
         assert results == []
         retriever.retrieve.assert_called_once_with(
             "non existent law", top_k=4, scopes={'legal'},

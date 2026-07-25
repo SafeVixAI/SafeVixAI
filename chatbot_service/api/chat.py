@@ -4,25 +4,24 @@
 from __future__ import annotations
 
 import asyncio
+import html
 import json
 import logging
-import html
 import uuid
 
 logger = logging.getLogger(__name__)
 
-from fastapi import APIRouter, Depends, Header, HTTPException, Path, Request
-from fastapi.responses import StreamingResponse
+from fastapi import APIRouter, Depends, Header, HTTPException, Path, Request  # noqa: E402
+from fastapi.responses import StreamingResponse  # noqa: E402
 
-from agent.graph import ChatEngine
-from agent.state import ChatRequest, ChatResponse
-from config import get_settings
-
+from agent.graph import ChatEngine  # noqa: E402
+from agent.state import ChatRequest, ChatResponse  # noqa: E402
+from config import get_settings  # noqa: E402
 
 router = APIRouter(prefix='/api/v1/chat', tags=['Chat'])
 
 
-from limiter import limiter
+from limiter import limiter  # noqa: E402
 
 
 def get_engine(request: Request) -> ChatEngine:
@@ -59,7 +58,7 @@ async def chat(
         payload.client_ip = forwarded.split(',')[0].strip() or (request.client.host if request.client else None)
     try:
         result = await asyncio.wait_for(engine.chat(payload), timeout=60.0)
-    except asyncio.TimeoutError:
+    except TimeoutError:
         raise HTTPException(status_code=504, detail="Chat request timed out. Please try again.")
     result.response = html.escape(result.response)
     return result
@@ -95,19 +94,16 @@ async def chat_stream(
                     if event['type'] in ('token',):
                         event['text'] = html.escape(event.get('text', ''))
                         yield f'data: {json.dumps(event)}\n\n'
-                    elif event['type'] == 'done':
-                        yield f'data: {json.dumps(event)}\n\n'
-                        return
-                    elif event['type'] == 'error':  # pragma: no branch
+                    elif event['type'] == 'done' or event['type'] == 'error':
                         yield f'data: {json.dumps(event)}\n\n'
                         return
 
-        except asyncio.TimeoutError:
+        except TimeoutError:
             err_data = json.dumps({'type': 'error', 'message': 'Stream timed out. Please try again.', 'request_id': request_id})
             yield f'data: {err_data}\n\n'
             return
         except Exception as exc:
-            logger.error(f"Chat stream error [request_id={request_id}]: {exc}", exc_info=True)
+            logger.exception("Chat stream error [request_id=%s]: %s", request_id, exc)
             err_data = json.dumps({'type': 'error', 'message': 'An internal error occurred while processing your request.', 'request_id': request_id})
             yield f'data: {err_data}\n\n'
 

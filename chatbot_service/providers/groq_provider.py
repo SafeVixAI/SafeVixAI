@@ -77,8 +77,11 @@ class GroqProvider(HttpProvider):
                 _GROQ_TPM_GUARD,
             )
             from providers.base import ProviderUnavailableError
-            raise ProviderUnavailableError(
+            msg = (
                 f"groq: context too large (~{estimated} tokens). "
                 "Skipping to preserve free-tier TPM budget."
+            )
+            raise ProviderUnavailableError(
+                msg
             )
         return await super().generate(request)

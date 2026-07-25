@@ -82,13 +82,15 @@ class ComplaintLifecycle:
         officer_stmt = select(Officer).where(Officer.id == officer_id)
         officer = (await db.execute(officer_stmt)).scalar_one_or_none()
         if not officer:
-            raise ValueError(f"Officer with ID {officer_id} not found")
+            msg = f"Officer with ID {officer_id} not found"
+            raise ValueError(msg)
 
         # 2. Fetch issue to know current status
         stmt = select(RoadIssue).where(RoadIssue.uuid == complaint_uuid)
         issue = (await db.execute(stmt)).scalar_one_or_none()
         if not issue:
-            raise ValueError(f"Complaint with UUID {complaint_uuid} not found")
+            msg = f"Complaint with UUID {complaint_uuid} not found"
+            raise ValueError(msg)
 
         # Set officer and SLA details
         issue.assigned_officer_id = officer_id
@@ -158,7 +160,8 @@ class ComplaintLifecycle:
         stmt = select(RoadIssue).where(RoadIssue.uuid == complaint_uuid)
         issue = (await db.execute(stmt)).scalar_one_or_none()
         if not issue:
-            raise ValueError(f"Complaint with UUID {complaint_uuid} not found")
+            msg = f"Complaint with UUID {complaint_uuid} not found"
+            raise ValueError(msg)
 
         if after_photo_url:
             issue.after_photo_url = after_photo_url
@@ -188,7 +191,8 @@ class ComplaintLifecycle:
         stmt = select(RoadIssue).where(RoadIssue.uuid == complaint_uuid)
         issue = (await db.execute(stmt)).scalar_one_or_none()
         if not issue:
-            raise ValueError(f"Complaint with UUID {complaint_uuid} not found")
+            msg = f"Complaint with UUID {complaint_uuid} not found"
+            raise ValueError(msg)
 
         if rating is not None:
             issue.citizen_rating = rating
@@ -228,7 +232,8 @@ class ComplaintLifecycle:
         stmt = select(RoadIssue).where(RoadIssue.uuid == complaint_uuid)
         issue = (await db.execute(stmt)).scalar_one_or_none()
         if not issue:
-            raise ValueError(f"Complaint with UUID {complaint_uuid} not found")
+            msg = f"Complaint with UUID {complaint_uuid} not found"
+            raise ValueError(msg)
 
         # Set rejection reason
         issue.rejection_reason = reason

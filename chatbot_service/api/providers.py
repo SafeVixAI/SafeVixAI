@@ -89,7 +89,6 @@ async def test_provider(
     provider_router: ProviderRouter = Depends(get_provider_router),
 ):
     """Test a provider connection."""
-    import traceback
 
     import httpx
 

@@ -3,11 +3,10 @@
 
 from __future__ import annotations
 
-import re
-import math
 import hashlib
+import math
+import re
 from typing import Any
-
 
 TOKEN_PATTERN = re.compile(r'[a-zA-Z][a-zA-Z0-9_]{1,}')
 
@@ -60,7 +59,7 @@ class LocalHashEmbeddingFunction:
         return 'safevixai-local-hash'
 
     @staticmethod
-    def build_from_config(config: dict[str, int]) -> 'LocalHashEmbeddingFunction':
+    def build_from_config(config: dict[str, int]) -> LocalHashEmbeddingFunction:
         return LocalHashEmbeddingFunction(dimensions=int(config.get('dimensions', 384)))
 
     def get_config(self) -> dict[str, int]:
@@ -104,7 +103,7 @@ class SentenceTransformerEmbeddingFunction:
         return 'safevixai-sentence-transformer'
 
     @staticmethod
-    def build_from_config(config: dict[str, str]) -> 'SentenceTransformerEmbeddingFunction':
+    def build_from_config(config: dict[str, str]) -> SentenceTransformerEmbeddingFunction:
         return SentenceTransformerEmbeddingFunction(
             model_name=config.get('model_name', 'sentence-transformers/all-MiniLM-L6-v2')
         )

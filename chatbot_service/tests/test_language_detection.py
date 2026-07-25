@@ -3,7 +3,6 @@
 
 from __future__ import annotations
 
-
 from providers.router import detect_lang
 
 

@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 import inspect
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 
 from agent.plan_and_execute import PlanAndExecuteAgent, PlanStep
 from providers.router import ProviderRouter

@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import logging
 import uuid
+
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from pydantic import BaseModel, Field, field_validator
 from sqlalchemy import select
@@ -38,7 +39,8 @@ class ProviderConfigCreate(BaseModel):
     @classmethod
     def validate_base_url(cls, v: str | None) -> str | None:
         if v and not str(v).startswith(('http://', 'https://')):
-            raise ValueError("base_url must start with http:// or https://")
+            msg = "base_url must start with http:// or https://"
+            raise ValueError(msg)
         return v
 
 
@@ -57,7 +59,8 @@ class ProviderConfigUpdate(BaseModel):
     @classmethod
     def validate_base_url(cls, v: str | None) -> str | None:
         if v and not str(v).startswith(('http://', 'https://')):
-            raise ValueError("base_url must start with http:// or https://")
+            msg = "base_url must start with http:// or https://"
+            raise ValueError(msg)
         return v
 
 
@@ -305,7 +308,6 @@ async def test_provider_connection(
     data: ProviderTestRequest,
 ):
     """Test a provider connection by making a lightweight API call."""
-    import traceback
 
     import httpx
 
@@ -368,7 +370,7 @@ async def sync_providers_to_chatbot(
             select(UserProviderConfig)
             .where(
                 UserProviderConfig.user_id == user_id,
-                UserProviderConfig.is_active == True,
+                UserProviderConfig.is_active,
             )
             .order_by(UserProviderConfig.priority)
         )

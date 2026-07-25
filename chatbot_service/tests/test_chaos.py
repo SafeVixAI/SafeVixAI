@@ -2,11 +2,12 @@
 # Copyright (c) 2026 SafeVixAI Team
 from __future__ import annotations
 
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from rag.retriever import Retriever
+import pytest
+
 from rag.evaluation import ndcg_at_k, recall_at_k
+from rag.retriever import Retriever
 
 
 @pytest.mark.asyncio

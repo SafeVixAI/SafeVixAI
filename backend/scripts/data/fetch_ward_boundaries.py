@@ -140,10 +140,7 @@ def main():
         elif isinstance(city_info, list):
             all_bboxes[city_name] = city_info
 
-    if args.all:
-        cities = [c for c in CITY_ADMIN_LEVELS if c in all_bboxes]
-    else:
-        cities = [args.city]
+    cities = [c for c in CITY_ADMIN_LEVELS if c in all_bboxes] if args.all else [args.city]
 
     print()
     print('=' * 56)

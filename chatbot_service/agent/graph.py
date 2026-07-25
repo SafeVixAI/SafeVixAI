@@ -3,20 +3,18 @@
 
 from __future__ import annotations
 
+import html
+import logging
 from uuid import uuid4
 
-import logging
-import html
-
 from agent.context_assembler import ContextAssembler
-from agent.multi_agent import MultiAgentGraph, ChatState
 from agent.governance import AIGovernance
 from agent.intent_detector import IntentDetector
+from agent.multi_agent import ChatState, MultiAgentGraph
 from agent.safety_checker import SafetyChecker
 from agent.state import ChatRequest, ChatResponse
 from memory.redis_memory import ConversationMemoryStore
 from memory.summarizer import ConversationSummarizer
-from providers.base import ProviderRequest
 from providers.router import ProviderRouter
 from rag.vectorstore import LocalVectorStore
 
@@ -65,12 +63,13 @@ class ChatEngine:
             return
         try:
             import json as _json
+
             from redis.asyncio import Redis
-            
+
             if not getattr(self, 'redis_url', None):
                 logger.info("No Redis available — skipping user provider sync")
                 return
-                
+
             redis = Redis.from_url(self.redis_url, encoding='utf-8', decode_responses=True)
             raw = await redis.get(f"user_providers:{user_id}")
             if raw:
@@ -107,7 +106,7 @@ class ChatEngine:
         intent = self.intent_detector.detect(payload.message)
         refined_intent = self.intent_detector.refine_intent(intent, payload.message, history)
         _log_intent_refinement(intent, refined_intent, payload.message)
-        
+
         state = ChatState(
             session_id=session_id,
             message=payload.message,
@@ -131,7 +130,7 @@ class ChatEngine:
                 llama_output_safety = await self.safety_checker.check_llama_guard(state.final_response, role="assistant")
                 if llama_output_safety.blocked:
                     output_safety = llama_output_safety
-                    
+
             if output_safety.blocked:
                 await self.memory_store.append_message(
                     session_id, 'assistant', output_safety.response or '',
@@ -143,7 +142,7 @@ class ChatEngine:
                     sources=['policy:safety-output'],
                     session_id=session_id,
                 )
-            
+
             # Medical disclaimer
             state.final_response = self.safety_checker.add_medical_disclaimer_if_needed(
                 payload.message, state.final_response
@@ -163,13 +162,13 @@ class ChatEngine:
         response_text = state.final_response or ''
         if governance_result.flagged:
             response_text = f"[⚠️ Low confidence] {response_text}"
-        
+
         sources_list = []
         if state.context:  # pragma: no branch
             sources_list = [source for tool in state.context.tools for source in tool.sources] + [item.source for item in state.context.retrieved]
-        
+
         sources = self._dedupe_sources(sources_list + governance_result.citations + state.final_sources)
-        
+
         await self.memory_store.append_message(
             session_id,
             'assistant',
@@ -219,7 +218,7 @@ class ChatEngine:
         intent = self.intent_detector.detect(payload.message)
         refined_intent = self.intent_detector.refine_intent(intent, payload.message, history)
         _log_intent_refinement(intent, refined_intent, payload.message)
-        
+
         state = ChatState(
             session_id=session_id,
             message=payload.message,
@@ -246,14 +245,14 @@ class ChatEngine:
                 elif event['type'] == 'done':
                     last_intent = event.get('intent', state.intent)
                     last_sources = event.get('sources', [])
-                    
+
                     # Phase 0.3 & Phase 4: Output safety check (static + Llama Guard)
                     output_safety = self.safety_checker.check_output_safety(full_text)
                     if not output_safety.blocked:
                         llama_output_safety = await self.safety_checker.check_llama_guard(full_text, role="assistant")
                         if llama_output_safety.blocked:  # pragma: no branch
                             output_safety = llama_output_safety  # pragma: no cover
-                            
+
                     if output_safety.blocked:
                         safe_text = output_safety.response or 'I encountered an issue generating a safe response.'
                         yield {'type': 'token', 'text': safe_text}
@@ -277,7 +276,7 @@ class ChatEngine:
                         tool_results=[{"payload": tool.payload} for tool in state.context.tools] if state.context and state.context.tools else [],
                         prompt=payload.message,
                     )
-                    
+
                     response_text = full_text
                     if governance_result.flagged:
                         response_text = f"[⚠️ Low confidence] {full_text}"
@@ -301,7 +300,7 @@ class ChatEngine:
                 elif event['type'] == 'error':  # pragma: no branch
                     yield event
         except Exception as exc:
-            logger.error(f"Stream chat error [session={session_id}]: {exc}", exc_info=True)
+            logger.exception("Stream chat error [session=%s]: %s", session_id, exc)
             yield {'type': 'error', 'message': 'An internal error occurred while processing your request.'}
 
     async def get_history(self, session_id: str) -> list[dict]:

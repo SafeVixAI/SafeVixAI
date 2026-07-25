@@ -139,7 +139,7 @@ def run_audit():
         print(f"  {mark} {t}: {status}")
 
     print("\nPolicy details:")
-    for t, name, permissive, cmd, qual, wc in policy_details:
+    for t, name, _permissive, cmd, qual, wc in policy_details:
         print(f"  [{t}] {name} ({cmd})")
         if qual:
             print(f"    USING: {qual[:120]}")

@@ -47,7 +47,8 @@ class SLAMonitor:
 
             if not already_escalated:
                 logger.warning(
-                    f"Complaint {issue.complaint_ref} breached SLA. SLA Deadline: {issue.sla_deadline}. Escalating...",
+                    "Complaint %s breached SLA. SLA Deadline: %s. Escalating...",
+                    issue.complaint_ref, issue.sla_deadline,
                     extra={"service": "sla_monitor", "complaint_ref": issue.complaint_ref}
                 )
                 try:
@@ -73,8 +74,8 @@ class SLAMonitor:
                     except Exception as notify_err:
                         logger.debug("SLA notification skipped: %s", notify_err)
 
-                except Exception as e:
-                    logger.error(f"Failed to escalate {issue.uuid}: {e}", exc_info=True)
+                except Exception:
+                    logger.exception("Failed to escalate %s", issue.uuid)
 
         return escalated_count
 
@@ -85,7 +86,7 @@ class SLAMonitor:
             return
 
         self.is_running = True
-        logger.info(f"SLA Monitor background loop started. Interval: {interval_seconds}s")
+        logger.info("SLA Monitor background loop started. Interval: %ss", interval_seconds)
 
         while self.is_running:
             try:
@@ -93,12 +94,12 @@ class SLAMonitor:
                 async with self.session_maker() as db:
                     escalated = await self.check_slas(db)
                     if escalated > 0:
-                        logger.info(f"SLA Monitor loop escalated {escalated} complaints.")
+                        logger.info("SLA Monitor loop escalated %d complaints.", escalated)
             except asyncio.CancelledError:
                 logger.info("SLA Monitor background loop cancelled.")
                 break
-            except Exception as e:
-                logger.error(f"Error in SLA Monitor loop: {e}", exc_info=True)
+            except Exception:
+                logger.exception("Error in SLA Monitor loop")
 
     def stop(self) -> None:
         """Stop the background check loop."""

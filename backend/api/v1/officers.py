@@ -56,7 +56,7 @@ async def get_or_create_officer(db: AsyncSession, current_user: dict) -> Officer
         db.add(officer)
         await db.commit()
         await db.refresh(officer)
-        logger.info(f"Auto-provisioned officer record for {name} ({email})")
+        logger.info("Auto-provisioned officer record for %s (%s)", name, email)
 
     return officer
 

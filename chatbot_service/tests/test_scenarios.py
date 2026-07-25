@@ -2,8 +2,9 @@
 # Copyright (c) 2026 SafeVixAI Team
 from __future__ import annotations
 
-import pytest
 from unittest.mock import AsyncMock, MagicMock
+
+import pytest
 
 
 @pytest.fixture

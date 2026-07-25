@@ -16,7 +16,6 @@ from tools.geocoding import GeocodingClient
 from tools.open_meteo import OpenMeteoClient
 from tools.weather_tool import WeatherTool
 
-
 # ===================================================================
 # Helpers
 # ===================================================================

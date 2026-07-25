@@ -1,11 +1,14 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2026 SafeVixAI Team
-import pytest
 from unittest.mock import AsyncMock
-from providers.router import ProviderRouter
-from providers.base import ProviderRequest
+
+import pytest
+
+from cache.llm_cache import CacheEntry, LLMResponseCache
 from config import Settings
-from cache.llm_cache import LLMResponseCache, CacheEntry
+from providers.base import ProviderRequest
+from providers.router import ProviderRouter
+
 
 @pytest.fixture
 def mock_settings():
@@ -31,16 +34,16 @@ async def test_router_idempotency_cache_hit(router, mock_cache):
         completion_tokens=20,
         total_tokens=30
     )
-    
+
     req = ProviderRequest(
         message="Hello",
         intent="general",
         history=[],
         idempotency_key="idemp_123"
     )
-    
+
     res = await router.generate(req)
-    
+
     mock_cache.get.assert_called_once()
     assert res.text == "Cached response"
     assert res.provider_used == "cache"
@@ -48,10 +51,10 @@ async def test_router_idempotency_cache_hit(router, mock_cache):
 @pytest.mark.asyncio
 async def test_router_idempotency_cache_miss(router, mock_cache):
     mock_cache.get.return_value = None
-    
+
     # We'll use the template provider to ensure it generates a result
     router._fallback_chain = ["template"]
-    
+
     req = ProviderRequest(
         message="Hello",
         intent="general",
@@ -59,9 +62,9 @@ async def test_router_idempotency_cache_miss(router, mock_cache):
         idempotency_key="idemp_123",
         provider_hint="template"
     )
-    
+
     res = await router.generate(req)
-    
+
     mock_cache.get.assert_called_once()
     # Template provider doesn't cache (see code: result.provider != 'template')
     mock_cache.set.assert_not_called()
@@ -71,7 +74,7 @@ async def test_router_idempotency_cache_miss(router, mock_cache):
 @pytest.mark.asyncio
 async def test_router_cache_set_for_real_provider(router, mock_cache):
     mock_cache.get.return_value = None
-    
+
     # Mocking a real provider
     mock_provider = AsyncMock()
     from providers.base import ProviderResult
@@ -81,10 +84,10 @@ async def test_router_cache_set_for_real_provider(router, mock_cache):
         model="real_model"
     )
     mock_provider.get_model_name.return_value = "real_model"
-    
+
     router.providers["real"] = mock_provider
     router._fallback_chain = ["real"]
-    
+
     req = ProviderRequest(
         message="Hello",
         intent="general",
@@ -92,9 +95,9 @@ async def test_router_cache_set_for_real_provider(router, mock_cache):
         idempotency_key="idemp_123",
         provider_hint="real"
     )
-    
+
     res = await router.generate(req)
-    
+
     mock_cache.get.assert_called_once()
     mock_cache.set.assert_called_once()
     assert res.text == "Real response"

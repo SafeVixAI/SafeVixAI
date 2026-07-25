@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import UTC, datetime
 
 from geoalchemy2 import Geometry
 from sqlalchemy import JSON, BigInteger, Boolean, DateTime, Float, Integer, String, Text
@@ -44,5 +44,5 @@ class EmergencyService(Base):
     source: Mapped[str] = mapped_column(String(32), default='overpass')
     raw_tags: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     verified: Mapped[bool] = mapped_column(Boolean, default=False)
-    last_updated: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    last_updated: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC))

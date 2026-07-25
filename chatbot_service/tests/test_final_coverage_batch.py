@@ -5,12 +5,12 @@ from __future__ import annotations
 import asyncio
 import json
 import os
-import pytest
 import sys
-import httpx
-from unittest.mock import AsyncMock, MagicMock, patch, PropertyMock
+from unittest.mock import AsyncMock, MagicMock, PropertyMock, patch
 
-from fastapi import FastAPI, Depends
+import httpx
+import pytest
+from fastapi import Depends, FastAPI
 from fastapi.testclient import TestClient
 
 
@@ -46,8 +46,9 @@ def _mock_settings(**overrides):
 
 class TestMainJsonFormatter:
     def test_json_formatter_exc_info(self):
-        from main import _JsonFormatter
         import logging
+
+        from main import _JsonFormatter
         fmt = _JsonFormatter()
         record = logging.LogRecord("test", logging.ERROR, "test.py", 10, "error msg", (), exc_info=True)
         try:
@@ -60,8 +61,9 @@ class TestMainJsonFormatter:
         assert data["msg"] == "error msg"
 
     def test_json_formatter_extra_fields(self):
-        from main import _JsonFormatter
         import logging
+
+        from main import _JsonFormatter
         fmt = _JsonFormatter()
         record = logging.LogRecord("test", logging.INFO, "test.py", 10, "msg", (), None)
         record.request_id = "req-123"
@@ -71,8 +73,9 @@ class TestMainJsonFormatter:
         assert data["request_id"] == "req-123"
 
     def test_json_formatter_no_exc_info(self):
-        from main import _JsonFormatter
         import logging
+
+        from main import _JsonFormatter
         fmt = _JsonFormatter()
         record = logging.LogRecord("test", logging.WARNING, "test.py", 10, "warn msg", (), None)
         result = fmt.format(record)
@@ -82,8 +85,9 @@ class TestMainJsonFormatter:
 
 class TestMainLogging:
     def test_configure_logging_production(self):
-        from main import _configure_logging
         import logging
+
+        from main import _configure_logging
         root = logging.getLogger()
         old_handlers = root.handlers[:]
         root.handlers.clear()
@@ -96,8 +100,9 @@ class TestMainLogging:
                 root.handlers.append(h)
 
     def test_configure_logging_development(self):
-        from main import _configure_logging
         import logging
+
+        from main import _configure_logging
         root = logging.getLogger()
         old_handlers = root.handlers[:]
         root.handlers.clear()
@@ -497,7 +502,7 @@ class TestSafetyChecker:
 
 class TestCoreMetrics:
     def test_metrics_response(self):
-        from core.metrics import metrics_response, metrics_content_type
+        from core.metrics import metrics_content_type, metrics_response
         result = metrics_response()
         assert result is not None
         content_type = metrics_content_type()
@@ -506,14 +511,14 @@ class TestCoreMetrics:
 
 class TestCoreQueue:
     def test_task_registry(self):
-        from core.queue import task, _TASK_REGISTRY
+        from core.queue import _TASK_REGISTRY, task
         @task("my_test_task")
         async def my_func(q, job_id):
             return "ok"
         assert "my_test_task" in _TASK_REGISTRY
 
     def test_get_global_engine_none(self):
-        from core.queue import get_global_chat_engine, _chat_engine
+        from core.queue import _chat_engine, get_global_chat_engine
         saved = _chat_engine
         try:
             from core.queue import set_global_chat_engine
@@ -525,7 +530,7 @@ class TestCoreQueue:
             set_global_chat_engine(saved)
 
     def test_set_and_get_global_engine(self):
-        from core.queue import set_global_chat_engine, get_global_chat_engine, _chat_engine
+        from core.queue import _chat_engine, get_global_chat_engine, set_global_chat_engine
         saved = _chat_engine
         try:
             engine = MagicMock()
@@ -575,8 +580,9 @@ class TestCoreQueue:
         assert result is None
 
     def test_task_queue_get_job_found(self):
-        from core.queue import TaskQueue, Job
         import json
+
+        from core.queue import Job, TaskQueue
         job = Job(job_id="j3", task_name="t", args=[], kwargs={})
         mock_redis = MagicMock()
         mock_redis.hget = AsyncMock(return_value=json.dumps(job.to_dict()))
@@ -612,8 +618,9 @@ class TestConfig:
         assert _split_csv("a, b, c", default=[]) == ["a", "b", "c"]
 
     def test_as_path_none(self):
-        from config import _as_path
         from pathlib import Path
+
+        from config import _as_path
         result = _as_path(None, default=Path("/tmp"))
         assert result == Path("/tmp")
 
@@ -693,8 +700,9 @@ class TestApiChatBranches:
         assert resp.status_code == 403
 
     def test_chat_timeout(self):
-        import main
         import asyncio
+
+        import main
         app = main.create_app()
         engine = MagicMock()
         async def ok_chat(*args, **kwargs):
@@ -708,7 +716,7 @@ class TestApiChatBranches:
         import api.chat
         orig = api.chat.asyncio.wait_for
         def timeout_wait_for(coro, timeout, **kw):
-            raise asyncio.TimeoutError()
+            raise TimeoutError()
         api.chat.asyncio.wait_for = timeout_wait_for
         try:
             client = TestClient(app)
@@ -720,8 +728,9 @@ class TestApiChatBranches:
 
 class TestConfigHelperBranches:
     def test_as_path_relative_resolves(self):
-        from config import _as_path
         from pathlib import Path
+
+        from config import _as_path
         result = _as_path("relative/path", default=Path("/tmp"))
         assert result is not None
         assert result.is_absolute()
@@ -785,7 +794,15 @@ class TestGraphCoordination:
     async def test_chat_emergency_intent(self):
         from agent.graph import ChatEngine
         from agent.state import ChatRequest
-        from tests.test_graph_coverage import FakeMemoryStore, FakeVectorStore, FakeIntentDetector, FakeSafetyChecker, FakeProviderRouter, FakeGovernance, FakeSummarizer
+        from tests.test_graph_coverage import (
+            FakeGovernance,
+            FakeIntentDetector,
+            FakeMemoryStore,
+            FakeProviderRouter,
+            FakeSafetyChecker,
+            FakeSummarizer,
+            FakeVectorStore,
+        )
         memory = FakeMemoryStore()
         engine = ChatEngine(
             memory_store=memory,
@@ -808,7 +825,15 @@ class TestGraphCoordination:
     async def test_stream_tool_call(self):
         from agent.graph import ChatEngine
         from agent.state import ChatRequest
-        from tests.test_graph_coverage import FakeMemoryStore, FakeVectorStore, FakeIntentDetector, FakeSafetyChecker, FakeProviderRouter, FakeGovernance, FakeSummarizer
+        from tests.test_graph_coverage import (
+            FakeGovernance,
+            FakeIntentDetector,
+            FakeMemoryStore,
+            FakeProviderRouter,
+            FakeSafetyChecker,
+            FakeSummarizer,
+            FakeVectorStore,
+        )
         memory = FakeMemoryStore()
         engine = ChatEngine(
             memory_store=memory,
@@ -835,7 +860,15 @@ class TestGraphStreamNoContext:
     async def test_stream_no_context(self):
         from agent.graph import ChatEngine
         from agent.state import ChatRequest
-        from tests.test_graph_coverage import FakeMemoryStore, FakeVectorStore, FakeIntentDetector, FakeSafetyChecker, FakeProviderRouter, FakeGovernance, FakeSummarizer
+        from tests.test_graph_coverage import (
+            FakeGovernance,
+            FakeIntentDetector,
+            FakeMemoryStore,
+            FakeProviderRouter,
+            FakeSafetyChecker,
+            FakeSummarizer,
+            FakeVectorStore,
+        )
 
         memory = FakeMemoryStore()
         engine = ChatEngine(
@@ -1010,8 +1043,9 @@ class TestAdminNoSecret:
 
 class TestChatStreamTimeout:
     def test_chat_stream_timeout(self):
-        import main
         import asyncio
+
+        import main
         app = main.create_app()
         app.state.chat_engine = MagicMock()
         async def endless_stream(*args, **kwargs):
@@ -1033,8 +1067,8 @@ class TestChatStreamTimeout:
 class TestToolsInitBackendClient:
     @pytest.mark.asyncio
     async def test_backend_get_http_500_triggers_alert(self):
-        from tools.__init__ import BackendToolClient
         from config import get_settings
+        from tools.__init__ import BackendToolClient
         s = get_settings()
         client = BackendToolClient(s)
         mock_resp = MagicMock()
@@ -1050,9 +1084,10 @@ class TestToolsInitBackendClient:
 
     @pytest.mark.asyncio
     async def test_backend_get_request_error(self):
-        from tools.__init__ import BackendToolClient
-        from config import get_settings
         import httpx
+
+        from config import get_settings
+        from tools.__init__ import BackendToolClient
         s = get_settings()
         client = BackendToolClient(s)
         client._client.get = AsyncMock(side_effect=httpx.RequestError("connection failed"))
@@ -1065,8 +1100,8 @@ class TestToolsInitBackendClient:
 
     @pytest.mark.asyncio
     async def test_backend_get_value_error(self):
-        from tools.__init__ import BackendToolClient
         from config import get_settings
+        from tools.__init__ import BackendToolClient
         s = get_settings()
         client = BackendToolClient(s)
         mock_resp = MagicMock()
@@ -1078,9 +1113,10 @@ class TestToolsInitBackendClient:
 
     @pytest.mark.asyncio
     async def test_backend_post_http_500_triggers_alert(self):
-        from tools.__init__ import BackendToolClient
-        from config import get_settings
         import httpx
+
+        from config import get_settings
+        from tools.__init__ import BackendToolClient
         s = get_settings()
         client = BackendToolClient(s)
         mock_resp = MagicMock()
@@ -1096,9 +1132,10 @@ class TestToolsInitBackendClient:
 
     @pytest.mark.asyncio
     async def test_backend_post_request_error(self):
-        from tools.__init__ import BackendToolClient
-        from config import get_settings
         import httpx
+
+        from config import get_settings
+        from tools.__init__ import BackendToolClient
         s = get_settings()
         client = BackendToolClient(s)
         client._client.post = AsyncMock(side_effect=httpx.RequestError("connection failed"))
@@ -1111,8 +1148,8 @@ class TestToolsInitBackendClient:
 
     @pytest.mark.asyncio
     async def test_backend_post_value_error(self):
-        from tools.__init__ import BackendToolClient
         from config import get_settings
+        from tools.__init__ import BackendToolClient
         s = get_settings()
         client = BackendToolClient(s)
         mock_resp = MagicMock()
@@ -1124,8 +1161,8 @@ class TestToolsInitBackendClient:
 
     @pytest.mark.asyncio
     async def test_backend_get_success(self):
-        from tools.__init__ import BackendToolClient
         from config import get_settings
+        from tools.__init__ import BackendToolClient
         s = get_settings()
         client = BackendToolClient(s)
         mock_resp = MagicMock()
@@ -1137,8 +1174,8 @@ class TestToolsInitBackendClient:
 
     @pytest.mark.asyncio
     async def test_backend_post_success(self):
-        from tools.__init__ import BackendToolClient
         from config import get_settings
+        from tools.__init__ import BackendToolClient
         s = get_settings()
         client = BackendToolClient(s)
         mock_resp = MagicMock()
@@ -1150,9 +1187,10 @@ class TestToolsInitBackendClient:
 
     @pytest.mark.asyncio
     async def test_backend_get_http_400_no_alert(self):
-        from tools.__init__ import BackendToolClient
-        from config import get_settings
         import httpx
+
+        from config import get_settings
+        from tools.__init__ import BackendToolClient
         s = get_settings()
         client = BackendToolClient(s)
         mock_resp = MagicMock()
@@ -1168,9 +1206,10 @@ class TestToolsInitBackendClient:
 
     @pytest.mark.asyncio
     async def test_backend_post_http_400_no_alert(self):
-        from tools.__init__ import BackendToolClient
-        from config import get_settings
         import httpx
+
+        from config import get_settings
+        from tools.__init__ import BackendToolClient
         s = get_settings()
         client = BackendToolClient(s)
         mock_resp = MagicMock()
@@ -1186,8 +1225,8 @@ class TestToolsInitBackendClient:
 
     @pytest.mark.asyncio
     async def test_aclose(self):
-        from tools.__init__ import BackendToolClient
         from config import get_settings
+        from tools.__init__ import BackendToolClient
         s = get_settings()
         client = BackendToolClient(s)
         client._client.aclose = AsyncMock()
@@ -1195,8 +1234,8 @@ class TestToolsInitBackendClient:
         client._client.aclose.assert_called_once()
 
     def test_backend_client_constructor_with_internal_api_key(self):
-        from tools.__init__ import BackendToolClient
         from config import get_settings
+        from tools.__init__ import BackendToolClient
         s = get_settings()
         orig = s.internal_api_key
         object.__setattr__(s, "internal_api_key", "test-internal-key")
@@ -1209,15 +1248,16 @@ class TestToolsInitBackendClient:
 
 class TestApiChatTimeout:
     def test_chat_timeout_error(self):
-        import main
         import asyncio
+
+        import main
         app = main.create_app()
         engine = MagicMock()
         original = asyncio.wait_for
         def timeout_first(coro, timeout, **kw):
             if hasattr(coro, "__aiter__"):
                 return coro
-            raise asyncio.TimeoutError()
+            raise TimeoutError()
         asyncio.wait_for = timeout_first
         try:
             async def ok_chat(*a, **kw):
@@ -1319,7 +1359,7 @@ class TestMemorySummarizer:
 
 class TestCoreMetricsDetail:
     def test_metrics_labels_and_counters(self):
-        from core.metrics import api_request_total, api_request_time
+        from core.metrics import api_request_time, api_request_total
         assert api_request_total is not None
         assert api_request_time is not None
 
@@ -1342,8 +1382,10 @@ class TestToolInitBrokenImportOnly:
 
 class TestFirstAidToolLoadGuides:
     def test_load_guides_valid_dict(self):
-        from tools.first_aid_tool import FirstAidTool, FALLBACK_GUIDES
-        import tempfile, json
+        import json
+        import tempfile
+
+        from tools.first_aid_tool import FALLBACK_GUIDES, FirstAidTool
         s = _mock_settings()
         with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False, encoding='utf-8') as f:
             json.dump({"test-guide": {"title": "Test Guide", "keywords": ["test"], "steps": ["Step 1"]}}, f)
@@ -1383,7 +1425,7 @@ class TestCorrelationIdFunctions:
         assert len(cid) == 8
 
     def test_get_correlation_id_default(self):
-        from middleware.correlation_id import get_correlation_id, correlation_id_var
+        from middleware.correlation_id import correlation_id_var, get_correlation_id
         correlation_id_var.set("test-id")
         cid = get_correlation_id()
         assert cid == "test-id"
@@ -1391,17 +1433,18 @@ class TestCorrelationIdFunctions:
 
 class TestFirstAidToolBranches:
     def test_lookup_returns_none_for_unmatched(self):
-        from tools.first_aid_tool import FirstAidTool
         from config import get_settings
+        from tools.first_aid_tool import FirstAidTool
         tool = FirstAidTool(get_settings())
         result = tool.lookup("supercalifragilistic")
         assert result is None
 
     def test_load_guides_valid_dict(self):
-        from tools.first_aid_tool import FirstAidTool
-        from config import get_settings
         import json
         from pathlib import Path
+
+        from config import get_settings
+        from tools.first_aid_tool import FirstAidTool
         s = get_settings()
         data_path = Path(__file__).resolve().parent.parent / "data" / "first_aid_guides.json"
         if data_path.exists():
@@ -1413,8 +1456,9 @@ class TestFirstAidToolBranches:
 class TestGeocodingRateLimit:
     @pytest.mark.asyncio
     async def test_nominatim_rate_limit_sleep(self):
-        from tools.geocoding import GeocodingClient
         import time
+
+        from tools.geocoding import GeocodingClient
         client = GeocodingClient()
         client._last_nominatim_request_at = time.monotonic() - 0.5
         mock_resp = MagicMock()
@@ -1485,8 +1529,9 @@ class TestCoreQueueWorker:
 class TestGovernanceBranches:
     @pytest.mark.asyncio
     async def test_evaluate_low_factuality(self):
-        from agent.governance import AIGovernance
         from unittest.mock import ANY
+
+        from agent.governance import AIGovernance
         gov = AIGovernance(redis_url=None)
         gov._redis = None
         with patch.object(gov, '_detect_hallucination', return_value=0.9):
@@ -1550,8 +1595,10 @@ class TestSummarizerBranches:
 
 class TestFirstAidToolBranches2:
     def test_load_guides_empty_dict(self):
+        import json
+        import tempfile
+
         from tools.first_aid_tool import FirstAidTool
-        import tempfile, json
         s = _mock_settings()
         with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False, encoding='utf-8') as f:
             json.dump({}, f)
@@ -1571,7 +1618,6 @@ class TestSubmitReportToolBranches:
     def test_get_client_closed(self):
         from tools.submit_report_tool import SubmitReportTool
         s = _mock_settings()
-        from unittest.mock import PropertyMock
         type(s).backend_base_url = PropertyMock(return_value="http://localhost:8000")
         tool = SubmitReportTool(s)
         client = tool._get_client()
@@ -1584,9 +1630,11 @@ class TestSubmitReportToolBranches:
 
 class TestPotholeValidatorBranches:
     def test_confidence_update(self):
-        from services.pothole_validator import PotholeValidator
         import io
+
         from PIL import Image
+
+        from services.pothole_validator import PotholeValidator
         img = Image.new('RGB', (100, 100), color='red')
         buf = io.BytesIO()
         img.save(buf, format='JPEG')
@@ -1598,8 +1646,9 @@ class TestPotholeValidatorBranches:
 
 class TestDocumentLoaderBranches:
     def test_csv_no_fieldnames(self):
-        from rag.document_loader import _read_csv
         import tempfile
+
+        from rag.document_loader import _read_csv
         content = "a,b\n1,2\n".encode('utf-8-sig')
         try:
             p = tempfile.NamedTemporaryFile(suffix='.csv', delete=False)
@@ -1613,8 +1662,9 @@ class TestDocumentLoaderBranches:
             os.unlink(p.name)
 
     def test_pdf_no_text(self):
-        from rag.document_loader import _read_pdf
         import tempfile
+
+        from rag.document_loader import _read_pdf
         try:
             p = tempfile.NamedTemporaryFile(suffix='.pdf', delete=False)
             p.write(b"%PDF-1.4\n1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n2 0 obj<</Type/Pages/Kids[]/Count 0>>endobj\nxref\n0 3\n0000000000 65535 f \n0000000009 00000 n \n0000000058 00000 n \ntrailer<</Size 3/Root 1 0 R>>\nstartxref\n114\n%%EOF")
@@ -1638,8 +1688,9 @@ class TestCoreQueueBranches:
         mock_redis.hget.assert_called_once()
 
     def test_update_progress_with_result(self):
-        from core.queue import TaskQueue, Job
         import json
+
+        from core.queue import Job, TaskQueue
         job = Job(job_id="j99", task_name="t", args=[], kwargs={})
         mock_redis = MagicMock()
         mock_redis.hget = AsyncMock(return_value=json.dumps(job.to_dict()))
@@ -1667,8 +1718,9 @@ class TestApiAiEndpoint:
 
 class TestConfigRelativePaths:
     def test_as_path_relative(self):
-        from config import _as_path
         from pathlib import Path
+
+        from config import _as_path
         result = _as_path("relative/path", default=Path("/tmp/default"))
         assert result.is_absolute()
 
@@ -1678,7 +1730,7 @@ class TestConfigRelativePaths:
         assert result.is_absolute()
 
     def test_resolve_optional_path_relative(self):
-        from config import Settings, ROOT_DIR
+        from config import ROOT_DIR, Settings
         s = Settings()
         from pathlib import Path
         result = s._resolve_optional_path(ROOT_DIR / "relative/data")
@@ -1927,7 +1979,7 @@ class TestVectorStoreGetPool:
 class TestVectorStoreEnsureIndex:
     @pytest.mark.asyncio
     async def test_ensure_index_returns_cached(self):
-        from rag.vectorstore import LocalVectorStore, DocumentChunk
+        from rag.vectorstore import DocumentChunk, LocalVectorStore
         vs = LocalVectorStore("postgresql://u:p@localhost/db", MagicMock())
         vs._chunks = [DocumentChunk(chunk_id="c1", source="s", title="t", category="c", content="x")]
         result = await vs.ensure_index()
@@ -1935,7 +1987,7 @@ class TestVectorStoreEnsureIndex:
 
     @pytest.mark.asyncio
     async def test_ensure_index_count_positive_fetches_rows(self):
-        from rag.vectorstore import LocalVectorStore, DocumentChunk
+        from rag.vectorstore import DocumentChunk, LocalVectorStore
         conn = AsyncMock()
         conn.fetchval = AsyncMock(return_value=3)
         conn.fetch = AsyncMock(return_value=[
@@ -1972,7 +2024,7 @@ class TestVectorStoreEnsureIndex:
 class TestVectorStoreBuildIndex:
     @pytest.mark.asyncio
     async def test_build_index_cached_when_not_forced(self):
-        from rag.vectorstore import LocalVectorStore, DocumentChunk
+        from rag.vectorstore import DocumentChunk, LocalVectorStore
         vs = LocalVectorStore("postgresql://u:p@localhost/db", MagicMock())
         vs._chunks = [DocumentChunk(chunk_id="c1", source="s", title="t", category="c", content="x")]
         with patch("rag.vectorstore.load_documents") as mock_load:
@@ -2028,7 +2080,7 @@ class TestVectorStoreChunkDocument:
         assert len(chunks) >= 2
 
     def test_filter_chunks_excludes_categories(self):
-        from rag.vectorstore import LocalVectorStore, DocumentChunk
+        from rag.vectorstore import DocumentChunk, LocalVectorStore
         included = DocumentChunk(chunk_id="c1", source="s", title="t", category="general", content="x")
         excluded = DocumentChunk(chunk_id="c2", source="s", title="t", category="qa_pairs", content="y")
         result = LocalVectorStore._filter_chunks([included, excluded])
@@ -2053,7 +2105,7 @@ class TestVectorStoreUpsert:
 
     @pytest.mark.asyncio
     async def test_upsert_pg_embedding_failure(self):
-        from rag.vectorstore import LocalVectorStore, DocumentChunk
+        from rag.vectorstore import DocumentChunk, LocalVectorStore
         vs = LocalVectorStore("postgresql://u:p@localhost/db", MagicMock())
         vs._embedding_function = MagicMock(side_effect=ValueError("no emb"))
         conn = AsyncMock()
@@ -2068,7 +2120,7 @@ class TestVectorStoreUpsert:
 
     @pytest.mark.asyncio
     async def test_upsert_pg_success(self):
-        from rag.vectorstore import LocalVectorStore, DocumentChunk
+        from rag.vectorstore import DocumentChunk, LocalVectorStore
         vs = LocalVectorStore("postgresql://u:p@localhost/db", MagicMock())
         vs._embedding_function = MagicMock(return_value=[[0.1, 0.2, 0.3]])
         conn = AsyncMock()
@@ -2294,7 +2346,7 @@ class TestLLMCacheGet:
 
     @pytest.mark.asyncio
     async def test_get_redis_error_then_pgvector_hit(self):
-        from cache.llm_cache import LLMResponseCache, CacheEntry
+        from cache.llm_cache import CacheEntry, LLMResponseCache
         mock_redis = MagicMock()
         mock_redis.get = AsyncMock(side_effect=ConnectionError("no redis"))
         emb_fn = MagicMock(return_value=[[0.1, 0.2]])
@@ -2375,7 +2427,7 @@ class TestLLMCacheGet:
 class TestLLMCacheSet:
     @pytest.mark.asyncio
     async def test_set_redis_success(self):
-        from cache.llm_cache import LLMResponseCache, CacheEntry
+        from cache.llm_cache import CacheEntry, LLMResponseCache
         mock_redis = MagicMock()
         mock_redis.setex = AsyncMock()
         entry = CacheEntry(text="hi", provider="groq", model="m")
@@ -2388,7 +2440,7 @@ class TestLLMCacheSet:
 
     @pytest.mark.asyncio
     async def test_set_redis_error(self):
-        from cache.llm_cache import LLMResponseCache, CacheEntry
+        from cache.llm_cache import CacheEntry, LLMResponseCache
         mock_redis = MagicMock()
         mock_redis.setex = AsyncMock(side_effect=ConnectionError("fail"))
         entry = CacheEntry(text="hi", provider="groq", model="m")
@@ -2399,14 +2451,14 @@ class TestLLMCacheSet:
 
     @pytest.mark.asyncio
     async def test_set_no_redis(self):
-        from cache.llm_cache import LLMResponseCache, CacheEntry
+        from cache.llm_cache import CacheEntry, LLMResponseCache
         c = LLMResponseCache(None)
         entry = CacheEntry(text="hi", provider="groq", model="m")
         await c.set("hello", "greeting", ["tool1"], entry)
 
     @pytest.mark.asyncio
     async def test_set_pgvector_success(self):
-        from cache.llm_cache import LLMResponseCache, CacheEntry
+        from cache.llm_cache import CacheEntry, LLMResponseCache
         entry = CacheEntry(text="hi", provider="groq", model="m")
         conn = AsyncMock()
         pool = MagicMock()
@@ -2422,7 +2474,7 @@ class TestLLMCacheSet:
 
     @pytest.mark.asyncio
     async def test_set_pgvector_error(self):
-        from cache.llm_cache import LLMResponseCache, CacheEntry
+        from cache.llm_cache import CacheEntry, LLMResponseCache
         entry = CacheEntry(text="hi", provider="groq", model="m")
         conn = AsyncMock()
         conn.execute = AsyncMock(side_effect=RuntimeError("db fail"))
@@ -2817,8 +2869,8 @@ class TestGraphStreamChat:
     @pytest.mark.asyncio
     async def test_stream_chat_blocked(self):
         from agent.graph import ChatEngine
-        from agent.state import ChatRequest
         from agent.safety_checker import SafetyDecision
+        from agent.state import ChatRequest
         engine = MagicMock()
         engine.__class__ = ChatEngine
         engine._load_user_providers = AsyncMock()
@@ -2836,10 +2888,9 @@ class TestGraphStreamChat:
     @pytest.mark.asyncio
     async def test_stream_chat_output_safety_blocked(self):
         from agent.graph import ChatEngine
-        from agent.state import ChatRequest
-        from agent.multi_agent import ChatState
+        from agent.multi_agent import ChatState, MultiAgentGraph
         from agent.safety_checker import SafetyDecision
-        from agent.multi_agent import MultiAgentGraph
+        from agent.state import ChatRequest
         engine = MagicMock()
         engine.__class__ = ChatEngine
         engine._load_user_providers = AsyncMock()
@@ -2870,8 +2921,8 @@ class TestGraphStreamChat:
     @pytest.mark.asyncio
     async def test_stream_chat_exception(self):
         from agent.graph import ChatEngine
-        from agent.state import ChatRequest
         from agent.safety_checker import SafetyDecision
+        from agent.state import ChatRequest
         engine = MagicMock()
         engine.__class__ = ChatEngine
         engine._load_user_providers = AsyncMock()
@@ -2897,8 +2948,8 @@ class TestGraphChat:
     @pytest.mark.asyncio
     async def test_chat_llama_blocked(self):
         from agent.graph import ChatEngine
-        from agent.state import ChatRequest
         from agent.safety_checker import SafetyDecision
+        from agent.state import ChatRequest
         engine = MagicMock()
         engine.__class__ = ChatEngine
         engine._load_user_providers = AsyncMock()
@@ -2915,9 +2966,9 @@ class TestGraphChat:
     @pytest.mark.asyncio
     async def test_chat_output_safety_blocked(self):
         from agent.graph import ChatEngine
-        from agent.state import ChatRequest
         from agent.multi_agent import ChatState
         from agent.safety_checker import SafetyDecision
+        from agent.state import ChatRequest
         engine = MagicMock()
         engine.__class__ = ChatEngine
         engine._load_user_providers = AsyncMock()
@@ -2947,11 +2998,11 @@ class TestGraphChat:
 
     @pytest.mark.asyncio
     async def test_chat_governance_flagged(self):
+        from agent.governance import GovernanceResult
         from agent.graph import ChatEngine
-        from agent.state import ChatRequest
         from agent.multi_agent import ChatState
         from agent.safety_checker import SafetyDecision
-        from agent.governance import GovernanceResult
+        from agent.state import ChatRequest
         engine = MagicMock()
         engine.__class__ = ChatEngine
         engine._load_user_providers = AsyncMock()
@@ -3273,7 +3324,7 @@ class TestPotholeValidatorEdgeCases:
             PotholeValidator._model = mock_model
             with patch("PIL.Image.open", return_value=mock_image):
                 result = PotholeValidator.validate_image(b"fake-image-bytes")
-                assert result["anomaly_detected"] == False
+                assert not result["anomaly_detected"]
 
 
 class TestSarvam2BWarning:
@@ -3297,38 +3348,13 @@ class TestSummarizerNonStandardRole:
         assert result is not None
 
 
-class TestDocumentLoaderBranches:
-    def test_csv_no_fieldnames(self, tmp_path):
-        from rag.document_loader import _read_csv
-        csv_path = tmp_path / "test.csv"
-        csv_path.write_text("a,b\n1,2\n3,4\n", encoding="utf-8-sig")
-        from pathlib import Path
-        empty_csv = tmp_path / "empty.csv"
-        empty_csv.write_bytes(b"")
-        result = _read_csv(empty_csv)
-        assert isinstance(result, str)
-
-    def test_csv_empty_parts_filtered(self, tmp_path):
-        from rag.document_loader import _read_csv
-        csv_path = tmp_path / "test.csv"
-        csv_path.write_text("col\n\n\n", encoding="utf-8-sig")
-        result = _read_csv(csv_path)
-        assert "Row" not in result or isinstance(result, str)
-
-    def test_pdf_empty_text(self, tmp_path):
-        from rag.document_loader import _read_pdf
-        pdf_path = tmp_path / "empty.pdf"
-        pdf_path.write_bytes(b"%PDF-1.4\n1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj\n3 0 obj<</Type/Page/MediaBox[0 0 612 792]/Parent 2 0 R>>endobj\nxref\n0 4\n0000000000 65535 f \n0000000009 00000 n \n0000000058 00000 n \n0000000115 00000 n \ntrailer<</Size 4/Root 1 0 R>>\nstartxref\n190\n%%EOF")
-        result = _read_pdf(pdf_path)
-        assert isinstance(result, str)
-
-
 class TestVectorstoreChunkLastChunk:
     def test_chunk_document_remaining_chunk(self):
-        from pathlib import Path
-        from rag.vectorstore import LocalVectorStore
-        from rag.document_loader import LoadedDocument
         import tempfile
+        from pathlib import Path
+
+        from rag.document_loader import LoadedDocument
+        from rag.vectorstore import LocalVectorStore
         tmpdir = Path(tempfile.mkdtemp())
         vs = LocalVectorStore(database_url="postgresql://test:test@localhost/test", data_dir=tmpdir)
         vs.chunk_size = 500
@@ -3391,9 +3417,11 @@ class TestQueryProfilerSlow:
 
     def test_slow_query_logs_warning(self):
         import time
-        from middleware.query_profiler import QueryProfilerMiddleware
+
         from fastapi import FastAPI
         from fastapi.testclient import TestClient
+
+        from middleware.query_profiler import QueryProfilerMiddleware
 
         app = FastAPI()
 
@@ -3650,6 +3678,7 @@ class TestMainSentryImportFail:
 
     def test_sentry_import_fail_sets_none(self):
         import importlib
+
         import main
         with patch.dict('sys.modules', {'sentry_sdk': None}):
             importlib.reload(main)
@@ -3725,8 +3754,8 @@ class TestCoreQueueSysPath:
     """Covers core/queue.py line 19 (sys.path.insert when alert_service.py found) and 16->21 loop."""
 
     def test_syspath_inserts_alert_service_parent(self, tmp_path):
-        import sys
         import importlib
+        import sys
         from pathlib import Path
         alert_dir = tmp_path / "myservice"
         alert_dir.mkdir()
@@ -3749,8 +3778,8 @@ class TestToolsInitSysPath:
     """Covers tools/__init__.py line 18 (sys.path.insert when alert_service.py found) and 15->20 loop."""
 
     def test_syspath_inserts_alert_service_parent(self, tmp_path):
-        import sys
         import importlib
+        import sys
         from pathlib import Path
         alert_dir = tmp_path / "myservice"
         alert_dir.mkdir()
@@ -3815,9 +3844,10 @@ class TestQueryProfilerFastPath:
     """Covers middleware/query_profiler.py line 34 else (fast query < threshold)."""
 
     def test_fast_query_logs_debug(self):
-        from middleware.query_profiler import QueryProfilerMiddleware
         from fastapi import FastAPI
         from fastapi.testclient import TestClient
+
+        from middleware.query_profiler import QueryProfilerMiddleware
 
         app = FastAPI()
 

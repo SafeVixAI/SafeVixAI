@@ -515,7 +515,8 @@ class AdminBoundaryFeature(BaseModel):
             return None
         val_str = str(value).strip()
         if not all(c in '0123456789abcdefABCDEF' for c in val_str):
-            raise ValueError("Invalid WKB: must be a valid hex string")
+            msg = "Invalid WKB: must be a valid hex string"
+            raise ValueError(msg)
         return val_str
 
     @field_validator('geojson', mode='before')
@@ -524,9 +525,11 @@ class AdminBoundaryFeature(BaseModel):
         if value is None:
             return None
         if not isinstance(value, dict):
-            raise ValueError("Invalid GeoJSON: must be a dictionary")
+            msg = "Invalid GeoJSON: must be a dictionary"
+            raise ValueError(msg)
         if 'type' not in value or 'coordinates' not in value:
-            raise ValueError("Invalid GeoJSON: missing 'type' or 'coordinates'")
+            msg = "Invalid GeoJSON: missing 'type' or 'coordinates'"
+            raise ValueError(msg)
         return value
 
 

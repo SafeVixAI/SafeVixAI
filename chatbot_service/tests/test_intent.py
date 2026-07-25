@@ -2,10 +2,13 @@
 # Copyright (c) 2026 SafeVixAI Team
 from __future__ import annotations
 
-import pytest
 from unittest.mock import patch
+
+import pytest
+
 from agent.intent_detector import INTENT_CLASSES, IntentDetector
 from rag.embeddings import build_embedding_function
+
 
 @pytest.fixture(autouse=True)
 def mock_embeddings():

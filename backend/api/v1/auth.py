@@ -6,6 +6,7 @@ from __future__ import annotations
 import hashlib
 import hmac
 import os
+import secrets
 
 import jwt
 from fastapi import APIRouter, Depends, HTTPException, Request
@@ -29,9 +30,6 @@ from core.security import (
 )
 
 router = APIRouter(prefix="/api/v1/auth", tags=["auth"])
-
-
-import secrets
 
 
 @router.get("/csrf-token")
@@ -114,7 +112,7 @@ async def register(
     """
     Register a new municipal operator profile dynamically in the system.
 
-    Hashes the user password securely via PBKDF2 with unique salts, checks email 
+    Hashes the user password securely via PBKDF2 with unique salts, checks email
     uniqueness, and persists the record to the backend SQL database.
 
     Args:
@@ -175,8 +173,8 @@ async def login(
     """
     Authenticate municipal operators and issue secure HTTP-only session cookies.
 
-    Performs dynamic multi-operator database lookups first, falling back to 
-    environment-based static operator settings if required. Validates passwords 
+    Performs dynamic multi-operator database lookups first, falling back to
+    environment-based static operator settings if required. Validates passwords
     via secure PBKDF2 comparison.
 
     Args:
@@ -185,7 +183,7 @@ async def login(
         db: Database session injection.
 
     Returns:
-        JSONResponse containing confirmation message and operator display name, 
+        JSONResponse containing confirmation message and operator display name,
         decorated with an HTTP-only JWT access cookie.
 
     Raises:
@@ -221,8 +219,7 @@ async def login(
 
     # 2. Fall back to environment-based single-operator authentication
     operator = _configured_operator()
-    if operator is not None and email == operator["email"]:
-        if _verify_pbkdf2_password(body.password, operator["password_hash"]):
+    if operator is not None and email == operator["email"] and _verify_pbkdf2_password(body.password, operator["password_hash"]):
             token = create_access_token(
                 data={"sub": email, "name": operator["name"]},
                 role="operator",
@@ -272,7 +269,7 @@ async def verify_token(request: Request, current_user: dict = Depends(get_curren
     """
     Validate the caller's active session bearer token.
 
-    Decodes JWT token structures, validating expiration, audience, issuer, 
+    Decodes JWT token structures, validating expiration, audience, issuer,
     and checks if the token has been JTI blacklisted.
 
     Args:
@@ -295,7 +292,7 @@ async def refresh_access_token(request: Request, body: RefreshTokenRequest) -> J
     """
     Issue a new JWT access token using a valid, unexpired refresh token.
 
-    Verifies refresh token signatures, audience, issuer, validates purpose constraints, 
+    Verifies refresh token signatures, audience, issuer, validates purpose constraints,
     and verifies that the token's JTI has not been blacklisted.
 
     Args:
@@ -347,7 +344,7 @@ async def revoke_access_token(
     """
     Revoke the current user's session token.
 
-    Adds the token's JTI (JWT ID) to the blacklisted cache registry to immediately 
+    Adds the token's JTI (JWT ID) to the blacklisted cache registry to immediately
     block any subsequent requests utilizing the token.
 
     Args:

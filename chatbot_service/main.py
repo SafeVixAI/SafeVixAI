@@ -1,9 +1,8 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2026 SafeVixAI Team
-
+# CI trigger: verify notify-failure fix
 from __future__ import annotations
 
-import logging
 import os
 import time
 import uuid
@@ -15,26 +14,26 @@ except ImportError:
     sentry_sdk = None
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from starlette.responses import JSONResponse
 
-from cache.llm_cache import LLMResponseCache
 from agent.context_assembler import ContextAssembler
 from agent.graph import ChatEngine
 from agent.intent_detector import IntentDetector
 from agent.safety_checker import SafetyChecker
 from api import api_router
+from cache.llm_cache import LLMResponseCache
 from config import get_settings
-from slowapi import _rate_limit_exceeded_handler
-from slowapi.errors import RateLimitExceeded
-from starlette.responses import JSONResponse
 
+# P2-02: Structured JSON logging (audit H35) — mirrors backend/core/logging.py
+from core.logging import configure_logging
 from limiter import limiter
-
-from middleware.query_profiler import setup_query_profiler
-from middleware.correlation_id import setup_correlation_id
-
 from memory.redis_memory import ConversationMemoryStore
 from memory.tiered_memory import TieredMemory
 from memory.user_memory import UserPreferenceStore
+from middleware.correlation_id import setup_correlation_id
+from middleware.query_profiler import setup_query_profiler
 from providers.router import ProviderRouter
 from rag.retriever import Retriever
 from rag.vectorstore import LocalVectorStore
@@ -54,10 +53,6 @@ from tools import (
     What3WordsTool,
 )
 
-
-# P2-02: Structured JSON logging (audit H35) — mirrors backend/core/logging.py
-from core.logging import configure_logging
-
 logger = configure_logging(get_settings().environment, "safevixai.chatbot")
 
 
@@ -75,8 +70,8 @@ def create_app() -> FastAPI:
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
-        import signal
         import asyncio
+        import signal
         _shutdown_requested = False
         def _handle_signal():
             nonlocal _shutdown_requested
@@ -115,13 +110,13 @@ def create_app() -> FastAPI:
         w3w_tool = What3WordsTool(api_key=settings.w3w_api_key)
         geocode_client = GeocodingClient(opencage_key=settings.opencage_api_key)
         drug_info_tool = DrugInfoTool()
-        
+
         submit_report_tool = SubmitReportTool(settings.main_backend_base_url)
 
         # C9: Initialize LLM response cache
         llm_cache = LLMResponseCache(settings.redis_url, database_url=settings.database_url)
         provider_router = ProviderRouter(settings, cache=llm_cache)
-        
+
         from memory.episodic_memory import EpisodicMemoryAgent
         episodic_memory_agent = EpisodicMemoryAgent(provider_router, settings.database_url, settings.chroma_persist_dir)
 
@@ -142,7 +137,7 @@ def create_app() -> FastAPI:
             episodic_memory_agent=episodic_memory_agent,
             tiered_memory=tiered_memory,
         )
-        
+
         chat_engine = ChatEngine(
             memory_store=memory_store,
             vectorstore=vectorstore,
@@ -177,7 +172,7 @@ def create_app() -> FastAPI:
             )
 
         # Initialize background task queue and worker
-        from core.queue import TaskQueue, BackgroundWorker, set_global_chat_engine
+        from core.queue import BackgroundWorker, TaskQueue, set_global_chat_engine
         set_global_chat_engine(chat_engine)
         if hasattr(memory_store, '_client') and memory_store._client is not None:
             queue = TaskQueue(memory_store._client)
@@ -243,7 +238,7 @@ def create_app() -> FastAPI:
             "X-Requested-With",
         ],
     )
-    
+
     app.state.limiter = limiter
     app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
@@ -269,7 +264,7 @@ def create_app() -> FastAPI:
     # P2-02: Prometheus metrics middleware
     @app.middleware("http")
     async def _prometheus_metrics_middleware(request: Request, call_next):
-        from core.metrics import api_request_total, api_request_time
+        from core.metrics import api_request_time, api_request_total
 
         if request.url.path == "/metrics":
             return await call_next(request)
@@ -296,8 +291,8 @@ def create_app() -> FastAPI:
     async def _host_validation_middleware(request: Request, call_next):
         if get_settings().environment != "production":
             return await call_next(request)
-        from urllib.parse import urlparse
         import os as _os
+        from urllib.parse import urlparse
         settings = get_settings()
         cors_hosts = {urlparse(u).hostname for u in settings.cors_origins_list if u} - {None}
         extra_allowed = {h.strip().lower() for h in _os.getenv("ALLOWED_HOSTS", "").split(",") if h.strip()}
@@ -368,8 +363,8 @@ def create_app() -> FastAPI:
         if auth_header.startswith("Bearer "):
             token = auth_header.removeprefix("Bearer ")
             try:
-                import json as _json
                 import base64 as _b64
+                import json as _json
                 parts = token.split(".")
                 if len(parts) >= 2:
                     padded = parts[1] + "=" * (4 - len(parts[1]) % 4)
@@ -438,8 +433,9 @@ def create_app() -> FastAPI:
 
     @app.get('/metrics', tags=['Observability'])
     async def metrics():
-        from core.metrics import metrics_response, metrics_content_type
         from fastapi.responses import Response
+
+        from core.metrics import metrics_content_type, metrics_response
         return Response(
             content=metrics_response(),
             media_type=metrics_content_type(),

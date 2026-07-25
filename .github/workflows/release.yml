@@ -206,7 +206,7 @@ jobs:
       workflow-name: 'Release'
       job-name: create-release
       run-id: ${{ github.run_id }}
-      conclusion: ${{ github.action_status || 'failure' }}
+      conclusion: failure
     secrets:
       SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
 

@@ -109,7 +109,7 @@ jobs:
 
   notify-failure:
     if: always() && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled'))
-    needs: [a11y]
+    needs: [pa11y]
     uses: ./.github/workflows/notify-failure.yml
     with:
       workflow-name: 'Accessibility (a11y)'

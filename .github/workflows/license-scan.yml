@@ -66,12 +66,32 @@ jobs:
       - name: Check Python dependency licenses
         working-directory: chatbot_service
         run: |
-          pip install -r requirements.txt
+          if [ -f requirements-render.txt ]; then
+            pip install -r requirements-render.txt
+          else
+            pip install -r requirements.txt
+          fi
           pip install pip-licenses
           pip-licenses --format=json --with-authors --with-urls \
             > ../chatbot-licenses.json
           pip-licenses --format=markdown --with-authors --with-urls \
             > ../chatbot-LICENSES.md
+
+      - name: Fail on restricted licenses
+        working-directory: chatbot_service
+        run: |
+          pip install pip-licenses
+          pip-licenses --format=json \
+            | python -c "
+          import json, sys
+          deps = json.load(sys.stdin)
+          restricted = {'GPL', 'GPLv2', 'GPLv3', 'AGPL', 'AGPLv3', 'LGPLv3', 'BUSL-1.1'}
+          bad = {d['Name'] for d in deps if d['License'] in restricted}
+          if bad:
+            print(f'RESTRICTED LICENSES FOUND: {bad}')
+            sys.exit(1)
+          print('All chatbot dependencies pass license check')
+          "
 
   frontend:
     runs-on: ubuntu-latest

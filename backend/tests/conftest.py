@@ -39,6 +39,16 @@ def reset_circuit_breakers():
     CircuitBreakerRegistry.reset_all()
 
 
+@pytest.fixture(autouse=True)
+def reset_event_bus_singleton():
+    """Reset the module-level _event_bus singleton before and after each test
+    to prevent state leakage between test modules (isolation-dependent fix)."""
+    from services.event_bus import reset_event_bus as _reset
+    _reset()
+    yield
+    _reset()
+
+
 @pytest.fixture(scope="session", autouse=True)
 def disable_rate_limiting():
     """Disable rate limiting globally during test runs to prevent 429 errors."""

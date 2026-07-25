@@ -154,8 +154,9 @@ def get_settings() -> Settings:
     settings = Settings()
     if settings.environment == "production" and "*" in settings.cors_origins_list:
         raise RuntimeError("CORS_ORIGINS must list explicit origins when ENVIRONMENT=production")
-    settings.chroma_persist_dir.mkdir(parents=True, exist_ok=True)
-    settings.rag_data_dir.mkdir(parents=True, exist_ok=True)
+    if settings.environment != "test":
+        settings.chroma_persist_dir.mkdir(parents=True, exist_ok=True)
+        settings.rag_data_dir.mkdir(parents=True, exist_ok=True)
     return settings
 
 import logging as _logging

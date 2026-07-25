@@ -11,19 +11,21 @@ files_to_recover = [
 ]
 
 with open(transcript_path, encoding='utf-8') as f:
-    for line in f:
-        if any(filename in line for filename in files_to_recover):
-            try:
-                data = json.loads(line)
-                if data.get('type') == 'PLANNER_RESPONSE':
-                    tool_calls = data.get('tool_calls', [])
-                    for call in tool_calls:
-                        if call.get('name') == 'write_to_file':
-                            args = call.get('arguments', {})
-                            target = args.get('TargetFile', '')
-                            for filename in files_to_recover:
-                                if filename in target:
-                                    with open(f"recovered_{filename}", 'w', encoding='utf-8') as out:
-                                        out.write(args.get('CodeContent', ''))
-            except Exception:
-                pass
+    for raw_line in f:
+        for filename in files_to_recover:
+            if filename in raw_line:
+                try:
+                    data = json.loads(raw_line)
+                    if data.get('type') == 'PLANNER_RESPONSE':
+                        tool_calls = data.get('tool_calls', [])
+                        for call in tool_calls:
+                            if call.get('name') == 'write_to_file':
+                                args = call.get('arguments', {})
+                                target = args.get('TargetFile', '')
+                                for fname in files_to_recover:
+                                    if fname in target:
+                                        with open(f"recovered_{fname}", 'w', encoding='utf-8') as out:
+                                            out.write(args.get('CodeContent', ''))
+                except Exception:
+                    pass
+                break

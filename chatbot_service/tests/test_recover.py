@@ -21,12 +21,6 @@ class TestRecoverScript:
         )
         script_content = script_content.replace(old_path, str(transcript_path))
 
-        # Replace generator expression with list comprehension to avoid exec scope issue
-        script_content = script_content.replace(
-            "if any(filename in line for filename in files_to_recover):",
-            "if any([filename in line for filename in files_to_recover]):"
-        )
-
         os.chdir(tmpdir)
         try:
             exec(script_content)

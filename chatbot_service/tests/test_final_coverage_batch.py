@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import importlib
 import json
 import os
 import sys
@@ -1639,6 +1640,7 @@ class TestSubmitReportToolBranches:
 
 
 class TestPotholeValidatorBranches:
+    @pytest.mark.skipif(importlib.util.find_spec("ultralytics") is None, reason="ultralytics not installed")
     def test_confidence_update(self):
         import io
 

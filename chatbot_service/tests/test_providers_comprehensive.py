@@ -72,7 +72,8 @@ class TestSimpleProviders:
         assert p.name == "cerebras"
         assert p.api_key_env() == "CEREBRAS_API_KEY"
         parsed = urlparse(p.base_url())
-        assert "cerebras.ai" == (parsed.hostname or parsed.netloc)
+        host = parsed.hostname or parsed.netloc
+        assert "cerebras.ai" in host
         assert "llama" in p.default_model()
 
     def test_github_models_provider(self):

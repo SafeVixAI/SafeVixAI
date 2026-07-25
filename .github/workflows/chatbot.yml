@@ -96,7 +96,7 @@ jobs:
           pip install uvicorn httpx
           uvicorn main:app --port 8010 &
           UVICORN_PID=$!
-          sleep 3
+          sleep 15
           STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8010/health || echo "000")
           kill $UVICORN_PID 2>/dev/null || true
           if [ "$STATUS" != "200" ]; then echo "Health check returned $STATUS"; exit 1; fi

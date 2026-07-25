@@ -142,9 +142,14 @@ class TestReportRoadIssue:
         mock_service = MagicMock()
         mock_service.submit_report = AsyncMock(return_value=mock_result)
 
-        mock_cache = AsyncMock()
-        mock_overpass = AsyncMock()
-        mock_geocoding = AsyncMock()
+        mock_cache = MagicMock()
+        mock_cache.close = AsyncMock()
+
+        mock_overpass = MagicMock()
+        mock_overpass.aclose = AsyncMock()
+
+        mock_geocoding = MagicMock()
+        mock_geocoding.aclose = AsyncMock()
 
         async def mock_build():
             return (mock_service, mock_cache, mock_overpass, mock_geocoding)

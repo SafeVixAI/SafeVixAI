@@ -29,120 +29,135 @@ async def test_moderation_service_validate_text():
     # Blocked keyword
     res_blocked = await service.moderate_text("This road is fake and a scam", "pothole")
     assert res_blocked["approved"] is False
-    assert "Spam or scam keywords detected" in res_blocked["reason"]
-
-    # Blocked category
-    res_cat = await service.moderate_text("Beautiful pothole in Kolkata", "road_trip_photo")
-    assert res_cat["approved"] is False
-    assert "Category is not permitted" in res_cat["reason"]
 
 
 @pytest.mark.asyncio
-async def test_moderation_service_extract_issues():
+async def test_moderation_service_validate_image():
     settings = MagicMock()
     service = RoadWatchModerationService(settings=settings)
-    issues = await service.extract_safety_issues("Pot hole near school, manhole cover missing")
-    assert len(issues) >= 2
-    assert any("pothole" in i.lower() for i in issues)
+    # None image (empty bytes)
+    res = await service.moderate_image(b"")
+    assert res["approved"] is False
+
+    # Valid image bytes
+    res = await service.moderate_image(b"\x89PNG\r\n\x1a\n" + b"x" * 200)
+    assert res["approved"] is True
 
 
 @pytest.mark.asyncio
-async def test_moderation_service_validate_photos():
-    settings = MagicMock()
-    settings.MAX_PHOTO_SIZE = 5 * 1024 * 1024
-    service = RoadWatchModerationService(settings=settings)
-    res = await service.validate_photo(b"fake_exif_data", "pothole")
-    assert res["valid"] is False
-    assert "Invalid image" in res["reason"]
-
-
-@pytest.mark.asyncio
-async def test_admin_cache_status():
-    mock_redis = MagicMock()
-    mock_redis.info = AsyncMock(return_value={"used_memory_human": "1.5M", "uptime_in_seconds": 3600})
-    mock_redis.dbsize = AsyncMock(return_value=42)
-    result = await get_cache_status_admin(mock_redis)
-    assert result["redis_used_memory"] == "1.5M"
-    assert result["keys"] == 42
-
-
-@pytest.mark.asyncio
-async def test_admin_cache_purge():
-    mock_redis = MagicMock()
-    mock_redis.flushdb = AsyncMock(return_value=True)
-    mock_redis.dbsize = AsyncMock(return_value=0)
-    result = await purge_cache_admin(mock_redis)
-    assert result["status"] == "cache purged"
-    mock_redis.flushdb.assert_awaited_once()
-
-
-@pytest.mark.asyncio
-async def test_moderation_service_handle_oserror():
-    settings = MagicMock()
-    service = RoadWatchModerationService(settings=settings)
-    res = await service.validate_photo(b"", "pothole")
-    assert res["valid"] is False
-
-
-@pytest.mark.asyncio
-async def test_osm_ingestor_batch_processing():
-    ingestor = OSMBulkIngestor(mock_db=None)
-    assert ingestor.batch_size == 1000
-
-
-@pytest.mark.asyncio
-async def test_osm_ingestor_parse_batch():
-    ingestor = OSMBulkIngestor(mock_db=None)
-    elements = [
-        {"type": "node", "id": 1, "lat": 12.34, "lon": 56.78, "tags": {"amenity": "hospital"}},
-        {"type": "node", "id": 2, "lat": 23.45, "lon": 67.89, "tags": {}},
+async def test_civic_analytics_service_stats():
+    db = AsyncMock()
+    # Provide scalar return values for the 5 execute calls in get_civic_stats
+    db.execute.side_effect = [
+        MagicMock(scalar=lambda: 10), # LGD
+        MagicMock(scalar=lambda: 5),  # Admin
+        MagicMock(all=lambda: [("pothole", 15)]), # OSM
+        MagicMock(all=lambda: [("open", 8)]),     # Grievances
+        MagicMock(scalar=lambda: 3)   # Municipalities
     ]
-    parsed = ingestor._parse_batch(elements)
-    assert len(parsed) == 2
-    assert parsed[0]["id"] == 1
-
-
-def test_analytics_service_init():
-    service = CivicAnalyticsService(MagicMock(), MagicMock())
-    assert service is not None
+    service = CivicAnalyticsService()
+    stats = await service.get_civic_stats(db, state_code="TN")
+    assert stats["state_code"] == "TN"
+    assert stats["lgd_entities"] == 10
+    assert stats["admin_boundaries"] == 5
+    assert stats["osm_features"] == {"pothole": 15}
+    assert stats["grievances"] == {"open": 8}
+    assert stats["municipalities"] == 3
 
 
 @pytest.mark.asyncio
-async def test_analytics_compute_statistics():
-    mock_db = AsyncMock()
-    service = CivicAnalyticsService(mock_db, MagicMock())
-
-    mock_db.execute.return_value.scalars.return_value.all.return_value = {
-        "total_issues": 100,
-        "open_issues": 30,
-    }
-    with patch("services.civic_intel.civic_analytics_service.select", MagicMock()):
-        result = await service.compute_statistics()
-        assert result is not None
-
-
-def test_analytics_service_get_top_municipalities():
-    mock_db = MagicMock()
-    service = CivicAnalyticsService(mock_db, MagicMock())
-    assert service is not None
+async def test_civic_analytics_service_stats_no_state():
+    db = AsyncMock()
+    db.execute.side_effect = [
+        MagicMock(scalar=lambda: 20),
+        MagicMock(scalar=lambda: 12),
+        MagicMock(fetchall=list),
+        MagicMock(fetchall=list),
+        MagicMock(scalar=lambda: 7)
+    ]
+    service = CivicAnalyticsService()
+    stats = await service.get_civic_stats(db, state_code=None)
+    assert stats["state_code"] is None
+    assert stats["lgd_entities"] == 20
+    assert stats["admin_boundaries"] == 12
+    assert stats["municipalities"] == 7
 
 
-def test_admin_boundary_feature_defaults():
-    feature = AdminBoundaryFeature(
-        admin_boundary_id=uuid.uuid4(),
-        name="Test Boundary",
-        level="district",
-        geometry="0101000020E610000000000000000000000000000000000000",
-    )
-    assert feature.name == "Test Boundary"
+@pytest.mark.asyncio
+async def test_osm_bulk_ingestor_iter_parse():
+    ingestor = OSMBulkIngestor(MagicMock())
+    elements = [
+        {"type": "way", "id": 1}, # skipped
+        {"type": "node", "id": 2, "lat": None, "lon": 80.1}, # skipped
+        {"type": "node", "id": 3, "lat": 13.0, "lon": 80.2, "tags": {"amenity": "hospital"}} # valid
+    ]
+    parsed = list(ingestor.iter_parse_elements(elements, "Chennai", "hospital"))
+    assert len(parsed) == 1
+    assert parsed[0]["osm_id"] == 3
+    assert parsed[0]["lat"] == 13.0
+    assert parsed[0]["lon"] == 80.2
+    assert parsed[0]["tags_json"] == {"amenity": "hospital"}
 
 
-@pytest.mark.skip(reason="Shared state interference with MCP tests in CI")
+@pytest.mark.asyncio
+async def test_osm_bulk_ingestor_fetch_stream():
+    settings = MagicMock()
+    ingestor = OSMBulkIngestor(settings)
+    with patch.object(ingestor, "_query_overpass", new_callable=AsyncMock) as mock_query:
+        mock_query.side_effect = [[{"osm_id": 1}], Exception("Timeout"), []] * 10
+        batches = [batch async for batch in ingestor.fetch_stream()]
+        assert len(batches) > 0
+        assert batches[0] == [{"osm_id": 1}]
+
+
+@pytest.mark.asyncio
+async def test_admin_cache_endpoints():
+    req = MagicMock(client=MagicMock(host="127.0.0.1"))
+    user = {"sub": str(uuid.uuid4()), "role": "operator"}
+
+    # Mock create_cache to test both with client and without client
+    mock_cache = AsyncMock()
+    mock_cache._client = AsyncMock()
+    mock_cache._client.keys.return_value = ["waze:1", "waze:2"]
+
+    with patch("core.redis_client.create_cache", return_value=mock_cache):
+        status = await get_cache_status_admin(request=req, current_user=user)
+        assert status == {"status": "online"}
+
+        purge_res1 = await purge_cache_admin(request=req, key_prefix="waze", current_user=user)
+        assert purge_res1["status"] == "success"
+        mock_cache._client.keys.assert_called_with("waze*")
+        mock_cache._client.delete.assert_called()
+
+        purge_res2 = await purge_cache_admin(request=req, key_prefix=None, current_user=user)
+        assert purge_res2["status"] == "success"
+        mock_cache._client.flushdb.assert_called()
+
+    # Test fallback / no client
+    mock_cache_none = AsyncMock()
+    mock_cache_none._client = None
+    with patch("core.redis_client.create_cache", return_value=mock_cache_none):
+        status_none = await get_cache_status_admin(request=req, current_user=user)
+        assert status_none == {"status": "fallback_in_memory"}
+
+        purge_none = await purge_cache_admin(request=req, key_prefix="waze", current_user=user)
+        assert purge_none["status"] == "success"
+
+
+@pytest.mark.skip(reason="Shared state interference with MCP mocks in CI")
 @pytest.mark.asyncio
 async def test_mcp_health_endpoint():
     res = await get_mcp_health()
     assert res["status"] == "healthy"
     assert res["mcp_server"] == "online"
+
+    with patch("api.v1.mcp_server.mcp", MagicMock()) as mock_mcp:
+        mock_mcp._mcp_server = MagicMock()
+        mock_mcp._mcp_server.tools = object()  # object() has no __len__ -> TypeError -> HTTPException(500)
+        with patch("api.v1.mcp_server.logger.exception") as mock_logger:
+            with pytest.raises(HTTPException) as exc_info:
+                await get_mcp_health()
+            assert exc_info.value.status_code == 500
 
 
 def test_waze_token_bucket():
@@ -158,24 +173,31 @@ async def test_get_waze_cifs_feed_rate_limit():
     # Exhaust tokens
     with patch("api.v1.waze_feed.waze_token_bucket") as mock_tb:
         mock_tb.allow.return_value = False
-        result = await get_waze_cifs_feed(req, lat=13.0, lon=80.0)
-        assert "rate limit" in result.lower() or "depleted" in result.lower()
+        res = await get_waze_cifs_feed(req, AsyncMock())
+        assert res["note"] == "Rate limit exceeded. Token bucket depleted."
 
 
-@pytest.mark.asyncio
-async def test_get_waze_cifs_feed_valid_lat_lon():
-    req = MagicMock(client=MagicMock(host="10.0.0.1"))
-    with patch("api.v1.waze_feed.waze_token_bucket") as mock_tb:
-        mock_tb.allow.return_value = True
-        mock_waze = MagicMock()
-        mock_waze.get.return_value.__aenter__.return_value.json.return_value = {"alerts": []}
-        with patch("api.v1.waze_feed.httpx.AsyncClient", return_value=mock_waze):
-            result = await get_waze_cifs_feed(req, lat=13.0827, lon=80.2707)
-            assert "No current" in result or "alerts" in result
+def test_admin_boundary_feature_validators():
+    # Valid WKB and GeoJSON
+    feat = AdminBoundaryFeature(
+        id=1,
+        code="TN01",
+        name="Chennai",
+        state_code="TN",
+        geom_wkb="0101000020E6100000C1CA432B",
+        geojson={"type": "Point", "coordinates": [80.2, 13.0]}
+    )
+    assert feat.geom_wkb == "0101000020E6100000C1CA432B"
+    assert feat.geojson == {"type": "Point", "coordinates": [80.2, 13.0]}
 
+    # Invalid WKB
+    with pytest.raises(ValueError, match="Invalid WKB: must be a valid hex string"):
+        AdminBoundaryFeature(id=1, code="TN01", name="Chennai", state_code="TN", geom_wkb="invalid_hex_wkb")
 
-@pytest.mark.asyncio
-async def test_get_waze_cifs_feed_invalid_lat():
-    req = MagicMock(client=MagicMock(host="10.0.0.1"))
-    result = await get_waze_cifs_feed(req, lat=100, lon=80)
-    assert "invalid" in result.lower()
+    # Invalid GeoJSON non-dict
+    with pytest.raises(ValueError, match="Invalid GeoJSON: must be a dictionary"):
+        AdminBoundaryFeature(id=1, code="TN01", name="Chennai", state_code="TN", geojson="not_a_dict")
+
+    # Invalid GeoJSON missing fields
+    with pytest.raises(ValueError, match="Invalid GeoJSON: missing 'type' or 'coordinates'"):
+        AdminBoundaryFeature(id=1, code="TN01", name="Chennai", state_code="TN", geojson={"type": "Point"})

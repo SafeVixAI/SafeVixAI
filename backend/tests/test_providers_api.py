@@ -209,6 +209,10 @@ async def test_test_connection_routes_have_sync_attr(monkeypatch):
     # Use app.test_client or direct route access?
     # Instead, verify the route is registered
     routes = _route_paths(app)
+    import json
+    parts = str(type(app.routes[0]) if app.routes else "empty")
+    print(f"\n\n=== DEBUG: app.routes type={parts}, len={len(routes)}, routes={json.dumps(routes[:20])}")
+    print(f"=== app.routes count = {len(app.routes)}")
     assert "/api/v1/providers/test" in routes
     assert "/api/v1/providers/sync" in routes
 
@@ -250,11 +254,13 @@ def _make_app(mock_session, monkeypatch=None):
     """
     if monkeypatch:
         monkeypatch.setenv("REDIS_URL", "")
+        monkeypatch.setenv("DATABASE_URL", "sqlite+aiosqlite:///./_test_make_app.db")
         monkeypatch.setenv("ENVIRONMENT", "test")
         monkeypatch.setenv("ADMIN_SECRET", "test-admin-secret-2026")
     else:
         import os
         os.environ["REDIS_URL"] = ""
+        os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///./_test_make_app.db"
         os.environ["ENVIRONMENT"] = "test"
         os.environ["ADMIN_SECRET"] = "test-admin-secret-2026"
 

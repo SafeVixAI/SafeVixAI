@@ -151,14 +151,15 @@ class TestReportRoadIssue:
         mock_geocoding = AsyncMock()
         mock_geocoding.aclose = AsyncMock()
 
-        async def mock_build():
-            return (mock_service, mock_cache, mock_overpass, mock_geocoding)
+        mock_db_session = AsyncMock(spec=["execute", "commit", "rollback"])
 
-        with patch("api.v1.mcp_server._build_roadwatch_service", new=mock_build), \
+        with patch("api.v1.mcp_server._build_roadwatch_service") as mock_build_fn, \
              patch("core.database.get_async_session") as mock_session:
 
+            mock_build_fn.return_value = (mock_service, mock_cache, mock_overpass, mock_geocoding)
+
             async def mock_gen():
-                yield AsyncMock(spec=["execute", "commit", "rollback"])
+                yield mock_db_session
 
             mock_session.side_effect = mock_gen
 

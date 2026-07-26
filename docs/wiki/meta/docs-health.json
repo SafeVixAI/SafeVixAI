@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-26T10:13:53.249788+00:00",
+  "generated_at": "2026-07-26T10:40:09.682332+00:00",
   "schema_version": 2,
   "wiki": {
     "total_files": 407,
@@ -28,6 +28,6 @@
   },
   "git": {
     "branch": "main",
-    "sha": "77c349ddf48fb7934e17ae1567ac5cbbd0d186fa"
+    "sha": "75ea9ee949221f4de081e16be170ab0e348ad071"
   }
 }

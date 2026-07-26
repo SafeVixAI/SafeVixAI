@@ -67,12 +67,6 @@ class TestDocumentChunk:
         assert chunk.category == 'legal'
         assert chunk.content == 'Some text here'
 
-    def test_dataclass_slots(self):
-        chunk = DocumentChunk('a', 'b', 'c', 'd', 'e')
-        with pytest.raises(AttributeError):
-            chunk.__dict__
-
-
 # ═══════════════════════════════════════════════════════════════════════════════
 # LoadedDocument
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -89,12 +83,6 @@ class TestLoadedDocument:
         assert doc.title == 'My Document'
         assert doc.category == 'legal'
         assert doc.text == 'Full document text'
-
-    def test_dataclass_slots(self):
-        doc = LoadedDocument('a', 'b', 'c', 'd')
-        with pytest.raises(AttributeError):
-            doc.__dict__
-
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # _read_text

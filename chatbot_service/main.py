@@ -304,12 +304,12 @@ def create_app() -> FastAPI:
         return await call_next(request)
 
     # Body size limit middleware — prevents oversized request bodies
-    _MAX_BODY_BYTES = 1 * 1024 * 1024  # 1 MB default
-    _SPEECH_PATH = "/speech/translate"
+    max_body_bytes = 1 * 1024 * 1024  # 1 MB default
+    speech_path = "/speech/translate"
 
     @app.middleware("http")
     async def _body_size_middleware(request: Request, call_next):
-        max_size = 10 * 1024 * 1024 if request.url.path == _SPEECH_PATH else _MAX_BODY_BYTES
+        max_size = 10 * 1024 * 1024 if request.url.path == speech_path else max_body_bytes
         content_length = request.headers.get("content-length")
         if content_length and int(content_length) > max_size:
             return JSONResponse(

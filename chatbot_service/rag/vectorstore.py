@@ -126,17 +126,15 @@ class LocalVectorStore:
             logger.warning('Failed to generate embeddings: %s', exc)
             return
 
-        async with pool.acquire() as conn:
-            async with conn.transaction():
-                for chunk, embedding in zip(chunks, embeddings, strict=False):
-                    # pgvector expects string representation like '[1.2, 0.5, ...]'
-                    emb_str = f"[{','.join(str(x) for x in embedding)}]"
-                    await conn.execute(
-                        f'''
-                        INSERT INTO {self.collection_name} (chunk_id, source, title, category, content, embedding)
-                        VALUES ($1, $2, $3, $4, $5, $6::vector)
-                        ON CONFLICT (chunk_id) DO UPDATE SET
-                            source = EXCLUDED.source,
+        async with pool.acquire() as conn, conn.transaction():
+            for chunk, embedding in zip(chunks, embeddings, strict=False):
+                emb_str = f"[{','.join(str(x) for x in embedding)}]"
+                await conn.execute(
+                    f'''
+                    INSERT INTO {self.collection_name} (chunk_id, source, title, category, content, embedding)
+                    VALUES ($1, $2, $3, $4, $5, $6::vector)
+                    ON CONFLICT (chunk_id) DO UPDATE SET
+                        source = EXCLUDED.source,
                             title = EXCLUDED.title,
                             category = EXCLUDED.category,
                             content = EXCLUDED.content,

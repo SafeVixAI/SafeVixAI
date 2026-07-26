@@ -134,17 +134,28 @@ class Settings(BaseSettings):
     @property
     def bootstrap_env_providers(self) -> list[str]:
         providers = []
-        if os.environ.get("GROQ_API_KEY"): providers.append("groq")
-        if os.environ.get("OPENAI_API_KEY"): providers.append("openai")
-        if os.environ.get("OLLAMA_BASE_URL"): providers.append("ollama")
-        if os.environ.get("VLLM_BASE_URL"): providers.append("vllm")
-        if os.environ.get("CEREBRAS_API_KEY"): providers.append("cerebras")
-        if os.environ.get("GEMINI_API_KEY"): providers.append("gemini")
-        if os.environ.get("GITHUB_TOKEN") or os.environ.get("GITHUB_API_KEY"): providers.append("github")
-        if os.environ.get("SARVAM_API_KEY"): providers.append("sarvam")
-        if os.environ.get("MISTRAL_API_KEY"): providers.append("mistral")
-        if os.environ.get("TOGETHER_API_KEY"): providers.append("together")
-        if os.environ.get("OPENROUTER_API_KEY"): providers.append("openrouter")
+        if os.environ.get("GROQ_API_KEY"):
+            providers.append("groq")
+        if os.environ.get("OPENAI_API_KEY"):
+            providers.append("openai")
+        if os.environ.get("OLLAMA_BASE_URL"):
+            providers.append("ollama")
+        if os.environ.get("VLLM_BASE_URL"):
+            providers.append("vllm")
+        if os.environ.get("CEREBRAS_API_KEY"):
+            providers.append("cerebras")
+        if os.environ.get("GEMINI_API_KEY"):
+            providers.append("gemini")
+        if os.environ.get("GITHUB_TOKEN") or os.environ.get("GITHUB_API_KEY"):
+            providers.append("github")
+        if os.environ.get("SARVAM_API_KEY"):
+            providers.append("sarvam")
+        if os.environ.get("MISTRAL_API_KEY"):
+            providers.append("mistral")
+        if os.environ.get("TOGETHER_API_KEY"):
+            providers.append("together")
+        if os.environ.get("OPENROUTER_API_KEY"):
+            providers.append("openrouter")
         return providers
 
 

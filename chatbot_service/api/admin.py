@@ -41,7 +41,7 @@ def _require_admin(x_admin_key: str = Header(default='')) -> None:
 @router.get('/admin/health')
 @limiter.limit('5/minute')
 async def health(
-    request: Request,
+    request: Request,  # noqa
     _: None = Depends(_require_admin),
     engine: ChatEngine = Depends(get_engine),
     memory_store: ConversationMemoryStore = Depends(get_memory),
@@ -96,7 +96,7 @@ async def get_job_status(
 @router.get('/admin/providers/health')
 @limiter.limit('5/minute')
 async def provider_health(
-    request: Request,
+    request: Request,  # noqa
     _: None = Depends(_require_admin),
     engine: ChatEngine = Depends(get_engine),
 ) -> dict:
@@ -140,7 +140,7 @@ async def provider_health(
 @router.get('/admin/providers/dashboard')
 @limiter.limit('5/minute')
 async def provider_health_dashboard(
-    request: Request,
+    request: Request,  # noqa
     _: None = Depends(_require_admin),
     engine: ChatEngine = Depends(get_engine),
     memory_store: ConversationMemoryStore = Depends(get_memory),
@@ -247,7 +247,7 @@ async def provider_health_dashboard(
 
 
 @task("rebuild_rag_index")
-async def rebuild_rag_index_task(q: TaskQueue, job_id: str):
+async def rebuild_rag_index_task(q: TaskQueue, job_id: str):  # noqa
     import logging
 
     from core.queue import get_global_chat_engine

@@ -241,9 +241,8 @@ class SafetyChecker:
     def add_medical_disclaimer_if_needed(self, message: str, response: str) -> str:
         """Append medical disclaimer to LLM responses on medical/first-aid topics."""
         normalized = _normalize_text(message)
-        if any(kw in normalized for kw in _MEDICAL_KEYWORDS):
-            if _MEDICAL_DISCLAIMER not in response:
-                return response + _MEDICAL_DISCLAIMER
+        if any(kw in normalized for kw in _MEDICAL_KEYWORDS) and _MEDICAL_DISCLAIMER not in response:
+            return response + _MEDICAL_DISCLAIMER
         return response
 
     def check_output_safety(self, llm_response: str) -> SafetyDecision:

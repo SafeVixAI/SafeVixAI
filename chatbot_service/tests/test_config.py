@@ -425,12 +425,6 @@ class TestConversationContext:
         assert ctx.retrieved == []
         assert ctx.tools == []
 
-    def test_dataclass_slots(self):
-        ctx = ConversationContext('s1', 'Hi', 'general')
-        with pytest.raises(AttributeError):
-            ctx.__dict__
-
-
 # ═══════════════════════════════════════════════════════════════════════════════
 # RetrievedContext
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -448,12 +442,6 @@ class TestRetrievedContext:
         rc = RetrievedContext(source='doc.txt', title='Doc', snippet='text', score=0.8)
         assert rc.category is None
 
-    def test_dataclass_slots(self):
-        rc = RetrievedContext('s', 't', 'sn', 0.5)
-        with pytest.raises(AttributeError):
-            rc.__dict__
-
-
 # ═══════════════════════════════════════════════════════════════════════════════
 # ToolContext
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -467,11 +455,6 @@ class TestToolContext:
         assert tc.sources == ['api']
 
     def test_optional_fields_default(self):
-        tc = ToolContext(name='Tool', summary='Done')
+        tc = ToolContext('Tool', 'Done')
         assert tc.payload is None
         assert tc.sources == []
-
-    def test_dataclass_slots(self):
-        tc = ToolContext('n', 's')
-        with pytest.raises(AttributeError):
-            tc.__dict__

@@ -37,7 +37,6 @@ from providers.base import (
     RateLimitError,
     TemplateProvider,
 )
-from providers.lang_detection import detect_lang
 from providers.openai_compat import OpenAICompatibleProvider
 from providers.provider_registry import (
     DEFAULT_FALLBACK_CHAIN,
@@ -345,7 +344,7 @@ class ProviderRouter:
         self,
         request: ProviderRequest,
         primary: str,
-        detected_lang: str | None,
+        detected_lang: str | None,  # noqa
         *,
         primary_err: Exception | None = None,
         skip_low_confidence: bool = False,
@@ -613,8 +612,7 @@ class ProviderRouter:
         # Fallback to checking Redis if available
         if self.cache and hasattr(self.cache, 'get_provider_unavailable_until'):
             redis_until = await self.cache.get_provider_unavailable_until(provider_name)
-            if redis_until is not None and isinstance(redis_until, (int, float)):
-                if redis_until > now:
+            if redis_until is not None and isinstance(redis_until, (int, float)) and redis_until > now:
                     # Sync to local in-memory dict for rapid future queries
                     self._unavailable_until[provider_name] = redis_until
                     return False

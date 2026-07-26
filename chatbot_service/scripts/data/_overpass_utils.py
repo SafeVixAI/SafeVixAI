@@ -70,7 +70,7 @@ def build_india_query(selectors: Iterable[str], *, timeout: int) -> str:
     )
 
 
-def fetch_elements(query: str, *, endpoint: str | None, timeout: int, **kwargs) -> list[dict]:
+def fetch_elements(query: str, *, endpoint: str | None, timeout: int, **kwargs) -> list[dict]:  # noqa
     payload = urllib.parse.urlencode({'data': query}).encode('utf-8')
     endpoints = [endpoint] if endpoint else list(DEFAULT_ENDPOINTS)
     last_error: Exception | None = None
@@ -110,7 +110,7 @@ def compose_address(tags: dict[str, str]) -> str:
     return ', '.join(part for part in parts if part)
 
 
-def normalize_row(element: dict, *, default_type: str, fallback_name: str, **kwargs) -> dict | None:
+def normalize_row(element: dict, *, default_type: str, fallback_name: str, **kwargs) -> dict | None:  # noqa
     lat, lon = extract_point(element)
     if lat is None or lon is None:
         return None

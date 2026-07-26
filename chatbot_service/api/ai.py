@@ -18,7 +18,7 @@ MAX_IMAGE_BYTES = 5 * 1024 * 1024
 @router.post('/validate-image')
 @limiter.limit("10/minute")
 async def validate_image(
-    request: Request,
+    request: Request,  # noqa
     file: UploadFile = File(...),
     _auth: None = Depends(verify_internal_auth),
 ):

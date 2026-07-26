@@ -171,7 +171,7 @@ class AIGovernance:
         matches = sum(1 for fact in tool_facts if fact in response_lower)
         return min(1.0, matches / max(1, len(tool_facts)))
 
-    def _extract_citations(self, response: str, context: list[dict]) -> list[str]:
+    def _extract_citations(self, _response: str, context: list[dict]) -> list[str]:  # noqa
         """Extract citations from response that match context sources."""
         citations = []
         for item in context:
@@ -197,7 +197,7 @@ class AIGovernance:
         self._prompt_versions[version] = prompt_hash
         return version
 
-    async def _log_audit(self, result: GovernanceResult, prompt: str) -> None:
+    async def _log_audit(self, result: GovernanceResult, prompt: str) -> None:  # noqa
         """Log governance result for audit trail."""
         if not self._redis:
             return

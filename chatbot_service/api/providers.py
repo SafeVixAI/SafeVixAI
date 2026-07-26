@@ -29,7 +29,7 @@ def get_provider_router(request: Request) -> ProviderRouter:
 @router.post("/configure")
 @limiter.limit("5/minute")
 async def configure_providers(
-    request: Request,
+    request: Request,  # noqa
     providers: list[dict[str, Any]],
     provider_router: ProviderRouter = Depends(get_provider_router),
 ):
@@ -54,7 +54,7 @@ async def configure_providers(
 @router.get("/active")
 @limiter.limit("10/minute")
 async def get_active_providers(
-    request: Request,
+    request: Request,  # noqa
     provider_router: ProviderRouter = Depends(get_provider_router),
 ):
     """Return currently active provider configs (env + user-configured)."""
@@ -65,7 +65,7 @@ def _lookup_provider_url(provider_name: str, provider_router: ProviderRouter) ->
     """Look up the base URL for a provider from the active provider config."""
     providers = provider_router.get_active_provider_info()
     for p in providers:
-        name = p.get("provider_name", "")
+        name = p.get("name", "") or p.get("provider_name", "")
         if name == provider_name:
             base_url = p.get("base_url", "")
             if base_url:
@@ -84,7 +84,7 @@ def _lookup_provider_url(provider_name: str, provider_router: ProviderRouter) ->
 @router.post("/test")
 @limiter.limit("5/minute")
 async def test_provider(
-    request: Request,
+    request: Request,  # noqa
     data: dict[str, Any],
     provider_router: ProviderRouter = Depends(get_provider_router),
 ):
@@ -96,7 +96,7 @@ async def test_provider(
     provider_name = data.get("provider_name", "custom")
     model = data.get("model", "gpt-3.5-turbo")
 
-    base_url = _lookup_provider_url(provider_name, provider_router)
+    base_url = data.get("base_url", "") or _lookup_provider_url(provider_name, provider_router)
 
     headers = {
         "Authorization": f"Bearer {api_key}",
@@ -114,15 +114,15 @@ async def test_provider(
             if resp.status_code == 200:
                 return {"status": "ok", "message": "Connection successful", "provider": provider_name}
             return {"status": "error", "message": f"HTTP {resp.status_code}: {resp.text[:200]}"}
-    except Exception:
+    except Exception as exc:
         logger.exception("Provider test failed for %s", provider_name)
-        return {"status": "error", "message": "An unexpected error occurred. Check server logs."}
+        return {"status": "error", "message": str(exc)}
 
 
 @router.post("/reset")
 @limiter.limit("5/minute")
 async def reset_providers(
-    request: Request,
+    request: Request,  # noqa
     provider_router: ProviderRouter = Depends(get_provider_router),
 ):
     """Reset to default env-var-based providers (clear user configs)."""

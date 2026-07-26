@@ -29,7 +29,7 @@ def get_engine(request: Request) -> ChatEngine:
 
 
 def verify_internal_auth(
-    request: Request,
+    request: Request,  # noqa
     x_internal_api_key: str | None = Header(default=None),
 ) -> None:
     settings = get_settings()
@@ -120,7 +120,7 @@ async def chat_stream(
 
 @router.get('/history/{session_id}')
 async def get_history(
-    request: Request,
+    request: Request,  # noqa
     session_id: str = Path(min_length=1, max_length=128, pattern=r"^[A-Za-z0-9_.:-]+$"),
     x_admin_secret: str | None = Header(default=None),
     engine: ChatEngine = Depends(get_engine),
@@ -133,5 +133,5 @@ async def get_history(
 
 
 @router.get('/health')
-async def health(request: Request) -> dict:
+async def health(request: Request) -> dict:  # noqa
     return {'status': 'ok', 'service': 'safevixai-chatbot'}

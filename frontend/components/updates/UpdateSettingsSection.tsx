@@ -118,6 +118,7 @@ export default function UpdateSettingsSection() {
         <Toast
           message={toast.message}
           type={toast.type}
+          isVisible={true}
           onClose={() => setToast(null)}
         />
       )}
@@ -150,52 +151,52 @@ export default function UpdateSettingsSection() {
 
       <SettingRow
         icon={<ArrowUp className="w-4 h-4" />}
-        label="Auto-update"
+        title="Auto-update"
         description="Automatically download and install updates"
-        control={
+        rightElement={
           <Toggle
-            enabled={settings?.auto_update_enabled ?? true}
+            checked={settings?.auto_update_enabled ?? true}
             onChange={(v) => handleToggle('auto_update_enabled', v)}
-            disabled={saving}
+            ariaLabel={saving ? 'Saving' : undefined}
           />
         }
       />
 
       <SettingRow
         icon={<Download className="w-4 h-4" />}
-        label="Background download"
+        title="Background download"
         description="Download updates in the background"
-        control={
+        rightElement={
           <Toggle
-            enabled={settings?.background_download ?? true}
+            checked={settings?.background_download ?? true}
             onChange={(v) => handleToggle('background_download', v)}
-            disabled={saving}
+            ariaLabel={saving ? 'Saving' : undefined}
           />
         }
       />
 
       <SettingRow
         icon={<RotateCcw className="w-4 h-4" />}
-        label="Auto-restart"
+        title="Auto-restart"
         description="Automatically restart after update"
-        control={
+        rightElement={
           <Toggle
-            enabled={settings?.auto_restart ?? false}
+            checked={settings?.auto_restart ?? false}
             onChange={(v) => handleToggle('auto_restart', v)}
-            disabled={saving}
+            ariaLabel={saving ? 'Saving' : undefined}
           />
         }
       />
 
       <SettingRow
         icon={<CheckCircle className="w-4 h-4" />}
-        label="Update notifications"
+        title="Update notifications"
         description="Show notification when updates are available"
-        control={
+        rightElement={
           <Toggle
-            enabled={settings?.notify_on_update ?? true}
+            checked={settings?.notify_on_update ?? true}
             onChange={(v) => handleToggle('notify_on_update', v)}
-            disabled={saving}
+            ariaLabel={saving ? 'Saving' : undefined}
           />
         }
       />

@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import sqlalchemy as sa
 from alembic import op
+from sqlalchemy.dialects.postgresql import JSONB
 
 revision = "10017_update_management"
 down_revision = "bdf0a2be195c"
@@ -42,7 +43,7 @@ def upgrade():
         sa.Column("is_draft", sa.Boolean(), nullable=False, server_default=sa.text("false")),
         sa.Column("is_prerelease", sa.Boolean(), nullable=False, server_default=sa.text("false")),
         sa.Column("published_at", sa.DateTime(timezone=True), nullable=True),
-        sa.Column("extra_data", sa.JSONB(), nullable=True, server_default=sa.text("'{}'::jsonb")),
+        sa.Column("extra_data", JSONB, nullable=True, server_default=sa.text("'{}'::jsonb")),
         sa.Column(
             "created_at", sa.DateTime(timezone=True), nullable=False,
             server_default=sa.text("now()"),
@@ -90,7 +91,7 @@ def upgrade():
         sa.Column("total_bytes", sa.Integer(), nullable=True, server_default=sa.text("0")),
         sa.Column("started_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("completed_at", sa.DateTime(timezone=True), nullable=True),
-        sa.Column("extra_data", sa.JSONB(), nullable=True, server_default=sa.text("'{}'::jsonb")),
+        sa.Column("extra_data", JSONB, nullable=True, server_default=sa.text("'{}'::jsonb")),
         sa.Column(
             "created_at", sa.DateTime(timezone=True), nullable=False,
             server_default=sa.text("now()"),
@@ -122,7 +123,7 @@ def upgrade():
         sa.Column("last_checked_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("last_check_result", sa.String(32), nullable=True),
         sa.Column("last_update_version", sa.String(32), nullable=True),
-        sa.Column("extra_data", sa.JSONB(), nullable=True, server_default=sa.text("'{}'::jsonb")),
+        sa.Column("extra_data", JSONB, nullable=True, server_default=sa.text("'{}'::jsonb")),
         sa.Column(
             "created_at", sa.DateTime(timezone=True), nullable=False,
             server_default=sa.text("now()"),

@@ -984,7 +984,7 @@ Treat this section as the operational truth before changing code.
 | B-P3.6 | Dead code removed: `_normalize_road_type` alias, TomTom stub + 7 tests | ✅ |
 | B-P3.7 | Ubiquitous language alignment: `complaint_lifecycle|state_machine|cluster|ai_verification` docstrings | ✅ |
 | C-P3.3 | Provider alias mapping cleaned up (3 redundant aliases removed) | ✅ |
-| C-P3.5 | Docstring "11-provider" → "10-provider" fixed | ✅ |
+| C-P3.5 | Docstring "9-provider" → "10-provider" fixed | ✅ |
 
 **Phase 8: Monitoring & Observability (6/6)**
 | ID | Item | Status |

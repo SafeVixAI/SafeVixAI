@@ -253,8 +253,7 @@ def _make_app(mock_session, monkeypatch=None):
     return app
 
 
-@pytest.mark.skip(reason="user_provider_configs table not migrated in CI test DB")
-@pytest.mark.asyncio(loop_scope="module")
+@pytest.mark.asyncio
 async def test_create_provider_config_returns_201(monkeypatch, mock_db, sample_config):  # B1
     """POST /api/v1/providers with minimal fields returns 201."""
     mock_db.execute.return_value = MockResult(row=None)  # No duplicate
@@ -292,8 +291,7 @@ async def test_create_provider_config_returns_201(monkeypatch, mock_db, sample_c
     mock_db.commit.assert_awaited_once()
 
 
-@pytest.mark.skip(reason="user_provider_configs table not migrated in CI test DB")
-@pytest.mark.asyncio(loop_scope="module")
+@pytest.mark.asyncio
 async def test_update_provider_config_returns_updated(monkeypatch, mock_db, sample_config):  # B2
     """PUT /api/v1/providers/{id} updates a single field."""
     mock_db.execute.return_value = MockResult(row=sample_config)
@@ -314,8 +312,7 @@ async def test_update_provider_config_returns_updated(monkeypatch, mock_db, samp
     mock_db.commit.assert_awaited_once()
 
 
-@pytest.mark.asyncio(loop_scope="module")
-@pytest.mark.skip(reason="user_provider_configs table not migrated in CI test DB")
+@pytest.mark.asyncio
 async def test_delete_provider_config_returns_204(monkeypatch, mock_db, sample_config):  # B3
     """DELETE /api/v1/providers/{id} returns 204."""
     mock_db.execute.return_value = MockResult(row=sample_config)
@@ -332,8 +329,7 @@ async def test_delete_provider_config_returns_204(monkeypatch, mock_db, sample_c
     mock_db.commit.assert_awaited_once()
 
 
-@pytest.mark.skip(reason="user_provider_configs table not migrated in CI test DB")
-@pytest.mark.asyncio(loop_scope="module")
+@pytest.mark.asyncio
 async def test_delete_non_existent_returns_404(monkeypatch, mock_db):  # B4
     """DELETE /api/v1/providers/{id} with non-existent ID returns 404."""
     mock_db.execute.return_value = MockResult(row=None)
@@ -350,8 +346,7 @@ async def test_delete_non_existent_returns_404(monkeypatch, mock_db):  # B4
     assert "not found" in detail.get("detail", "").lower()
 
 
-@pytest.mark.skip(reason="user_provider_configs table not migrated in CI test DB")
-@pytest.mark.asyncio(loop_scope="module")
+@pytest.mark.asyncio
 async def test_update_non_existent_returns_404(monkeypatch, mock_db):  # B5
     """PUT /api/v1/providers/{id} with non-existent ID returns 404."""
     mock_db.execute.return_value = MockResult(row=None)
@@ -369,8 +364,7 @@ async def test_update_non_existent_returns_404(monkeypatch, mock_db):  # B5
     assert resp.status_code == 404
 
 
-@pytest.mark.skip(reason="user_provider_configs table not migrated in CI test DB")
-@pytest.mark.asyncio(loop_scope="module")
+@pytest.mark.asyncio
 async def test_create_duplicate_provider_returns_409(monkeypatch, mock_db, sample_config):  # B6
     """POST /api/v1/providers with duplicate provider_name returns 409."""
     mock_db.execute.return_value = MockResult(row=sample_config)  # Found existing

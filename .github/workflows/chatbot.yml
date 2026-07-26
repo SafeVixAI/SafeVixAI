@@ -96,11 +96,23 @@ jobs:
           pip install uvicorn httpx
           uvicorn main:app --port 8010 &
           UVICORN_PID=$!
-          sleep 15
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8010/health || echo "000")
+          MAX_RETRIES=12
+          RETRY_DELAY=5
+          STATUS="000"
+          for i in $(seq 1 $MAX_RETRIES); do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8010/health || echo "000")
+            if [ "$STATUS" = "200" ]; then
+              echo "Health check passed (200) after $((i * RETRY_DELAY))s"
+              break
+            fi
+            echo "Health check attempt $i/$MAX_RETRIES: $STATUS, retrying in ${RETRY_DELAY}s..."
+            sleep $RETRY_DELAY
+          done
           kill $UVICORN_PID 2>/dev/null || true
-          if [ "$STATUS" != "200" ]; then echo "Health check returned $STATUS"; exit 1; fi
-          echo "Health check passed (200)"
+          if [ "$STATUS" != "200" ]; then
+            echo "Health check failed after $((MAX_RETRIES * RETRY_DELAY))s, last status: $STATUS"
+            exit 1
+          fi
 
       - name: Upload coverage
         uses: codecov/codecov-action@0fb7174895f61a3b6b78fc075e0cd60383518dac  # v5.4.0

@@ -130,7 +130,6 @@ class TestGetEmergencyServices:
 class TestReportRoadIssue:
     """Tests for report_road_issue MCP tool."""
 
-    @pytest.mark.skip(reason="MagicMock not awaitable on Python 3.11 CI")
     @pytest.mark.asyncio
     async def test_valid_report_submission(self):
         """Test successful road issue report."""
@@ -143,23 +142,23 @@ class TestReportRoadIssue:
         mock_service = MagicMock()
         mock_service.submit_report = AsyncMock(return_value=mock_result)
 
-        mock_cache = MagicMock()
+        mock_cache = AsyncMock()
         mock_cache.close = AsyncMock()
 
-        mock_overpass = MagicMock()
+        mock_overpass = AsyncMock()
         mock_overpass.aclose = AsyncMock()
 
-        mock_geocoding = MagicMock()
+        mock_geocoding = AsyncMock()
         mock_geocoding.aclose = AsyncMock()
 
         async def mock_build():
             return (mock_service, mock_cache, mock_overpass, mock_geocoding)
 
         with patch("api.v1.mcp_server._build_roadwatch_service", new=mock_build), \
-             patch("core.database.get_async_session") as mock_session:
+             patch("api.v1.mcp_server.get_async_session") as mock_session:
 
             async def mock_gen():
-                yield MagicMock(spec_set=["execute", "commit", "rollback"])
+                yield AsyncMock(spec=["execute", "commit", "rollback"])
 
             mock_session.side_effect = mock_gen
 

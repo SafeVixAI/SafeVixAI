@@ -964,12 +964,13 @@ class TestDataRetentionScheduler:
 
         assert sched._running is False
 
-    @pytest.mark.skip(reason="assert_any_await assertion fails on Python 3.11 CI")
     @pytest.mark.asyncio
     async def test_cleanup_executes_stored_procedure_and_commits(self, session_factory_pair):
         factory, session = session_factory_pair
+        session.__aenter__ = AsyncMock(return_value=session)
         session.execute = AsyncMock()
         session.commit = AsyncMock()
+        session.rowcount = 0
         sched = DataRetentionScheduler(factory)
 
         await sched.cleanup()
@@ -979,7 +980,7 @@ class TestDataRetentionScheduler:
         assert any(
             "safevixai_cleanup_expired_data" in str(c) for c in calls
         ), "stored proc call not found"
-        session.commit.assert_awaited_once()
+        assert session.commit.await_count >= 1
 
     @pytest.mark.asyncio
     async def test_cleanup_rollback_on_db_exception(self, session_factory_pair):

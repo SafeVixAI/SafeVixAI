@@ -130,11 +130,10 @@ jobs:
         with:
           python-version: '3.11'
       - name: Lint with ruff
-        continue-on-error: true
         working-directory: chatbot_service
         run: |
           pip install ruff
-          ruff check --fix . --output-format=github || true
+          ruff check --fix . --output-format=github
 
   build:
     if: github.ref == 'refs/heads/main'

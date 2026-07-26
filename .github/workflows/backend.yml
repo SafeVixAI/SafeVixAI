@@ -67,6 +67,15 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Run database migrations
+        working-directory: backend
+        env:
+          DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/safevixai_test
+          ENVIRONMENT: test
+          ADMIN_SECRET: test-admin-secret
+        run: |
+          python -m alembic upgrade head
+
       - name: Run tests with coverage
         working-directory: backend
         env:

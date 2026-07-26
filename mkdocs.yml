@@ -125,24 +125,57 @@ markdown_extensions:
 nav:
   - Overview: index.md
   - Getting Started:
-      - Setup Guide: SETUP.md
+      - Setup Guide: ../SETUP.md
+      - Starter Guide: STARTER_GUIDE.md
+      - User Guide: USER_GUIDE.md
+      - Quick Start: ../README.md
       - Architecture: Architecture.md
       - Features: Features.md
+      - Tech Stack: TechStack.md
   - AI & Agents:
-      - Agent System: AGENTS.md
+      - Agent System: ../AGENTS.md
+      - AI Architecture: ../AI.md
       - Chatbot Pipeline: AI_Instructions.md
-      - Capabilities: SKILL.md
+      - Capabilities: ../SKILL.md
       - Tools & Intents: Agent.md
       - Offline Architecture: Offline_Architecture.md
-  - Engineering:
-      - Tech Stack: TechStack.md
-      - Security: Security.md
-      - Environment: Environment.md
-  - API Reference:
-      - Overview: API.md
-      - Database Schema: Database.md
+      - RAG System: ../RAG.md
+      - Memory System: ../MEMORY.md
+  - API & Developer:
+      - API Overview: API.md
+      - SDK Guide: ../SDK_GUIDE.md
+      - Integration Guide: INTEGRATION_GUIDE.md
+      - Webhooks: WEBHOOKS.md
+      - Error Codes: ../ERROR_CODES.md
+      - Error Code Reference: ERROR_CODE_REFERENCE.md
+      - Plugin System: PLUGIN_SYSTEM.md
+      - Third-Party Integrations: THIRD_PARTY_INTEGRATIONS.md
+      - Internationalization: INTERNATIONALIZATION.md
       - Backend OpenAPI: api/backend.md
       - Chatbot OpenAPI: api/chatbot.md
+  - Database & Schema:
+      - Database Schema: Database.md
+      - Migration Guide: MIGRATION_GUIDE.md
+      - Upgrade Guide: UPGRADE_GUIDE.md
+  - Security & Compliance:
+      - Security: Security.md
+      - Authentication: AUTHENTICATION.md
+      - Authorization: AUTHORIZATION.md
+      - Privacy: ../PRIVACY.md
+      - Terms of Service: ../SECURITY.md
+      - Code of Conduct: ../CODE_OF_CONDUCT.md
+      - Security Policy: ../SECURITY.md
+  - Operations:
+      - Deployment: Deployment.md
+      - Advanced Setup: ADVANCED_SETUP.md
+      - Deployment Strategies: DEPLOYMENT_STRATEGIES.md
+      - Scaling Guide: SCALING_GUIDE.md
+      - Docker Compose Guide: DOCKER_COMPOSE_GUIDE.md
+      - Monitoring Setup: MONITORING_SETUP.md
+      - Telemetry: TELEMETRY.md
+      - Performance Benchmarks: PERFORMANCE_BENCHMARKS.md
+      - Data Sources: DataSources.md
+      - Dataset Placement: DATASET_PLACEMENT.md
   - Runbooks:
       - All LLMs Down: runbooks/all-llms-down.md
       - Database Migration Rollback: runbooks/db-migration-rollback.md
@@ -156,15 +189,31 @@ nav:
       - High Error Rate: runbooks/high-error-rate.md
       - OOM Kill Response: runbooks/oom-kill-response.md
       - Smoke Tests: runbooks/smoke-tests.md
+      - Disaster Recovery: runbooks/disaster-recovery.md
+  - Development:
+      - Contributors Guide: CONTRIBUTORS_GUIDE.md
+      - Developer Experience: DEVELOPER_EXPERIENCE.md
+      - Best Practices: BEST_PRACTICES.md
+      - Coding Standards: CODING_STANDARDS.md
+      - Style Guide: ../STYLE_GUIDE.md
+      - Code Review Guide: CODE_REVIEW_GUIDE.md
+      - Testing Policy: TESTING_POLICY.md
+      - Accessibility: ACCESSIBILITY.md
   - Design & UX:
       - Design System: DESIGN.md
       - UI/UX Specs: UIUX.md
-  - Operations:
-      - Deployment: Deployment.md
-      - Data Sources: DataSources.md
-      - Dataset Placement: DATASET_PLACEMENT.md
-      - Roadmap: Roadmap.md
+  - Community & Governance:
+      - Community Guide: COMMUNITY.md
       - Contributing: Contributing.md
+      - Governance: ../GOVERNANCE.md
+      - Maintainers: ../MAINTAINERS.md
+      - Roadmap: Roadmap.md
+      - FAQ: ../FAQ.md
+      - Troubleshooting: ../TROUBLESHOOTING.md
+      - Adopters: ../ADOPTERS.md
+      - Versioning: ../VERSIONING.md
+      - Release Process: RELEASE_PROCESS.md
       - Resource Checklist: Complete_Project_Resource_Checklist.md
-      - Changelog: CHANGELOG.md
+      - Changelog: ../CHANGELOG.md
+      - New Contributor Guide: NEW_CONTRIBUTOR_GUIDE.md
   - Glossary: glossary.md

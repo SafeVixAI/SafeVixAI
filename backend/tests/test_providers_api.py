@@ -159,15 +159,26 @@ def _route_paths(router):
 
     FastAPI v2.3+ wraps included sub-routers in ``_IncludedRouter`` objects
     that don't have a ``path`` attribute themselves; their routes are nested
-    in a ``.routes`` attribute.  This helper recurses into those wrappers so
-    callers can assert routes are registered regardless of FastAPI version.
+    under a ``.router`` attribute.  This helper recurses into those wrappers
+    so callers can assert routes are registered regardless of FastAPI version.
     """
     paths: list[str] = []
-    for r in router.routes if hasattr(router, "routes") else router:
-        if hasattr(r, "path"):
-            paths.append(r.path)
+    # _IncludedRouter objects have .router (the actual APIRouter) not .routes
+    items = getattr(router, "routes", None) or getattr(router, "router", None)
+    if items is None:
+        return paths
+    if not isinstance(items, (list, tuple)):
+        items = items.routes if hasattr(items, "routes") else []
+    for r in items:
+        if hasattr(r, "path") and isinstance(r.path, str):
+            # APIRoute or similar leaf route — normalise leading slash
+            norm = r.path if r.path.startswith("/") else f"/{r.path}"
+            paths.append(norm)
+        # Recurse into sub-routers (both _IncludedRouter and APIRouter)
         if hasattr(r, "routes"):
             paths.extend(_route_paths(r))
+        if hasattr(r, "router") and hasattr(r.router, "routes"):
+            paths.extend(_route_paths(r.router))
     return paths
 
 

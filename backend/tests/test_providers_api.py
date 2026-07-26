@@ -207,13 +207,12 @@ async def test_test_connection_routes_have_sync_attr(monkeypatch):
 
     # Use app.test_client or direct route access?
     # Instead, verify the route is registered
-    # In FastAPI 0.140.0, include_router wraps sub-routers in _IncludedRouter.
-    # Quick inline check: collect paths from _IncludedRouter wrappers.
+    # FastAPI 0.140.0 include_router wraps sub-routers in _IncludedRouter;
+    # test provider route existence directly from the provider router.
     from api.v1.providers import router as _providers_router
-    _found = {"/api/v1/providers" + (getattr(sr, "path", "") or "")
-              for sr in _providers_router.routes if hasattr(sr, "path")}
-    assert "/api/v1/providers/test" in _found, f"providers routes: {_found}"
-    assert "/api/v1/providers/sync" in _found
+    _rpaths = {getattr(sr, "path", "") for sr in _providers_router.routes if hasattr(sr, "path")}
+    assert "/api/v1/providers/test" in _rpaths, f"provider routes: {_rpaths}"
+    assert "/api/v1/providers/sync" in _rpaths
 
 
 async def test_sync_route_is_registered(monkeypatch):
@@ -222,13 +221,10 @@ async def test_sync_route_is_registered(monkeypatch):
     monkeypatch.setenv("ENVIRONMENT", "test")
     monkeypatch.setenv("ADMIN_SECRET", "test-admin-secret-2026")
 
-    from core.config import get_settings
-    get_settings.cache_clear()
     from api.v1.providers import router as _providers_router
-    _found = {"/api/v1/providers" + (getattr(sr, "path", "") or "")
-              for sr in _providers_router.routes if hasattr(sr, "path")}
-    assert "/api/v1/providers/sync" in _found
-    assert "/api/v1/providers/test" in _found
+    _rpaths = {getattr(sr, "path", "") for sr in _providers_router.routes if hasattr(sr, "path")}
+    assert "/api/v1/providers/sync" in _rpaths
+    assert "/api/v1/providers/test" in _rpaths
 
 
 # ═══════════════ CRUD Tests (with mocked DB) ═══════════════
@@ -242,13 +238,13 @@ def _make_app(mock_session, monkeypatch=None):
     """
     if monkeypatch:
         monkeypatch.setenv("REDIS_URL", "")
-        monkeypatch.setenv("DATABASE_URL", "sqlite+aiosqlite:///./_test_make_app.db")
+        monkeypatch.setenv("DATABASE_URL", "postgresql+asyncpg://u:p@localhost:5432/db_does_not_exist")
         monkeypatch.setenv("ENVIRONMENT", "test")
         monkeypatch.setenv("ADMIN_SECRET", "test-admin-secret-2026")
     else:
         import os
         os.environ["REDIS_URL"] = ""
-        os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///./_test_make_app.db"
+        os.environ["DATABASE_URL"] = "postgresql+asyncpg://u:p@localhost:5432/db_does_not_exist"
         os.environ["ENVIRONMENT"] = "test"
         os.environ["ADMIN_SECRET"] = "test-admin-secret-2026"
 

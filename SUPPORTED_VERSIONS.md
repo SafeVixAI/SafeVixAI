@@ -1,35 +1,36 @@
 # Supported Versions
 
-## Current Release
+> **Last updated:** 2026-07-26
 
-| Version | Status | Security Fixes | Bug Fixes | EOL |
-|---------|--------|---------------|-----------|-----|
-| 1.0.x | Active | ✅ | ✅ | TBD |
+| Version | Status | Security Patches | Bug Fixes | Features |
+|---------|--------|-----------------|-----------|----------|
+| 1.0.x | ✅ Current (Full Support) | ✅ | ✅ | ✅ |
+| < 1.0 | ❌ End of Life | ❌ | ❌ | ❌ |
 
-## Older Versions
-
-| Version | Status | Security Fixes | Bug Fixes | EOL |
-|---------|--------|---------------|-----------|-----|
-| < 1.0 | Unsupported | ❌ | ❌ | — |
+---
 
 ## Support Policy
 
-- **Active**: Receives security patches and bug fixes
-- **Maintenance**: Receives only security patches
-- **Unsupported**: No updates of any kind
+- **Current releases** receive security patches, bug fixes, and feature backports.
+- **EOL releases** receive no updates. Users must upgrade to a supported version.
+- Security patches are backported to the previous MAJOR version for 12 months after a new MAJOR release.
+- Bug fixes are only applied to the current MINOR release.
+
+---
 
 ## Upgrade Path
 
-1. Review [CHANGELOG.md](CHANGELOG.md) for breaking changes
-2. Check [RELEASE.md](RELEASE.md) for migration guides
-3. For database schema changes: `alembic upgrade head` from `backend/`
-4. Test the upgrade in staging before production
-5. Rollback via `alembic downgrade -1` if issues arise
+| From | To | Recommended Timeline |
+|------|----|--------------------|
+| 0.x | 1.0.x | Immediately |
+| 1.0.x | 1.x.x | Within 90 days of release |
 
-## Version Lifecycle
+See [UPGRADE_GUIDE.md](./docs/UPGRADE_GUIDE.md) for detailed upgrade instructions.
 
-| Version | Released | EOL Target |
-|---------|----------|------------|
-| 1.0.0 | 2026-07-20 | 2027-01-20 (6 months after next major) |
+---
 
-EOL dates are extended by 6 months after each subsequent major release to ensure adequate migration time.
+## End of Life Timeline
+
+| Version | Release Date | EOL Date |
+|---------|-------------|----------|
+| 1.0.0 | 2026-07-20 | TBD |

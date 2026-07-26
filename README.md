@@ -11,22 +11,26 @@
   <a href="ROADMAP.md"><img src="https://img.shields.io/badge/roadmap-available-brightgreen" alt="Roadmap" /></a>
   <a href="https://scorecard.dev/viewer/?uri=github.com/SafeVixAI/SafeVixAI"><img src="https://img.shields.io/badge/Scorecard-Passing-brightgreen" alt="OpenSSF Scorecard" /></a>
   <a href="https://github.com/SafeVixAI/SafeVixAI/actions/workflows/codeql.yml"><img src="https://img.shields.io/badge/CodeQL-Analysis-blue" alt="CodeQL" /></a>
+  <a href="https://safevixai.github.io/SafeVixAI/"><img src="https://img.shields.io/badge/docs-mkdocs-teal" alt="Docs" /></a>
 </p>
 
 <p align="center">
   <strong>AI-powered road safety platform.</strong><br/>
   Emergency response · Traffic legal assistance · Road infrastructure reporting.<br/>
-  Offline-first PWA with enterprise-grade security and monitoring.
+  Offline-first PWA with enterprise-grade security, resilience, and monitoring.<br/>
+  Built for the IIT Madras Road Safety Hackathon 2026.
 </p>
 
 | Metric | Value |
 |--------|-------|
-| Unit Tests | **7,160+ passing** — Frontend 2,956 / Backend 2,750 / Chatbot 1,613 |
+| Unit Tests | **7,687+ passing** — Frontend 2,956 / Backend 2,912 / Chatbot 1,819 |
 | E2E Tests | 55/55 passing |
-| LLM Providers | 10-provider fallback chain |
+| LLM Providers | 10-provider fallback chain (+ Sarvam AI for Indian languages) |
 | Services | 3 (frontend :3000, backend :8000, chatbot :8010) |
 | Coverage | Backend 100% / Frontend 86% lines / Chatbot 97%+ |
-| CI Workflows | 40 (security, load, chaos, E2E, migration, benchmark) |
+| CI Workflows | 41 (security, load, chaos, E2E, migration, benchmark) |
+| Lint Errors | 0 across all 3 services |
+| License | MIT — free for all use |
 
 ---
 
@@ -51,42 +55,47 @@ SafeVixAI is a three-service monorepo delivering real-time emergency response, A
 - Python 3.11+
 - Node.js 20+
 - Git
+- PostgreSQL 16 with PostGIS (optional — Supabase free tier works)
+- Redis 7 (optional — in-memory fallback)
 
-### Backend
+### 1. Clone & Setup Backend
 ```bash
-cd backend
+git clone https://github.com/SafeVixAI/SafeVixAI.git
+cd SafeVixAI/backend
 python -m venv .venv
-source .venv/bin/activate          # Linux/Mac
-# .venv\Scripts\activate           # Windows
+# Linux/Mac: source .venv/bin/activate
+# Windows: .venv\Scripts\activate
 pip install -r requirements.txt
-cp .env.example .env               # Configure your environment
+cp .env.example .env
 uvicorn main:app --reload --port 8000
 ```
+Verify: `curl http://localhost:8000/health`
 
-Verify: `GET http://localhost:8000/health`
-
-### Chatbot Service
+### 2. Setup Chatbot Service
 ```bash
-cd chatbot_service
+cd ../chatbot_service
 python -m venv .venv
-source .venv/bin/activate          # Linux/Mac
-# .venv\Scripts\activate           # Windows
+source .venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env               # Configure your LLM provider keys
+cp .env.example .env   # Add your LLM provider API keys
 uvicorn main:app --reload --port 8010
 ```
+Verify: `curl http://localhost:8010/health`
 
-Verify: `GET http://localhost:8010/health`
-
-### Frontend
+### 3. Setup Frontend
 ```bash
-cd frontend
-npm install
-cp .env.local.example .env.local   # Configure your API endpoints
+cd ../frontend
+npm ci
+cp .env.local.example .env.local   # Set API URLs
 npm run dev
 ```
+Open: `http://localhost:3000`
 
-Verify: `http://localhost:3000`
+### Docker (Full Stack)
+```bash
+docker compose up --build   # Starts all 5 services
+# postgres:5432  redis:6379  backend:8000  chatbot:8010  frontend:3000
+```
 
 ---
 
@@ -106,47 +115,53 @@ Verify: `http://localhost:3000`
 │  DuckDB (challan)      │  │  13 agent tools                │
 │  Overpass/Nominatim    │  │  Redis conversation memory     │
 │  WebSocket /tracking   │  │  Prompt injection defense      │
+│  CQRS + Distributed    │  │  Speech translation            │
+│  Locks + Idempotency   │  │  (14 Indian languages)         │
 └────────────────────────┘  └────────────────────────────────┘
 ```
 
 ---
 
-## Enterprise Features
+## Key Differentiators
 
-| Layer | Capability | Implementation |
-|-------|-----------|----------------|
-| **Resilience** | 9-provider LLM fallback chain | Sequential fallback with timeout, TemplateProvider as last resort |
-| **Resilience** | Circuit breaker | 3-failure threshold, 30s half-open on all 8 external API calls |
-| **Resilience** | Cache stampede protection | SET NX EX mutex + stale-while-revalidate |
-| **Resilience** | Distributed locking | Redlock with Redis + in-memory fallback |
-| **Consistency** | CQRS bus | Command/Query buses with middleware for write-heavy operations |
-| **Consistency** | Idempotency keys | SHA-256 hash + distributed lock for critical POST endpoints |
-| **Security** | JWT authentication | RS256 + HS256, JWKS atomic key fetching with stampede protection |
-| **Security** | Rate limiting | Token bucket per endpoint, Redis-backed |
-| **Security** | CORS guard | Fail-fast RuntimeError if wildcard `*` in production |
-| **Security** | Security headers | CSP, HSTS preload, XFO, COOP, CORP, COEP |
-| **Observability** | Structured logging | JSON format with request_id, method, path, duration_ms |
-| **Observability** | Prometheus metrics | Custom metrics per endpoint, Redis and Postgres exporters |
-| **Observability** | Grafana dashboards | Provisioned dashboard with resource, latency, error, saturation views |
-| **Observability** | Email alerting | SMTP with 5-min cooldown for all-provider failure, DB errors |
-| **Supply Chain** | SLSA Level 3 | Build provenance attestation per commit |
-| **Supply Chain** | Container signing | Cosign keyless signing via GitHub OIDC |
-| **Supply Chain** | SBOM | CycloneDX + SPDX generated every build |
-| **Supply Chain** | Secret scanning | Gitleaks pre-commit with 18 custom provider patterns |
+### Enterprise-Grade Resilience
+- **10-provider LLM fallback chain**: Groq → Cerebras → Gemini → GitHub Models → NVIDIA NIM → OpenRouter → Mistral → Together → Template (deterministic fallback) + Sarvam AI for Indian languages
+- **Circuit breakers** on all 8 external API calls (3-failure threshold, 30s half-open)
+- **Cache stampede protection** (SET NX EX mutex + stale-while-revalidate)
+- **Redlock distributed locking** with in-memory fallback
+- **CQRS event bus** for write-heavy operations
+- **Idempotency keys** for critical POST endpoints
 
----
+### Offline-First Architecture
+- **PWA Service Worker** caches core assets for offline use
+- **DuckDB-Wasm** runs SQL-based challan calculation entirely in-browser
+- **IndexedDB** queues SOS alerts and road reports, auto-flushed on reconnect
+- **WebLLM Phi-3 Mini** (2.2GB) downloadable for offline AI assistance
+- **Offline-optimized maps** with pre-loaded GeoJSON for 25 Indian cities
 
-## Security Hardening
+### Security by Design
+- **Blood group and emergency contacts** stored only in IndexedDB — never on server (privacy by architecture)
+- **JWT RS256** authentication with JWKS atomic key fetching and rotation
+- **CSRF tokens** on all state-changing requests
+- **Content-Security-Policy**, HSTS, XFO, COOP, CORP, COEP headers
+- **Prompt injection defense** — 12-pattern SafetyChecker on all LLM inputs
+- **Host header validation**, rate limiting, CORS fail-fast in production
+- **Gitleaks** pre-commit hook scanning for 18 custom provider patterns
 
-| Layer | Protection | Location |
-|-------|-----------|----------|
-| CORS | Fail-fast `RuntimeError` if wildcard `*` in production | `backend/core/config.py` |
-| Auth | JWT Bearer tokens + service-to-service API keys | `backend/api/v1/auth.py` |
-| LLM Safety | 12-pattern prompt injection guard + SafetyChecker | `chatbot_service/agent/safety_checker.py` |
-| LLM Timeout | `asyncio.wait_for()` on every provider call | `chatbot_service/providers/router.py` |
-| Error Boundary | Global React error boundary | `frontend/app/error.tsx` |
-| Env Validation | Throws at import if `NEXT_PUBLIC_*` URL missing | `frontend/lib/public-env.ts` |
-| Host Validation | ALLOWED_HOSTS middleware | `backend/middleware/allowed_hosts.py` |
+### Observability
+- **Structured JSON logging** with request_id, method, path, duration_ms
+- **Prometheus metrics** per endpoint + Redis and Postgres exporters
+- **Grafana dashboards** provisioned with resource, latency, error, saturation views
+- **Email alerting** (SMTP with 5-min cooldown) for critical failures
+- **Sentry** error tracking for frontend
+
+### Supply Chain Security
+- **SLSA Level 3** build provenance attestation per commit
+- **Cosign** keyless container signing via GitHub OIDC
+- **SBOM** generation (CycloneDX + SPDX) every build
+- **Dependabot** weekly vulnerability scanning (pip ×2 + npm + actions)
+- **OpenSSF Scorecard** passing
+- **CodeQL** analysis on every push
 
 ---
 
@@ -154,45 +169,110 @@ Verify: `http://localhost:3000`
 
 ```
 SafeVixAI/
-├── backend/              FastAPI Python 3.11 — PostgreSQL/PostGIS, Redis, DuckDB
-│   ├── api/v1/           25 route modules
-│   ├── core/             Config, security, caching, CQRS, Redlock, JWKS
-│   ├── services/         16 domain services + 10 civic_intel modules
-│   ├── models/           20 SQLAlchemy ORM models + Pydantic schemas
-│   └── migrations/       Alembic — 11 migration files
-├── chatbot_service/      FastAPI — Agentic RAG, 10 LLM providers, ChromaDB
-│   ├── agent/            ChatEngine, IntentDetector, SafetyChecker
-│   ├── providers/        LLM routing, lang_detection, provider_registry
-│   ├── rag/              ChromaDB vector store, retriever, embeddings
-│   └── tools/            13 agent tools (SOS, Challan, Legal, FirstAid, etc.)
-├── frontend/             Next.js 15 + React 19 + TypeScript PWA
-│   ├── app/              28 routes with error boundaries + loading states
-│   ├── components/       91 components across 13 domains
-│   └── lib/              28 modules — API client, state, offline AI, tracking
-├── docs/                 Architecture, API, database, deployment, ADRs, runbooks
-├── monitoring/           Prometheus config + Grafana dashboards + alert rules
-├── k8s/                  Kubernetes manifests (kustomize)
-├── terraform/            AWS infrastructure (VPC, ECS, RDS, ElastiCache)
-└── .github/              40+ CI/CD workflows
+├── backend/                FastAPI Python 3.11 — PostgreSQL/PostGIS, Redis, DuckDB
+│   ├── api/v1/             25 route modules (28 files)
+│   ├── core/               Config, security, caching, CQRS, Redlock, JWKS, idempotency
+│   ├── services/           16 domain services + 10 civic_intel modules
+│   ├── models/             20 SQLAlchemy ORM models + Pydantic schemas + value objects
+│   └── migrations/         Alembic — 11 migration files
+├── chatbot_service/        FastAPI — Agentic RAG, 10 LLM providers, ChromaDB
+│   ├── agent/              ChatEngine, IntentDetector, SafetyChecker, ContextAssembler
+│   ├── providers/          LLM routing, lang_detection, provider_registry (9 providers)
+│   ├── rag/                ChromaDB vector store, retriever, LocalHashEmbeddingFunction
+│   └── tools/              13 agent tools (SOS, Challan, Legal, FirstAid, Weather, etc.)
+├── frontend/               Next.js 15 + React 19 + TypeScript PWA
+│   ├── app/                28 routes with error boundaries + loading states
+│   ├── components/         91 components across 13 domains (maps, chat, sos, etc.)
+│   ├── lib/                28 modules — API client, Zustand state, offline AI, tracking
+│   └── public/             manifest.json, icons (8 PWA sizes), offline data
+├── docs/                   Full documentation site (MkDocs Material)
+│   ├── adr/                12 Architecture Decision Records
+│   ├── runbooks/           12+ incident response runbooks
+│   ├── observability/      Monitoring configuration guides
+│   └── wiki/               Auto-generated API documentation
+├── monitoring/             Prometheus config + Grafana dashboards + alert rules
+├── k8s/                    Kubernetes manifests (kustomize) + namespace + ingress
+├── terraform/              AWS infrastructure (VPC, ECS, RDS, ElastiCache)
+├── deploy/                 Deployment scripts and configurations
+├── e2e/                    Playwright E2E tests (55 scenarios)
+├── load-testing/           k6 load test scripts
+├── scripts/                Data pipeline (DB seeders + standalone data fetchers)
+└── .github/                41 CI/CD workflows
 ```
 
 ---
 
 ## Documentation
 
-| Document | Contents |
-|----------|----------|
-| [docs/Agent.md](docs/Agent.md) | Complete app overview for new developers |
-| [docs/Architecture.md](docs/Architecture.md) | System architecture and data flows |
-| [docs/API.md](docs/API.md) | All endpoints with request/response examples |
-| [docs/Database.md](docs/Database.md) | Schema definitions and migration history |
-| [docs/Deployment.md](docs/Deployment.md) | Deployment guides for Vercel, Render, Docker |
-| [docs/adr/](docs/adr/) | 12 Architecture Decision Records |
-| [docs/runbooks/](docs/runbooks/) | 12+ incident response runbooks |
-| [CHANGELOG.md](CHANGELOG.md) | Release history |
-| [RELEASE.md](RELEASE.md) | Release process, versioning, rollback |
+### Governance & Community
+| Document | Description |
+|----------|-------------|
+| [CONTRIBUTING.md](CONTRIBUTING.md) | How to contribute — workflow, coding standards, PR process |
+| [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) | Contributor Covenant v2.1 |
+| [GOVERNANCE.md](GOVERNANCE.md) | Project governance, decision-making, release process |
+| [MAINTAINERS.md](MAINTAINERS.md) | Current maintainers and contributor ladder |
+| [SECURITY.md](SECURITY.md) | Vulnerability reporting, disclosure policy, security features |
+| [SUPPORT.md](SUPPORT.md) | Support channels and response times |
+| [ADOPTERS.md](ADOPTERS.md) | Organizations using SafeVixAI in production |
 | [FAQ.md](FAQ.md) | Frequently asked questions |
-| [TROUBLESHOOTING.md](TROUBLESHOOTING.md) | Common issues and resolutions |
+
+### Technical Reference
+| Document | Description |
+|----------|-------------|
+| [docs/Architecture.md](docs/Architecture.md) | System architecture, data flows, service design |
+| [docs/API.md](docs/API.md) | Complete API reference with request/response examples |
+| [docs/Database.md](docs/Database.md) | Database schema, PostGIS design, migration history |
+| [docs/Deployment.md](docs/Deployment.md) | Deploy to Vercel, Render, Docker, Kubernetes |
+| [docs/SETUP.md](docs/SETUP.md) | Detailed local setup guide |
+| [docs/TechStack.md](docs/TechStack.md) | Technology choices and rationale |
+| [docs/AI.md](docs/AI.md) | Chatbot architecture, 10-provider chain, safety system |
+| [docs/MEMORY.md](docs/MEMORY.md) | Conversation memory architecture (IndexedDB, Zustand, Redis) |
+| [docs/RAG.md](docs/RAG.md) | ChromaDB with LocalHashEmbeddingFunction |
+| [docs/SDK_GUIDE.md](docs/SDK_GUIDE.md) | API integration, SDK usage, auth, rate limits |
+| [docs/ERROR_CODES.md](docs/ERROR_CODES.md) | Complete error code reference |
+| [docs/PRIVACY.md](docs/PRIVACY.md) | GDPR/DPDP compliance, data collection, privacy architecture |
+
+### Operations & Quality
+| Document | Description |
+|----------|-------------|
+| [docs/STARTER_GUIDE.md](docs/STARTER_GUIDE.md) | Getting started for absolute beginners |
+| [docs/ADVANCED_SETUP.md](docs/ADVANCED_SETUP.md) | Production deployment, HA, multi-region, SSL, CDN |
+| [docs/SCALING_GUIDE.md](docs/SCALING_GUIDE.md) | Horizontal scaling, caching, CQRS, replication |
+| [docs/MONITORING_SETUP.md](docs/MONITORING_SETUP.md) | Prometheus, Grafana, Loki, alerting setup |
+| [docs/BEST_PRACTICES.md](docs/BEST_PRACTICES.md) | API design, database, security, testing best practices |
+| [docs/DEPLOYMENT_STRATEGIES.md](docs/DEPLOYMENT_STRATEGIES.md) | Blue-green, canary, rolling updates |
+| [docs/PERFORMANCE_BENCHMARKS.md](docs/PERFORMANCE_BENCHMARKS.md) | Latency, throughput, and resource benchmarks |
+| [docs/MIGRATION_GUIDE.md](docs/MIGRATION_GUIDE.md) | Version migration paths and procedures |
+| [docs/UPGRADE_GUIDE.md](docs/UPGRADE_GUIDE.md) | Step-by-step upgrade instructions |
+| [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) | Common issues and resolutions (not created yet) |
+| [docs/TESTING_POLICY.md](docs/TESTING_POLICY.md) | Testing standards, coverage targets, CI integration |
+| [docs/ERROR_CODE_REFERENCE.md](docs/ERROR_CODE_REFERENCE.md) | Complete error codes organized by domain |
+
+### Development
+| Document | Description |
+|----------|-------------|
+| [STYLE_GUIDE.md](STYLE_GUIDE.md) | Coding standards for Python, TypeScript, testing |
+| [VERSIONING.md](VERSIONING.md) | Semantic versioning policy and lifecycle |
+| [docs/INTEGRATION_GUIDE.md](docs/INTEGRATION_GUIDE.md) | Third-party integration, auth, SDK, webhooks |
+| [docs/PLUGIN_SYSTEM.md](docs/PLUGIN_SYSTEM.md) | Plugin architecture and development guide |
+| [docs/WEBHOOKS.md](docs/WEBHOOKS.md) | Webhook events, payloads, security |
+| [docs/INTERNATIONALIZATION.md](docs/INTERNATIONALIZATION.md) | i18n guide for 14 Indian languages |
+| [docs/CONTRIBUTORS_GUIDE.md](docs/CONTRIBUTORS_GUIDE.md) | Detailed contributor workflow |
+| [docs/CODE_REVIEW_GUIDE.md](docs/CODE_REVIEW_GUIDE.md) | Code review process and checklist |
+| [docs/DOCKER_COMPOSE_GUIDE.md](docs/DOCKER_COMPOSE_GUIDE.md) | Docker Compose for development and production |
+
+### Runbooks
+| Document | Description |
+|----------|-------------|
+| [docs/runbooks/all-llms-down.md](docs/runbooks/all-llms-down.md) | All LLM providers failed |
+| [docs/runbooks/db-down.md](docs/runbooks/db-down.md) | Database outage |
+| [docs/runbooks/redis-down.md](docs/runbooks/redis-down.md) | Redis cache outage |
+| [docs/runbooks/service-restart.md](docs/runbooks/service-restart.md) | Service restart procedures |
+| [docs/runbooks/high-error-rate.md](docs/runbooks/high-error-rate.md) | Elevated error rate response |
+| [docs/runbooks/oom-kill-response.md](docs/runbooks/oom-kill-response.md) | Out-of-memory kill handling |
+| [docs/runbooks/db-migration-rollback.md](docs/runbooks/db-migration-rollback.md) | Database migration rollback |
+| [docs/runbooks/deployment-rollback.md](docs/runbooks/deployment-rollback.md) | Deployment rollback procedures |
+| [docs/runbooks/api-key-rotation.md](docs/runbooks/api-key-rotation.md) | API key rotation |
 
 ---
 
@@ -216,11 +296,11 @@ Research notebooks (Colab-ready, free T4 GPU):
 | Layer | Technologies |
 |-------|-------------|
 | Backend | FastAPI, SQLAlchemy (async), PostGIS, Redis (hiredis), DuckDB, Overpass/Nominatim |
-| Chatbot | FastAPI, ChromaDB, LangChain, 10 LLM providers (Groq, Gemini, Sarvam AI, Cerebras, etc.) |
+| Chatbot | FastAPI, ChromaDB, 10 LLM providers (Groq, Gemini, Sarvam AI, Cerebras, etc.) |
 | Frontend | Next.js 15, React 19, TypeScript 5, Tailwind CSS 3, MapLibre GL, WebLLM, DuckDB-Wasm |
 | Infrastructure | Docker Compose, Kubernetes (kustomize), Terraform (AWS), Vercel, Render |
 | Monitoring | Prometheus, Grafana, Sentry, structured JSON logging |
-| CI/CD | GitHub Actions (40+ workflows) |
+| CI/CD | GitHub Actions (41 workflows) |
 
 ---
 
@@ -228,17 +308,29 @@ Research notebooks (Colab-ready, free T4 GPU):
 
 | Layer | Framework | Tests | Coverage |
 |-------|-----------|-------|----------|
-| Backend | pytest + hypothesis + testcontainers | 2,750 | 100% lines, 100% branches |
-| Chatbot | pytest + pytest-httpx + ChromaDB integration | 1,613 | 97%+ lines |
+| Backend | pytest + hypothesis + testcontainers | 2,912 | 100% lines, 100% branches |
+| Chatbot | pytest + pytest-httpx + ChromaDB integration | 1,819 | 97%+ lines |
 | Frontend | Jest + React Testing Library + jest-axe | 2,956 | 86% lines, 72% branches |
 | E2E | Playwright | 55 | — |
 | Mutation | mutmut (backend) | — | CI (informational) |
+
+**Run locally:**
+```bash
+# Backend
+cd backend && pytest tests/ -v --cov
+
+# Chatbot
+cd chatbot_service && pytest tests/ -v --cov
+
+# Frontend
+cd frontend && npm test && npm run lint && npx tsc --noEmit
+```
 
 ---
 
 ## Contributing
 
-We welcome contributions of all sizes. See [CONTRIBUTING.md](CONTRIBUTING.md) to get started.
+We welcome contributions of all sizes.
 
 - Report bugs: [GitHub Issues](https://github.com/SafeVixAI/SafeVixAI/issues)
 - Feature requests: [Feature Request Template](.github/ISSUE_TEMPLATE/feature_request.yml)
@@ -248,6 +340,12 @@ We welcome contributions of all sizes. See [CONTRIBUTING.md](CONTRIBUTING.md) to
 - Support: [SUPPORT.md](SUPPORT.md)
 - All contributions under [MIT License](LICENSE)
 
+---
+
 ## License
 
 MIT License — see [LICENSE](LICENSE) for details.
+
+<p align="center">
+  <sub>Built with ❤️ for the IIT Madras Road Safety Hackathon 2026 · Centre of Excellence for Road Safety (CoERS)</sub>
+</p>

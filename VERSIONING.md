@@ -1,47 +1,107 @@
 # Versioning Policy
 
-SafeVixAI follows [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.html).
+> **Version:** 1.0  
+> **Last updated:** 2026-07-26
 
-## Version Format
+---
 
-Given a version number `MAJOR.MINOR.PATCH`:
+## Semantic Versioning
 
-| Component | Description |
-|-----------|-------------|
-| **MAJOR** | Breaking API or behavior changes |
-| **MINOR** | New features, backward-compatible |
-| **PATCH** | Bug fixes, security patches, backward-compatible |
+SafeVixAI follows [Semantic Versioning 2.0.0](https://semver.org/):
 
-Pre-release versions use suffix: `1.0.0-alpha.1`, `2.0.0-rc.3`
-
-## Version Source of Truth
-
-The canonical version is stored in the `VERSION` file at the repository root.
-
-```bash
-cat VERSION
-# → 1.0.0
+```
+MAJOR.MINOR.PATCH
+  │      │      └── Backward-compatible bug fixes
+  │      └──────── Backward-compatible new features
+  └─────────────── Breaking changes
 ```
 
-All three services share the same version:
-- `backend/pyproject.toml` → `version = "1.0.0"`
-- `chatbot_service/pyproject.toml` → `version = "1.0.0"`
-- `frontend/package.json` → `"version": "1.0.0"`
+**Pre-release:** `MAJOR.MINOR.PATCH-alpha.N` (e.g., `1.0.0-alpha.1`)
 
-## Release Cadence
+---
 
-| Type | Frequency | Approvers |
-|------|-----------|-----------|
-| Patch | As needed | 1 Core Contributor |
-| Minor | Monthly | 2 Core Contributors |
-| Major | Quarterly | Project Lead + 2 Core Contributors |
-| Hotfix | Emergency | 1 Core Contributor |
+## What Constitutes Each Bump
 
-## Backward Compatibility
+### MAJOR (e.g., 1.0.0 → 2.0.0)
+- Breaking API changes (endpoint removal, request/response schema changes)
+- Database schema changes requiring data migration
+- Removal of deprecated functionality
+- Major architectural changes (service decomposition, protocol changes)
+- Minimum dependency version bumps that require user action
 
-- MINOR releases guarantee API backward compatibility
-- PATCH releases guarantee API + data backward compatibility
-- MAJOR releases may include breaking changes with migration guide
-- Database schema changes are backward-compatible within MINOR version
+### MINOR (e.g., 1.0.0 → 1.1.0)
+- New API endpoints (non-breaking additions)
+- New features that don't break existing functionality
+- Deprecation of existing features (with migration path)
+- Significant performance improvements
+- New LLM provider support
+- New language support
 
-See [RELEASE.md](RELEASE.md) for the full release workflow.
+### PATCH (e.g., 1.0.0 → 1.0.1)
+- Bug fixes
+- Security patches
+- Performance optimizations
+- Documentation updates
+- Dependency updates (non-breaking)
+- Test additions and improvements
+- CI/CD improvements
+
+---
+
+## Pre-release Tags
+
+| Tag | Meaning | Stability |
+|-----|---------|-----------|
+| `-alpha.N` | Internal testing, unstable APIs | Unstable |
+| `-beta.N` | Feature complete, testing phase | Mostly stable |
+| `-rc.N` | Release candidate, final testing | Stable |
+
+---
+
+## Backward Compatibility Guarantees
+
+Within a MAJOR version:
+- **API**: All documented endpoints remain available. Request/response schemas may only add optional fields.
+- **Database**: No breaking schema changes without migration path.
+- **Configuration**: Environment variables and config files remain compatible.
+- **Database migrations**: All migrations are reversible.
+- **Data formats**: Export/import formats remain compatible.
+
+### Exceptions
+- **Security fixes**: May break compatibility if necessary to patch a vulnerability (documented in changelog).
+- **Internal APIs**: Modules and functions prefixed with `_` have no compatibility guarantee.
+- **Experimental features**: Features behind feature flags may change without notice.
+
+---
+
+## Deprecation Policy
+
+1. **Announcement**: Deprecated features are marked in the changelog with deprecation notice.
+2. **Grace period**: Features remain functional for at least one MINOR version after deprecation.
+3. **Removal**: Deprecated features are removed in the next MAJOR version.
+4. **Headers**: Deprecated API endpoints return a `DeprecationWarning` header.
+5. **Logging**: Server logs warn when deprecated features are used.
+
+---
+
+## Version Lifecycle
+
+| Stage | Description | Timeline |
+|-------|-------------|----------|
+| **Development** | Active development on `main` | Pre-release |
+| **Alpha** | Early preview, unstable APIs | Weeks |
+| **Beta** | Feature complete, testing | 2-4 weeks |
+| **Release Candidate** | Final testing before release | 1-2 weeks |
+| **Current** | Latest stable release | Until next MAJOR |
+| **LTS** | Long-term support (critical patches only) | 12 months |
+| **EOL** | No longer supported | After LTS expires |
+
+---
+
+## Version History
+
+| Version | Date | Status |
+|---------|------|--------|
+| 1.0.0 | 2026-07-20 | Current |
+| 1.0.0-alpha | 2026-06-30 | EOL |
+| 0.x | 2026-06 | EOL |

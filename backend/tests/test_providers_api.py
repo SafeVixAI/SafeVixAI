@@ -154,7 +154,23 @@ async def test_builtins_endpoint(monkeypatch):
         assert required in names
 
 
-@pytest.mark.skip(reason="FastAPI _IncludedRouter wraps sub-routes in v2.3+; this tests FastAPI internals, not business logic")
+def _route_paths(router):
+    """Recursively collect route path strings from a FastAPI app or router.
+
+    FastAPI v2.3+ wraps included sub-routers in ``_IncludedRouter`` objects
+    that don't have a ``path`` attribute themselves; their routes are nested
+    in a ``.routes`` attribute.  This helper recurses into those wrappers so
+    callers can assert routes are registered regardless of FastAPI version.
+    """
+    paths: list[str] = []
+    for r in router.routes if hasattr(router, "routes") else router:
+        if hasattr(r, "path"):
+            paths.append(r.path)
+        if hasattr(r, "routes"):
+            paths.extend(_route_paths(r))
+    return paths
+
+
 async def test_test_connection_routes_have_sync_attr(monkeypatch):
     """Verify the test connection route exists and returns proper schema."""
     monkeypatch.setenv("REDIS_URL", "")
@@ -181,12 +197,11 @@ async def test_test_connection_routes_have_sync_attr(monkeypatch):
 
     # Use app.test_client or direct route access?
     # Instead, verify the route is registered
-    routes = [r.path for r in app.routes if hasattr(r, "path")]
+    routes = _route_paths(app)
     assert "/api/v1/providers/test" in routes
     assert "/api/v1/providers/sync" in routes
 
 
-@pytest.mark.skip(reason="Same FastAPI _IncludedRouter issue as test_test_connection_routes_have_sync_attr")
 async def test_sync_route_is_registered(monkeypatch):
     """Verify the sync provider route exists."""
     monkeypatch.setenv("REDIS_URL", "")
@@ -208,7 +223,7 @@ async def test_sync_route_is_registered(monkeypatch):
 
     app.dependency_overrides[get_db] = override_db
 
-    routes = [r.path for r in app.routes if hasattr(r, "path")]
+    routes = _route_paths(app)
     assert "/api/v1/providers/sync" in routes
     assert "/api/v1/providers/test" in routes
 
@@ -254,7 +269,6 @@ def _make_app(mock_session, monkeypatch=None):
     return app
 
 
-@pytest.mark.skip(reason="user_provider_configs table not migrated in CI test DB")
 @pytest.mark.asyncio(loop_scope="module")
 async def test_create_provider_config_returns_201(monkeypatch, mock_db, sample_config):  # B1
     """POST /api/v1/providers with minimal fields returns 201."""
@@ -293,7 +307,6 @@ async def test_create_provider_config_returns_201(monkeypatch, mock_db, sample_c
     mock_db.commit.assert_awaited_once()
 
 
-@pytest.mark.skip(reason="user_provider_configs table not migrated in CI test DB")
 @pytest.mark.asyncio(loop_scope="module")
 async def test_update_provider_config_returns_updated(monkeypatch, mock_db, sample_config):  # B2
     """PUT /api/v1/providers/{id} updates a single field."""
@@ -316,7 +329,6 @@ async def test_update_provider_config_returns_updated(monkeypatch, mock_db, samp
 
 
 @pytest.mark.asyncio(loop_scope="module")
-@pytest.mark.skip(reason="user_provider_configs table not migrated in CI test DB")
 async def test_delete_provider_config_returns_204(monkeypatch, mock_db, sample_config):  # B3
     """DELETE /api/v1/providers/{id} returns 204."""
     mock_db.execute.return_value = MockResult(row=sample_config)
@@ -333,7 +345,6 @@ async def test_delete_provider_config_returns_204(monkeypatch, mock_db, sample_c
     mock_db.commit.assert_awaited_once()
 
 
-@pytest.mark.skip(reason="user_provider_configs table not migrated in CI test DB")
 @pytest.mark.asyncio(loop_scope="module")
 async def test_delete_non_existent_returns_404(monkeypatch, mock_db):  # B4
     """DELETE /api/v1/providers/{id} with non-existent ID returns 404."""
@@ -351,7 +362,6 @@ async def test_delete_non_existent_returns_404(monkeypatch, mock_db):  # B4
     assert "not found" in detail.get("detail", "").lower()
 
 
-@pytest.mark.skip(reason="user_provider_configs table not migrated in CI test DB")
 @pytest.mark.asyncio(loop_scope="module")
 async def test_update_non_existent_returns_404(monkeypatch, mock_db):  # B5
     """PUT /api/v1/providers/{id} with non-existent ID returns 404."""
@@ -370,7 +380,6 @@ async def test_update_non_existent_returns_404(monkeypatch, mock_db):  # B5
     assert resp.status_code == 404
 
 
-@pytest.mark.skip(reason="user_provider_configs table not migrated in CI test DB")
 @pytest.mark.asyncio(loop_scope="module")
 async def test_create_duplicate_provider_returns_409(monkeypatch, mock_db, sample_config):  # B6
     """POST /api/v1/providers with duplicate provider_name returns 409."""

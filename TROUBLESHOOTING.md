@@ -1,94 +1,380 @@
 # Troubleshooting Guide
 
-## Build Issues
+> **Version:** 1.0  
+> **Last updated:** 2026-07-26
 
-### Frontend build takes 10+ minutes
-**Cause**: `next.config.js` with `output: 'standalone'` triggers Next.js file tracer on all dependencies including three.js (~200MB).
-**Fix**: Ensure `STANDALONE=true` is only set in CI/Docker builds. For local dev, run `npm run build` without the env var.
+---
+
+## Installation
+
+### Backend Won't Start
+
+**Symptom:** `uvicorn main:app --reload` fails with module not found errors.
+
+**Causes:**
+1. Virtual environment not activated
+2. Dependencies not installed
+3. Python version < 3.11
+
+**Solutions:**
 ```bash
-# Fast local build (~2 min)
-npm run build
-
-# Docker/CI build (~10-15 min, but produces smaller image)
-STANDALONE=true npm run build
+cd backend
+python -m venv .venv
+.venv\Scripts\activate  # Windows
+source .venv/bin/activate  # Linux/Mac
+pip install -r requirements.txt
+uvicorn main:app --reload --port 8000
 ```
 
-### "Cannot find namespace 'React'" in `.next/types/`
-**Cause**: Pre-existing bug in Next.js 15 generated type declarations. The `LayoutProps` type references `React.ReactNode` without importing React.
-**Impact**: Type-check only — does not affect runtime or production builds.
-**Workaround**: Ignore the error — it's in generated code, not your source.
-**Fix**: Run `npx tsc --noEmit --skipLibCheck` for CI, or wait for Next.js 15.6+ patch.
+### Chatbot Service Won't Start
 
-## Test Issues
+**Symptom:** `uvicorn main:app --reload --port 8010` crashes on startup.
 
-### Backend tests fail locally
-**Cause**: Most tests require PostgreSQL + Redis running. 10 tests fail in isolation (state-dependent ordering).
-**Workaround**: Run tests against a running Docker Compose stack:
+**Causes:**
+1. PyTorch/torchaudio not installed properly
+2. Missing `.env` file
+3. ChromaDB persist directory permissions
+
+**Solutions:**
 ```bash
-docker compose up -d postgres redis
-cd backend && pytest tests/ -v
-```
-See `docs/runbooks/` for per-suite troubleshooting.
-
-### Chatbot tests fail locally
-**Cause**: 2 tests fail in isolation due to pre-existing ChromaDB mock state.
-**Impact**: 0 collection errors; all 1611 other tests pass.
-**Workaround**: Run full test suite, not individual files:
-```bash
-cd chatbot_service && pytest tests/ -v
+cd chatbot_service
+python -m venv .venv
+source .venv/bin/activate  # Linux/Mac
+pip install -r requirements.txt
+cp .env.example .env  # or create from AGENTS.md
+python -c "from core.config import Settings; print('Config OK')"
 ```
 
-### E2E tests fail in production build
-**Cause**: 8 form validation tests fail in `npm run build && npm start` but pass in `npm run dev`.
-**Root cause**: React 19 RSC streaming event handler registration timing.
-**Impact**: Functional testing in CI uses dev server; production E2E passes all non-form tests.
-**Tracking**: [Issue #TBD]
+### Frontend Build Fails
 
-## Runtime Issues
+**Symptom:** `npm run dev` or `npm run build` fails with compilation errors.
 
-### Backend logs show UnicodeEncodeError on Windows
-**Cause**: Emoji characters in log output not supported by Windows console encoding.
-**Impact**: No functional impact — logs render correctly on Linux production servers.
-**Workaround**: Set `PYTHONIOENCODING=utf-8` before running:
+**Causes:**
+- Missing `node_modules` or `package-lock.json`
+- Node.js version < 20
+
+**Solutions:**
 ```bash
-set PYTHONIOENCODING=utf-8
-uvicorn main:app --reload
+cd frontend
+node --version  # Must be >= 20
+npm ci          # Clean install from lockfile
+npm run dev
 ```
 
-### "Geolocation not supported" in JSDOM tests
-**Cause**: JSDOM does not implement `navigator.geolocation`.
-**Impact**: 0 test failures — components gracefully degrade with fallback UI.
-**Workaround**: None needed — this is expected behavior in test environment.
-
-### WebSocket tracking shows "Connecting..." forever
-**Cause**: The tracking WebSocket server requires a running backend. The demo/CI environment needs a WebSocket mock.
-**Workaround**: Ensure backend is running on port 8000 before accessing tracking pages.
-
-## Docker Issues
-
-### Docker build fails on Windows
-**Cause**: Line ending differences or volume mount path issues.
-**Fix**: Use Git Bash or WSL for Docker commands. Ensure `autocrlf` is set to `input`:
-```bash
-git config core.autocrlf input
+For `npm run build` failures related to `.next/types/`:
+```
+npm run build 2>&1 | head -50  # Check exact error
+# If "Cannot find namespace 'React'" — this is a Next.js generated-code bug
+# Workaround: npx next build --no-lint
 ```
 
-### Container exits with "permission denied"
-**Cause**: The Dockerfile uses a non-root user (`appuser:1001` or `nextjs:1001`).
-**Fix**: Ensure all mounted volumes have correct permissions:
+---
+
+## Database
+
+### Connection Failed
+
+**Symptom:** Backend logs `could not connect to server: Connection refused`.
+
+**Causes:**
+- PostgreSQL not running
+- Wrong `DATABASE_URL` in `.env`
+- Firewall blocking port 5432
+
+**Solutions:**
 ```bash
-# For bind mounts, the host directory must be readable by UID 1001
-chmod -R 755 ./data
+# Check if PostgreSQL is running
+pg_isready -h localhost -p 5432
+
+# Verify DATABASE_URL format
+# postgresql+asyncpg://user:password@host:port/dbname
+```
+If using Supabase: check the connection string in Supabase dashboard → Settings → Database.
+
+### Alembic Migration Fails
+
+**Symptom:** `alembic upgrade head` fails with relation already exists or column not found.
+
+**Solutions:**
+```bash
+cd backend
+alembic current          # Check current migration
+alembic history         # View migration history
+alembic upgrade head    # Apply all pending migrations
+alembic downgrade -1    # Roll back last migration
 ```
 
-## Known Issues (v1.0.0)
+### Migration Pending Error
 
-| ID | Issue | Status | Workaround |
-|----|-------|--------|------------|
-| K1 | 10 backend tests fail when run in isolation | Known | Run full suite |
-| K2 | 2 chatbot tests fail in isolation | Known | Run full suite |
-| K3 | 8 E2E form tests fail in production standalone | Known | Test in dev mode |
-| K4 | `next lint` shows deprecation warning for App Router | Cosmetic | Run `npx @next/codemod@latest built-in-next-font .` |
-| K5 | No WebSocket mock for tracking E2E tests | Known | Manual testing on live backend |
+**Symptom:** Health check returns `database_migration_pending`.
 
-If your issue isn't listed here, search [GitHub Issues](https://github.com/SafeVixAI/SafeVixAI/issues) or open a new one.
+**Solution:** Run `alembic upgrade head` and restart the backend.
+
+---
+
+## Redis
+
+### Connection Failed
+
+**Symptom:** Backend logs `Error connecting to Redis: -100`.
+
+**Solutions:**
+- Redis is **optional** — backend falls back to in-memory cache
+- If using Redis: verify `REDIS_URL` and that Redis is running
+- For Upstash: use `rediss://` URL format (TLS)
+
+### TLS Connection Error
+
+**Symptom:** `SSL: WRONG_VERSION_NUMBER` on `rediss://` URLs.
+
+**Solution:** Ensure `redis_tls_enabled: true` in backend config and `ssl=True` in the Redis connection string.
+
+---
+
+## API
+
+### CORS Errors
+
+**Symptom:** Browser console shows CORS errors when frontend calls backend.
+
+**Solutions:**
+- Verify `CORS_ORIGINS` env var includes your frontend URL
+- For local development: `http://localhost:3000` must be in CORS origins
+- For production: use exact domain (no wildcards in production)
+
+### 401 Unauthorized
+
+**Symptom:** API returns 401 even with valid JWT.
+
+**Causes:**
+- Token expired (default: 1 hour)
+- Wrong authorization header format
+- JWKS cache stale
+
+**Solutions:**
+- Refresh the token: `POST /api/v1/auth/refresh`
+- Ensure header format: `Authorization: Bearer <token>`
+- Clear JWKS cache: `POST /api/v1/admin/cache/purge`
+
+### 429 Rate Limited
+
+**Symptom:** API returns 429 Too Many Requests.
+
+**Solution:** Check `Retry-After` header and wait before retrying. Rate limits are per-endpoint and per-IP.
+
+### WebSocket Disconnects
+
+**Symptom:** Tracking session WebSocket disconnects unexpectedly.
+
+**Causes:**
+- JWT token expired during session
+- Network interruption
+- Session timeout
+
+**Solutions:**
+- Ensure token is valid for the expected session duration
+- Implement WebSocket reconnection with exponential backoff
+- Check `session_timeout_seconds` config
+
+---
+
+## LLM Providers
+
+### All Providers Fail
+
+**Symptom:** Chatbot returns error that all 9 LLM providers failed.
+
+**Causes:**
+- API keys not configured
+- Rate limits exceeded on all providers
+- Network connectivity issues
+
+**Solutions:**
+```bash
+# Check which provider keys are set
+grep -E "_(API_KEY|TOKEN)" chatbot_service/.env | grep -v "^#"
+
+# Test a single provider
+curl -X POST http://localhost:8010/api/v1/chat/ \
+  -H "Content-Type: application/json" \
+  -d '{"message": "Hello", "provider_hint": "template"}'
+```
+If all providers fail, the TemplateProvider should always work (deterministic responses).
+
+### Specific Provider Fails
+
+**Symptom:** Chatbot logs `Provider X failed, falling back to Y`.
+
+**Solutions:**
+- Check the provider's API key and rate limits
+- See `chatbot_service/providers/` for provider-specific error handling
+- The fallback chain automatically tries the next provider
+
+### ChromaDB Vector Search Returns No Results
+
+**Symptom:** Legal search returns empty results.
+
+**Solutions:**
+- Ensure ChromaDB vectorstore is built: `cd chatbot_service && python data/build_vectorstore.py`
+- Verify `CHROMA_PERSIST_DIR` points to the correct directory
+- Check that `chatbot_service/data/chroma_db/` exists and is not empty
+
+---
+
+## Frontend
+
+### Map Not Loading
+
+**Symptom:** MapLibre map shows blank/empty.
+
+**Causes:**
+- MapLibre CSS not imported
+- Component not wrapped in `dynamic({ssr:false})`
+- API key missing for tile provider
+
+**Solutions:**
+- Verify `maplibre-gl/dist/maplibre-gl.css` is imported in `layout.tsx`
+- Map components must use `dynamic(() => import('...'), { ssr: false })`
+- If using a non-default tile provider, set the API URL in env
+
+### Service Worker Not Registering
+
+**Symptom:** PWA features not working (offline mode, install prompt).
+
+**Causes:**
+- Running in `npm run dev` (Service Worker only works in production build)
+- Service worker file not found
+
+**Solutions:**
+```bash
+npm run build && npm start  # Production mode enables SW
+```
+Check DevTools → Application → Service Workers for registration status.
+
+### PWA Install Prompt Not Showing
+
+**Symptom:** Browser doesn't prompt to install the app.
+
+**Solutions:**
+- Must be served over HTTPS (or localhost)
+- Must meet PWA criteria (manifest, SW, icons)
+- In Chrome DevTools → Application → Manifest → "Add to homescreen"
+
+### `crypto.randomUUID` Not Supported
+
+**Symptom:** Frontend test fails with `crypto.randomUUID is not a function`.
+
+**Solution:** This is a JSDOM limitation — ignored via Istanbul comments in the source code. Does not affect production (browsers support it).
+
+### Speech Recognition Fails
+
+**Symptom:** Voice input button does not capture speech.
+
+**Solutions:**
+- Chrome/Edge only (Firefox and Safari lack SpeechRecognition API)
+- Ensure microphone permission is granted
+- Check `window.SpeechRecognition || window.webkitSpeechRecognition`
+
+### Geolocation Errors
+
+**Symptom:** Location features show "Geolocation not supported".
+
+**Solutions:**
+- Browser must support `navigator.geolocation` (all modern browsers)
+- User must grant location permission
+- In JSDOM tests, navigator.geolocation is unavailable (expected)
+
+---
+
+## Docker
+
+### Docker Compose Fails
+
+**Symptom:** `docker compose up --build` fails on service startup.
+
+**Solutions:**
+```bash
+# Check service logs
+docker compose logs backend
+docker compose logs chatbot_service
+docker compose logs frontend
+
+# Rebuild from scratch
+docker compose down --volumes  # WARNING: deletes DB data
+docker compose up --build
+```
+
+### PostgreSQL in Docker Fails
+
+**Symptom:** PostGIS extension not available.
+
+**Solution:** Use `postgis/postgis:16-3.4` image (not plain `postgres`).
+
+### Memory Issues
+
+**Symptom:** Container OOM-killed during build.
+
+**Solutions:**
+- Increase Docker memory limit: Docker Desktop → Settings → Resources
+- For chatbot service (torch): allocate at least 2GB RAM
+
+---
+
+## Testing
+
+### Tests Fail with Import Errors
+
+**Symptom:** `pytest tests/` fails with `ModuleNotFoundError`.
+
+**Solutions:**
+- Ensure virtual environment is activated
+- Install dev dependencies: `pip install -r requirements-dev.txt`
+- For frontend: `npm ci`
+
+### Frontend Tests Fail in CI
+
+**Symptom:** Tests pass locally but fail in GitHub Actions.
+
+**Solutions:**
+- Check Node.js version matches (20.x)
+- Ensure `package-lock.json` is up to date
+- Increase Node memory: `NODE_OPTIONS=--max-old-space-size=4096`
+
+### Test Coverage Below Threshold
+
+**Symptom:** CI fails with coverage below threshold.
+
+**Solutions:**
+```bash
+# Backend
+cd backend && pytest --cov --cov-report=term-missing
+
+# Chatbot
+cd chatbot_service && pytest --cov --cov-report=term-missing
+
+# Frontend
+cd frontend && npx jest --coverage
+```
+Add tests for uncovered lines identified in the report.
+
+---
+
+## Email Alerts
+
+### Alert Emails Not Sending
+
+**Symptom:** `core/alert.py` reports success but no email received.
+
+**Solutions:**
+- Check `ALERT_EMAIL` and `ALERT_EMAIL_PASSWORD` env vars are set
+- Check spam folder
+- Verify SMTP server configuration in `alert.py`
+
+---
+
+## Getting Help
+
+If the above doesn't solve your issue:
+- Search [GitHub Issues](https://github.com/SafeVixAI/SafeVixAI/issues)
+- Ask in [GitHub Discussions](https://github.com/SafeVixAI/SafeVixAI/discussions)
+- See [SUPPORT.md](./SUPPORT.md) for all support channels

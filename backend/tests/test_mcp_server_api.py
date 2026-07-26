@@ -134,6 +134,8 @@ class TestReportRoadIssue:
     async def test_valid_report_submission(self):
         """Test successful road issue report."""
         from types import SimpleNamespace
+        import api.v1.mcp_server as mcp_mod
+
         mock_result = SimpleNamespace(
             uuid="test-uuid-123",
             issue_id="test-uuid-123",
@@ -153,17 +155,23 @@ class TestReportRoadIssue:
 
         mock_db_session = AsyncMock(spec=["execute", "commit", "rollback"])
 
-        with patch("api.v1.mcp_server._build_roadwatch_service") as mock_build_fn, \
-             patch("core.database.get_async_session") as mock_session:
+        async def mock_build():
+            return (mock_service, mock_cache, mock_overpass, mock_geocoding)
 
-            mock_build_fn.return_value = (mock_service, mock_cache, mock_overpass, mock_geocoding)
+        original_build = mcp_mod._build_roadwatch_service
+        mcp_mod._build_roadwatch_service = mock_build
+
+        with patch("core.database.get_async_session") as mock_session:
 
             async def mock_gen():
                 yield mock_db_session
 
             mock_session.side_effect = mock_gen
 
-            result = await mcp_server.report_road_issue("pothole", 3, 13.0827, 80.2707, "Large pothole on main road")
+            try:
+                result = await mcp_server.report_road_issue("pothole", 3, 13.0827, 80.2707, "Large pothole on main road")
+            finally:
+                mcp_mod._build_roadwatch_service = original_build
 
             assert "test-uuid-123" in result
             assert "CR-2026-001" in result

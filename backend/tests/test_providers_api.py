@@ -209,6 +209,8 @@ async def test_test_connection_routes_have_sync_attr(monkeypatch):
     # Instead, verify the route is registered
     # FastAPI 0.140.0 include_router wraps sub-routers in _IncludedRouter;
     # test provider route existence directly from the provider router.
+    from core.config import get_settings
+    get_settings.cache_clear()
     from api.v1.providers import router as _providers_router
     _rpaths = {getattr(sr, "path", "") for sr in _providers_router.routes if hasattr(sr, "path")}
     assert "/api/v1/providers/test" in _rpaths, f"provider routes: {_rpaths}"
@@ -221,6 +223,8 @@ async def test_sync_route_is_registered(monkeypatch):
     monkeypatch.setenv("ENVIRONMENT", "test")
     monkeypatch.setenv("ADMIN_SECRET", "test-admin-secret-2026")
 
+    from core.config import get_settings
+    get_settings.cache_clear()
     from api.v1.providers import router as _providers_router
     _rpaths = {getattr(sr, "path", "") for sr in _providers_router.routes if hasattr(sr, "path")}
     assert "/api/v1/providers/sync" in _rpaths
@@ -263,11 +267,13 @@ def _make_app(mock_session, monkeypatch=None):
     _sys.modules.pop("core.database", None)
     _sys.modules.pop("core.config", None)
 
-    from api.v1.providers import router as providers_router
+    # Clear BEFORE import: get_settings() is cached via lru_cache,
+    # and core.database reads settings = get_settings() at module level.
     from core.config import get_settings
-    from core.database import get_db
-
     get_settings.cache_clear()
+
+    from api.v1.providers import router as providers_router
+    from core.database import get_db
 
     app = FastAPI()
     app.include_router(providers_router)

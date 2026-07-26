@@ -1,7 +1,9 @@
 .PHONY: help setup test lint build docker docker-up docker-down clean deploy \
         e2e terraform-fmt terraform-validate terraform-plan terraform-apply \
         k8s-apply k8s-delete k8s-status k8s-logs k6-smoke k6-load k6-sustained k6-spike \
-        ecr-login ecr-build ecr-push security-scan
+        ecr-login ecr-build ecr-push security-scan \
+        update-check update-download update-install update-rollback update-history update-sync \
+        backend-migrate backend-migrate-head
 
 SHELL := /bin/bash
 # NOTE: Windows contributors should use `make` via WSL, Git Bash, or Docker.
@@ -197,6 +199,41 @@ clean:
 	cd frontend && rm -f lint_output.txt ts-errors.txt log.txt ls_recursive.txt eslint.json
 	rm -rf .pytest_cache .ruff_cache htmlcov
 	@echo "✓ Cleaned build artifacts"
+
+# === Updates ===
+
+update-check:
+	@echo "Checking for updates..."
+	cd backend && PYTHONPATH=. python ../scripts/safevixai_update.py check
+
+update-download:
+	cd backend && PYTHONPATH=. python ../scripts/safevixai_update.py download
+
+update-install:
+	cd backend && PYTHONPATH=. python ../scripts/safevixai_update.py install
+
+update-rollback:
+	cd backend && PYTHONPATH=. python ../scripts/safevixai_update.py rollback
+
+update-history:
+	cd backend && PYTHONPATH=. python ../scripts/safevixai_update.py history
+
+update-sync:
+	cd backend && PYTHONPATH=. python ../scripts/safevixai_update.py sync
+
+# === Migrations ===
+
+backend-migrate:
+	cd backend && alembic upgrade head
+
+backend-migrate-head:
+	cd backend && alembic heads
+
+backend-migrate-downgrade:
+	cd backend && alembic downgrade -1
+
+backend-migration-create:
+	cd backend && read -p "Migration name: " name; alembic revision --autogenerate -m "$$name"
 
 # === Deploy ===
 

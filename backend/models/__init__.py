@@ -18,6 +18,7 @@ from models.provider_config import UserProviderConfig
 from models.road_issue import RoadInfrastructure, RoadIssue
 from models.sos_incident import SosIncident
 from models.streetlight_pole import StreetlightPole
+from models.update_management import ReleaseChannel, UpdateInstallation, UpdateRelease, UpdateSetting, UpdateStatus
 from models.user import OperatorUser, UserProfile
 from models.values import Coordinates, Distance, Severity
 from models.ward import Ward
@@ -47,5 +48,10 @@ __all__ = [
     'Municipality',
     'StreetlightPole',
     'UserProviderConfig',
+    'ReleaseChannel',
+    'UpdateStatus',
+    'UpdateRelease',
+    'UpdateInstallation',
+    'UpdateSetting',
 ]
 

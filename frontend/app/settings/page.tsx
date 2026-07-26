@@ -23,6 +23,7 @@ import {
 import { useAppStore } from '@/lib/store';
 import { useTheme } from '@/components/ThemeProvider';
 import TopSearch from '@/components/dashboard/TopSearch';
+import UpdateSettingsSection from '@/components/updates/UpdateSettingsSection';
 import { TerminalHeader } from '@/components/ui/TerminalHeader';
 import { SurfaceCard } from '@/components/ui/SurfaceCard';
 import { SettingRow } from '@/components/ui/SettingRow';
@@ -402,6 +403,13 @@ export default function SettingsPage() {
               </div>
               <CheckCircle size={14} className="text-brand-light" />
             </div>
+          </SurfaceCard>
+        </Section>
+
+        {/* ── UPDATES ── */}
+        <Section title="Updates">
+          <SurfaceCard padding="lg">
+            <UpdateSettingsSection />
           </SurfaceCard>
         </Section>
 

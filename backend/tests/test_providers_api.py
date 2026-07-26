@@ -252,6 +252,12 @@ def _make_app(mock_session, monkeypatch=None):
 
     from fastapi import FastAPI
 
+    # Dispose the old async engine before re-importing core.database,
+    # so the engine from create_app() doesn't leave dangling connections.
+    if "core.database" in _sys.modules:
+        _old_db = _sys.modules["core.database"]
+        if hasattr(_old_db, "engine"):
+            _old_db.engine.sync_engine.dispose()
     # Purge module cache so core.database re-imports with monkeypatched
     # DATABASE_URL instead of using the engine from create_app().
     _sys.modules.pop("core.database", None)

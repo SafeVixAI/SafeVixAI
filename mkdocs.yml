@@ -190,6 +190,10 @@ nav:
       - OOM Kill Response: runbooks/oom-kill-response.md
       - Smoke Tests: runbooks/smoke-tests.md
       - Disaster Recovery: runbooks/disaster-recovery.md
+  - Update Management:
+      - Architecture: update-management/ARCHITECTURE.md
+      - API Reference: update-management/UPDATE_SYSTEM_API.md
+      - Deployment Guide: update-management/UPDATE_SYSTEM_DEPLOYMENT.md
   - Development:
       - Contributors Guide: CONTRIBUTORS_GUIDE.md
       - Developer Experience: DEVELOPER_EXPERIENCE.md

@@ -11,6 +11,7 @@ import { createSettingsSlice } from './store/settings-slice';
 import { createUISlice } from './store/ui-slice';
 import { createDataSlice } from './store/data-slice';
 import { createProvidersSlice } from './store/providers-slice';
+import { createUpdateSlice } from './store/update-slice';
 import type { AppState } from './store/types';
 
 export const useAppStore = create<AppState>()(
@@ -22,6 +23,7 @@ export const useAppStore = create<AppState>()(
       ...createUISlice(...a),
       ...createDataSlice(...a),
       ...createProvidersSlice(...a),
+      ...createUpdateSlice(...a),
     }),
     {
       name: 'svai-storage',
@@ -75,6 +77,10 @@ export const useAppStore = create<AppState>()(
     }
   )
 );
+
+// Updates
+export const useUpdateInfo = () => useAppStore((s) => s.updateInfo);
+export const useUpdateBannerDismissed = () => useAppStore((s) => s.updateBannerDismissed);
 
 export type {
   GpsLocation, NearbyService, NearbyRoadIssue,

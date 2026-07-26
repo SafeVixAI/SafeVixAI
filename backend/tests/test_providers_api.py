@@ -239,39 +239,25 @@ def _make_app(mock_session, monkeypatch=None):
 
     Uses a bare FastAPI app (not create_app()) to avoid complex service
     initialization chains that fail without real Postgres/Redis.
+
+    Note: does NOT monkeypatch DATABASE_URL — CI has a real Postgres
+    and the engine in core.database is imported once by the route tests.
+    Reimporting on a different event loop causes "Future attached to a
+    different loop" errors because asyncpg connections are created on
+    one function-scoped loop and closed on another.
     """
     if monkeypatch:
-        monkeypatch.setenv("REDIS_URL", "")
-        monkeypatch.setenv("DATABASE_URL", "postgresql+asyncpg://u:p@localhost:5432/db_does_not_exist")
         monkeypatch.setenv("ENVIRONMENT", "test")
         monkeypatch.setenv("ADMIN_SECRET", "test-admin-secret-2026")
     else:
         import os
-        os.environ["REDIS_URL"] = ""
-        os.environ["DATABASE_URL"] = "postgresql+asyncpg://u:p@localhost:5432/db_does_not_exist"
         os.environ["ENVIRONMENT"] = "test"
         os.environ["ADMIN_SECRET"] = "test-admin-secret-2026"
 
-    import sys as _sys
-
     from fastapi import FastAPI
 
-    # Dispose the old async engine before re-importing core.database,
-    # so the engine from create_app() doesn't leave dangling connections.
-    if "core.database" in _sys.modules:
-        _old_db = _sys.modules["core.database"]
-        if hasattr(_old_db, "engine"):
-            _old_db.engine.sync_engine.dispose()
-    # Purge module cache so core.database re-imports with monkeypatched
-    # DATABASE_URL instead of using the engine from create_app().
-    _sys.modules.pop("core.database", None)
-    _sys.modules.pop("core.config", None)
-
-    # Clear BEFORE import: get_settings() is cached via lru_cache,
-    # and core.database reads settings = get_settings() at module level.
-    from core.config import get_settings
-    get_settings.cache_clear()
-
+    # Use the already-imported core.database engine — do NOT reimport
+    # modules on this event loop to avoid loop-cross-contamination.
     from api.v1.providers import router as providers_router
     from core.database import get_db
 

@@ -139,7 +139,7 @@ class TestReportRoadIssue:
             issue_id="test-uuid-123",
             complaint_ref="CR-2026-001",
         )
-        mock_service = MagicMock()
+        mock_service = AsyncMock()
         mock_service.submit_report = AsyncMock(return_value=mock_result)
 
         mock_cache = AsyncMock()

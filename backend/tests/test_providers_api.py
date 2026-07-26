@@ -15,6 +15,24 @@ from core.security import get_current_user
 from services.provider_encrypt import decrypt_api_key, encrypt_api_key, mask_api_key
 
 
+@pytest.fixture(scope="module", autouse=True)
+async def dispose_engine():
+    """Dispose the module-level async engine before the event loop closes.
+    
+    core.database creates a module-level AsyncEngine with a real connection
+    pool. If the pool's background maintenance tasks survive past the event
+    loop closure, they raise 'Event loop is closed'. This fixture runs
+    after all tests in the module and disposes the engine cleanly.
+    """
+    yield
+    try:
+        from core.database import engine
+        await engine.dispose()
+    except Exception:
+        pass  # Best-effort cleanup; engine might already be mocked/None
+
+
+
 class MockResult:
     """Mocks SQLAlchemy Result.scalar_one_or_none() and scalars().all()."""
 
@@ -218,6 +236,8 @@ def _make_app(mock_session, monkeypatch=None):
 
     Uses a bare FastAPI app (not create_app()) to avoid complex service
     initialization chains that fail without real Postgres/Redis.
+    Mocks the module-level engine to prevent asyncpg connection pool
+    issues across different event loops under pytest-asyncio.
     """
     if monkeypatch:
         monkeypatch.setenv("REDIS_URL", "")
@@ -229,26 +249,43 @@ def _make_app(mock_session, monkeypatch=None):
         os.environ["ENVIRONMENT"] = "test"
         os.environ["ADMIN_SECRET"] = "test-admin-secret-2026"
 
-    from fastapi import FastAPI
+    from unittest.mock import AsyncMock, MagicMock, patch
 
-    from api.v1.providers import router as providers_router
     from core.config import get_settings
-    from core.database import get_db
 
     get_settings.cache_clear()
 
-    app = FastAPI()
-    app.include_router(providers_router)
+    # Mock the module-level engine so asyncpg never initialises a real pool.
+    # The engine is bound to AsyncSessionLocal at import time, so we patch
+    # that binding too.  get_db() is overridden below with a mock session,
+    # so no live query ever reaches this engine.
+    mock_engine = MagicMock()
+    mock_engine.connect = AsyncMock()
+    mock_engine.dispose = AsyncMock()
 
-    async def override_db():
-        yield mock_session
+    with patch("core.database.engine", mock_engine), \
+         patch("core.database.AsyncSessionLocal") as mock_maker:
 
-    app.dependency_overrides[get_db] = override_db
+        mock_maker.return_value.__aenter__.return_value = mock_session
+        mock_maker.return_value.__aexit__ = AsyncMock(return_value=None)
 
-    async def override_auth():
-        return {"sub": "test-user", "role": "user", "jti": None}
-    app.dependency_overrides[get_current_user] = override_auth
-    return app
+        from fastapi import FastAPI
+
+        from api.v1.providers import router as providers_router
+        from core.database import get_db
+
+        app = FastAPI()
+        app.include_router(providers_router)
+
+        async def override_db():
+            yield mock_session
+
+        app.dependency_overrides[get_db] = override_db
+
+        async def override_auth():
+            return {"sub": "test-user", "role": "user", "jti": None}
+        app.dependency_overrides[get_current_user] = override_auth
+        return app
 
 
 @pytest.mark.asyncio(loop_scope="module")

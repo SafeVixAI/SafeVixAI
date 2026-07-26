@@ -4,20 +4,20 @@
 from __future__ import annotations
 
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Optional
 
 from pydantic import BaseModel, Field
 
 
-class ReleaseChannel(str, Enum):
+class ReleaseChannel(StrEnum):
     STABLE = "stable"
     BETA = "beta"
     NIGHTLY = "nightly"
     PRE_RELEASE = "pre-release"
 
 
-class UpdateStatusEnum(str, Enum):
+class UpdateStatusEnum(StrEnum):
     PENDING = "pending"
     DOWNLOADING = "downloading"
     DOWNLOADED = "downloaded"

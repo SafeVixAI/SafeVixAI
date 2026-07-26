@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import uuid
 from datetime import UTC, datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Optional
 
 from sqlalchemy import Boolean, DateTime, Enum as SAEnum, Integer, String, Text, UniqueConstraint
@@ -12,14 +12,14 @@ from sqlalchemy.orm import Mapped, mapped_column
 from core.database import Base
 
 
-class ReleaseChannel(str, Enum):
+class ReleaseChannel(StrEnum):
     STABLE = "stable"
     BETA = "beta"
     NIGHTLY = "nightly"
     PRE_RELEASE = "pre-release"
 
 
-class UpdateStatus(str, Enum):
+class UpdateStatus(StrEnum):
     PENDING = "pending"
     DOWNLOADING = "downloading"
     DOWNLOADED = "downloaded"

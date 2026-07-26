@@ -155,7 +155,7 @@ class TestReportRoadIssue:
             return (mock_service, mock_cache, mock_overpass, mock_geocoding)
 
         with patch("api.v1.mcp_server._build_roadwatch_service", new=mock_build), \
-             patch("api.v1.mcp_server.get_async_session") as mock_session:
+             patch("core.database.get_async_session") as mock_session:
 
             async def mock_gen():
                 yield AsyncMock(spec=["execute", "commit", "rollback"])

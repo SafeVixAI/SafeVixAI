@@ -967,10 +967,9 @@ class TestDataRetentionScheduler:
     @pytest.mark.asyncio
     async def test_cleanup_executes_stored_procedure_and_commits(self, session_factory_pair):
         factory, session = session_factory_pair
-        session.__aenter__ = AsyncMock(return_value=session)
         session.execute = AsyncMock()
+        session.execute.return_value = MagicMock(rowcount=0)
         session.commit = AsyncMock()
-        session.rowcount = 0
         sched = DataRetentionScheduler(factory)
 
         await sched.cleanup()

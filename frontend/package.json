@@ -72,7 +72,7 @@
     "@types/react-dom": "19.2.3",
     "@typescript-eslint/eslint-plugin": "8.65.0",
     "eslint": "8.57.1",
-    "eslint-config-next": "15.5.18",
+    "eslint-config-next": "16.2.11",
     "eslint-plugin-react-hooks": "4.6.2",
     "jest": "30.3.0",
     "jest-axe": "^10.0.0",

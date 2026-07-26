@@ -208,10 +208,15 @@ async def test_test_connection_routes_have_sync_attr(monkeypatch):
 
     # Use app.test_client or direct route access?
     # Instead, verify the route is registered
-    routes = _route_paths(app)
+    from api.v1 import api_router as _api_router
     import json
+    print(f"\n\n=== DEBUG: api_router count = {len(_api_router.routes)}")
+    for _r in _api_router.routes[:5]:
+        print(f"  api_router route: {type(_r).__name__} path={getattr(_r, 'path', getattr(_r, 'prefix', 'N/A'))}")
+
+    routes = _route_paths(app)
     parts = str(type(app.routes[0]) if app.routes else "empty")
-    print(f"\n\n=== DEBUG: app.routes type={parts}, len={len(routes)}, routes={json.dumps(routes[:20])}")
+    print(f"\n=== DEBUG: app.routes type={parts}, len={len(routes)}, routes={json.dumps(routes[:20])}")
     print(f"=== app.routes count = {len(app.routes)}")
     assert "/api/v1/providers/test" in routes
     assert "/api/v1/providers/sync" in routes

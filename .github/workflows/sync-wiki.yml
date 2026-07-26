@@ -125,7 +125,7 @@ jobs:
             - [ ] Verify code examples are valid (Python/TS/Bash)
             - [ ] Check internal links resolve to existing files
             - [ ] Verify no hallucinated API routes or env vars
-          branch: "docs-wiki-auto-update-${{ github.run_id }}"
+          branch: "docs-wiki-auto-update"
           base: "main"
           add-paths: |
             docs/wiki/**

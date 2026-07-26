@@ -134,44 +134,30 @@ class TestReportRoadIssue:
     async def test_valid_report_submission(self):
         """Test successful road issue report."""
         from types import SimpleNamespace
-        import api.v1.mcp_server as mcp_mod
 
         mock_result = SimpleNamespace(
             uuid="test-uuid-123",
             issue_id="test-uuid-123",
             complaint_ref="CR-2026-001",
         )
-        mock_service = AsyncMock()
-        mock_service.submit_report = AsyncMock(return_value=mock_result)
 
-        mock_cache = AsyncMock()
-        mock_cache.close = AsyncMock()
+        # Mock RoadWatchService class via its module path — same pattern used
+        # by TestGetEmergencyServices tests.  When _build_roadwatch_service
+        # does "from services.roadwatch_service import RoadWatchService" it
+        # picks up the patched class.
+        with patch("services.roadwatch_service.RoadWatchService") as MockRWS, \
+             patch("core.database.get_async_session") as mock_session:
 
-        mock_overpass = AsyncMock()
-        mock_overpass.aclose = AsyncMock()
-
-        mock_geocoding = AsyncMock()
-        mock_geocoding.aclose = AsyncMock()
-
-        mock_db_session = AsyncMock(spec=["execute", "commit", "rollback"])
-
-        async def mock_build():
-            return (mock_service, mock_cache, mock_overpass, mock_geocoding)
-
-        original_build = mcp_mod._build_roadwatch_service
-        mcp_mod._build_roadwatch_service = mock_build
-
-        with patch("core.database.get_async_session") as mock_session:
+            mock_service = AsyncMock()
+            mock_service.submit_report = AsyncMock(return_value=mock_result)
+            MockRWS.return_value = mock_service
 
             async def mock_gen():
-                yield mock_db_session
+                yield AsyncMock(spec=["execute", "commit", "rollback"])
 
             mock_session.side_effect = mock_gen
 
-            try:
-                result = await mcp_server.report_road_issue("pothole", 3, 13.0827, 80.2707, "Large pothole on main road")
-            finally:
-                mcp_mod._build_roadwatch_service = original_build
+            result = await mcp_server.report_road_issue("pothole", 3, 13.0827, 80.2707, "Large pothole on main road")
 
             assert "test-uuid-123" in result
             assert "CR-2026-001" in result

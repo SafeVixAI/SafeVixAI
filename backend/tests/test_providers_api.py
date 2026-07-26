@@ -180,7 +180,7 @@ async def test_test_connection_routes_have_sync_attr(monkeypatch):
 
     # Use app.test_client or direct route access?
     # Instead, verify the route is registered
-    routes = [r.path for r in app.routes]
+    routes = [r.path for r in app.routes if hasattr(r, "path")]
     assert "/api/v1/providers/test" in routes
     assert "/api/v1/providers/sync" in routes
 
@@ -206,7 +206,7 @@ async def test_sync_route_is_registered(monkeypatch):
 
     app.dependency_overrides[get_db] = override_db
 
-    routes = [r.path for r in app.routes]
+    routes = [r.path for r in app.routes if hasattr(r, "path")]
     assert "/api/v1/providers/sync" in routes
     assert "/api/v1/providers/test" in routes
 

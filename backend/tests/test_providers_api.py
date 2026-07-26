@@ -182,6 +182,33 @@ def _route_paths(router):
     return paths
 
 
+def _flatten_router(app):
+    """Expand _IncludedRouter wrappers in app.router.routes in-place.
+
+    FastAPI 0.140.0's ``include_router`` wraps sub-routers in
+    ``_IncludedRouter`` objects which the Starlette routing engine cannot
+    match against, causing all API requests to return 404. This helper
+    flattens those wrappers by extracting the underlying ``APIRoute``
+    objects and prepending their prefix.
+    """
+    flattened = []
+    for r in app.router.routes:
+        if hasattr(r, "router") and hasattr(r, "prefix"):
+            # _IncludedRouter: unwrap and prepend prefix to each route path
+            prefix = r.prefix
+            for sub in r.router.routes:
+                if hasattr(sub, "path"):
+                    from copy import copy
+                    new_sub = copy(sub)
+                    new_sub.path = prefix + (sub.path if sub.path.startswith("/") else f"/{sub.path}")
+                    flattened.append(new_sub)
+                else:
+                    flattened.append(sub)
+        else:
+            flattened.append(r)
+    app.router.routes = flattened
+
+
 async def test_test_connection_routes_have_sync_attr(monkeypatch):
     """Verify the test connection route exists and returns proper schema."""
     monkeypatch.setenv("REDIS_URL", "")
@@ -209,15 +236,8 @@ async def test_test_connection_routes_have_sync_attr(monkeypatch):
     # Use app.test_client or direct route access?
     # Instead, verify the route is registered
     from api.v1 import api_router as _api_router
-    import json
-    print(f"\n\n=== DEBUG: api_router count = {len(_api_router.routes)}")
-    for _r in _api_router.routes[:5]:
-        print(f"  api_router route: {type(_r).__name__} path={getattr(_r, 'path', getattr(_r, 'prefix', 'N/A'))}")
 
-    routes = _route_paths(app)
-    parts = str(type(app.routes[0]) if app.routes else "empty")
-    print(f"\n=== DEBUG: app.routes type={parts}, len={len(routes)}, routes={json.dumps(routes[:20])}")
-    print(f"=== app.routes count = {len(app.routes)}")
+    routes = _route_paths(_api_router)
     assert "/api/v1/providers/test" in routes
     assert "/api/v1/providers/sync" in routes
 
@@ -230,20 +250,9 @@ async def test_sync_route_is_registered(monkeypatch):
 
     from core.config import get_settings
     get_settings.cache_clear()
-    from core.database import get_db
-    from main import create_app
+    from api.v1 import api_router as _api_router
 
-    app = create_app()
-
-    class DummySession:
-        pass
-
-    async def override_db():
-        yield DummySession()
-
-    app.dependency_overrides[get_db] = override_db
-
-    routes = _route_paths(app)
+    routes = _route_paths(_api_router)
     assert "/api/v1/providers/sync" in routes
     assert "/api/v1/providers/test" in routes
 
@@ -279,6 +288,7 @@ def _make_app(mock_session, monkeypatch=None):
 
     app = FastAPI()
     app.include_router(providers_router)
+    _flatten_router(app)
 
     async def override_db():
         yield mock_session

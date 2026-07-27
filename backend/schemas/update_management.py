@@ -168,3 +168,32 @@ class SignatureVerifyResponse(BaseModel):
     fingerprint: Optional[str] = None
     status: str
     error: Optional[str] = None
+
+
+class SchedulerStatusResponse(BaseModel):
+    running: bool
+    last_check: Optional[str] = None
+    task_active: bool
+
+
+class OfflineBundleResponse(BaseModel):
+    version: str
+    download_url: str
+    checksum_sha256: str
+    bundle_size_bytes: int
+    created_at: datetime
+
+
+class RestartActionResponse(BaseModel):
+    success: bool
+    message: str
+    restart_in_seconds: int = 5
+
+
+class DownloadProgressEvent(BaseModel):
+    downloaded_bytes: int = 0
+    total_bytes: int = 0
+    percentage: float = 0.0
+    speed_kbps: Optional[float] = None
+    eta_seconds: Optional[float] = None
+    status: str = "downloading"

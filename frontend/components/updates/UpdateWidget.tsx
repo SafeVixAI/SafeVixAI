@@ -3,21 +3,32 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 SafeVixAI Team
 
-import React from 'react';
-import { ArrowUp, CheckCircle, Clock, Download, RefreshCw } from 'lucide-react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { ArrowUp, CheckCircle, Clock, Download, RefreshCw, RotateCcw, AlertTriangle } from 'lucide-react';
 import { useAppStore, useUpdateInfo } from '@/lib/store';
 import { useShallow } from 'zustand/react/shallow';
+import { restartApplication, subscribeToDownloadProgress } from '@/lib/api/update-api';
+import { logClientError } from '@/lib/client-logger';
 
 export default function UpdateWidget() {
   const updateInfo = useUpdateInfo();
-  const { setUpdateInfo, setUpdateStatus } = useAppStore(
+  const { setUpdateInfo, setUpdateStatus, setDownloadProgress } = useAppStore(
     useShallow((s) => ({
       setUpdateInfo: s.setUpdateInfo,
       setUpdateStatus: s.setUpdateStatus,
+      setDownloadProgress: s.setDownloadProgress,
     }))
   );
+  const [restarting, setRestarting] = useState(false);
+  const cleanupRef = useRef<(() => void) | null>(null);
 
-  const handleCheckNow = async () => {
+  useEffect(() => {
+    return () => {
+      if (cleanupRef.current) cleanupRef.current();
+    };
+  }, []);
+
+  const handleCheckNow = useCallback(async () => {
     setUpdateInfo({ status: 'up-to-date' });
     try {
       const { checkForUpdates } = await import('@/lib/api/update-api');
@@ -34,7 +45,36 @@ export default function UpdateWidget() {
     } catch {
       setUpdateInfo({ status: 'error' });
     }
-  };
+  }, [updateInfo.channel, setUpdateInfo]);
+
+  const handleUpdateNow = useCallback(() => {
+    setUpdateStatus('downloading');
+    if (updateInfo.latestVersion) {
+      cleanupRef.current?.();
+      cleanupRef.current = subscribeToDownloadProgress(
+        updateInfo.latestVersion,
+        (event) => {
+          setDownloadProgress(event.percentage);
+          if (event.status === 'complete') {
+            setUpdateStatus('installing');
+            setTimeout(() => setUpdateStatus('installed'), 1000);
+          }
+        },
+        () => setUpdateStatus('installed')
+      );
+    }
+  }, [updateInfo.latestVersion, setUpdateStatus, setDownloadProgress]);
+
+  const handleRestart = useCallback(async () => {
+    setRestarting(true);
+    try {
+      await restartApplication();
+    } catch (err) {
+      logClientError('Restart failed', err);
+    } finally {
+      setRestarting(false);
+    }
+  }, []);
 
   const formatTime = (iso: string | null) => {
     if (!iso) return 'Never';
@@ -69,17 +109,31 @@ export default function UpdateWidget() {
         <div className={`w-2 h-2 rounded-full ${
           updateInfo.status === 'up-to-date' ? 'bg-emerald-400' :
           updateInfo.status === 'available' ? 'bg-amber-400' :
+          updateInfo.status === 'downloading' ? 'bg-blue-400 animate-pulse' :
+          updateInfo.status === 'installing' ? 'bg-purple-400 animate-pulse' :
+          updateInfo.status === 'installed' ? 'bg-emerald-400' :
           updateInfo.status === 'error' ? 'bg-red-400' :
           'bg-blue-400 animate-pulse'
         }`} />
         <span className="text-xs text-white/70">
           {updateInfo.status === 'up-to-date' && 'Up to date'}
           {updateInfo.status === 'available' && `v${updateInfo.latestVersion} available`}
-          {updateInfo.status === 'downloading' && 'Downloading...'}
+          {updateInfo.status === 'downloading' && `Downloading... ${Math.round(updateInfo.downloadProgress)}%`}
           {updateInfo.status === 'installing' && 'Installing...'}
+          {updateInfo.status === 'installed' && 'Installed! Restart to apply'}
           {updateInfo.status === 'error' && 'Check failed'}
         </span>
       </div>
+
+      {/* Progress Bar */}
+      {(updateInfo.status === 'downloading') && (
+        <div className="w-full bg-white/10 rounded-full h-1.5 overflow-hidden">
+          <div
+            className="h-full bg-blue-500 rounded-full transition-all duration-300"
+            style={{ width: `${Math.min(updateInfo.downloadProgress, 100)}%` }}
+          />
+        </div>
+      )}
 
       <div className="flex items-center gap-2 text-xs text-white/40">
         <Clock className="w-3 h-3" />
@@ -93,14 +147,32 @@ export default function UpdateWidget() {
         </div>
       )}
 
-      {updateInfo.updateAvailable && (
+      {updateInfo.updateAvailable && updateInfo.status !== 'downloading' && updateInfo.status !== 'installing' && (
         <button
-          onClick={() => setUpdateStatus('downloading')}
+          onClick={handleUpdateNow}
           className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium rounded-lg transition-colors"
         >
           <Download className="w-3.5 h-3.5" />
           Update Now
         </button>
+      )}
+
+      {(updateInfo.status === 'installed' || updateInfo.status === 'installing') && (
+        <button
+          onClick={handleRestart}
+          disabled={restarting}
+          className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white text-xs font-medium rounded-lg transition-colors"
+        >
+          <RotateCcw className="w-3.5 h-3.5" />
+          {restarting ? 'Restarting...' : 'Restart Now'}
+        </button>
+      )}
+
+      {updateInfo.status === 'error' && (
+        <div className="flex items-center gap-1.5 text-xs text-red-400/80">
+          <AlertTriangle className="w-3 h-3" />
+          <button onClick={handleCheckNow} className="underline hover:text-red-300">Retry</button>
+        </div>
       )}
     </div>
   );

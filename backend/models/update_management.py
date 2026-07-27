@@ -117,6 +117,7 @@ class UpdateSetting(Base):
     background_download: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     auto_restart: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     notify_on_update: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    retry_on_failure: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     last_checked_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     last_check_result: Mapped[Optional[str]] = mapped_column(String(32), nullable=True)
     last_update_version: Mapped[Optional[str]] = mapped_column(String(32), nullable=True)

@@ -96,16 +96,52 @@ export interface UpdateSettings {
   background_download: boolean;
   auto_restart: boolean;
   notify_on_update: boolean;
+  retry_on_failure: boolean;
 }
 
 export interface UpdateSettingsResponse extends UpdateSettings {
   id: number;
   uuid: string;
+  gpg_public_key: string | null;
   last_checked_at: string | null;
   last_check_result: string | null;
   last_update_version: string | null;
   created_at: string;
   updated_at: string;
+}
+
+export interface SchedulerStatus {
+  running: boolean;
+  last_check: string | null;
+  task_active: boolean;
+}
+
+export interface RestartResponse {
+  success: boolean;
+  message: string;
+  restart_in_seconds: number;
+}
+
+export interface OfflineBundle {
+  version: string;
+  download_url: string;
+  checksum_sha256: string;
+  bundle_size_bytes: number;
+  created_at: string;
+}
+
+export interface ChecksumVerifyResponse {
+  valid: boolean;
+  computed_hash: string;
+  expected_hash: string;
+  algorithm: string;
+}
+
+export interface SignatureVerifyResponse {
+  valid: boolean;
+  fingerprint: string | null;
+  status: string;
+  error: string | null;
 }
 
 // ── API Functions ──
@@ -174,4 +210,63 @@ export async function fetchUpdateSettings(): Promise<UpdateSettingsResponse> {
 export async function updateUpdateSettings(settings: Partial<UpdateSettings>): Promise<UpdateSettingsResponse> {
   const { data } = await client.put('/api/v1/updates/settings', settings);
   return data;
+}
+
+export async function fetchSchedulerStatus(): Promise<SchedulerStatus> {
+  const { data } = await client.get('/api/v1/updates/scheduler/status');
+  return data;
+}
+
+export async function restartApplication(): Promise<RestartResponse> {
+  const { data } = await client.post('/api/v1/updates/restart');
+  return data;
+}
+
+export async function retryOperation(operation: string, version: string): Promise<UpdateActionResponse> {
+  const { data } = await client.post('/api/v1/updates/retry', { operation, version });
+  return data;
+}
+
+export async function fetchOfflineBundle(version: string): Promise<OfflineBundle> {
+  const { data } = await client.get(`/api/v1/updates/offline/bundle/${version}`);
+  return data;
+}
+
+export async function verifyReleaseIntegrity(version: string, filePath: string): Promise<UpdateActionResponse> {
+  const { data } = await client.post(`/api/v1/updates/verify/${version}`, { file_path: filePath });
+  return data;
+}
+
+export async function verifyReleaseSignature(version: string, signatureB64: string): Promise<SignatureVerifyResponse> {
+  const { data } = await client.post(`/api/v1/updates/verify-signature/${version}`, { signature_b64: signatureB64 });
+  return data;
+}
+
+export async function updatePublicKey(publicKey: string): Promise<UpdateSettingsResponse> {
+  const { data } = await client.put('/api/v1/updates/settings/public-key', { public_key: publicKey });
+  return data;
+}
+
+export function subscribeToDownloadProgress(
+  version: string,
+  onProgress: (event: { downloaded_bytes: number; total_bytes: number; percentage: number; status: string }) => void,
+  onComplete: () => void
+): () => void {
+  const es = new EventSource(`/api/v1/updates/download/${version}/progress`);
+  es.onmessage = (e) => {
+    try {
+      const data = JSON.parse(e.data);
+      onProgress(data);
+      if (data.status === 'complete') {
+        onComplete();
+        es.close();
+      }
+    } catch { /* ignore parse errors */ }
+  };
+  es.addEventListener('complete', () => {
+    onComplete();
+    es.close();
+  });
+  es.onerror = () => es.close();
+  return () => es.close();
 }

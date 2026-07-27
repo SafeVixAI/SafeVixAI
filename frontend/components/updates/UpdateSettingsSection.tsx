@@ -3,16 +3,29 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 SafeVixAI Team
 
-import React, { useEffect, useState } from 'react';
-import { ArrowUp, CheckCircle, Clock, Download, RefreshCw, RotateCcw } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import {
+  ArrowUp, CheckCircle, Clock, Download, RefreshCw, RotateCcw,
+  AlertTriangle, Key, Shield,
+} from 'lucide-react';
 import { useAppStore, useUpdateInfo } from '@/lib/store';
 import { useShallow } from 'zustand/react/shallow';
-import { fetchChannels, fetchUpdateHistory, fetchUpdateSettings, updateUpdateSettings } from '@/lib/api/update-api';
+import {
+  fetchChannels, fetchUpdateHistory, fetchUpdateSettings, updateUpdateSettings,
+  restartApplication, updatePublicKey,
+} from '@/lib/api/update-api';
 import { logClientError } from '@/lib/client-logger';
 import type { ChannelInfo, InstallationRecord, UpdateSettingsResponse } from '@/lib/api/update-api';
 import { SettingRow } from '@/components/ui/SettingRow';
 import Toggle from '@/components/dashboard/Toggle';
 import Toast from '@/components/dashboard/Toast';
+
+const SCHEDULE_OPTIONS = [
+  { value: 'immediate', label: 'Every minute' },
+  { value: 'hourly', label: 'Every hour' },
+  { value: 'daily', label: 'Daily' },
+  { value: 'weekly', label: 'Weekly' },
+];
 
 export default function UpdateSettingsSection() {
   const updateInfo = useUpdateInfo();
@@ -28,7 +41,17 @@ export default function UpdateSettingsSection() {
   const [history, setHistory] = useState<InstallationRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [restarting, setRestarting] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
+  const [publicKeyInput, setPublicKeyInput] = useState('');
+  const [showKeyInput, setShowKeyInput] = useState(false);
+  const toastTimeout = useRef<ReturnType<typeof setTimeout>>();
+
+  const showToast = (message: string, type: 'success' | 'error' | 'info') => {
+    if (toastTimeout.current) clearTimeout(toastTimeout.current);
+    setToast({ message, type });
+    toastTimeout.current = setTimeout(() => setToast(null), 3000);
+  };
 
   useEffect(() => {
     const load = async () => {
@@ -41,6 +64,7 @@ export default function UpdateSettingsSection() {
         setSettings(s);
         setChannels(c);
         setHistory(h.installations);
+        setPublicKeyInput(s.gpg_public_key || '');
       } catch (err) {
         logClientError('Failed to load update settings', err);
       } finally {
@@ -48,6 +72,7 @@ export default function UpdateSettingsSection() {
       }
     };
     load();
+    return () => { if (toastTimeout.current) clearTimeout(toastTimeout.current); };
   }, []);
 
   const handleToggle = async (key: string, value: boolean) => {
@@ -56,10 +81,10 @@ export default function UpdateSettingsSection() {
     try {
       const updated = await updateUpdateSettings({ [key]: value });
       setSettings(updated);
-      setToast({ message: 'Update settings saved', type: 'success' });
+      showToast('Update settings saved', 'success');
     } catch (err) {
       logClientError('Failed to save update settings', err);
-      setToast({ message: 'Failed to save settings', type: 'error' });
+      showToast('Failed to save settings', 'error');
     } finally {
       setSaving(false);
     }
@@ -72,10 +97,25 @@ export default function UpdateSettingsSection() {
       const updated = await updateUpdateSettings({ channel });
       setSettings(updated);
       setUpdateInfo({ channel: channel as any });
-      setToast({ message: `Channel changed to ${channel}`, type: 'success' });
+      showToast(`Channel changed to ${channel}`, 'success');
     } catch (err) {
       logClientError('Failed to change channel', err);
-      setToast({ message: 'Failed to change channel', type: 'error' });
+      showToast('Failed to change channel', 'error');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleScheduleChange = async (schedule: string) => {
+    if (!settings) return;
+    setSaving(true);
+    try {
+      const updated = await updateUpdateSettings({ schedule });
+      setSettings(updated);
+      showToast(`Schedule changed to ${schedule}`, 'success');
+    } catch (err) {
+      logClientError('Failed to change schedule', err);
+      showToast('Failed to change schedule', 'error');
     } finally {
       setSaving(false);
     }
@@ -94,13 +134,42 @@ export default function UpdateSettingsSection() {
         status: result.update_available ? 'available' : 'up-to-date',
         currentVersion: result.current_version,
       });
-      setToast({
-        message: result.update_available ? `Update v${result.latest_version} available` : 'Up to date',
-        type: result.update_available ? 'info' : 'success',
-      });
+      showToast(
+        result.update_available ? `Update v${result.latest_version} available` : 'Up to date',
+        result.update_available ? 'info' : 'success',
+      );
     } catch (err) {
       logClientError('Update check failed', err);
-      setToast({ message: 'Check failed', type: 'error' });
+      showToast('Check failed', 'error');
+    }
+  };
+
+  const handleRestart = async () => {
+    setRestarting(true);
+    try {
+      await restartApplication();
+      showToast('Restart triggered', 'success');
+    } catch (err) {
+      logClientError('Restart failed', err);
+      showToast('Restart failed', 'error');
+    } finally {
+      setRestarting(false);
+    }
+  };
+
+  const handleSavePublicKey = async () => {
+    if (!settings) return;
+    setSaving(true);
+    try {
+      const updated = await updatePublicKey(publicKeyInput);
+      setSettings(updated);
+      setShowKeyInput(false);
+      showToast('Public key saved', 'success');
+    } catch (err) {
+      logClientError('Failed to save public key', err);
+      showToast('Failed to save public key', 'error');
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -144,6 +213,29 @@ export default function UpdateSettingsSection() {
               {ch.latest_version && (
                 <span className="ml-1.5 opacity-70">v{ch.latest_version}</span>
               )}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Schedule Selector */}
+      <div className="space-y-2">
+        <label className="text-xs font-medium text-white/60 uppercase tracking-wider">
+          Check Schedule
+        </label>
+        <div className="flex flex-wrap gap-2">
+          {SCHEDULE_OPTIONS.map((opt) => (
+            <button
+              key={opt.value}
+              onClick={() => handleScheduleChange(opt.value)}
+              disabled={saving}
+              className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors ${
+                settings?.schedule === opt.value
+                  ? 'bg-purple-600/30 border-purple-500/50 text-purple-300'
+                  : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10'
+              }`}
+            >
+              {opt.label}
             </button>
           ))}
         </div>
@@ -201,6 +293,57 @@ export default function UpdateSettingsSection() {
         }
       />
 
+      <SettingRow
+        icon={<AlertTriangle className="w-4 h-4" />}
+        title="Retry on failure"
+        description="Automatically retry failed downloads"
+        rightElement={
+          <Toggle
+            checked={settings?.retry_on_failure ?? true}
+            onChange={(v) => handleToggle('retry_on_failure', v)}
+            ariaLabel={saving ? 'Saving' : undefined}
+          />
+        }
+      />
+
+      {/* GPG Public Key */}
+      <div className="rounded-lg bg-white/5 p-3 space-y-2">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Shield className="w-4 h-4 text-white/60" />
+            <span className="text-xs text-white/60">GPG Public Key</span>
+          </div>
+          <button
+            onClick={() => setShowKeyInput(!showKeyInput)}
+            className="text-xs text-blue-400 hover:text-blue-300 transition-colors"
+          >
+            {showKeyInput ? 'Cancel' : publicKeyInput ? 'Edit' : 'Add'}
+          </button>
+        </div>
+        {showKeyInput && (
+          <div className="space-y-2">
+            <textarea
+              value={publicKeyInput}
+              onChange={(e) => setPublicKeyInput(e.target.value)}
+              placeholder="Paste ASCII-armored GPG public key..."
+              className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white/80 placeholder-white/30 resize-none h-20 focus:outline-none focus:border-blue-500/50"
+            />
+            <button
+              onClick={handleSavePublicKey}
+              disabled={saving}
+              className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-medium rounded-lg transition-colors"
+            >
+              {saving ? 'Saving...' : 'Save Key'}
+            </button>
+          </div>
+        )}
+        {!showKeyInput && publicKeyInput && (
+          <p className="text-[10px] text-emerald-400/60 font-mono truncate">
+            Key configured ({publicKeyInput.substring(0, 40)}...)
+          </p>
+        )}
+      </div>
+
       {/* Version Info */}
       <div className="rounded-lg bg-white/5 p-3 space-y-2">
         <div className="flex items-center justify-between">
@@ -230,6 +373,16 @@ export default function UpdateSettingsSection() {
             </button>
           </div>
         </div>
+
+        {/* Restart Button */}
+        <button
+          onClick={handleRestart}
+          disabled={restarting}
+          className="w-full mt-2 inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-white/10 hover:bg-white/15 disabled:opacity-50 text-white text-xs font-medium rounded-lg transition-colors"
+        >
+          <RotateCcw className="w-3.5 h-3.5" />
+          {restarting ? 'Restarting...' : 'Restart Application'}
+        </button>
       </div>
 
       {/* Update History */}

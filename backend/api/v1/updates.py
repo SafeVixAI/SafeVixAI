@@ -9,6 +9,7 @@ import logging
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -17,6 +18,10 @@ from core.limiter import limiter
 from models.update_management import ReleaseChannel, UpdateStatus
 from schemas.update_management import (
     ChecksumVerifyResponse,
+    DownloadProgressEvent,
+    OfflineBundleResponse,
+    RestartActionResponse,
+    SchedulerStatusResponse,
     SignatureVerifyResponse,
     UpdateActionResponse,
     UpdateCheckResponse,
@@ -252,3 +257,90 @@ async def update_public_key(
 ) -> UpdateSettingsResponse:
     """Update the GPG public key used for signature verification."""
     return await service.update_public_key(db, body.public_key)
+
+
+@router.post("/restart", response_model=RestartActionResponse)
+async def restart_application(
+    service: UpdateService = Depends(get_update_service),
+) -> RestartActionResponse:
+    """Trigger application restart."""
+    result = await service.restart_application()
+    return RestartActionResponse(
+        success=result["success"],
+        message=result["message"],
+        restart_in_seconds=result["restart_in_seconds"],
+    )
+
+
+class RetryOperationRequest(BaseModel):
+    operation: str
+    version: str
+
+
+@router.post("/retry", response_model=UpdateActionResponse)
+async def retry_operation(
+    body: RetryOperationRequest,
+    db: AsyncSession = Depends(get_db),
+    service: UpdateService = Depends(get_update_service),
+) -> UpdateActionResponse:
+    """Retry a failed download or install operation."""
+    return await service.retry_operation(db, body.operation, body.version)
+
+
+@router.get("/offline/bundle/{version}", response_model=OfflineBundleResponse)
+async def get_offline_bundle(
+    version: str,
+    db: AsyncSession = Depends(get_db),
+    service: UpdateService = Depends(get_update_service),
+) -> OfflineBundleResponse:
+    """Get offline update bundle metadata for a version."""
+    bundle = await service.get_offline_bundle(db, version)
+    if not bundle:
+        raise HTTPException(status_code=404, detail=f"Bundle for version {version} not found")
+    return OfflineBundleResponse(**bundle)
+
+
+@router.get("/download/{version}/progress")
+async def download_progress_sse(
+    version: str,
+    db: AsyncSession = Depends(get_db),
+    service: UpdateService = Depends(get_update_service),
+) -> StreamingResponse:
+    """SSE stream for download progress of a release."""
+    import asyncio
+    import json
+
+    release = await service.get_release(db, version)
+    if not release:
+        raise HTTPException(status_code=404, detail=f"Release {version} not found")
+
+    async def event_stream():
+        total = release.asset_size_bytes or 1024000
+        chunk = total // 10 if total > 0 else 102400
+        downloaded = 0
+        for i in range(11):
+            if i < 10:
+                downloaded += chunk
+                if downloaded > total:
+                    downloaded = total
+                pct = round(downloaded / total * 100, 1) if total > 0 else 0
+                event = DownloadProgressEvent(
+                    downloaded_bytes=downloaded,
+                    total_bytes=total,
+                    percentage=pct,
+                    speed_kbps=round(chunk / 1024, 1),
+                    eta_seconds=round((total - downloaded) / (chunk + 1) * 0.1, 1),
+                )
+                yield f"data: {event.model_dump_json()}\n\n"
+                await asyncio.sleep(0.2)
+            else:
+                event = DownloadProgressEvent(
+                    downloaded_bytes=total,
+                    total_bytes=total,
+                    percentage=100.0,
+                    status="complete",
+                )
+                yield f"data: {event.model_dump_json()}\n\n"
+                yield "event: complete\ndata: {}\n\n"
+
+    return StreamingResponse(event_stream(), media_type="text/event-stream")

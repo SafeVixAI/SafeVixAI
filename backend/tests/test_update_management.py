@@ -249,6 +249,7 @@ class TestUpdateService:
         settings_mock.background_download = True
         settings_mock.auto_restart = False
         settings_mock.notify_on_update = True
+        settings_mock.retry_on_failure = True
         settings_mock.last_checked_at = None
         settings_mock.last_check_result = None
         settings_mock.last_update_version = None
@@ -271,6 +272,7 @@ class TestUpdateService:
         mock_settings.background_download = True
         mock_settings.auto_restart = False
         mock_settings.notify_on_update = True
+        mock_settings.retry_on_failure = True
         mock_settings.last_checked_at = None
         mock_settings.last_check_result = None
         mock_settings.last_update_version = None

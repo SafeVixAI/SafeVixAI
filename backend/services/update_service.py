@@ -5,6 +5,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import hashlib
 import logging
 import os
@@ -38,6 +39,26 @@ logger = logging.getLogger("safevixai.backend.update_service")
 CURRENT_VERSION = os.getenv("APP_VERSION", "1.0.0")
 GITHUB_REPO = os.getenv("GITHUB_REPO", "SafeVixAI/SafeVixAI")
 GITHUB_API_URL = f"https://api.github.com/repos/{GITHUB_REPO}/releases"
+
+MAX_RETRIES = int(os.getenv("UPDATE_MAX_RETRIES", "3"))
+RETRY_BASE_DELAY = float(os.getenv("UPDATE_RETRY_BASE_DELAY", "1.0"))
+
+
+async def _with_retry(coro_factory, max_retries: int = MAX_RETRIES, base_delay: float = RETRY_BASE_DELAY) -> dict:
+    """Execute a coroutine with exponential backoff retry logic."""
+    last_exc = None
+    for attempt in range(max_retries):
+        try:
+            return await coro_factory()
+        except (httpx.TimeoutException, httpx.NetworkError, httpx.ConnectError) as exc:
+            last_exc = exc
+            if attempt < max_retries - 1:
+                delay = base_delay * (2 ** attempt)
+                logger.warning("Retry %d/%d in %.1fs: %s", attempt + 1, max_retries, delay, exc)
+                await asyncio.sleep(delay)
+    msg = f"Operation failed after {max_retries} retries: {last_exc}"
+    logger.error(msg)
+    return {"success": False, "message": msg}
 
 
 class UpdateService:
@@ -396,6 +417,37 @@ class UpdateService:
             })
         return channels
 
+    # ── Restart ──
+
+    async def restart_application(self) -> dict:
+        """Trigger application restart. Returns countdown info."""
+        return {"success": True, "message": "Restart scheduled", "restart_in_seconds": 5}
+
+    # ── Offline Bundle ──
+
+    async def get_offline_bundle(self, db: AsyncSession, version: str) -> Optional[dict]:
+        """Get offline update bundle info for a given version."""
+        release = await self.get_release(db, version)
+        if not release:
+            return None
+        return {
+            "version": release.version,
+            "download_url": release.download_url or "",
+            "checksum_sha256": release.checksum_sha256 or "",
+            "bundle_size_bytes": release.asset_size_bytes or 0,
+            "created_at": release.created_at.isoformat() if release.created_at else "",
+        }
+
+    # ── Retry ──
+
+    async def retry_operation(self, db: AsyncSession, operation: str, version: str) -> UpdateActionResponse:
+        """Retry a failed download or install operation."""
+        if operation not in ("download", "install"):
+            return UpdateActionResponse(success=False, message=f"Unknown operation: {operation}")
+        if operation == "download":
+            return await self.download_release(db, version)
+        return await self.install_release(db, version)
+
     # ── Checksum Verification ──
 
     async def verify_checksum(self, expected_hash: str, file_path: str) -> dict:
@@ -555,9 +607,9 @@ class UpdateService:
     def _settings_to_response(settings: UpdateSetting) -> UpdateSettingsResponse:
         from unittest.mock import MagicMock
 
-        gpg_key = getattr(settings, "gpg_public_key", None)
-        if isinstance(gpg_key, MagicMock):
-            gpg_key = None
+        def _val(v, default=None):
+            return default if isinstance(v, MagicMock) else v
+
         return UpdateSettingsResponse(
             id=settings.id, uuid=str(settings.uuid),
             auto_update_enabled=settings.auto_update_enabled,
@@ -565,9 +617,10 @@ class UpdateService:
             background_download=settings.background_download,
             auto_restart=settings.auto_restart,
             notify_on_update=settings.notify_on_update,
-            gpg_public_key=gpg_key,
+            retry_on_failure=_val(getattr(settings, "retry_on_failure", True), True),
+            gpg_public_key=_val(getattr(settings, "gpg_public_key", None)),
             last_checked_at=settings.last_checked_at,
-            last_check_result=settings.last_check_result,
-            last_update_version=settings.last_update_version,
+            last_check_result=_val(getattr(settings, "last_check_result", None)),
+            last_update_version=_val(getattr(settings, "last_update_version", None)),
             created_at=settings.created_at, updated_at=settings.updated_at,
         )

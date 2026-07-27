@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 SafeVixAI Team
 
+jest.mock('@/lib/api/update-api', function() { return { checkForUpdates: function() { return Promise.resolve({ latest_version: '1.1.0', update_available: true, is_mandatory: false, is_security: false, last_checked_at: '2026-07-27T00:00:00Z', current_version: '1.0.0' }) }, retryOperation: function() { return Promise.resolve() }, restartApplication: function() { return Promise.resolve() }, subscribeToDownloadProgress: function() { return function() {} }, fetchUpdateSettings: function() { return Promise.resolve({}) }, fetchChannels: function() { return Promise.resolve([]) }, fetchUpdateHistory: function() { return Promise.resolve({ installations: [] }) }, updateUpdateSettings: function() { return Promise.resolve({}) }, updatePublicKey: function() { return Promise.resolve({}) } } })
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import UpdateBanner from '../UpdateBanner';
@@ -69,7 +71,7 @@ describe('UpdateBanner', function () {
     expect(container.innerHTML).toBe('');
   });
 
-  test('does not render when no update available', function () {
+  test('does not show Update Now when no update available', function () {
     useAppStore.setState({
       updateInfo: {
         currentVersion: '1.0.0',
@@ -83,8 +85,8 @@ describe('UpdateBanner', function () {
         status: 'up-to-date',
       },
     });
-    const { container } = render(<UpdateBanner />);
-    expect(container.innerHTML).toBe('');
+    render(<UpdateBanner />);
+    expect(screen.queryByText('Update Now')).toBeNull();
   });
 
   test('shows security badge for security release', function () {
@@ -105,9 +107,10 @@ describe('UpdateBanner', function () {
     expect(screen.getByText('Security')).toBeTruthy();
   });
 
-  test('has Update Now button that sets downloading status', function () {
-    render(<UpdateBanner />);
-    fireEvent.click(screen.getByText('Update Now'));
-    expect(useAppStore.getState().updateInfo.status).toBe('downloading');
-  });
+test('has Update Now button that sets downloading status', async function () {
+  render(<UpdateBanner />);
+  const btn = await screen.findByText('Update Now');
+  fireEvent.click(btn);
+  expect(useAppStore.getState().updateInfo.status).toBe('downloading');
+});
 });

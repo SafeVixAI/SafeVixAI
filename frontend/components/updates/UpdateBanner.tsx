@@ -3,24 +3,32 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 SafeVixAI Team
 
-import React, { useEffect, useState } from 'react';
-import { Download, Shield, X, ArrowUp } from 'lucide-react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Download, Shield, X, ArrowUp, RotateCcw, AlertTriangle } from 'lucide-react';
 import { useShallow } from 'zustand/react/shallow';
 import { useAppStore, useUpdateBannerDismissed, useUpdateInfo } from '@/lib/store';
-import { checkForUpdates } from '@/lib/api/update-api';
+import { checkForUpdates, retryOperation, restartApplication, subscribeToDownloadProgress } from '@/lib/api/update-api';
 import { logClientError } from '@/lib/client-logger';
 
 export default function UpdateBanner() {
   const updateInfo = useUpdateInfo();
   const dismissed = useUpdateBannerDismissed();
-  const { setUpdateInfo, dismissUpdateBanner, setUpdateStatus } = useAppStore(
+  const { setUpdateInfo, dismissUpdateBanner, setUpdateStatus, setDownloadProgress } = useAppStore(
     useShallow((s) => ({
       setUpdateInfo: s.setUpdateInfo,
       dismissUpdateBanner: s.dismissUpdateBanner,
       setUpdateStatus: s.setUpdateStatus,
+      setDownloadProgress: s.setDownloadProgress,
     }))
   );
   const [checking, setChecking] = useState(false);
+  const cleanupRef = useRef<(() => void) | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (cleanupRef.current) cleanupRef.current();
+    };
+  }, []);
 
   useEffect(() => {
     const check = async () => {
@@ -46,7 +54,42 @@ export default function UpdateBanner() {
     }
   }, [dismissed]);
 
-  if (dismissed || !updateInfo.updateAvailable) return null;
+  const handleUpdateNow = useCallback(() => {
+    setUpdateStatus('downloading');
+    if (updateInfo.latestVersion) {
+      cleanupRef.current?.();
+      cleanupRef.current = subscribeToDownloadProgress(
+        updateInfo.latestVersion,
+        (event) => {
+          setDownloadProgress(event.percentage);
+          if (event.status === 'complete') {
+            setUpdateStatus('installing');
+            setTimeout(() => setUpdateStatus('installed'), 1000);
+          }
+        },
+        () => setUpdateStatus('installed')
+      );
+    }
+  }, [updateInfo.latestVersion, setUpdateStatus, setDownloadProgress]);
+
+  const handleRetry = useCallback(async () => {
+    if (updateInfo.latestVersion) {
+      await retryOperation('download', updateInfo.latestVersion);
+      handleUpdateNow();
+    }
+  }, [updateInfo.latestVersion, handleUpdateNow]);
+
+  const handleRestart = useCallback(async () => {
+    try {
+      await restartApplication();
+    } catch (err) {
+      logClientError('Restart failed', err);
+    }
+  }, []);
+
+  if (dismissed || (!updateInfo.updateAvailable && updateInfo.status !== 'up-to-date')) return null;
+
+  const isProcessing = updateInfo.status === 'downloading' || updateInfo.status === 'installing';
 
   const securityBadge = updateInfo.isSecurity ? (
     <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-red-900/40 text-red-300 text-xs font-semibold rounded-full border border-red-700/40">
@@ -69,22 +112,63 @@ export default function UpdateBanner() {
       <div className="flex items-center gap-3 flex-1 min-w-0">
         <ArrowUp className="w-4 h-4 shrink-0" />
         <span className="truncate">
-          <strong>Update available:</strong> v{updateInfo.latestVersion}
-          {updateInfo.currentVersion && (
-            <span className="opacity-70"> (current: v{updateInfo.currentVersion})</span>
+          {isProcessing ? (
+            <strong>{updateInfo.status === 'downloading' ? `Downloading... ${Math.round(updateInfo.downloadProgress)}%` : 'Installing...'}</strong>
+          ) : updateInfo.status === 'installed' ? (
+            <strong>Installed! Restart to apply</strong>
+          ) : updateInfo.status === 'error' ? (
+            <strong className="text-red-300">Update check failed</strong>
+          ) : (
+            <>
+              <strong>Update available:</strong> v{updateInfo.latestVersion}
+              {updateInfo.currentVersion && (
+                <span className="opacity-70"> (current: v{updateInfo.currentVersion})</span>
+              )}
+            </>
           )}
         </span>
-        {securityBadge}
+        {!isProcessing && updateInfo.status !== 'installed' && securityBadge}
       </div>
+
+      {/* Progress bar */}
+      {updateInfo.status === 'downloading' && (
+        <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/10">
+          <div
+            className="h-full bg-blue-500 transition-all duration-300"
+            style={{ width: `${Math.min(updateInfo.downloadProgress, 100)}%` }}
+          />
+        </div>
+      )}
+
       <div className="flex items-center gap-2 shrink-0">
-        <button
-          onClick={() => setUpdateStatus('downloading')}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium rounded-lg transition-colors"
-        >
-          <Download className="w-3.5 h-3.5" />
-          Update Now
-        </button>
-        {!updateInfo.isMandatory && (
+        {updateInfo.status === 'available' && (
+          <button
+            onClick={handleUpdateNow}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium rounded-lg transition-colors"
+          >
+            <Download className="w-3.5 h-3.5" />
+            Update Now
+          </button>
+        )}
+        {updateInfo.status === 'installed' && (
+          <button
+            onClick={handleRestart}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium rounded-lg transition-colors"
+          >
+            <RotateCcw className="w-3.5 h-3.5" />
+            Restart
+          </button>
+        )}
+        {updateInfo.status === 'error' && (
+          <button
+            onClick={handleRetry}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-600 hover:bg-red-500 text-white text-xs font-medium rounded-lg transition-colors"
+          >
+            <AlertTriangle className="w-3.5 h-3.5" />
+            Retry
+          </button>
+        )}
+        {!updateInfo.isMandatory && !isProcessing && updateInfo.status !== 'installed' && (
           <button
             onClick={dismissUpdateBanner}
             className="p-1.5 hover:bg-white/10 rounded-lg transition-colors"

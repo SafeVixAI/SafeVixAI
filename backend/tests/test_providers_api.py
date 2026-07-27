@@ -240,11 +240,10 @@ def _make_app(mock_session, monkeypatch=None):
     Uses a bare FastAPI app (not create_app()) to avoid complex service
     initialization chains that fail without real Postgres/Redis.
 
-    Note: does NOT monkeypatch DATABASE_URL — CI has a real Postgres
-    and the engine in core.database is imported once by the route tests.
-    Reimporting on a different event loop causes "Future attached to a
-    different loop" errors because asyncpg connections are created on
-    one function-scoped loop and closed on another.
+    Injects a mock core.database module into sys.modules BEFORE importing
+    providers_router, so the real async engine is never created. This
+    prevents "Future attached to a different loop" RuntimeError from
+    asyncpg protocol connections.
     """
     if monkeypatch:
         monkeypatch.setenv("REDIS_URL", "")
@@ -256,13 +255,33 @@ def _make_app(mock_session, monkeypatch=None):
         os.environ["ENVIRONMENT"] = "test"
         os.environ["ADMIN_SECRET"] = "test-admin-secret-2026"
 
+    import sys as _sys
+    import types as _types
+
+    # Purge the cached providers module so it is re-imported fresh
+    # and picks up the mock core.database below.
+    _sys.modules.pop("api.v1.providers", None)
+
+    # Inject a mock core.database BEFORE importing providers_router,
+    # so the real engine (with asyncpg) is never created.
+    _mock_db = _types.ModuleType("core.database")
+    _mock_db.engine = None
+    _mock_db.AsyncSessionLocal = None
+
+    async def _mock_get_db():
+        yield mock_session
+    _mock_db.get_db = _mock_get_db
+    _mock_db.get_async_session = _mock_get_db
+
+    # Prevent fastapi import from triggering real module load
+    _sys.modules["core.database"] = _mock_db
+
     from fastapi import FastAPI
 
-    # Use the already-imported core.database engine — do NOT reimport
-    # modules on this event loop to avoid loop-cross-contamination.
     from api.v1.providers import router as providers_router
     from core.config import get_settings
-    from core.database import get_db
+
+    # core.limiter imports get_settings() at module level; re-clear for test env
     from core.limiter import limiter as _limiter
     get_settings.cache_clear()
     _limiter.enabled = False

@@ -108,6 +108,7 @@ class UpdateSetting(Base):
     uuid: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), unique=True, nullable=False, default=uuid.uuid4
     )
+    gpg_public_key: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     auto_update_enabled: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     channel: Mapped[ReleaseChannel] = mapped_column(
         SAEnum(ReleaseChannel, name="setting_channel"), nullable=False, default=ReleaseChannel.STABLE

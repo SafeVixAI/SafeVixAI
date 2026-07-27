@@ -318,6 +318,76 @@ class TestUpdateService:
         assert result.year == 2026
         assert service._parse_github_date(None) is None
 
+    async def test_verify_checksum_matches(self, service: UpdateService) -> None:
+        """SHA256 hash matches."""
+        db = _make_mock_db()
+        release = _make_release(version="2.0.0", checksum_sha256="abc123hash...")
+        db.execute.return_value = _make_async_result(scalar_one_or_none_return=release)
+
+        with (
+            patch("builtins.open", MagicMock()) as mock_open,
+            patch("hashlib.sha256") as mock_sha,
+        ):
+            mock_open.return_value.__enter__.return_value.read.return_value = b""
+            mock_sha.return_value.hexdigest.return_value = "abc123hash..."
+            result = await service.verify_release_integrity(db, "2.0.0", "/fake/path")
+
+        assert result.success is True
+        assert "verified" in result.message.lower()
+
+    async def test_verify_checksum_mismatch(self, service: UpdateService) -> None:
+        """SHA256 hash mismatch."""
+        db = _make_mock_db()
+        release = _make_release(version="2.0.0", checksum_sha256="expected_hash")
+        db.execute.return_value = _make_async_result(scalar_one_or_none_return=release)
+
+        with (
+            patch("builtins.open", MagicMock()) as mock_open,
+            patch("hashlib.sha256") as mock_sha,
+        ):
+            mock_open.return_value.__enter__.return_value.read.return_value = b""
+            mock_sha.return_value.hexdigest.return_value = "different_hash"
+            result = await service.verify_release_integrity(db, "2.0.0", "/fake/path")
+
+        assert result.success is False
+        assert "mismatch" in result.message.lower()
+
+    async def test_verify_checksum_missing_hash(self, service: UpdateService) -> None:
+        """No checksum stored for release."""
+        db = _make_mock_db()
+        release = _make_release(version="2.0.0", checksum_sha256=None)
+        db.execute.return_value = _make_async_result(scalar_one_or_none_return=release)
+        result = await service.verify_release_integrity(db, "2.0.0", "/fake/path")
+        assert result.success is False
+
+    async def test_verify_signature_fallback(self, service: UpdateService) -> None:
+        """GPG signature graceful fallback when module unavailable."""
+        from core.signature import verify_gpg_signature
+
+        db = _make_mock_db()
+        release = _make_release(version="2.0.0")
+        db.execute.return_value = _make_async_result(scalar_one_or_none_return=release)
+        settings = MagicMock(spec=UpdateSetting)
+        settings.gpg_public_key = "fake_key"
+        with patch.object(service, "_get_settings", return_value=settings):
+            result = await service.verify_digital_signature(db, "2.0.0", "ZmFrZV9zaWc=")
+        assert "valid" in result
+        assert isinstance(result["valid"], bool)
+
+    async def test_update_public_key(self, service: UpdateService) -> None:
+        """Update the GPG public key in settings."""
+        db = _make_mock_db()
+        settings = MagicMock(spec=UpdateSetting)
+        settings.gpg_public_key = None
+        settings.channel = ReleaseChannel.STABLE
+        settings.schedule = "daily"
+        settings.last_check_result = None
+        settings.last_update_version = None
+        with patch.object(service, "_get_settings", return_value=settings):
+            result = await service.update_public_key(db, "new_public_key")
+        assert result is not None
+        assert settings.gpg_public_key == "new_public_key"
+
 
 class TestUpdateServiceSync:
     """Test GitHub sync integration."""

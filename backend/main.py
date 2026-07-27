@@ -162,6 +162,12 @@ def create_app() -> FastAPI:
         retention_interval = 3600 if settings.environment == "development" else 86400  # 1 hour dev, 24 hours prod
         await data_retention.start(interval_seconds=retention_interval)
 
+        # Initialize and start UpdateScheduler for periodic update checks
+        from services.update_scheduler import UpdateScheduler
+        update_scheduler = UpdateScheduler(AsyncSessionLocal)
+        app.state.update_scheduler = update_scheduler
+        await update_scheduler.start()
+
         # ── Wire remaining domain services into app.state ────────────────────
         from services.ai_verification import AIVerificationPipeline
         from services.challan_dispute_service import ChallanDisputeService
@@ -227,6 +233,8 @@ def create_app() -> FastAPI:
                 app.state.data_retention.stop()
             if hasattr(app.state, 'etl_scheduler'):
                 await app.state.etl_scheduler.stop()
+            if hasattr(app.state, 'update_scheduler'):
+                await app.state.update_scheduler.stop()
 
             await jwks_manager.stop()
             from services.safe_spaces import close_safe_spaces_client

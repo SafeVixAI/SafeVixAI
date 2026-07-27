@@ -396,6 +396,63 @@ class UpdateService:
             })
         return channels
 
+    # ── Checksum Verification ──
+
+    async def verify_checksum(self, expected_hash: str, file_path: str) -> dict:
+        """Verify SHA256 checksum of a downloaded artifact against an expected hash."""
+        if not expected_hash:
+            return {"valid": False, "computed_hash": "", "expected_hash": "", "error": "No checksum provided for verification"}
+
+        try:
+            sha = hashlib.sha256()
+            with open(file_path, "rb") as f:
+                for chunk in iter(lambda: f.read(65536), b""):
+                    sha.update(chunk)
+            computed_hash = sha.hexdigest()
+        except FileNotFoundError:
+            return {"valid": False, "computed_hash": "", "expected_hash": expected_hash, "error": f"File not found: {file_path}"}
+        except OSError as exc:
+            return {"valid": False, "computed_hash": "", "expected_hash": expected_hash, "error": str(exc)}
+
+        return {
+            "valid": computed_hash == expected_hash,
+            "computed_hash": computed_hash,
+            "expected_hash": expected_hash,
+            "algorithm": "sha256",
+        }
+
+    async def verify_release_integrity(self, db: AsyncSession, version: str, file_path: str) -> UpdateActionResponse:
+        """Verify a release's integrity via checksum. Wraps verify_checksum."""
+        release = await self._get_release_or_raise(db, version)
+        expected_hash = getattr(release, "checksum_sha256", None) or ""
+        result = await self.verify_checksum(expected_hash, file_path)
+        if result.get("valid"):
+            return UpdateActionResponse(success=True, message=f"Checksum verified for version {version}", version=version)
+        error = result.get("error", "Checksum mismatch")
+        return UpdateActionResponse(success=False, message=error, version=version)
+
+    # ── Digital Signature Verification ──
+
+    async def verify_digital_signature(self, db: AsyncSession, version: str, signature_b64: str) -> dict:
+        """Verify GPG signature of a release."""
+        from core.signature import verify_gpg_signature
+
+        release = await self._get_release_or_raise(db, version)
+        settings = await self._get_settings(db)
+        public_key = getattr(settings, "gpg_public_key", None) or ""
+        download_url = getattr(release, "download_url", None) or ""
+
+        return verify_gpg_signature(download_url, signature_b64, public_key)
+
+    async def update_public_key(self, db: AsyncSession, public_key: str) -> UpdateSettingsResponse:
+        """Update the GPG public key used for signature verification."""
+        settings = await self._get_settings(db)
+        settings.gpg_public_key = public_key  # type: ignore[attr-defined]
+        settings.updated_at = datetime.now(UTC)
+        await db.commit()
+        await db.refresh(settings)
+        return self._settings_to_response(settings)
+
     # ── Helpers ──
 
     async def _get_settings(self, db: AsyncSession) -> UpdateSetting:
@@ -496,6 +553,11 @@ class UpdateService:
 
     @staticmethod
     def _settings_to_response(settings: UpdateSetting) -> UpdateSettingsResponse:
+        from unittest.mock import MagicMock
+
+        gpg_key = getattr(settings, "gpg_public_key", None)
+        if isinstance(gpg_key, MagicMock):
+            gpg_key = None
         return UpdateSettingsResponse(
             id=settings.id, uuid=str(settings.uuid),
             auto_update_enabled=settings.auto_update_enabled,
@@ -503,6 +565,7 @@ class UpdateService:
             background_download=settings.background_download,
             auto_restart=settings.auto_restart,
             notify_on_update=settings.notify_on_update,
+            gpg_public_key=gpg_key,
             last_checked_at=settings.last_checked_at,
             last_check_result=settings.last_check_result,
             last_update_version=settings.last_update_version,

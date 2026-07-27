@@ -95,10 +95,11 @@ class UpdateInstallationResponse(UpdateInstallationBase):
 class UpdateSettingsBase(BaseModel):
     auto_update_enabled: bool = True
     channel: ReleaseChannel = ReleaseChannel.STABLE
-    schedule: str = Field(default="daily", pattern=r"^(immediate|daily|weekly)$")
+    schedule: str = Field(default="daily", pattern=r"^(immediate|hourly|daily|weekly)$")
     background_download: bool = True
     auto_restart: bool = False
     notify_on_update: bool = True
+    retry_on_failure: bool = True
 
 
 class UpdateSettingsUpdate(UpdateSettingsBase):
@@ -108,6 +109,7 @@ class UpdateSettingsUpdate(UpdateSettingsBase):
 class UpdateSettingsResponse(UpdateSettingsBase):
     id: int
     uuid: str
+    gpg_public_key: Optional[str] = None
     last_checked_at: Optional[datetime] = None
     last_check_result: Optional[str] = None
     last_update_version: Optional[str] = None
@@ -152,3 +154,17 @@ class VersionInfo(BaseModel):
     channel: ReleaseChannel
     last_checked_at: Optional[datetime] = None
     uptime_seconds: Optional[float] = None
+
+
+class ChecksumVerifyResponse(BaseModel):
+    valid: bool
+    computed_hash: str
+    expected_hash: str
+    algorithm: str = "sha256"
+
+
+class SignatureVerifyResponse(BaseModel):
+    valid: bool
+    fingerprint: Optional[str] = None
+    status: str
+    error: Optional[str] = None

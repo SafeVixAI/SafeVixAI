@@ -8,13 +8,16 @@ from __future__ import annotations
 import logging
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.database import get_db
 from core.limiter import limiter
 from models.update_management import ReleaseChannel, UpdateStatus
 from schemas.update_management import (
+    ChecksumVerifyResponse,
+    SignatureVerifyResponse,
     UpdateActionResponse,
     UpdateCheckResponse,
     UpdateHistoryResponse,
@@ -165,6 +168,17 @@ async def list_channels(
     return await service.list_channels(db)
 
 
+@router.get("/scheduler/status")
+async def get_scheduler_status(
+    request: Request,
+) -> dict:
+    """Return update scheduler status."""
+    scheduler = getattr(request.app.state, "update_scheduler", None)
+    if not scheduler:
+        return {"running": False, "last_check": None, "task_active": False}
+    return await scheduler.get_status()
+
+
 @router.get("/settings", response_model=UpdateSettingsResponse)
 async def get_update_settings(
     db: AsyncSession = Depends(get_db),
@@ -182,3 +196,59 @@ async def update_update_settings(
 ) -> UpdateSettingsResponse:
     """Update update settings."""
     return await service.update_settings(db, settings.model_dump(exclude_unset=True))
+
+
+class VerifyFileRequest(BaseModel):
+    file_path: str
+
+
+class VerifySignatureRequest(BaseModel):
+    signature_b64: str
+
+
+class PublicKeyRequest(BaseModel):
+    public_key: str
+
+
+@router.post("/verify/{version}", response_model=UpdateActionResponse)
+async def verify_release(
+    version: str,
+    body: VerifyFileRequest,
+    db: AsyncSession = Depends(get_db),
+    service: UpdateService = Depends(get_update_service),
+) -> UpdateActionResponse:
+    """Verify a release's checksum integrity."""
+    try:
+        return await service.verify_release_integrity(db, version, body.file_path)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
+@router.post("/verify-signature/{version}", response_model=SignatureVerifyResponse)
+async def verify_release_signature(
+    version: str,
+    body: VerifySignatureRequest,
+    db: AsyncSession = Depends(get_db),
+    service: UpdateService = Depends(get_update_service),
+) -> SignatureVerifyResponse:
+    """Verify a release's GPG digital signature."""
+    try:
+        result = await service.verify_digital_signature(db, version, body.signature_b64)
+        return SignatureVerifyResponse(
+            valid=result.get("valid", False),
+            fingerprint=result.get("fingerprint"),
+            status=result.get("status", "error"),
+            error=result.get("error"),
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
+@router.put("/settings/public-key", response_model=UpdateSettingsResponse)
+async def update_public_key(
+    body: PublicKeyRequest,
+    db: AsyncSession = Depends(get_db),
+    service: UpdateService = Depends(get_update_service),
+) -> UpdateSettingsResponse:
+    """Update the GPG public key used for signature verification."""
+    return await service.update_public_key(db, body.public_key)

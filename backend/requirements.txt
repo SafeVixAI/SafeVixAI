@@ -27,6 +27,9 @@ redis[hiredis]==8.0.1
 # --- HTTP Client ---
 httpx==0.28.1
 
+# --- GPG Signature Verification ---
+python-gnupg==0.5.4
+
 # --- Geospatial ---
 geopandas==1.1.4
 shapely==2.1.2

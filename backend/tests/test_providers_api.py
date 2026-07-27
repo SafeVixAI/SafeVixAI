@@ -247,10 +247,12 @@ def _make_app(mock_session, monkeypatch=None):
     one function-scoped loop and closed on another.
     """
     if monkeypatch:
+        monkeypatch.setenv("REDIS_URL", "")
         monkeypatch.setenv("ENVIRONMENT", "test")
         monkeypatch.setenv("ADMIN_SECRET", "test-admin-secret-2026")
     else:
         import os
+        os.environ["REDIS_URL"] = ""
         os.environ["ENVIRONMENT"] = "test"
         os.environ["ADMIN_SECRET"] = "test-admin-secret-2026"
 
@@ -259,7 +261,13 @@ def _make_app(mock_session, monkeypatch=None):
     # Use the already-imported core.database engine — do NOT reimport
     # modules on this event loop to avoid loop-cross-contamination.
     from api.v1.providers import router as providers_router
+    from core.config import get_settings
     from core.database import get_db
+    from core.limiter import limiter as _limiter
+    get_settings.cache_clear()
+    _limiter.enabled = False
+
+    app = FastAPI()
 
     app = FastAPI()
     app.include_router(providers_router)
@@ -276,7 +284,7 @@ def _make_app(mock_session, monkeypatch=None):
     return app
 
 
-@pytest.mark.asyncio(loop_scope="module")
+@pytest.mark.asyncio
 async def test_create_provider_config_returns_201(monkeypatch, mock_db, sample_config):  # B1
     """POST /api/v1/providers with minimal fields returns 201."""
     mock_db.execute.return_value = MockResult(row=None)  # No duplicate
@@ -314,7 +322,7 @@ async def test_create_provider_config_returns_201(monkeypatch, mock_db, sample_c
     mock_db.commit.assert_awaited_once()
 
 
-@pytest.mark.asyncio(loop_scope="module")
+@pytest.mark.asyncio
 async def test_update_provider_config_returns_updated(monkeypatch, mock_db, sample_config):  # B2
     """PUT /api/v1/providers/{id} updates a single field."""
     mock_db.execute.return_value = MockResult(row=sample_config)
@@ -335,7 +343,7 @@ async def test_update_provider_config_returns_updated(monkeypatch, mock_db, samp
     mock_db.commit.assert_awaited_once()
 
 
-@pytest.mark.asyncio(loop_scope="module")
+@pytest.mark.asyncio
 async def test_delete_provider_config_returns_204(monkeypatch, mock_db, sample_config):  # B3
     """DELETE /api/v1/providers/{id} returns 204."""
     mock_db.execute.return_value = MockResult(row=sample_config)
@@ -352,7 +360,7 @@ async def test_delete_provider_config_returns_204(monkeypatch, mock_db, sample_c
     mock_db.commit.assert_awaited_once()
 
 
-@pytest.mark.asyncio(loop_scope="module")
+@pytest.mark.asyncio
 async def test_delete_non_existent_returns_404(monkeypatch, mock_db):  # B4
     """DELETE /api/v1/providers/{id} with non-existent ID returns 404."""
     mock_db.execute.return_value = MockResult(row=None)
@@ -369,7 +377,7 @@ async def test_delete_non_existent_returns_404(monkeypatch, mock_db):  # B4
     assert "not found" in detail.get("detail", "").lower()
 
 
-@pytest.mark.asyncio(loop_scope="module")
+@pytest.mark.asyncio
 async def test_update_non_existent_returns_404(monkeypatch, mock_db):  # B5
     """PUT /api/v1/providers/{id} with non-existent ID returns 404."""
     mock_db.execute.return_value = MockResult(row=None)
@@ -387,7 +395,7 @@ async def test_update_non_existent_returns_404(monkeypatch, mock_db):  # B5
     assert resp.status_code == 404
 
 
-@pytest.mark.asyncio(loop_scope="module")
+@pytest.mark.asyncio
 async def test_create_duplicate_provider_returns_409(monkeypatch, mock_db, sample_config):  # B6
     """POST /api/v1/providers with duplicate provider_name returns 409."""
     mock_db.execute.return_value = MockResult(row=sample_config)  # Found existing

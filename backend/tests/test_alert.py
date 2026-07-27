@@ -115,8 +115,8 @@ def test_alert_circuit_breaker_tripped() -> None:
 
 
 def test_get_alert_service_singleton() -> None:
-    from core.alert import _instance
-    _instance = None
+    import core.alert as _ca
+    _ca._instance = None
     a = get_alert_service()
     b = get_alert_service()
     assert a is b

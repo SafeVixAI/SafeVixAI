@@ -798,3 +798,10 @@ ALERT_EMAIL=your-gmail@gmail.com
 ALERT_EMAIL_PASSWORD=abcd efgh ijkl mnop   # Gmail App Password
 ALERT_EMAIL_TO=team-lead@gmail.com
 ```
+
+## Related
+
+- [SYSTEM_DESIGN.md](SYSTEM_DESIGN.md) — Detailed system design and component specs
+- [OBSERVABILITY.md](OBSERVABILITY.md) — Logging, metrics, tracing architecture
+- [ARCHITECTURE.md](docs/ARCHITECTURE.md) — System architecture overview
+- [UIUX.md](docs/UIUX.md) — User experience and interface design

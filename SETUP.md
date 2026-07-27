@@ -378,3 +378,9 @@ npm run dev -- -p 3001
 
 *For full deployment to Vercel + Render.com, see [`docs/Deployment.md`](docs/Deployment.md)*
 *For the complete app overview, see [`docs/Agent.md`](docs/Agent.md)*
+
+## Related
+
+- [TESTING.md](TESTING.md) — Testing standards and coverage
+- [OPERATIONS.md](OPERATIONS.md) — Day-to-day operations and scaling
+- [docs/MONITORING_SETUP.md](docs/MONITORING_SETUP.md) — Prometheus/Grafana/Loki setup

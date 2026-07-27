@@ -378,3 +378,10 @@ If the above doesn't solve your issue:
 - Search [GitHub Issues](https://github.com/SafeVixAI/SafeVixAI/issues)
 - Ask in [GitHub Discussions](https://github.com/SafeVixAI/SafeVixAI/discussions)
 - See [SUPPORT.md](./SUPPORT.md) for all support channels
+
+## Related
+
+- [RUNBOOKS.md](RUNBOOKS.md) — Incident response runbooks
+- [OBSERVABILITY.md](OBSERVABILITY.md) — Logging, metrics, traces, alerting
+- [SUPPORT.md](SUPPORT.md) — Support channels and response times
+- [FAQ.md](FAQ.md) — Frequently asked questions

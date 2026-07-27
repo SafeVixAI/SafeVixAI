@@ -1,4 +1,4 @@
-# SafeVixAI — AI Instructions
+# SafeVixAI ï¿½ AI Instructions
 
 > **Version 2.1** | AI-powered road safety platform  
 > Reflects the current chatbot/agent architecture.
@@ -39,7 +39,7 @@ All agent logic lives under `chatbot_service/`:
 
 ## 9 Intent Classes
 
-Defined in `chatbot_service/agent/intent_detector.py`. Uses keyword matching + regex — **not** a separate LLM call (<1ms).
+Defined in `chatbot_service/agent/intent_detector.py`. Uses keyword matching + regex ï¿½ **not** a separate LLM call (<1ms).
 
 | Intent | Triggers |
 |--------|----------|
@@ -91,8 +91,8 @@ If all 10 providers fail, `alert_service.py` (project root) sends an email with 
 ### Indian Language Auto-Routing (Separate Path, Not in Chain)
 
 - **Language detection:** Unicode script range regex (Devnagari, Tamil, Telugu, etc.)
-- **Sarvam-30B** — General Indic queries
-- **Sarvam-105B** — Legal/challan queries in Indic languages (higher accuracy)
+- **Sarvam-30B** ï¿½ General Indic queries
+- **Sarvam-105B** ï¿½ Legal/challan queries in Indic languages (higher accuracy)
 - Direct Sarvam API used if `SARVAM_API_KEY` is set
 - Falls back to `HF_TOKEN` via HuggingFace Inference API if Sarvam key absent
 
@@ -129,7 +129,7 @@ SYSTEM_PROMPT = (
     "navigation, and road authority escalation. "
     "Always answer concisely in the SAME language the user writes in (Hindi, Tamil, Telugu, etc.). "
     "For life-threatening situations, always lead with 112 (universal emergency) or 102 (ambulance). "
-    "Be factual — cite MV Act sections when answering challan questions."
+    "Be factual ï¿½ cite MV Act sections when answering challan questions."
 )
 ```
 
@@ -169,7 +169,7 @@ python data/build_vectorstore.py
 
 ### SafetyChecker (`chatbot_service/agent/safety_checker.py`)
 
-- `SafetyChecker.evaluate()` — Blocks prompt injection, hate speech, dangerous instructions
+- `SafetyChecker.evaluate()` ï¿½ Blocks prompt injection, hate speech, dangerous instructions
 - 12-pattern prompt injection guard
 - All injury responses **must** start with "Call 112 immediately"
 
@@ -228,7 +228,7 @@ This mapping is correctly used in `VoiceInput.tsx` and the assistant page `speec
 ## Conversation Memory
 
 - **Storage:** Redis with 24h TTL (`config.py: session_ttl_seconds = 86400`)
-- **Library:** `chatbot_service/memory/conversation_memory.py` — `ConversationMemoryStore`
+- **Library:** `chatbot_service/memory/conversation_memory.py` ï¿½ `ConversationMemoryStore`
 - **Fallback:** In-memory store if Redis is unavailable
 - **Session ID:** Generated per conversation and passed as `session_id` in chat requests
 
@@ -236,7 +236,7 @@ This mapping is correctly used in `VoiceInput.tsx` and the assistant page `speec
 
 ## Offline AI
 
-All offline AI runs client-side in the browser — no server required.
+All offline AI runs client-side in the browser ï¿½ no server required.
 
 | Component | Technology | Model/Size | File |
 |-----------|-----------|------------|------|
@@ -263,7 +263,7 @@ Only activates in production (`npm run build && npm start`), not in dev mode.
 | Decision | Why |
 |----------|-----|
 | Two separate FastAPI services | Chatbot has heavy ML deps (torch ~2GB); backend stays lightweight |
-| 10-provider LLM fallback | Zero downtime — if one API rate-limits, next takes over |
+| 10-provider LLM fallback | Zero downtime ï¿½ if one API rate-limits, next takes over |
 | Sarvam AI for Indian languages | Trained on 4 trillion Indic tokens; best Hindi/Tamil legal accuracy |
 | DuckDB for challans (not LLM) | Deterministic SQL; LLMs hallucinate fine amounts |
 | ChromaDB committed to git | Render cold-starts need pre-built vectorstore; rebuild takes 10 min |
@@ -291,12 +291,20 @@ Only activates in production (`npm run build && npm start`), not in dev mode.
 ## Critical Rules (Never Break)
 
 1. Any AI response about injuries **must** start with "Call 112 immediately"
-2. Never delete `chatbot_service/data/chroma_db/` — it's committed for Render deployment
-3. Backend and chatbot have **separate** `.venv`, `.env`, `requirements.txt` — never mix dependencies
-4. WebLLM Phi-3 model (2.2GB) downloads on-demand only — never preload without user consent
+2. Never delete `chatbot_service/data/chroma_db/` ï¿½ it's committed for Render deployment
+3. Backend and chatbot have **separate** `.venv`, `.env`, `requirements.txt` ï¿½ never mix dependencies
+4. WebLLM Phi-3 model (2.2GB) downloads on-demand only ï¿½ never preload without user consent
 5. All injury responses must pass through `SafetyChecker.evaluate()`
 6. Do **not** change the system prompt without testing all 9 intent classes
 
 ---
 
 *Document version: 2.1 | AI-powered road safety platform*
+
+## Related
+
+- [TESTING.md](../TESTING.md) â€” AI testing standards
+- [BENCHMARKS.md](../BENCHMARKS.md) â€” Benchmarking methodology
+- [AGENTS.md](../AGENTS.md) â€” Agent configuration and tool definitions
+- [docs/MEMORY.md](MEMORY.md) â€” Conversation memory architecture
+- [docs/RAG.md](RAG.md) â€” Vector search and retrieval

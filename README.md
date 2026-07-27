@@ -231,10 +231,16 @@ SafeVixAI/
 | [docs/SDK_GUIDE.md](docs/SDK_GUIDE.md) | API integration, SDK usage, auth, rate limits |
 | [docs/ERROR_CODES.md](docs/ERROR_CODES.md) | Complete error code reference |
 | [docs/PRIVACY.md](docs/PRIVACY.md) | GDPR/DPDP compliance, data collection, privacy architecture |
+| [BENCHMARKS.md](BENCHMARKS.md) | Performance benchmarks and k6 load testing |
+| [TESTING.md](TESTING.md) | Testing standards and coverage across all services |
 
 ### Operations & Quality
 | Document | Description |
 |----------|-------------|
+| [OPERATIONS.md](OPERATIONS.md) | Day-to-day operations, deployment, scaling |
+| [MONITORING.md](MONITORING.md) | Metrics, dashboards, uptime monitoring |
+| [OBSERVABILITY.md](OBSERVABILITY.md) | Logging, metrics, traces, alerting |
+| [RUNBOOKS.md](RUNBOOKS.md) | Incident response runbooks |
 | [docs/STARTER_GUIDE.md](docs/STARTER_GUIDE.md) | Getting started for absolute beginners |
 | [docs/ADVANCED_SETUP.md](docs/ADVANCED_SETUP.md) | Production deployment, HA, multi-region, SSL, CDN |
 | [docs/SCALING_GUIDE.md](docs/SCALING_GUIDE.md) | Horizontal scaling, caching, CQRS, replication |
@@ -247,6 +253,16 @@ SafeVixAI/
 | [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) | Common issues and resolutions (not created yet) |
 | [docs/TESTING_POLICY.md](docs/TESTING_POLICY.md) | Testing standards, coverage targets, CI integration |
 | [docs/ERROR_CODE_REFERENCE.md](docs/ERROR_CODE_REFERENCE.md) | Complete error codes organized by domain |
+
+### Examples
+| Document | Description |
+|----------|-------------|
+| [examples/README.md](examples/README.md) | Example code and integration patterns |
+| [examples/api-client/](examples/api-client/) | Python and TypeScript API client examples |
+| [examples/emergency/](examples/emergency/) | Emergency locator and SOS integration |
+| [examples/challan/](examples/challan/) | Challan calculation examples |
+| [examples/chatbot/](examples/chatbot/) | Chatbot API integration patterns |
+| [examples/cookbook/](examples/cookbook/) | Recipe-based integration cookbook |
 
 ### Development
 | Document | Description |

@@ -199,3 +199,10 @@ When alerts fire, the dashboard should link directly to the relevant runbook:
 - All LLMs down → [runbooks/all-llms-down.md](./runbooks/all-llms-down.md)
 - Database down → [runbooks/db-down.md](./runbooks/db-down.md)
 - High error rate → [runbooks/high-error-rate.md](./runbooks/high-error-rate.md)
+
+## Related
+
+- [MONITORING.md](../MONITORING.md) — Monitoring overview and dashboards
+- [OBSERVABILITY.md](../OBSERVABILITY.md) — Observability architecture
+- [OPERATIONS.md](../OPERATIONS.md) — Operations and incident response
+- [TELEMETRY.md](TELEMETRY.md) — Telemetry configuration and data collection

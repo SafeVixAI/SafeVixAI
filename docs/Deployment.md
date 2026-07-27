@@ -1,4 +1,4 @@
-# SafeVixAI v1.0.0 — Deployment Guide
+# SafeVixAI v1.0.0 ï¿½ Deployment Guide
 
 ## Infrastructure Overview (All Free Tier)
 
@@ -17,12 +17,12 @@
 
 ## Step 1: Create Free Accounts
 
-1. **Groq** — [console.groq.com](https://console.groq.com) ? Create account ? API Keys ? Create Key (starts with `gsk_`)
-2. **Supabase** — [supabase.com](https://supabase.com) ? New project ? Region: Singapore (closest to India) ? Save password
-3. **Upstash** — [upstash.com](https://upstash.com) ? New Redis Database ? Global ? Copy `REDIS_URL`
-4. **Vercel** — [vercel.com](https://vercel.com) ? Connect GitHub account
-5. **Render.com** — [render.com](https://render.com) ? Connect GitHub account
-6. **data.gov.in** — [data.gov.in](https://data.gov.in) ? Register ? Get API key (for NHAI data)
+1. **Groq** ï¿½ [console.groq.com](https://console.groq.com) ? Create account ? API Keys ? Create Key (starts with `gsk_`)
+2. **Supabase** ï¿½ [supabase.com](https://supabase.com) ? New project ? Region: Singapore (closest to India) ? Save password
+3. **Upstash** ï¿½ [upstash.com](https://upstash.com) ? New Redis Database ? Global ? Copy `REDIS_URL`
+4. **Vercel** ï¿½ [vercel.com](https://vercel.com) ? Connect GitHub account
+5. **Render.com** ï¿½ [render.com](https://render.com) ? Connect GitHub account
+6. **data.gov.in** ï¿½ [data.gov.in](https://data.gov.in) ? Register ? Get API key (for NHAI data)
 
 ---
 
@@ -67,7 +67,7 @@ cp .env.example .env
 alembic upgrade head
 
 # 6. Verify tables were created
-# Check Supabase Table Editor — should see 6 tables
+# Check Supabase Table Editor ï¿½ should see 6 tables
 ```
 
 ### Download Required PDFs (for RAG)
@@ -91,7 +91,7 @@ python backend/scripts/data/seed_violations.py
 # Also creates: frontend/public/offline-data/india-emergency.geojson
 python backend/scripts/app/seed_emergency.py
 
-# Build ChromaDB vector store from PDFs — RUN ONCE, takes 5-10 minutes
+# Build ChromaDB vector store from PDFs ï¿½ RUN ONCE, takes 5-10 minutes
 # Creates: chatbot_service/data/chroma_db/ directory (committed to git)
 python chatbot_service/data/build_vectorstore.py
 ```
@@ -160,9 +160,9 @@ This bypasses AuthGuard at the component level, preventing redirect loops while 
 npm run build && npm start
 
 # Then in Chrome:
-# 1. DevTools ? Application ? Service Workers — verify registered
-# 2. DevTools ? Network — check "Offline"
-# 3. Navigate to /emergency — hospitals should still show
+# 1. DevTools ? Application ? Service Workers ï¿½ verify registered
+# 2. DevTools ? Network ï¿½ check "Offline"
+# 3. Navigate to /emergency ï¿½ hospitals should still show
 ```
 
 ---
@@ -292,7 +292,7 @@ curl "https://safevixai-api.onrender.com/api/v1/challan/calculate?violation_code
 
 ## CI/CD (GitHub Actions)
 
-Configured in `.github/workflows/` — 19 workflow files:
+Configured in `.github/workflows/` ï¿½ 19 workflow files:
 
 | Workflow | Trigger | Purpose |
 |---|---|---|
@@ -360,7 +360,7 @@ MAIN_BACKEND_BASE_URL=http://localhost:8000
 
 # RAG
 CHROMA_PERSIST_DIR=./data/chroma_db
-EMBEDDING_MODEL=LocalHashEmbeddingFunction (zero-dependency)  # Config hint — runtime uses LocalHashEmbeddingFunction
+EMBEDDING_MODEL=LocalHashEmbeddingFunction (zero-dependency)  # Config hint ï¿½ runtime uses LocalHashEmbeddingFunction
 
 # Cache
 REDIS_URL=rediss://default:[TOKEN]@[HOST].upstash.io:6379
@@ -419,9 +419,9 @@ Backed by IndicSeamlessService (SeamlessM4T for ASR + translation).
 
 ## Render.com Free Tier Limitations
 
-- **512MB RAM** — sufficient for FastAPI + ChromaDB reads (build vectorstore before deploy)
-- **750 hrs/month** — one service runs 24/7 for a month
-- **Cold starts** — first request after inactivity takes ~30s (free tier sleeps after 15min)
+- **512MB RAM** ï¿½ sufficient for FastAPI + ChromaDB reads (build vectorstore before deploy)
+- **750 hrs/month** ï¿½ one service runs 24/7 for a month
+- **Cold starts** ï¿½ first request after inactivity takes ~30s (free tier sleeps after 15min)
   - Mitigation: Set up a `/health` ping every 14 minutes via UptimeRobot (free)
 
 ---
@@ -460,7 +460,7 @@ curl "http://localhost:8000/api/v1/challan/calculate?violation_code=MVA_185"
 
 ## Free Tier Cold Start Mitigation
 
-Render free web services spin down after **15 minutes of inactivity** and take **30–60 seconds** to cold start. The app mitigates this with three layers:
+Render free web services spin down after **15 minutes of inactivity** and take **30ï¿½60 seconds** to cold start. The app mitigates this with three layers:
 
 ### 1. cron-job.org (Automatic Keep-Alive)
 
@@ -474,16 +474,16 @@ Set up two free cron jobs at [cron-job.org](https://cron-job.org) (no signup cos
 1. Create account at cron-job.org
 2. Add new cron job ? URL, 10-minute interval, GET request
 3. Disable "Save Responses" to save their resources
-4. Both jobs stay free forever (10 min interval = 6 jobs/day × 30 days = 180 requests/month ˜ free)
+4. Both jobs stay free forever (10 min interval = 6 jobs/day ï¿½ 30 days = 180 requests/month ï¿½ free)
 
 ### 2. Client-Side Warm-Up (Automatic)
 
 The frontend automatically pings both `/health` endpoints:
 
-- **On page load** — immediately sends warm-up pings
-- **Every 9 minutes** — interval timer keeps instances awake
-- **On tab focus** — re-warms when user returns after idle
-- **Emergency page** — pre-warms before user needs to act
+- **On page load** ï¿½ immediately sends warm-up pings
+- **Every 9 minutes** ï¿½ interval timer keeps instances awake
+- **On tab focus** ï¿½ re-warms when user returns after idle
+- **Emergency page** ï¿½ pre-warms before user needs to act
 
 This runs in `EnterpriseClientAppHooks.tsx` (keep-alive pings) and `app/emergency/page.tsx` (emergency pre-warm).
 
@@ -495,9 +495,9 @@ When a request takes >5 seconds (cold start signal), a "Connecting..." banner ap
 
 | Scenario | Delay | User Sees |
 |----------|-------|-----------|
-| First visit (or after >15 min idle) | 30–60s warming + page load | "Connecting..." banner, then normal page |
-| Active user (returning within 15 min) | ~1–2s | No delay, instant response |
-| cron-job.org ping arrives | 30–60s warming (server wakes up) | No user impact (next user request is fast) |
+| First visit (or after >15 min idle) | 30ï¿½60s warming + page load | "Connecting..." banner, then normal page |
+| Active user (returning within 15 min) | ~1ï¿½2s | No delay, instant response |
+| cron-job.org ping arrives | 30ï¿½60s warming (server wakes up) | No user impact (next user request is fast) |
 | Emergency page visited | Immediate pre-warm ping | Minimal delay on SOS actions |
 
 > **Note:** On free tier, the combined idle+startup time per month is ~750 hours per service. With 10-min keep-alive, expect ~744 hours/month uptime (99.9%).
@@ -505,3 +505,10 @@ When a request takes >5 seconds (cold start signal), a "Connecting..." banner ap
 ---
 
 *Document version: 2.1 | AI-powered road safety platform | Updated: July 2026*
+
+## Related
+
+- [OPERATIONS.md](../OPERATIONS.md) â€” Day-to-day operations runbook
+- [RUNBOOKS.md](../RUNBOOKS.md) â€” Incident response runbooks
+- [MONITORING.md](../MONITORING.md) â€” Metrics and uptime monitoring
+- [DEPLOYMENT_STRATEGIES.md](DEPLOYMENT_STRATEGIES.md) â€” Blue-green, canary, rolling updates

@@ -131,3 +131,9 @@ Performance regression is checked in CI:
 - 5% regression in p95 latency triggers a warning
 - 10% regression in p95 latency fails the workflow
 - Bundle size increases > 5KB trigger a warning
+
+## Related
+
+- [BENCHMARKS.md](../BENCHMARKS.md) — Performance benchmarks overview
+- [MONITORING.md](../MONITORING.md) — Metrics dashboards and uptime monitoring
+- [SCALING_GUIDE.md](SCALING_GUIDE.md) — Horizontal scaling and caching

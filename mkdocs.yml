@@ -158,14 +158,20 @@ nav:
       - Migration Guide: MIGRATION_GUIDE.md
       - Upgrade Guide: UPGRADE_GUIDE.md
   - Security & Compliance:
-      - Security: Security.md
+      - Security Overview: Security.md
       - Authentication: AUTHENTICATION.md
       - Authorization: AUTHORIZATION.md
+      - Terms of Service: ../TERMS.md
       - Privacy: ../PRIVACY.md
-      - Terms of Service: ../SECURITY.md
-      - Code of Conduct: ../CODE_OF_CONDUCT.md
       - Security Policy: ../SECURITY.md
+      - Code of Conduct: ../CODE_OF_CONDUCT.md
+      - Security Requirements: SECURITY_REQUIREMENTS.md
   - Operations:
+      - Operations Overview: ../OPERATIONS.md
+      - Monitoring: ../MONITORING.md
+      - Observability: ../OBSERVABILITY.md
+      - Runbooks Overview: ../RUNBOOKS.md
+      - Benchmarks: ../BENCHMARKS.md
       - Deployment: Deployment.md
       - Advanced Setup: ADVANCED_SETUP.md
       - Deployment Strategies: DEPLOYMENT_STRATEGIES.md
@@ -202,10 +208,18 @@ nav:
       - Style Guide: ../STYLE_GUIDE.md
       - Code Review Guide: CODE_REVIEW_GUIDE.md
       - Testing Policy: TESTING_POLICY.md
+      - Testing: ../TESTING.md
       - Accessibility: ACCESSIBILITY.md
   - Design & UX:
       - Design System: DESIGN.md
       - UI/UX Specs: UIUX.md
+  - Examples:
+      - Overview: ../examples/README.md
+      - API Client: ../examples/api-client/README.md
+      - Emergency: ../examples/emergency/README.md
+      - Challan Calculator: ../examples/challan/README.md
+      - Chatbot: ../examples/chatbot/README.md
+      - Cookbook: ../examples/cookbook/README.md
   - Community & Governance:
       - Community Guide: COMMUNITY.md
       - Contributing: Contributing.md

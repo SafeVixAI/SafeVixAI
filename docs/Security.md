@@ -179,3 +179,10 @@ Implemented via `slowapi` (IP-based):
 ---
 
 *Document version: 2.0 | AI-powered road safety platform | Updated: June 2026*
+
+## Related
+
+- [AUTHENTICATION.md](AUTHENTICATION.md) — Auth flows and JWT validation
+- [AUTHORIZATION.md](AUTHORIZATION.md) — RBAC and permission model
+- [THREAT_MODEL.md](THREAT_MODEL.md) — Threat modeling and risk assessment
+- [SECURITY_REQUIREMENTS.md](SECURITY_REQUIREMENTS.md) — Detailed security requirements

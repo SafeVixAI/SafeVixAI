@@ -238,3 +238,9 @@ Comment on a `good first issue` saying "I'd like to work on this — could I get
 - Explore the [Documentation Site](https://safevixai.github.io/SafeVixAI/) for complete docs
 - Check [ROADMAP.md](../ROADMAP.md) for planned features
 - Look at [ADOPTERS.md](../ADOPTERS.md) to see who's using SafeVixAI
+
+## Related
+
+- [TESTING.md](../TESTING.md) — Testing standards and coverage
+- [OPERATIONS.md](../OPERATIONS.md) — Production operations and deployment
+- [SETUP.md](../SETUP.md) — Detailed setup guide

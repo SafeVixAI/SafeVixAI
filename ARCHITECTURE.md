@@ -16,3 +16,10 @@ SafeVixAI/
 Key architecture decisions are documented in [docs/adr/](docs/adr/).
 
 For deployment architecture, see [docs/Deployment.md](docs/Deployment.md).
+
+## Related
+
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — Full architecture documentation
+- [SYSTEM_DESIGN.md](SYSTEM_DESIGN.md) — Detailed system design and component specs
+- [OBSERVABILITY.md](OBSERVABILITY.md) — Logging, metrics, traces, alerting
+- [MONITORING.md](MONITORING.md) — Metrics dashboards and uptime monitoring

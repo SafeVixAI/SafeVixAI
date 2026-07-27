@@ -1,4 +1,4 @@
-# SafeVixAI — Architecture v3.1
+# SafeVixAI ï¿½ Architecture v3.1
 
 > **AI-powered road safety platform** | Free & open-source (?0 infra cost)
 
@@ -8,21 +8,21 @@
 
 ```
 +-------------------------------------------------------------+
-¦  frontend/         Next.js 15 + React 19 + TypeScript PWA   ¦
-¦  Port 3000         MapLibre GL 5, WebLLM, DuckDB-Wasm       ¦
-¦                    Zustand state, Tailwind CSS, GSAP         ¦
+ï¿½  frontend/         Next.js 15 + React 19 + TypeScript PWA   ï¿½
+ï¿½  Port 3000         MapLibre GL 5, WebLLM, DuckDB-Wasm       ï¿½
+ï¿½                    Zustand state, Tailwind CSS, GSAP         ï¿½
 +-------------------------------------------------------------+
-               ¦ REST/WS (JWT Bearer)      ¦ REST (JWT Bearer)
+               ï¿½ REST/WS (JWT Bearer)      ï¿½ REST (JWT Bearer)
 +--------------?---------+  +-------------?------------------+
-¦  backend/              ¦  ¦  chatbot_service/              ¦
-¦  FastAPI :8000         ¦  ¦  FastAPI :8010                  ¦
-¦  PostgreSQL + PostGIS  ¦?-¦  10-provider LLM fallback     ¦
-¦  Redis cache           ¦  ¦  ChromaDB RAG vectorstore       ¦
-¦  DuckDB (challan SQL)  ¦  ¦  13 agent tools                 ¦
-¦  Overpass/Nominatim    ¦  ¦  Redis conversation memory      ¦
-¦  WebSocket /tracking   ¦  ¦  Prompt injection defense       ¦
-¦  28 API route modules  ¦  ¦  IndicSeamless speech           ¦
-¦  CQRS bus + Redlock    ¦  ¦  Lang detection + provider reg  ¦
+ï¿½  backend/              ï¿½  ï¿½  chatbot_service/              ï¿½
+ï¿½  FastAPI :8000         ï¿½  ï¿½  FastAPI :8010                  ï¿½
+ï¿½  PostgreSQL + PostGIS  ï¿½?-ï¿½  10-provider LLM fallback     ï¿½
+ï¿½  Redis cache           ï¿½  ï¿½  ChromaDB RAG vectorstore       ï¿½
+ï¿½  DuckDB (challan SQL)  ï¿½  ï¿½  13 agent tools                 ï¿½
+ï¿½  Overpass/Nominatim    ï¿½  ï¿½  Redis conversation memory      ï¿½
+ï¿½  WebSocket /tracking   ï¿½  ï¿½  Prompt injection defense       ï¿½
+ï¿½  28 API route modules  ï¿½  ï¿½  IndicSeamless speech           ï¿½
+ï¿½  CQRS bus + Redlock    ï¿½  ï¿½  Lang detection + provider reg  ï¿½
 +------------------------+  +--------------------------------+
 ```
 
@@ -122,19 +122,19 @@ All routes live in `backend/api/v1/`:
 
 ```
 Request
-  +-- IdempotencyMiddleware        — Idempotency-Key header dedup
-  +-- APIVersioningMiddleware       — Accept header / URL prefix version routing
-  +-- SecurityHeadersMiddleware     — HSTS, CSP, X-Frame-Options, X-Content-Type-Options
-  +-- RequestIDMiddleware           — X-Request-ID / X-Correlation-ID injection
-  +-- PrometheusMetricsMiddleware   — Request count, latency, error metrics
-  +-- CSRFMiddleware                — CSRF token validation for state-changing requests
-  +-- TenantIsolationMiddleware     — Multi-tenant data boundary enforcement
-  +-- AllowedHostsMiddleware        — Host header whitelist validation
-  +-- QueryProfilerMiddleware       — Slow query logging and analysis
-  +-- GeoJSONCompressionMiddleware  — Compress large GeoJSON responses
-  +-- CORSCheckMiddleware           — CORS origin pre-validation
-  +-- FastAPI CORSMiddleware        — Standard CORS headers
-  +-- ApiResponseMiddleware         — Uniform API envelope wrapping
+  +-- IdempotencyMiddleware        ï¿½ Idempotency-Key header dedup
+  +-- APIVersioningMiddleware       ï¿½ Accept header / URL prefix version routing
+  +-- SecurityHeadersMiddleware     ï¿½ HSTS, CSP, X-Frame-Options, X-Content-Type-Options
+  +-- RequestIDMiddleware           ï¿½ X-Request-ID / X-Correlation-ID injection
+  +-- PrometheusMetricsMiddleware   ï¿½ Request count, latency, error metrics
+  +-- CSRFMiddleware                ï¿½ CSRF token validation for state-changing requests
+  +-- TenantIsolationMiddleware     ï¿½ Multi-tenant data boundary enforcement
+  +-- AllowedHostsMiddleware        ï¿½ Host header whitelist validation
+  +-- QueryProfilerMiddleware       ï¿½ Slow query logging and analysis
+  +-- GeoJSONCompressionMiddleware  ï¿½ Compress large GeoJSON responses
+  +-- CORSCheckMiddleware           ï¿½ CORS origin pre-validation
+  +-- FastAPI CORSMiddleware        ï¿½ Standard CORS headers
+  +-- ApiResponseMiddleware         ï¿½ Uniform API envelope wrapping
 Response
 ```
 
@@ -227,7 +227,7 @@ Enterprise-grade patterns added in Batch 16-22 hardening:
 | `core/security.py` | RS256 JWT | RS256 JWT validation with atomic JWKS fetching and distributed caching |
 | `core/jwks.py` | JWKS Manager | Key rotation, caching (TTL-based), historical key fallback for gradual rotation |
 | `core/alert.py` | Email Alerts | When all 10 LLM providers fail, sends email with 3 diagnostic solutions. 5-min cooldown. |
-| `core/redis_client.py` | Stampede Protection | `get_json_with_stampede_protection()` — Redis SET NX EX mutex + stale-while-revalidate + retry |
+| `core/redis_client.py` | Stampede Protection | `get_json_with_stampede_protection()` ï¿½ Redis SET NX EX mutex + stale-while-revalidate + retry |
 | `models/values.py` | Value Objects | `Coordinates(lat, lon)` with haversine `distance_to()`, `Severity(level)` with `from_risk_score()`, `Distance(meters)` |
 | `models/schemas_*.py` | Domain Schemas | 9 supplementary domain-specific Pydantic schema files alongside monolithic `schemas.py` |
 
@@ -292,12 +292,12 @@ flowchart LR
     J -->|fail| K[Template - deterministic fallback]
 ```
 
-> Language detection is regex-based (Unicode script ranges for Devanagari, Tamil, Telugu, Kannada, Bengali, etc.) — no NLTK dependency.
+> Language detection is regex-based (Unicode script ranges for Devanagari, Tamil, Telugu, Kannada, Bengali, etc.) ï¿½ no NLTK dependency.
 
 ### Indian Language Auto-Routing
 
-- **Sarvam-30B** — General Indian language queries (Hindi, Tamil, Telugu, etc.)
-- **Sarvam-105B** — Legal/challan queries in Indian languages (higher accuracy)
+- **Sarvam-30B** ï¿½ General Indian language queries (Hindi, Tamil, Telugu, etc.)
+- **Sarvam-105B** ï¿½ Legal/challan queries in Indian languages (higher accuracy)
 - If `SARVAM_API_KEY` is set ? direct Sarvam API; otherwise falls back to `HF_TOKEN` via HuggingFace Inference API
 
 ### 13 Agent Tools
@@ -320,9 +320,9 @@ flowchart LR
 
 ### Speech Translation
 
-- `POST /speech/translate` — ASR + translation for 14 Indian languages
-- `GET /speech/status` — Service health check
-- `IndicSeamlessService` — Indian language ASR/TTS pipeline (IndicSeamless models)
+- `POST /speech/translate` ï¿½ ASR + translation for 14 Indian languages
+- `GET /speech/status` ï¿½ Service health check
+- `IndicSeamlessService` ï¿½ Indian language ASR/TTS pipeline (IndicSeamless models)
 
 ---
 
@@ -334,7 +334,7 @@ flowchart LR
 /                          Landing / Home
 /assistant                 AI chatbot assistant
 /auth/*                    Authentication flow (callback, error)
-/bystander                 Bystander mode — witness reporting
+/bystander                 Bystander mode ï¿½ witness reporting
 /challan                   Challan/fine calculator
 /command-center            Emergency command center dashboard
 /emergency                 Emergency locator
@@ -388,19 +388,19 @@ Key modules in `frontend/lib/`:
 
 ```
 components/
-+-- ui/               — shadcn/ui primitives (button, card, dialog, input, etc.)
-+-- maps/             — MapLibre GL map components (dynamic import, ssr: false)
-+-- auth/             — Login/signup forms, AuthGuard
-+-- chat/             — Chat interface, message bubbles, streaming text
-+-- crash/            — Crash detection overlay, CrashCountdown UI
-+-- dashboard/        — Citizen and officer dashboards
-+-- first-aid/        — First-aid step-by-step guides
-+-- guide/            — Safety guide cards and detail views
-+-- profile/          — User profile editor
-+-- report/           — Road issue report forms
-+-- search/           — Search suggestions, autocomplete
-+-- voice-input/      — VoiceInput component (14 Indian languages)
-+-- command-center/   — Emergency command center widgets
++-- ui/               ï¿½ shadcn/ui primitives (button, card, dialog, input, etc.)
++-- maps/             ï¿½ MapLibre GL map components (dynamic import, ssr: false)
++-- auth/             ï¿½ Login/signup forms, AuthGuard
++-- chat/             ï¿½ Chat interface, message bubbles, streaming text
++-- crash/            ï¿½ Crash detection overlay, CrashCountdown UI
++-- dashboard/        ï¿½ Citizen and officer dashboards
++-- first-aid/        ï¿½ First-aid step-by-step guides
++-- guide/            ï¿½ Safety guide cards and detail views
++-- profile/          ï¿½ User profile editor
++-- report/           ï¿½ Road issue report forms
++-- search/           ï¿½ Search suggestions, autocomplete
++-- voice-input/      ï¿½ VoiceInput component (14 Indian languages)
++-- command-center/   ï¿½ Emergency command center widgets
 ```
 
 ---
@@ -433,7 +433,7 @@ flowchart TD
     D2 --> E
 ```
 
-| Aspect | Online — Layer 1 | Offline — Layer 2 |
+| Aspect | Online ï¿½ Layer 1 | Offline ï¿½ Layer 2 |
 |--------|-----------------|-------------------|
 | LLM | 10-provider chain (Groq primary) | WebLLM Phi-3-mini-4k (4-bit, 2.2GB) |
 | Indian Languages | Sarvam AI (30B/105B) | English only |
@@ -449,11 +449,11 @@ flowchart TD
 
 ```mermaid
 graph LR
-    L1[Layer 1 - App Shell] --> L1D["All UI, JS, CSS, fonts — Service Worker precache"]
-    L2[Layer 2 - Emergency POI] --> L2D["india-emergency.geojson — Turf.js haversine"]
+    L1[Layer 1 - App Shell] --> L1D["All UI, JS, CSS, fonts ï¿½ Service Worker precache"]
+    L2[Layer 2 - Emergency POI] --> L2D["india-emergency.geojson ï¿½ Turf.js haversine"]
     L3[Layer 3 - Challan Calc] --> L3D["DuckDB-Wasm + violations.csv + state_overrides.csv"]
     L4[Layer 4 - AI Chatbot] --> L4D["WebLLM Phi-3 Mini ~2.2GB + first-aid.json"]
-    L5[Layer 5 - Road Reports] --> L5D["IndexedDB + Background Sync — offline SOS queue"]
+    L5[Layer 5 - Road Reports] --> L5D["IndexedDB + Background Sync ï¿½ offline SOS queue"]
 ```
 
 ---
@@ -470,7 +470,7 @@ sequenceDiagram
 
     U->>F: GET /api/v1/emergency/nearby?lat=X&lon=Y
     F->>R: Check cache key nearby:lat:lon
-    R-->>F: HIT — return cached result
+    R-->>F: HIT ï¿½ return cached result
     F-->>U: Return cached hospitals/police/fire
 
     Note over F,R: On cache MISS:
@@ -503,7 +503,7 @@ sequenceDiagram
     U->>FE: Types or speaks a message
     FE->>CS: POST /api/v1/chat/
     CS->>CS: SafetyChecker.evaluate()
-    CS->>CS: IntentDetector.detect() — classify into 9 intents
+    CS->>CS: IntentDetector.detect() ï¿½ classify into 9 intents
     CS->>CS: ContextAssembler.assemble()
 
     alt Emergency intent
@@ -511,7 +511,7 @@ sequenceDiagram
         BE-->>CS: Nearby services
     end
     alt Legal intent
-        CS->>C: ChromaDB vector search — top 5 chunks
+        CS->>C: ChromaDB vector search ï¿½ top 5 chunks
         C-->>CS: Relevant law text
     end
 
@@ -565,7 +565,7 @@ sequenceDiagram
     BE->>AR: Route to appropriate authority (ONDC/SLA)
     AR-->>BE: Authority assigned
     BE-->>FE: ReportResponse with tracking ID
-    FE-->>U: "Report filed — Track status"
+    FE-->>U: "Report filed ï¿½ Track status"
     U->>FE: GET /report/track?id=XXX
     FE->>BE: GET /api/v1/roads/status/{id}
     BE-->>FE: Current status (filed ? investigating ? resolved)
@@ -578,36 +578,36 @@ sequenceDiagram
 ```
 SafeVixAI/
 +-- backend/                 FastAPI :8000
-¦   +-- main.py              App factory (create_app ? lifespan ? services)
-¦   +-- api/v1/              28 route modules (registered) + 1 MCP server
-¦   +-- core/                Config, database, redis, security, rate limiter, circuit_breaker, cqrs, alert
-¦   +-- services/            47 service modules (37 core + 10 civic_intel) — 17 wired in app.state
-¦   +-- models/              SQLAlchemy ORM (30) + Pydantic schemas + value objects
-¦   +-- middleware/           Middleware stack (3 registered + 7 inline decorators)
-¦   +-- migrations/          Alembic (25 versions: initial + GiST + city_centers + 22 autogenerated)
-¦   +-- scripts/             DB seeders + data transforms
-¦   +-- data/                violations_seed.csv, state_overrides.csv, chroma_db/
-¦
+ï¿½   +-- main.py              App factory (create_app ? lifespan ? services)
+ï¿½   +-- api/v1/              28 route modules (registered) + 1 MCP server
+ï¿½   +-- core/                Config, database, redis, security, rate limiter, circuit_breaker, cqrs, alert
+ï¿½   +-- services/            47 service modules (37 core + 10 civic_intel) ï¿½ 17 wired in app.state
+ï¿½   +-- models/              SQLAlchemy ORM (30) + Pydantic schemas + value objects
+ï¿½   +-- middleware/           Middleware stack (3 registered + 7 inline decorators)
+ï¿½   +-- migrations/          Alembic (25 versions: initial + GiST + city_centers + 22 autogenerated)
+ï¿½   +-- scripts/             DB seeders + data transforms
+ï¿½   +-- data/                violations_seed.csv, state_overrides.csv, chroma_db/
+ï¿½
 +-- chatbot_service/         FastAPI :8010
-¦   +-- main.py              App factory (create_app ? lifespan ? ChatEngine)
-¦   +-- agent/               ChatEngine graph, IntentDetector, SafetyChecker, ContextAssembler
-¦   +-- providers/           10 LLM providers + TemplateProvider + ProviderRouter
-¦   +-- rag/                 ChromaDB local vectorstore, Retriever, embeddings
-¦   +-- tools/               13 agent tools
-¦   +-- memory/              Redis conversation memory with session TTL
-¦   +-- services/            Speech translation (IndicSeamlessService)
-¦   +-- data/                chroma_db/ (COMMITTED — never delete)
-¦
+ï¿½   +-- main.py              App factory (create_app ? lifespan ? ChatEngine)
+ï¿½   +-- agent/               ChatEngine graph, IntentDetector, SafetyChecker, ContextAssembler
+ï¿½   +-- providers/           10 LLM providers + TemplateProvider + ProviderRouter
+ï¿½   +-- rag/                 ChromaDB local vectorstore, Retriever, embeddings
+ï¿½   +-- tools/               13 agent tools
+ï¿½   +-- memory/              Redis conversation memory with session TTL
+ï¿½   +-- services/            Speech translation (IndicSeamlessService)
+ï¿½   +-- data/                chroma_db/ (COMMITTED ï¿½ never delete)
+ï¿½
 +-- frontend/                Next.js 15 PWA
-¦   +-- app/                 28 routes + error.tsx
-¦   +-- components/          91 components across 13 subdirs
-¦   +-- lib/                 52+ modules
-¦   +-- public/              manifest.json, theme-init.js, icons/, offline-data/
-¦
+ï¿½   +-- app/                 28 routes + error.tsx
+ï¿½   +-- components/          91 components across 13 subdirs
+ï¿½   +-- lib/                 52+ modules
+ï¿½   +-- public/              manifest.json, theme-init.js, icons/, offline-data/
+ï¿½
 +-- scripts/                 Root-level data pipeline + wiki automation
-¦   +-- app/                 3 DB seeders
-¦   +-- data/                16 standalone fetchers/extractors
-¦
+ï¿½   +-- app/                 3 DB seeders
+ï¿½   +-- data/                16 standalone fetchers/extractors
+ï¿½
 +-- docs/                    18+ markdown docs + wiki/ (231 auto-generated API docs)
 +-- .github/workflows/       GitHub Actions CI/CD (8 workflows)
 +-- docker-compose.yml       5 services: postgres, redis, backend, chatbot, frontend
@@ -634,7 +634,7 @@ SafeVixAI/
 All services use free tiers or open-source self-hosted alternatives:
 - **Maps:** MapLibre GL (free, no API key) + OSM Overpass (free)
 - **Geocoding:** Nominatim (free, with User-Agent header)
-- **LLM APIs:** Groq, Cerebras, Gemini, GitHub Models, NVIDIA NIM, OpenRouter, Mistral, Together — all have free tiers
+- **LLM APIs:** Groq, Cerebras, Gemini, GitHub Models, NVIDIA NIM, OpenRouter, Mistral, Together ï¿½ all have free tiers
 - **Database:** Supabase free tier (500MB, 1 CPU)
 - **Redis:** Upstash free tier (256MB)
 - **Compute:** Render.com + Vercel free tiers
@@ -647,25 +647,32 @@ All services use free tiers or open-source self-hosted alternatives:
 | Decision | Rationale |
 |----------|-----------|
 | Two separate FastAPI services | Chatbot has heavy ML deps (torch ~2GB); backend stays lightweight |
-| 10-provider LLM fallback | Zero downtime — if one API rate-limits, next takes over |
+| 10-provider LLM fallback | Zero downtime ï¿½ if one API rate-limits, next takes over |
 | Sarvam AI for Indian languages | Trained on 4 trillion Indic tokens; best Hindi/Tamil legal accuracy |
 | DuckDB for challans (not LLM) | Deterministic SQL; LLMs hallucinate fine amounts |
 | ChromaDB committed to git | Render cold-starts need pre-built vectorstore; rebuild takes 10 min |
 | PostGIS over MongoDB | `ST_DWithin` with GIST index < 50ms; Mongo much slower for radius |
 | MapLibre GL over Google Maps | Google Maps costs ?; MapLibre is free and open source |
 | Zustand over Redux | 90% less boilerplate; sufficient for this app's state |
-| IndexedDB for user profile | Blood group never leaves device — privacy by architecture |
+| IndexedDB for user profile | Blood group never leaves device ï¿½ privacy by architecture |
 | 13-middleware middleware stack | Production-grade security, observability, and reliability |
 
 ---
 
 ## Safety Rules
 
-- Any AI response about injuries **must** start with "Call 112 immediately" — enforced in `agent/safety_checker.py`
+- Any AI response about injuries **must** start with "Call 112 immediately" ï¿½ enforced in `agent/safety_checker.py`
 - Blood group, emergency contacts stored in IndexedDB only (never sent to server)
-- Guest auth uses anonymous UUIDs — no PII required
+- Guest auth uses anonymous UUIDs ï¿½ no PII required
 - Prompt injection defense in chatbot safety checker
 
 ---
 
 *Document version: 3.2 | AI-powered road safety platform | ?0 Infrastructure | Enterprise Hardening Batch 26*
+
+## Related
+
+- [OBSERVABILITY.md](../OBSERVABILITY.md) â€” Logging, metrics, traces, alerting
+- [MONITORING.md](../MONITORING.md) â€” Dashboards, uptime monitoring
+- [SYSTEM_DESIGN.md](../SYSTEM_DESIGN.md) â€” Detailed system design and data flows
+- [Database.md](Database.md) â€” Database schema and PostGIS design

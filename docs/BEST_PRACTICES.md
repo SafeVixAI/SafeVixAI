@@ -250,3 +250,10 @@ async def lifespan(app: FastAPI):
 - Include examples in API documentation
 - Cross-reference related documents
 - Follow Google-style docstrings for Python
+
+## Related
+
+- [TESTING.md](../TESTING.md) — Testing standards and coverage
+- [OPERATIONS.md](../OPERATIONS.md) — Production operations best practices
+- [CONTRIBUTING.md](../CONTRIBUTING.md) — Contribution workflow and standards
+- [STYLE_GUIDE.md](../STYLE_GUIDE.md) — Coding style conventions

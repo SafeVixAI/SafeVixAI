@@ -24,7 +24,7 @@ Most endpoints require **JWT Bearer tokens** (HS256). Supabase-compatible via `S
 | Refresh Token | 30-day expiry, one-time use |
 | Guest Auth | Anonymous UUID via `X-Guest-ID` header |
 | Service-to-Service | `X-Internal-Api-Key` header for chatbot?backend |
-| Public Endpoints | Use `get_current_user_optional` — returns `None` if unauthenticated |
+| Public Endpoints | Use `get_current_user_optional` ï¿½ returns `None` if unauthenticated |
 | Frontend AuthGuard | Bypassed in E2E via `localStorage.__E2E_SKIP_AUTH__` |
 
 ---
@@ -121,7 +121,7 @@ Various CRUD operations for system administration.
 
 #### `GET /api/v1/admin/cache/status`
 
-Cache status — returns `{"status": "online"}` if Redis is available, `{"status": "fallback_in_memory"}` if not.
+Cache status ï¿½ returns `{"status": "online"}` if Redis is available, `{"status": "fallback_in_memory"}` if not.
 
 #### `POST /api/v1/admin/cache/purge?key_prefix=...`
 
@@ -129,7 +129,7 @@ Purge cache entries. Optional `key_prefix` query param to filter keys (e.g., `?k
 
 #### `GET /api/v1/admin/cache/status`
 
-Cache status — returns `{"status": "online"}` if Redis is available, `{"status": "fallback_in_memory"}` if not.
+Cache status ï¿½ returns `{"status": "online"}` if Redis is available, `{"status": "fallback_in_memory"}` if not.
 
 #### `POST /api/v1/admin/cache/purge?key_prefix=...`
 
@@ -190,7 +190,7 @@ Calculate fine for a traffic violation. DuckDB-based, deterministic (no LLM).
 {
   "violation_code": "MVA_185",
   "section": "185",
-  "description_en": "Drunk driving — first offence",
+  "description_en": "Drunk driving ï¿½ first offence",
   "base_fine_inr": 10000,
   "state_override_fine": null,
   "final_fine_inr": 10000,
@@ -407,13 +407,13 @@ Get details for a specific vehicle.
 
 #### `GET /api/v1/geocode/search?q=...&limit=...`
 
-Forward geocoding — text address to GPS coordinates. Uses Nominatim/Photon with Redis caching.
+Forward geocoding ï¿½ text address to GPS coordinates. Uses Nominatim/Photon with Redis caching.
 
 **Query Parameters:** `q` (address string), `limit` (max results, default 5)
 
 #### `GET /api/v1/geocode/reverse?lat=...&lon=...`
 
-Reverse geocoding — GPS coordinates to address.
+Reverse geocoding ï¿½ GPS coordinates to address.
 
 **Response:**
 ```json
@@ -459,7 +459,7 @@ MCP message endpoint for tool calls.
 
 #### `GET /health`
 
-MCP server health check — returns `{"status": "healthy", "mcp_server": "online"}`.
+MCP server health check ï¿½ returns `{"status": "healthy", "mcp_server": "online"}`.
 
 ---
 
@@ -643,7 +643,7 @@ Waze alert data.
 
 ---
 
-## Speech Endpoints (Chatbot Service — port 8010)
+## Speech Endpoints (Chatbot Service ï¿½ port 8010)
 
 #### `POST /speech/translate`
 
@@ -673,7 +673,7 @@ Speech service health and available language pairs.
 
 ## Rate Limits
 
-### Server-Side (slowapi — IP-based)
+### Server-Side (slowapi ï¿½ IP-based)
 
 | Endpoint | Limit |
 |---|---|
@@ -713,3 +713,10 @@ Speech service health and available language pairs.
 ---
 
 *Document version: 3.4 | AI-powered road safety platform | 28 backend route modules + chatbot + MCP*
+
+## Related
+
+- [BENCHMARKS.md](../BENCHMARKS.md) â€” API performance benchmarks
+- [OPERATIONS.md](../OPERATIONS.md) â€” Production operations and scaling
+- [SDK_GUIDE.md](../SDK_GUIDE.md) â€” SDK usage, auth patterns, rate limits
+- [ERROR_CODES.md](../ERROR_CODES.md) â€” Complete error code reference

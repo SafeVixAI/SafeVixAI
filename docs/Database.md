@@ -460,3 +460,10 @@ LIMIT 1;
 ---
 
 *Document version: 3.3 | AI-powered road safety platform | July 2026 (Enterprise Hardening Batch 26)*
+
+## Related
+
+- [BENCHMARKS.md](../BENCHMARKS.md) — Database performance benchmarks
+- [TESTING.md](../TESTING.md) — Testing standards for data layer
+- [SCALING_GUIDE.md](SCALING_GUIDE.md) — Horizontal scaling and replication
+- [MIGRATION_GUIDE.md](MIGRATION_GUIDE.md) — Migration paths and procedures

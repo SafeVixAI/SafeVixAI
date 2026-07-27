@@ -46,7 +46,7 @@ export default function UpdateSettingsSection() {
   const [publicKeyInput, setPublicKeyInput] = useState('');
   const [showKeyInput, setShowKeyInput] = useState(false);
   const [offlineUpdatesEnabled, setOfflineUpdatesEnabled] = useState(true);
-  const toastTimeout = useRef<ReturnType<typeof setTimeout>>();
+  const toastTimeout = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const showToast = (message: string, type: 'success' | 'error' | 'info') => {
     if (toastTimeout.current) clearTimeout(toastTimeout.current);

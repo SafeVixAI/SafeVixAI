@@ -15,6 +15,8 @@ export interface UpdateInfo {
   isSecurity: boolean;
   lastCheckedAt: string | null;
   downloadProgress: number;
+  retryCount: number;
+  maxRetries: number;
   status: UpdateStatus;
 }
 
@@ -26,6 +28,8 @@ export interface UpdateSlice {
   resetUpdateBanner: () => void;
   setDownloadProgress: (progress: number) => void;
   setUpdateStatus: (status: UpdateStatus) => void;
+  incrementRetry: () => void;
+  resetRetry: () => void;
 }
 
 const DEFAULT_UPDATE_INFO: UpdateInfo = {
@@ -37,6 +41,8 @@ const DEFAULT_UPDATE_INFO: UpdateInfo = {
   isSecurity: false,
   lastCheckedAt: null,
   downloadProgress: 0,
+  retryCount: 0,
+  maxRetries: 3,
   status: 'up-to-date',
 };
 
@@ -56,5 +62,13 @@ export const createUpdateSlice: StateCreator<any, [], [], UpdateSlice> = (set) =
   setUpdateStatus: (status) =>
     set((state: any) => ({
       updateInfo: { ...state.updateInfo, status },
+    })),
+  incrementRetry: () =>
+    set((state: any) => ({
+      updateInfo: { ...state.updateInfo, retryCount: state.updateInfo.retryCount + 1 },
+    })),
+  resetRetry: () =>
+    set((state: any) => ({
+      updateInfo: { ...state.updateInfo, retryCount: 0 },
     })),
 });

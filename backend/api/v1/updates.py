@@ -344,3 +344,22 @@ async def download_progress_sse(
                 yield "event: complete\ndata: {}\n\n"
 
     return StreamingResponse(event_stream(), media_type="text/event-stream")
+
+
+class ApplyOfflineBundleRequest(BaseModel):
+    version: str
+    checksum_sha256: str = ""
+    bundle_data: dict = {}
+
+
+@router.post("/offline/apply", response_model=UpdateActionResponse)
+async def apply_offline_bundle(
+    body: ApplyOfflineBundleRequest,
+    db: AsyncSession = Depends(get_db),
+    service: UpdateService = Depends(get_update_service),
+) -> UpdateActionResponse:
+    """Apply an offline update bundle from a manually uploaded file."""
+    try:
+        return await service.apply_offline_bundle(db, body.version, body.bundle_data)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc

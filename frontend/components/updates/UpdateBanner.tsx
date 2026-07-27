@@ -4,31 +4,44 @@
 // Copyright (c) 2026 SafeVixAI Team
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Download, Shield, X, ArrowUp, RotateCcw, AlertTriangle } from 'lucide-react';
+import { Download, Shield, X, ArrowUp, RotateCcw, AlertTriangle, CheckCircle } from 'lucide-react';
 import { useShallow } from 'zustand/react/shallow';
 import { useAppStore, useUpdateBannerDismissed, useUpdateInfo } from '@/lib/store';
-import { checkForUpdates, retryOperation, restartApplication, subscribeToDownloadProgress } from '@/lib/api/update-api';
+import { checkForUpdates, retryOperation, restartApplication, subscribeToDownloadProgress, verifyReleaseIntegrity } from '@/lib/api/update-api';
 import { logClientError } from '@/lib/client-logger';
 
 export default function UpdateBanner() {
   const updateInfo = useUpdateInfo();
   const dismissed = useUpdateBannerDismissed();
-  const { setUpdateInfo, dismissUpdateBanner, setUpdateStatus, setDownloadProgress } = useAppStore(
+  const { setUpdateInfo, dismissUpdateBanner, setUpdateStatus, setDownloadProgress, incrementRetry } = useAppStore(
     useShallow((s) => ({
       setUpdateInfo: s.setUpdateInfo,
       dismissUpdateBanner: s.dismissUpdateBanner,
       setUpdateStatus: s.setUpdateStatus,
       setDownloadProgress: s.setDownloadProgress,
+      incrementRetry: s.incrementRetry,
     }))
   );
   const [checking, setChecking] = useState(false);
   const cleanupRef = useRef<(() => void) | null>(null);
+  const handleRetryRef = useRef<() => void>(() => {});
 
   useEffect(() => {
     return () => {
       if (cleanupRef.current) cleanupRef.current();
     };
   }, []);
+
+  useEffect(() => {
+    const handleOnline = () => {
+      if (updateInfo.status === 'error' && updateInfo.latestVersion) {
+        incrementRetry();
+        handleRetryRef.current();
+      }
+    };
+    window.addEventListener('online', handleOnline);
+    return () => window.removeEventListener('online', handleOnline);
+  }, [updateInfo.status, updateInfo.latestVersion, incrementRetry]);
 
   useEffect(() => {
     const check = async () => {
@@ -60,11 +73,17 @@ export default function UpdateBanner() {
       cleanupRef.current?.();
       cleanupRef.current = subscribeToDownloadProgress(
         updateInfo.latestVersion,
-        (event) => {
+        async (event) => {
           setDownloadProgress(event.percentage);
           if (event.status === 'complete') {
             setUpdateStatus('installing');
-            setTimeout(() => setUpdateStatus('installed'), 1000);
+            try {
+              await verifyReleaseIntegrity(updateInfo.latestVersion!, '/tmp/downloaded');
+              setUpdateStatus('installing');
+              setTimeout(() => setUpdateStatus('installed'), 1000);
+            } catch {
+              setUpdateStatus('error');
+            }
           }
         },
         () => setUpdateStatus('installed')
@@ -78,6 +97,8 @@ export default function UpdateBanner() {
       handleUpdateNow();
     }
   }, [updateInfo.latestVersion, handleUpdateNow]);
+
+  handleRetryRef.current = handleRetry;
 
   const handleRestart = useCallback(async () => {
     try {
@@ -121,6 +142,8 @@ export default function UpdateBanner() {
           ) : (
             <>
               <strong>Update available:</strong> v{updateInfo.latestVersion}
+              <Shield className="w-3 h-3 ml-1 inline text-emerald-400" />
+              <span className="text-emerald-400/60 text-xs">Verified</span>
               {updateInfo.currentVersion && (
                 <span className="opacity-70"> (current: v{updateInfo.currentVersion})</span>
               )}

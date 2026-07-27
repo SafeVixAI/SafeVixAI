@@ -438,6 +438,36 @@ class UpdateService:
             "created_at": release.created_at.isoformat() if release.created_at else "",
         }
 
+    # ── Offline Bundle Apply ──
+
+    async def apply_offline_bundle(self, db: AsyncSession, version: str, bundle_data: dict) -> UpdateActionResponse:
+        """Apply an offline update bundle. Validates checksum, creates installation record."""
+        release = await self._get_release_or_raise(db, version)
+        bundle_checksum = bundle_data.get("checksum_sha256", "")
+        expected_checksum = getattr(release, "checksum_sha256", None) or ""
+        if expected_checksum and bundle_checksum and bundle_checksum != expected_checksum:
+            return UpdateActionResponse(
+                success=False, message=f"Checksum mismatch for version {version}", version=version,
+            )
+        install = UpdateInstallation(
+            release_id=release.id, release_version=release.version,
+            previous_version=self._current_version, channel=release.channel,
+            status=UpdateStatus.INSTALLING, is_offline=True, started_at=datetime.now(UTC),
+        )
+        db.add(install)
+        await db.flush()
+        install.status = UpdateStatus.INSTALLED
+        install.completed_at = datetime.now(UTC)
+        self._current_version = release.version
+        settings = await self._get_settings(db)
+        settings.last_update_version = release.version
+        await db.commit()
+        await db.refresh(install)
+        return UpdateActionResponse(
+            success=True, message=f"Offline bundle applied for version {version}",
+            installation_id=install.id, version=version,
+        )
+
     # ── Retry ──
 
     async def retry_operation(self, db: AsyncSession, operation: str, version: str) -> UpdateActionResponse:

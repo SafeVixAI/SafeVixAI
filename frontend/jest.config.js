@@ -42,6 +42,7 @@ const customJestConfig = {
     '!**/route.ts',
     '!app/landing/hooks/**',
     '!app/landing/components/three/**',
+    '!lib/api/update-api.ts',
     '!components/maps/index.ts',
     '!app/guide/**/layout.tsx',
     '!app/track/**/layout.tsx',

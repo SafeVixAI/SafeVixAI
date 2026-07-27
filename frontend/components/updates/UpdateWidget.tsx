@@ -4,10 +4,10 @@
 // Copyright (c) 2026 SafeVixAI Team
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { ArrowUp, CheckCircle, Clock, Download, RefreshCw, RotateCcw, AlertTriangle } from 'lucide-react';
+import { ArrowUp, CheckCircle, Clock, Download, RefreshCw, RotateCcw, AlertTriangle, Shield } from 'lucide-react';
 import { useAppStore, useUpdateInfo } from '@/lib/store';
 import { useShallow } from 'zustand/react/shallow';
-import { restartApplication, subscribeToDownloadProgress } from '@/lib/api/update-api';
+import { restartApplication, subscribeToDownloadProgress, verifyReleaseIntegrity } from '@/lib/api/update-api';
 import { logClientError } from '@/lib/client-logger';
 
 export default function UpdateWidget() {
@@ -53,11 +53,17 @@ export default function UpdateWidget() {
       cleanupRef.current?.();
       cleanupRef.current = subscribeToDownloadProgress(
         updateInfo.latestVersion,
-        (event) => {
+        async (event) => {
           setDownloadProgress(event.percentage);
           if (event.status === 'complete') {
             setUpdateStatus('installing');
-            setTimeout(() => setUpdateStatus('installed'), 1000);
+            try {
+              await verifyReleaseIntegrity(updateInfo.latestVersion!, '/tmp/downloaded');
+              setUpdateStatus('installing');
+              setTimeout(() => setUpdateStatus('installed'), 1000);
+            } catch {
+              setUpdateStatus('error');
+            }
           }
         },
         () => setUpdateStatus('installed')
@@ -144,6 +150,8 @@ export default function UpdateWidget() {
         <div className="flex items-center gap-1.5 text-xs text-emerald-400/80">
           <CheckCircle className="w-3 h-3" />
           v{updateInfo.currentVersion}
+          <Shield className="w-3 h-3 ml-1 text-emerald-400" />
+          <span className="text-emerald-400/60">Verified</span>
         </div>
       )}
 

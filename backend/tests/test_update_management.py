@@ -390,6 +390,28 @@ class TestUpdateService:
         assert result is not None
         assert settings.gpg_public_key == "new_public_key"
 
+    async def test_apply_offline_bundle_success(self, service: UpdateService) -> None:
+        """Apply an offline bundle successfully."""
+        db = _make_mock_db()
+        release = _make_release(version="2.0.0")
+        db.execute.return_value = _make_async_result(scalar_one_or_none_return=release)
+        db.flush = AsyncMock()
+        db.commit = AsyncMock()
+        db.refresh = AsyncMock()
+        settings = MagicMock(spec=UpdateSetting)
+        settings.last_update_version = None
+        with patch.object(service, "_get_settings", return_value=settings):
+            result = await service.apply_offline_bundle(db, "2.0.0", {})
+        assert result.success is True
+        assert "2.0.0" in result.message
+
+    async def test_apply_offline_bundle_missing_release(self, service: UpdateService) -> None:
+        """Apply offline bundle for non-existent release raises ValueError."""
+        db = _make_mock_db()
+        db.execute.return_value = _make_async_result(scalar_one_or_none_return=None)
+        with pytest.raises(ValueError, match="not found"):
+            await service.apply_offline_bundle(db, "9.9.9", {})
+
 
 class TestUpdateServiceSync:
     """Test GitHub sync integration."""

@@ -45,7 +45,8 @@ export default function UpdateSettingsSection() {
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
   const [publicKeyInput, setPublicKeyInput] = useState('');
   const [showKeyInput, setShowKeyInput] = useState(false);
-  const toastTimeout = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const [offlineUpdatesEnabled, setOfflineUpdatesEnabled] = useState(true);
+  const toastTimeout = useRef<ReturnType<typeof setTimeout>>();
 
   const showToast = (message: string, type: 'success' | 'error' | 'info') => {
     if (toastTimeout.current) clearTimeout(toastTimeout.current);
@@ -302,6 +303,18 @@ export default function UpdateSettingsSection() {
             checked={settings?.retry_on_failure ?? true}
             onChange={(v) => handleToggle('retry_on_failure', v)}
             ariaLabel={saving ? 'Saving' : undefined}
+          />
+        }
+      />
+
+      <SettingRow
+        icon={<Download className="w-4 h-4" />}
+        title="Allow offline updates"
+        description="Download bundles for offline installation"
+        rightElement={
+          <Toggle
+            checked={offlineUpdatesEnabled}
+            onChange={(v) => setOfflineUpdatesEnabled(v)}
           />
         }
       />

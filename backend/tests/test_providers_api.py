@@ -181,7 +181,7 @@ def _flatten_router(app):
     app.router.routes = flattened
 
 
-async def test_test_connection_routes_have_sync_attr(monkeypatch):
+def test_test_connection_routes_have_sync_attr(monkeypatch):
     """Verify the test connection route exists and returns proper schema."""
     monkeypatch.setenv("REDIS_URL", "")
     monkeypatch.setenv("ENVIRONMENT", "test")
@@ -217,7 +217,7 @@ async def test_test_connection_routes_have_sync_attr(monkeypatch):
     assert "/api/v1/providers/sync" in _rpaths
 
 
-async def test_sync_route_is_registered(monkeypatch):
+def test_sync_route_is_registered(monkeypatch):
     """Verify the sync provider route exists."""
     monkeypatch.setenv("REDIS_URL", "")
     monkeypatch.setenv("ENVIRONMENT", "test")

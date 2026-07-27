@@ -4,7 +4,7 @@
 import type { StateCreator } from 'zustand';
 
 export type ReleaseChannel = 'stable' | 'beta' | 'nightly' | 'pre-release';
-export type UpdateStatus = 'up-to-date' | 'available' | 'downloading' | 'installing' | 'error';
+export type UpdateStatus = 'up-to-date' | 'available' | 'downloading' | 'installing' | 'installed' | 'error';
 
 export interface UpdateInfo {
   currentVersion: string;

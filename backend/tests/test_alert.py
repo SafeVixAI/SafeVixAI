@@ -26,13 +26,18 @@ def test_init_enabled_with_credentials() -> None:
 
 def test_cooldown_suppresses_duplicate() -> None:
     svc = AlertService()
+    svc.enabled = True
+    svc.smtp_user = "a@b.com"
+    svc.smtp_pass = "pass"
+    svc.alert_to = "a@b.com"
     key = "test_cooldown"
     _last_alert_time[key] = 0
-    with patch.object(svc, "_send") as mock_send:
+    with patch("core.alert.smtplib.SMTP") as mock_smtp:
+        mock_ctx = MagicMock()
+        mock_smtp.return_value.__enter__.return_value = mock_ctx
         svc._send(key, "test", "details", ["fix"])
-        assert mock_send.call_count == 1
         svc._send(key, "test", "details", ["fix"])
-        assert mock_send.call_count == 1
+    assert mock_smtp.call_count == 1
 
 
 def test_send_email_success() -> None:
@@ -60,9 +65,10 @@ def test_send_email_failure_logged() -> None:
 def test_send_not_enabled_logs_only() -> None:
     svc = AlertService()
     svc.enabled = False
+    _last_alert_time.pop("test", None)
     with patch("core.alert.logger") as mock_log:
         svc._send("test", "Subject", "details", ["fix"])
-        assert mock_log.info.call_count >= 1
+        assert mock_log.warning.call_count >= 1
 
 
 def test_alert_all_providers_failed() -> None:

@@ -57,7 +57,7 @@ jobs:
 
       - name: Install frontend deps
         working-directory: frontend
-        run: npm ci
+        run: npm ci --ignore-scripts
 
       - name: Measure frontend build time
         id: frontend-build

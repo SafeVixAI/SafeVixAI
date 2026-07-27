@@ -82,7 +82,7 @@ jobs:
       - name: Install frontend dependencies
         run: |
           cd frontend
-          npm ci
+          npm ci --ignore-scripts
           npm install playwright @playwright/test
 
       - name: Install Playwright browsers

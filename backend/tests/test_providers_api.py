@@ -295,7 +295,7 @@ def _make_app(mock_session, monkeypatch=None):
     async def override_db():
         yield mock_session
 
-    app.dependency_overrides[get_db] = override_db
+    app.dependency_overrides[_mock_get_db] = override_db
 
     async def override_auth():
         return {"sub": "test-user", "role": "user", "jti": None}

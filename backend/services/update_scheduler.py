@@ -6,6 +6,7 @@
 from __future__ import annotations
 
 import asyncio
+from contextlib import suppress
 import logging
 from datetime import UTC, datetime
 from typing import Optional
@@ -69,10 +70,8 @@ class UpdateScheduler:
         self._running = False
         if self._task:
             self._task.cancel()
-            try:
+            with suppress(asyncio.CancelledError):
                 await self._task
-            except asyncio.CancelledError:
-                pass
             self._task = None
         logger.info("UpdateScheduler stopped")
 

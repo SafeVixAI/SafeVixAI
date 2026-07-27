@@ -39,12 +39,14 @@ class TestGetAllCityCenters:
         assert result == _HARDCODED_CENTERS
 
     async def test_returns_db_results_when_available(self) -> None:
-        db = AsyncMock()
+        db = MagicMock()
         row = MagicMock()
         row.city_slug = "testville"
         row.lat = 12.0
         row.lon = 77.0
-        db.execute.return_value.scalars.return_value.all.return_value = [row]
+        result_mock = MagicMock()
+        result_mock.scalars.return_value.all.return_value = [row]
+        db.execute.return_value = AsyncMock(return_value=result_mock)
         result = await get_all_city_centers(db=db)
         assert result == {"testville": (12.0, 77.0)}
 
@@ -73,8 +75,9 @@ class TestGetOfflineCenters:
         row.city_slug = "chennai"
         row.lat = 13.08
         row.lon = 80.27
-        db.execute.return_value = AsyncMock()
-        db.execute.return_value.scalars.return_value.all.return_value = [row]
+        result_mock = MagicMock()
+        result_mock.scalars.return_value.all.return_value = [row]
+        db.execute.return_value = AsyncMock(return_value=result_mock)
         result = await get_offline_centers(db=db)
         assert "chennai" in result
 
@@ -95,10 +98,12 @@ class TestGetCityCenter:
         assert result == (13.0827, 80.2707)
 
     async def test_returns_db_result_when_available(self) -> None:
-        db = AsyncMock()
+        db = MagicMock()
         row = MagicMock()
         row.lat = 99.0
         row.lon = 99.0
-        db.execute.return_value.scalar_one_or_none.return_value = row
+        result_mock = MagicMock()
+        result_mock.scalar_one_or_none.return_value = row
+        db.execute.return_value = AsyncMock(return_value=result_mock)
         result = await get_city_center("testville", db=db)
         assert result == (99.0, 99.0)

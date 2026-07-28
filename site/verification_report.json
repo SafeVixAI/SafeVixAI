@@ -1,0 +1,669 @@
+{
+  "timestamp": "2026-06-09T19:20:21.918118",
+  "score": 100,
+  "passed": 82,
+  "failed_required": 0,
+  "failed_optional": 0,
+  "total": 82,
+  "backend_url": "https://safevixai-api.onrender.com",
+  "chatbot_url": "https://safevixai-chatbot.onrender.com",
+  "frontend_url": "https://safevixai.vercel.app",
+  "results": [
+    {
+      "name": "Repository root has frontend/backend/chatbot_service",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "core application directories present",
+      "fix": "Run this script from the SafeVixAI repo root."
+    },
+    {
+      "name": "Frontend package exposes build/test/e2e scripts",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "scripts: analyze, audit:frontend, build, dev, i18n:split, i18n:translate, i18n:types, lint, lint:i18n, start, test, test:e2e, test:watch, type-check",
+      "fix": "Add build, test, and test:e2e scripts to frontend/package.json."
+    },
+    {
+      "name": "Frontend uses expected Next/React stack",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "Next, React, and MapLibre dependencies detected",
+      "fix": "Restore missing frontend dependencies in package.json."
+    },
+    {
+      "name": "Frontend public env wrapper exists",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "frontend/lib/public-env.ts",
+      "fix": "Centralize public API/chatbot URLs in frontend/lib/public-env.ts."
+    },
+    {
+      "name": "Frontend source has no hardcoded localhost:8000",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "clean",
+      "fix": "Use NEXT_PUBLIC_API_URL through frontend/lib/public-env.ts."
+    },
+    {
+      "name": "No obvious API secrets committed in source",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "clean",
+      "fix": "Move secrets to environment variables and rotate any exposed key."
+    },
+    {
+      "name": "PWA manifest is valid and has share_target",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "name=SafeVixAI - Tactical Road Safety",
+      "fix": "Add name and share_target to frontend/public/manifest.json."
+    },
+    {
+      "name": "All required PWA icon sizes exist",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "found=[72, 96, 128, 144, 152, 192, 384, 512]",
+      "fix": "Generate 72, 96, 128, 144, 152, 192, 384, and 512px icons."
+    },
+    {
+      "name": "Service worker and offline queue use same IndexedDB",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "sw=safevix-offline-db, lib=safevix-offline-db",
+      "fix": "Keep the DB name identical in sw.js and offline-sos-queue.ts."
+    },
+    {
+      "name": "Service worker handles SOS and road-report background sync",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "sync tags present",
+      "fix": "Handle both offline SOS and road report queues in frontend/public/sw.js."
+    },
+    {
+      "name": "Service worker is registered from frontend code",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "frontend/components/EnterpriseClientAppHooks.tsx:104",
+      "fix": "Call navigator.serviceWorker.register('/sw.js') during app startup/offline init."
+    },
+    {
+      "name": "Offline-first public data bundle exists",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "5/5 files",
+      "fix": "Restore missing files under frontend/public/offline-data."
+    },
+    {
+      "name": "Crash countdown component exists and is wired in ClientAppHooks",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "CrashCountdown.tsx exists + imported in ClientAppHooks.tsx",
+      "fix": "Wire CrashCountdown into ClientAppHooks.tsx with severity-based rendering."
+    },
+    {
+      "name": "Crash detection requests iOS DeviceMotion permission",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "DeviceMotionEvent.requestPermission found",
+      "fix": "Ask for DeviceMotion permission before starting crash detection on iOS."
+    },
+    {
+      "name": "Safety constants are centralized",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "frontend/lib/safety-constants.ts",
+      "fix": "Keep crash/SOS timing and thresholds in frontend/lib/safety-constants.ts."
+    },
+    {
+      "name": "Key UI and map test files exist",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "3/3 files",
+      "fix": "Restore OfflineBanner, SystemStatusBar, and map.test.tsx."
+    },
+    {
+      "name": "Frontend test coverage is present",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "test files detected",
+      "fix": "Add Jest tests for critical UI/map/offline flows."
+    },
+    {
+      "name": "Playwright E2E configuration exists",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "frontend/playwright.config.ts and frontend/e2e",
+      "fix": "Add Playwright E2E setup for browser-level flows."
+    },
+    {
+      "name": "Bystander mode UI exists",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "frontend/app/bystander/page.tsx",
+      "fix": "Ensure V2 witness/first-aid bystander features are enabled."
+    },
+    {
+      "name": "Zustand store persistence is enabled",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "persist middleware present",
+      "fix": "Keep map layers and profile state stored via Zustand persistent storage."
+    },
+    {
+      "name": "Map UI layer controls enforce ARIA accessibility",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "aria-label attributes verified",
+      "fix": "Enforce accessibility attributes on emergency mapping dashboards."
+    },
+    {
+      "name": "All key user-facing pages have aria-label attributes on inputs/icon-buttons",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "aria-label found in 4/4 key pages",
+      "fix": "Add aria-label to interactive elements on challan, assistant, profile, and report pages."
+    },
+    {
+      "name": "Backend API v1 registers all product routers",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "23/23 routers",
+      "fix": "Include every v1 router in backend/api/v1/__init__.py."
+    },
+    {
+      "name": "MCP server module is available for Agentic RAG",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "backend/api/v1/mcp_server.py",
+      "fix": "Expose FastMCP/Starlette endpoints to serve external AI tool integrations."
+    },
+    {
+      "name": "Live tracking supports real-time continuous sync and Enterprise WebSockets",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "WebSocket endpoint plus Redis pubsub scaling",
+      "fix": "Support continuous group location WebSockets with horizontal Redis clustering."
+    },
+    {
+      "name": "Challan schema matches current API contract",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "base_fine/repeat_fine/amount_due",
+      "fix": "Use the current ChallanResponse fields instead of legacy fine_amount."
+    },
+    {
+      "name": "Emergency API exposes nearby, SOS GET, SOS POST, and numbers",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "nearby, sos get/post, numbers",
+      "fix": "Restore emergency locator and SOS endpoints."
+    },
+    {
+      "name": "Unified ApiResponse<T> envelope wraps all 2xx responses",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "ApiResponse[T] model + ApiResponseMiddleware",
+      "fix": "Add ApiResponse[T] generic model and middleware for consistent response format."
+    },
+    {
+      "name": "Global exception handler returns ApiErrorResponse with timestamp",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "ApiErrorResponse with timestamp in 500 handler",
+      "fix": "Migrate 500 error handler to use ApiErrorResponse with timestamp."
+    },
+    {
+      "name": "Civic intel admin endpoints use JWT RBAC (not header-based auth)",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "JWT RBAC on admin civic endpoints",
+      "fix": "Replace X-Admin-Secret header auth with require_role(Role.OPERATOR) from core.rbac."
+    },
+    {
+      "name": "SOS POST records an incident and is rate limited",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "ORM-based incident insert plus limiter",
+      "fix": "Persist SOS incidents via ORM and keep abuse protection on POST /sos."
+    },
+    {
+      "name": "Production JWT secret is mandatory",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "production guard present",
+      "fix": "Raise at startup if JWT_SECRET_KEY is missing in production."
+    },
+    {
+      "name": "Static mock tokens are explicitly rejected",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "reject list present",
+      "fix": "Reject demo/mock bearer tokens in core/security.py."
+    },
+    {
+      "name": "No obvious demo admin passwords in runtime code",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "clean",
+      "fix": "Remove hardcoded demo credentials from runtime services."
+    },
+    {
+      "name": "Backend critical endpoint tests exist",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "5/5 tests",
+      "fix": "Add focused tests for emergency, challan, roads, routing, and auth."
+    },
+    {
+      "name": "Backend expanded test suite exists",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "7/7 tests",
+      "fix": "Add integration, WebSocket, and infrastructure tests."
+    },
+    {
+      "name": "Chatbot expanded test suite exists",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "12/12 tests",
+      "fix": "Add safety, context, memory, and provider tests."
+    },
+    {
+      "name": "Advanced test directories exist (load/stress/chaos/security)",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "9/9 dirs",
+      "fix": "Create advanced testing infrastructure for production readiness."
+    },
+    {
+      "name": "Frontend expanded test suite exists",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "8/8 tests",
+      "fix": "Add component, accessibility, and E2E tests."
+    },
+    {
+      "name": "Chatbot exposes root health and API health",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "/health and /api/v1/chat/health",
+      "fix": "Expose health endpoints for Render and app status checks."
+    },
+    {
+      "name": "Chatbot supports blocking and streaming chat",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "POST /api/v1/chat/ and /stream",
+      "fix": "Restore standard and SSE chat endpoints."
+    },
+    {
+      "name": "Chat history is admin protected",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "admin secret gate present",
+      "fix": "Require admin secret for chat history access."
+    },
+    {
+      "name": "Chatbot RAG/reference data exists",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "5/5 assets",
+      "fix": "Restore chatbot_service/data reference files and ChromaDB."
+    },
+    {
+      "name": "Torch is not imported at module level (lazy imports OK)",
+      "category": "CODE",
+      "passed": true,
+      "required": false,
+      "detail": "clean",
+      "fix": "Move heavyweight ML imports inside _import_dependencies() on-demand pattern."
+    },
+    {
+      "name": "Interactive architecture knowledge graph is fully up to date",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "graphify-out/GRAPH_REPORT.md and graph.json",
+      "fix": "Run graphify update . to synchronize architecture knowledge graph artifacts."
+    },
+    {
+      "name": "Core backend safety and monitoring services are fully deployed",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "4/4 services",
+      "fix": "Ensure secondary support features (OSM uploads, routing overrides, public safe-spaces, email alerts) are available."
+    },
+    {
+      "name": "Chatbot supports a unified 9-provider fallback chain framework",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "6/6 key providers",
+      "fix": "Include full suite of LLM provider integrations for high-availability agent fallback routing."
+    },
+    {
+      "name": "Chatbot circular import fixed via extracted limiter module",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "chatbot_service/limiter.py",
+      "fix": "Extract limiter from main.py to break main.RealTimeLimiter dependency cycle."
+    },
+    {
+      "name": "Backend AI report classifier service exists",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "backend/services/report_classifier.py",
+      "fix": "Restore 10-category rule-based road hazard classifier."
+    },
+    {
+      "name": "GeoJSON compression middleware is installed",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "backend/middleware/compression.py",
+      "fix": "Add gzip middleware for large GeoJSON emergency bundles."
+    },
+    {
+      "name": "Dependabot weekly security PR automation is configured",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": ".github/dependabot.yml",
+      "fix": "Configure .github/dependabot.yml for weekly npm/pip/GHActions audits."
+    },
+    {
+      "name": "Phase 3 completion documented in plan",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "docs/phase3-plan.md marks all Phase 3 items complete",
+      "fix": "Update docs/phase3-plan.md to track completed enterprise hardening milestones."
+    },
+    {
+      "name": "PyJWT is patched above CVE-2026-32597 threshold (>=2.12.0)",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "backend/requirements.txt has PyJWT[crypto]==2.12.0",
+      "fix": "Upgrade PyJWT to 2.12.0 to fix HIGH CVE-2026-32597."
+    },
+    {
+      "name": "All services have .env.example template files",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "backend, chatbot_service, frontend all have .env.example",
+      "fix": "Add .env.example files with documented required vars for every service."
+    },
+    {
+      "name": "ESLint does not block production builds (ignoreDuringBuilds)",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "eslint.ignoreDuringBuilds in next.config.js",
+      "fix": "Add eslint: { ignoreDuringBuilds: true } to next.config.js to separate lint from build."
+    },
+    {
+      "name": "Gitignore uses anchored /tests/ not bare tests/",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "/tests/ anchored (bare tests/ excluded nested dirs before fix)",
+      "fix": "Ensure .gitignore has /tests/ (anchored) and not tests/ (matches any level)."
+    },
+    {
+      "name": "Docker Compose orchestrates all services",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "docker-compose.yml with backend service",
+      "fix": "Add/restore docker-compose.yml for postgis, redis, backend, chatbot, frontend."
+    },
+    {
+      "name": "Render deployment blueprint exists",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "render.yaml",
+      "fix": "Create render.yaml for Render.com auto-deploy with health checks."
+    },
+    {
+      "name": "No orphaned framer-motion in package.json (GSAP migration complete)",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "clean",
+      "fix": "Remove framer-motion from package.json with npm uninstall framer-motion."
+    },
+    {
+      "name": "TypeScript strict mode is enabled",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "strict=True",
+      "fix": "Set strict: true in frontend/tsconfig.json for type safety."
+    },
+    {
+      "name": "CSP headers configured in next.config.js",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "CSP with script-src found",
+      "fix": "Add Content-Security-Policy in next.config.js async headers."
+    },
+    {
+      "name": "Sentry import is guarded (try/except) in chatbot service",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "guarded sentry_sdk in chatbot_service/main.py",
+      "fix": "Wrap import sentry_sdk and sentry_sdk.init() in try/except to prevent ImportError in tests."
+    },
+    {
+      "name": "Road report POST accepts anonymous reports (get_current_user_optional)",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "JWT-optional on POST /roads/report",
+      "fix": "Use get_current_user_optional (not get_current_user) so anonymous bystanders can report."
+    },
+    {
+      "name": "Speech translation uses on-demand lazy imports for torch/torchaudio",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "lazy import pattern detected",
+      "fix": "Wrap torch/torchaudio/transformers imports in _import_dependencies() on-demand method."
+    },
+    {
+      "name": "Safety rule: injury responses include 112 prompt",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "safety_checker.py includes 112 prompt",
+      "fix": "Any AI response about injuries must include a 112/emergency services prompt."
+    },
+    {
+      "name": "Challans use deterministic engine (CSV/SQL, not LLM)",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "CSV loading + SQLAlchemy queries (deterministic)",
+      "fix": "Challans must use deterministic CSV/SQL, not LLM (hallucinates fine amounts)."
+    },
+    {
+      "name": "PostGIS ST_MakePoint uses longitude-first convention",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "longitude-first ST_MakePoint in emergency_locator",
+      "fix": "PostGIS ST_MakePoint takes (longitude, latitude) \u2014 lon FIRST."
+    },
+    {
+      "name": "Database engine is declared exactly once (no dead code)",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "create_async_engine( calls: 1 (excluding import)",
+      "fix": "Remove duplicate/dead engine declarations in backend/core/database.py."
+    },
+    {
+      "name": "RAG retriever min_score has safe default (>=0.2)",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "RAG_MIN_SCORE environment variable used in retriever.py",
+      "fix": "Set min_score via os.getenv('RAG_MIN_SCORE', '0.28') not hardcoded 0.0."
+    },
+    {
+      "name": "Waze feed uses env var not hardcoded frontend URL",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "FRONTEND_URL env var in waze_feed.py",
+      "fix": "Replace hardcoded safevixai.vercel.app with FRONTEND_URL env var."
+    },
+    {
+      "name": "Frontend uses env vars for URLs (not hardcoded vercel.app)",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "NEXT_PUBLIC_APP_URL / NEXT_PUBLIC_VERCEL_URL in share.ts and deep-link.ts",
+      "fix": "Replace hardcoded safevixai.vercel.app fallbacks with env var chain."
+    },
+    {
+      "name": "Backend chat proxy routes to chatbot service",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "backend/api/v1/chat.py proxies to chatbot_service",
+      "fix": "Backend should proxy chat requests to the chatbot service at port 8010."
+    },
+    {
+      "name": "Conversation memory uses Redis (not in-memory)",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "chatbot_service/memory/redis_memory.py with Redis imports",
+      "fix": "Use Redis conversation memory for production persistence and horizontal scaling."
+    },
+    {
+      "name": "Auth endpoints exist (login/refresh)",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "login / refresh endpoints",
+      "fix": "Provide auth flow: login and token refresh (registration may be delegated to Supabase)."
+    },
+    {
+      "name": "Offline SOS queue auto-flushes on reconnect",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "online event listener present",
+      "fix": "Add window.addEventListener('online', ...) to auto-flush queued SOS on reconnect."
+    },
+    {
+      "name": "Emergency card QR profile route exists",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "frontend/app/emergency-card/[userId]/page.tsx",
+      "fix": "Public emergency card with blood group, emergency contacts, and QR code."
+    },
+    {
+      "name": "Live tracking WebSocket endpoint exists",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "WS endpoint in backend/api/v1/tracking.py",
+      "fix": "Family tracking must use WebSocket at /api/v1/tracking/{group_id}."
+    },
+    {
+      "name": "Enterprise ETL and local data bootstrapping pipeline scripts exist",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "3/3 scripts",
+      "fix": "Maintain automated pipelines for road watch infrastructure and MoRTH datasets."
+    },
+    {
+      "name": "Speech translation service supports multimodal Indic voice input",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "chatbot_service/services/speech_translation.py",
+      "fix": "Enable localized multimodal audio transcription and Indic translation for voice-driven emergency navigation."
+    },
+    {
+      "name": "Enterprise Kubernetes deployment manifests exist for all three services",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "3/3 k8s manifests present",
+      "fix": "Ensure backend-deployment.yaml, chatbot-deployment.yaml, and frontend-deployment.yaml are configured under k8s/."
+    },
+    {
+      "name": "Enterprise Terraform IaC configuration files exist",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "6/6 terraform configs present",
+      "fix": "Bootstrap complete AWS-compatible IaC configs inside terraform/."
+    },
+    {
+      "name": "DPDP 2023 GPS Consent dialog is created and wired globally",
+      "category": "CODE",
+      "passed": true,
+      "required": true,
+      "detail": "GpsConsent.tsx exists and is wired in Hooks and hook settings",
+      "fix": "Wire GpsConsent dialog into client app hooks and check locationTracking state."
+    }
+  ]
+}

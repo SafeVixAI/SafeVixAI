@@ -41,10 +41,7 @@ const nextConfig = {
       { protocol: 'https', hostname: 'huggingface.co' },
     ],
   },
-  // D6: ESLint blocks production builds for safety. CI has its own lint step.
-  eslint: {
-    ignoreDuringBuilds: process.env.CI === 'true' || process.env.NODE_ENV !== 'production',
-  },
+  // D6: ESLint now handled via CLI only in Next 16
   // No orphan redirects needed; /emergency and /settings routes now exist.
   async redirects() {
     return [];

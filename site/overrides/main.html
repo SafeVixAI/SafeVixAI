@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block extrahead %}
+{% if page and page.meta and page.meta.description %}
+<meta name="description" content="{{ page.meta.description }}" />
+<meta property="og:description" content="{{ page.meta.description }}" />
+{% endif %}
+{% if page and page.meta and page.meta.tags %}
+<meta name="keywords" content="{{ page.meta.tags | join(', ') }}" />
+{% endif %}
+{% if page and page.meta and page.meta.deprecated %}
+<meta name="robots" content="noindex" />
+{% endif %}
+{% if page and page.meta and page.meta.owner %}
+<meta name="docs-owner" content="{{ page.meta.owner }}" />
+{% endif %}
+{% endblock %}
+
+{% block content %}
+{% if page and page.meta and page.meta.deprecated %}
+<div class="admonition warning">
+<p class="admonition-title">Deprecated</p>
+<p>
+  This page documents a deprecated component.
+  {% if page.meta.deprecated_by %}
+  See <a href="{{ page.meta.deprecated_by }}">the replacement</a>.
+  {% endif %}
+</p>
+</div>
+{% endif %}
+{% if page and page.meta and page.meta.owner %}
+<div style="font-size:0.75rem;color:var(--md-default-fg-color--lighter);margin-bottom:1rem;">
+  Owner: <code>{{ page.meta.owner }}</code>
+  {% if page.meta.review_by %}
+  &middot; Review by: <code>{{ page.meta.review_by }}</code>
+  {% endif %}
+</div>
+{% endif %}
+{{ super() }}
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+// Interactive code examples - wraps sandbox fences with run buttons
+document.addEventListener("DOMContentLoaded", function() {
+  document.querySelectorAll(".sandbox, .interactive").forEach(function(block) {
+    var btn = document.createElement("button");
+    btn.className = "md-button md-button--primary";
+    btn.textContent = "Run in Sandbox";
+    btn.style.cssText = "margin:0.5rem 0;font-size:0.8rem;";
+    btn.addEventListener("click", function() {
+      var code = block.textContent;
+      var encoded = encodeURIComponent(code);
+      var url = "https://codesandbox.io/api/v1/sandboxes/define?parameters=" + encoded;
+      window.open(url, "_blank");
+    });
+    block.parentNode.insertBefore(btn, block.nextSibling);
+  });
+});
+</script>
+{% endblock %}

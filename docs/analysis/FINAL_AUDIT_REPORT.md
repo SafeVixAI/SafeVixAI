@@ -1,4 +1,4 @@
-# SafeVixAI — Final Enterprise Audit Report
+# SafeVixAI â€” Final Enterprise Audit Report
 
 > **SNAPSHOT**: This document reflects the state as of its creation date. For current state see [AGENTS.md](../../AGENTS.md).
 
@@ -13,7 +13,7 @@
 
 SafeVixAI is a **production-capable** safety PWA with 25/25 features accounted, 2829 unit tests passing, 19 CI/CD workflows, and defense-in-depth across 7+ security layers. The codebase is significantly more mature than suggested by prior automated audits.
 
-**Key finding:** The prior audit score of 46/100 was inaccurate — 6 of the 10 claimed "critical" issues are either false positives (admin123 not hardcoded, mock-jwt rejected, ChromaDB is real, SOS has POST, Waze feed works) or design choices (CORS wildcard blocked in production).
+**Key finding:** The prior audit score of 46/100 was inaccurate â€” 6 of the 10 claimed "critical" issues are either false positives (admin123 not hardcoded, mock-jwt rejected, ChromaDB is real, SOS has POST, Waze feed works) or design choices (CORS wildcard blocked in production).
 
 **Real score:** ~82/100 with verified gaps
 
@@ -23,16 +23,16 @@ SafeVixAI is a **production-capable** safety PWA with 25/25 features accounted, 
 
 ```
 Overall:           82/100
-Frontend UI/UX:    85/100  — GSAP animations, MapLibre, dynamic imports ?
-Backend Quality:   83/100  — Factory pattern, lifespan management, 14 services
-Chatbot/RAG:       88/100  — Real ChromaDB, 11-provider chain, circuit breakers
-Security:          72/100  — .env credentials in git, safety output check fixed, chatbot auth enforced
-Database:          81/100  — PostGIS, 18 migrations, RLS policies exist
-Testing:           85/100  — 2829 tests, 90%+ backend coverage, 572 frontend tests
-CI/CD:             85/100  — 40 workflows, permissions added, blue-green deploy
-Observability:     60/100  — Prometheus wired, no uptime monitor, Sentry optional
-PWA/Offline:       82/100  — SW v3, IndexedDB queues, offline challan, WebLLM missing
-Accessibility:     75/100  — Skip links, reduced motion, aria labels partial
+Frontend UI/UX:    85/100  â€” GSAP animations, MapLibre, dynamic imports ?
+Backend Quality:   83/100  â€” Factory pattern, lifespan management, 14 services
+Chatbot/RAG:       88/100  â€” Real ChromaDB, 11-provider chain, circuit breakers
+Security:          72/100  â€” .env credentials in git, safety output check fixed, chatbot auth enforced
+Database:          81/100  â€” PostGIS, 18 migrations, RLS policies exist
+Testing:           85/100  â€” 2829 tests, 90%+ backend coverage, 572 frontend tests
+CI/CD:             85/100  â€” 40 workflows, permissions added, blue-green deploy
+Observability:     60/100  â€” Prometheus wired, no uptime monitor, Sentry optional
+PWA/Offline:       82/100  â€” SW v3, IndexedDB queues, offline challan, WebLLM missing
+Accessibility:     75/100  â€” Skip links, reduced motion, aria labels partial
 ```
 
 ---
@@ -61,7 +61,7 @@ Accessibility:     75/100  — Skip links, reduced motion, aria labels partial
 |---|-------|----------|------------|
 | 1 | **All 3 .env files committed with live credentials** | CRITICAL | Rotate ALL keys: JWT, DB, 11 LLM APIs, Gmail password. `git filter-branch` to remove. |
 | 2 | **torch 2.12.0 in chatbot requirements (800MB)** | HIGH | Already graceful fallback + requirements-render.txt excludes it. Documented. |
-| 3 | **SWR underutilized — only 1 of 23 pages** | HIGH | Convert Axios data fetching to SWR hooks across all pages for caching + dedup. |
+| 3 | **SWR underutilized â€” only 1 of 23 pages** | HIGH | Convert Axios data fetching to SWR hooks across all pages for caching + dedup. |
 | 4 | **No data retention enforced** | MEDIUM | Enable cleanup cron job (SQL exists in migration). SOS persists forever. |
 | 5 | **EmergencyTool instantiated but never wired** | MEDIUM | Wire into ContextAssembler or remove as dead code. |
 | 6 | **@mlc-ai/web-llm missing from deps** | MEDIUM | Add to package.json or remove from docs. Offline AI path broken. |

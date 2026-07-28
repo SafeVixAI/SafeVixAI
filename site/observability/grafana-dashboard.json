@@ -1,0 +1,303 @@
+{
+  "dashboard": {
+    "id": null,
+    "uid": "safevixai-backend",
+    "title": "SafeVixAI Backend — Business Metrics",
+    "tags": ["safevixai", "backend", "business"],
+    "timezone": "browser",
+    "schemaVersion": 38,
+    "version": 1,
+    "refresh": "10s",
+    "time": { "from": "now-6h", "to": "now" },
+    "panels": [
+      {
+        "id": 1,
+        "title": "SOS Dispatches (Total)",
+        "type": "stat",
+        "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
+        "targets": [{
+          "expr": "sum(sos_dispatch_total)",
+          "legendFormat": "Total SOS"
+        }],
+        "fieldConfig": {
+          "defaults": {
+            "color": { "mode": "thresholds" },
+            "thresholds": {
+              "steps": [
+                { "color": "green", "value": null },
+                { "color": "red", "value": 100 }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 2,
+        "title": "SOS Success Rate",
+        "type": "gauge",
+        "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
+        "targets": [{
+          "expr": "sum(rate(sos_dispatch_total{status=\"success\"}[5m])) / sum(rate(sos_dispatch_total[5m])) * 100",
+          "legendFormat": "Success %"
+        }],
+        "fieldConfig": {
+          "defaults": {
+            "color": { "mode": "thresholds" },
+            "min": 0,
+            "max": 100,
+            "thresholds": {
+              "steps": [
+                { "color": "red", "value": null },
+                { "color": "yellow", "value": 90 },
+                { "color": "green", "value": 95 }
+              ]
+            },
+            "unit": "percent"
+          }
+        }
+      },
+      {
+        "id": 3,
+        "title": "SOS Response Time (p95)",
+        "type": "stat",
+        "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 },
+        "targets": [{
+          "expr": "histogram_quantile(0.95, rate(sos_response_time_seconds_bucket[5m]))",
+          "legendFormat": "p95 latency"
+        }],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s",
+            "thresholds": {
+              "steps": [
+                { "color": "green", "value": null },
+                { "color": "yellow", "value": 2 },
+                { "color": "red", "value": 5 }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 4,
+        "title": "Active Tracking Sessions",
+        "type": "stat",
+        "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 },
+        "targets": [{
+          "expr": "tracking_sessions_active",
+          "legendFormat": "Active sessions"
+        }],
+        "fieldConfig": {
+          "defaults": {
+            "color": { "mode": "palette-classic" }
+          }
+        }
+      },
+      {
+        "id": 5,
+        "title": "Emergency Lookups by Service Type",
+        "type": "timeseries",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+        "targets": [{
+          "expr": "sum(rate(emergency_lookup_total[5m])) by (service_type)",
+          "legendFormat": "{{service_type}}"
+        }],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "reqps",
+            "lineWidth": 2,
+            "fillOpacity": 10
+          }
+        }
+      },
+      {
+        "id": 6,
+        "title": "Emergency Services Found",
+        "type": "bargauge",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
+        "targets": [{
+          "expr": "emergency_services_found",
+          "legendFormat": "{{service_type}} ({{radius_meters}}m)"
+        }],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "orientation": "horizontal"
+          }
+        }
+      },
+      {
+        "id": 7,
+        "title": "Chatbot Requests by Provider",
+        "type": "timeseries",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 12 },
+        "targets": [{
+          "expr": "sum(rate(chatbot_request_total[5m])) by (provider)",
+          "legendFormat": "{{provider}}"
+        }],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "reqps",
+            "stacking": { "mode": "normal" },
+            "fillOpacity": 80
+          }
+        }
+      },
+      {
+        "id": 8,
+        "title": "Chatbot Response Time by Provider",
+        "type": "heatmap",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 12 },
+        "targets": [{
+          "expr": "rate(chatbot_response_time_seconds_bucket[5m])",
+          "legendFormat": "{{provider}}"
+        }],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s"
+          }
+        }
+      },
+      {
+        "id": 9,
+        "title": "LLM Provider Fallbacks",
+        "type": "timeseries",
+        "gridPos": { "h": 6, "w": 12, "x": 0, "y": 20 },
+        "targets": [{
+          "expr": "sum(rate(chatbot_fallback_total[5m])) by (from_provider, to_provider)",
+          "legendFormat": "{{from_provider}} → {{to_provider}}"
+        }],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "reqps",
+            "lineWidth": 2
+          }
+        }
+      },
+      {
+        "id": 10,
+        "title": "API Request Rate by Endpoint",
+        "type": "timeseries",
+        "gridPos": { "h": 6, "w": 12, "x": 12, "y": 20 },
+        "targets": [{
+          "expr": "sum(rate(api_request_total[5m])) by (endpoint)",
+          "legendFormat": "{{endpoint}}"
+        }],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "reqps",
+            "lineWidth": 1,
+            "fillOpacity": 10
+          }
+        }
+      },
+      {
+        "id": 11,
+        "title": "API Response Time (p95 by Endpoint)",
+        "type": "timeseries",
+        "gridPos": { "h": 6, "w": 12, "x": 0, "y": 26 },
+        "targets": [{
+          "expr": "histogram_quantile(0.95, sum(rate(api_request_time_seconds_bucket[5m])) by (endpoint, le))",
+          "legendFormat": "{{endpoint}}"
+        }],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s",
+            "thresholds": {
+              "steps": [
+                { "color": "green", "value": null },
+                { "color": "yellow", "value": 0.5 },
+                { "color": "red", "value": 2 }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 12,
+        "title": "Cache Hit/Miss Ratio",
+        "type": "piechart",
+        "gridPos": { "h": 6, "w": 12, "x": 12, "y": 26 },
+        "targets": [
+          {
+            "expr": "sum(rate(cache_hit_total[5m]))",
+            "legendFormat": "Hits"
+          },
+          {
+            "expr": "sum(rate(cache_miss_total[5m]))",
+            "legendFormat": "Misses"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "reqps"
+          }
+        }
+      },
+      {
+        "id": 13,
+        "title": "Challan Calculations",
+        "type": "stat",
+        "gridPos": { "h": 4, "w": 6, "x": 0, "y": 32 },
+        "targets": [{
+          "expr": "sum(challan_calculation_total)",
+          "legendFormat": "Total calculations"
+        }],
+        "fieldConfig": {
+          "defaults": {
+            "color": { "mode": "palette-classic" }
+          }
+        }
+      },
+      {
+        "id": 14,
+        "title": "Challan Calculation Time (p95)",
+        "type": "stat",
+        "gridPos": { "h": 4, "w": 6, "x": 6, "y": 32 },
+        "targets": [{
+          "expr": "histogram_quantile(0.95, rate(challan_calculation_time_seconds_bucket[5m]))",
+          "legendFormat": "p95"
+        }],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s"
+          }
+        }
+      },
+      {
+        "id": 15,
+        "title": "Tracking Updates (Success vs Failure)",
+        "type": "timeseries",
+        "gridPos": { "h": 4, "w": 12, "x": 12, "y": 32 },
+        "targets": [{
+          "expr": "sum(rate(tracking_update_total[5m])) by (status)",
+          "legendFormat": "{{status}}"
+        }],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "reqps",
+            "stacking": { "mode": "normal" }
+          }
+        }
+      }
+    ],
+    "templating": {
+      "list": [
+        {
+          "name": "datasource",
+          "type": "datasource",
+          "query": "prometheus",
+          "current": { "text": "Prometheus", "value": "Prometheus" }
+        },
+        {
+          "name": "environment",
+          "type": "custom",
+          "query": "production,staging,development",
+          "current": { "text": "production", "value": "production" }
+        }
+      ]
+    }
+  },
+  "overwrite": true,
+  "message": "SafeVixAI Backend Business Metrics Dashboard — Phase 2 Observability"
+}

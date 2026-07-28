@@ -220,6 +220,10 @@ def create_app() -> FastAPI:
             app.state.queue = None
             app.state.worker = None
 
+        # Signal that startup is complete (for startup probe)
+        from api.v1.probes import set_startup_complete
+        set_startup_complete()
+
         try:
             yield
         finally:

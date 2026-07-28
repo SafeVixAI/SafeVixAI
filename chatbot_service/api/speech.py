@@ -13,6 +13,7 @@ from services.speech_translation import IndicSeamlessService, speech_result_to_d
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix='/speech', tags=['Speech'])
+router_v1 = APIRouter(prefix='/api/v1/speech', tags=['Speech'])
 
 # Max audio upload: 10 MB
 _MAX_AUDIO_BYTES = 10 * 1024 * 1024
@@ -27,6 +28,7 @@ def get_speech_service(request: Request) -> IndicSeamlessService:
 
 
 @router.get('/status')
+@router_v1.get('/status')
 @limiter.limit("30/minute")
 async def speech_status(request: Request) -> dict:
     service = get_speech_service(request)
@@ -34,6 +36,7 @@ async def speech_status(request: Request) -> dict:
 
 
 @router.post('/translate')
+@router_v1.post('/translate')
 @limiter.limit("20/minute")
 async def translate_speech(
     request: Request,

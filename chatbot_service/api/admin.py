@@ -17,6 +17,7 @@ from limiter import limiter
 from memory.redis_memory import ConversationMemoryStore
 
 router = APIRouter(tags=['Admin'])
+router_v1 = APIRouter(prefix='/api/v1/admin', tags=['Admin'])
 
 
 def get_engine(request: Request) -> ChatEngine:
@@ -39,6 +40,7 @@ def _require_admin(x_admin_key: str = Header(default='')) -> None:
 
 
 @router.get('/admin/health')
+@router_v1.get('/health')
 @limiter.limit('5/minute')
 async def health(
     request: Request,  # noqa
@@ -59,6 +61,7 @@ async def health(
 
 
 @router.post('/admin/rebuild-index')
+@router_v1.post('/rebuild-index')
 @limiter.limit('5/minute')
 async def rebuild_index(
     request: Request,
@@ -78,6 +81,7 @@ async def rebuild_index(
 
 
 @router.get('/admin/jobs/{job_id}')
+@router_v1.get('/jobs/{job_id}')
 @limiter.limit('10/minute')
 async def get_job_status(
     job_id: str,
@@ -94,6 +98,7 @@ async def get_job_status(
 
 
 @router.get('/admin/providers/health')
+@router_v1.get('/providers/health')
 @limiter.limit('5/minute')
 async def provider_health(
     request: Request,  # noqa
@@ -138,6 +143,7 @@ async def provider_health(
 
 
 @router.get('/admin/providers/dashboard')
+@router_v1.get('/providers/dashboard')
 @limiter.limit('5/minute')
 async def provider_health_dashboard(
     request: Request,  # noqa

@@ -18,6 +18,7 @@ import { ViewTransitions } from 'next-view-transitions';
 import { AppFrame } from '@/components/ui/AppFrame';
 import { AnalyticsProvider } from '@/lib/analytics-provider';
 import { EnterpriseClientAppHooks } from '@/components/EnterpriseClientAppHooks';
+import PwaUpdatePrompt from '@/components/updates/PwaUpdatePrompt';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -162,6 +163,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <GSAPProvider>
               <ConnectivityProvider>
                 <EnterpriseClientAppHooks />
+                <PwaUpdatePrompt />
                 <AppFrame><ViewTransitions>{children}</ViewTransitions></AppFrame>
               <Toaster
                 position="top-right"

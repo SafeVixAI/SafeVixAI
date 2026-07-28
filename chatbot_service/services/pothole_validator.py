@@ -22,9 +22,15 @@ class PotholeValidator:
 
     @classmethod
     def get_model(cls):
-        if YOLO is None:
-            msg = "ultralytics is not installed. Install with: pip install ultralytics"
-            raise ImportError(msg)
+        # Resolve YOLO class — use module-level import if available,
+        # otherwise try runtime import (supports patch.dict in tests)
+        yolo_cls = YOLO
+        if yolo_cls is None:
+            try:
+                from ultralytics import YOLO as yolo_cls
+            except ImportError:
+                msg = "ultralytics is not installed. Install with: pip install ultralytics"
+                raise ImportError(msg) from None
         if cls._model is None:
             # Check relative and absolute paths
             paths_to_check = [
@@ -45,7 +51,7 @@ class PotholeValidator:
                 raise FileNotFoundError(msg)
 
             logger.info("Loading YOLOv8 pothole model from %s", selected_path)
-            cls._model = YOLO(selected_path)
+            cls._model = yolo_cls(selected_path)
         return cls._model
 
     @classmethod

@@ -4,7 +4,7 @@
 'use client';
 
 import React, { useEffect, useState, useCallback } from 'react';
-import { TerminalHeader } from '@/components/layout/TerminalHeader';
+import { TerminalHeader } from '@/components/ui/TerminalHeader';
 import { Shield, AlertTriangle, Loader2, RefreshCw } from 'lucide-react';
 import { fetchReleases, type ReleaseSummary } from '@/lib/api/update-api';
 import { logClientError } from '@/lib/client-logger';

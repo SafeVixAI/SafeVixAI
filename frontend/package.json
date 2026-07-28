@@ -9,7 +9,7 @@
     "dev": "next dev --webpack",
     "build": "next build --webpack && node scripts/copy-public.js",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint --ext .ts,.tsx --ignore-pattern '*.js' .",
     "type-check": "tsc --noEmit",
     "test": "jest",
     "test:e2e": "playwright test e2e",

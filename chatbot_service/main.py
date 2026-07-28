@@ -14,8 +14,14 @@ except ImportError:
     sentry_sdk = None
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from slowapi import _rate_limit_exceeded_handler
-from slowapi.errors import RateLimitExceeded
+try:
+    from slowapi import _rate_limit_exceeded_handler
+    from slowapi.errors import RateLimitExceeded
+    _HAS_SLOWAPI = True
+except ImportError:
+    _HAS_SLOWAPI = False
+    _rate_limit_exceeded_handler = None
+    RateLimitExceeded = Exception
 from starlette.responses import JSONResponse
 
 from agent.context_assembler import ContextAssembler
@@ -239,8 +245,9 @@ def create_app() -> FastAPI:
         ],
     )
 
-    app.state.limiter = limiter
-    app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+    if _HAS_SLOWAPI:
+        app.state.limiter = limiter
+        app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
     # Global exception handler — catches all unhandled exceptions
     @app.exception_handler(Exception)

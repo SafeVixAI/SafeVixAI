@@ -24,7 +24,7 @@ class PotholeValidator:
     def get_model(cls):
         if cls._model is not None:
             return cls._model
-        yolo_cls = YOLO
+        yolo_cls = YOLO  # noqa: N811
         if yolo_cls is None:
             try:
                 from ultralytics import YOLO as yolo_cls

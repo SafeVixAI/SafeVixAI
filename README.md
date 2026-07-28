@@ -21,6 +21,10 @@
   Built for the IIT Madras Road Safety Hackathon 2026.
 </p>
 
+## Vision
+
+Every second counts in a road emergency. SafeVixAI puts life-saving information — nearest hospitals, traffic laws, first aid protocols — directly in the hands of citizens, officers, and first responders. Offline-first architecture ensures it works when networks fail. 10-provider LLM fallback ensures the AI never goes silent. Zero infrastructure cost — entirely free and open source.
+
 | Metric | Value |
 |--------|-------|
 | Unit Tests | **7,687+ passing** — Frontend 2,956 / Backend 2,912 / Chatbot 1,819 |
@@ -96,6 +100,37 @@ Open: `http://localhost:3000`
 docker compose up --build   # Starts all 5 services
 # postgres:5432  redis:6379  backend:8000  chatbot:8010  frontend:3000
 ```
+
+### Configuration
+
+| Service | Config File | Key Vars |
+|---------|-------------|----------|
+| Backend | `backend/.env` | `DATABASE_URL`, `REDIS_URL`, `OVERPASS_URLS`, `ADMIN_SECRET` |
+| Chatbot | `chatbot_service/.env` | `DEFAULT_LLM_PROVIDER`, `DEFAULT_LLM_MODEL`, `CHROMA_PERSIST_DIR` |
+| Frontend | `frontend/.env.local` | `NEXT_PUBLIC_BACKEND_URL`, `NEXT_PUBLIC_CHATBOT_URL` |
+
+Full reference: [docs/Environment.md](docs/Environment.md), [docs/CONFIGURATION.md](docs/CONFIGURATION.md)
+
+### CLI
+
+```bash
+# Health checks
+curl http://localhost:8000/health
+curl http://localhost:8010/health
+
+# Database migrations
+cd backend && alembic upgrade head
+
+# Testing
+cd backend && pytest tests/ -v --cov
+cd frontend && npm test && npm run lint && npx tsc --noEmit
+
+# Data pipeline
+python backend/scripts/data/seed_violations.py
+python chatbot_service/data/build_vectorstore.py
+```
+
+Full reference: [CLI_REFERENCE.md](CLI_REFERENCE.md)
 
 ---
 
@@ -344,7 +379,37 @@ cd frontend && npm test && npm run lint && npx tsc --noEmit
 
 ---
 
-## Contributing
+## FAQ
+
+| Question | Answer |
+|----------|--------|
+| **Does it work offline?** | Yes. Critical features (SOS, challan calculation, first aid, emergency data) work offline via PWA service worker, DuckDB-Wasm, and IndexedDB queues. |
+| **How much does it cost?** | Zero. All services use free tiers (Vercel, Render, Supabase, Upstash). Total infrastructure cost: ₹0. |
+| **Is my data private?** | Blood group and emergency contacts are stored only on your device (IndexedDB). Location data is used only for requested services. See [PRIVACY.md](PRIVACY.md). |
+| **Which Indian languages are supported?** | 14 languages via Sarvam AI + browser SpeechRecognition. |
+| **Is this a real emergency service?** | No. Always call **112** in life-threatening situations. SafeVixAI is an informational aid, not a replacement for professional responders. |
+| **Can I self-host?** | Yes. Docker Compose runs the full stack locally. See [docs/Deployment.md](docs/Deployment.md). |
+| **What's the test coverage?** | Backend: 100% lines/branches. Frontend: 86% lines. Chatbot: 97%+. ~7,687 unit tests + 55 E2E. |
+| **How do I report a bug?** | Open a [GitHub Issue](https://github.com/SafeVixAI/SafeVixAI/issues). |
+| **How do I report a security issue?** | Email **security@safevixai.gov.in**. See [SECURITY.md](SECURITY.md). |
+
+Full FAQ: [FAQ.md](FAQ.md)
+
+## Troubleshooting
+
+| Symptom | Likely Cause | Fix |
+|---------|-------------|-----|
+| Backend won't start | Database not running | Start PostgreSQL or check `DATABASE_URL` in `backend/.env` |
+| Chatbot returns errors | Missing API key | Add `GROQ_API_KEY` or `GEMINI_API_KEY` in `chatbot_service/.env` |
+| Frontend can't connect | Backend not running | Start backend: `cd backend && uvicorn main:app --reload --port 8000` |
+| PWA not installing | Running in dev mode | Use `npm run build && npm start` for service worker |
+| SOS doesn't trigger offline | IndexedDB blocked | Check browser storage permissions; verify offline queue in DevTools > Application > IndexedDB |
+| LLM always falls back to template | All provider keys invalid | Check `chatbot_service/.env` for correct API keys |
+| Docker build fails | Port conflict or ARM64 issue | Check `docker ps` for port conflicts; use `DOCKER_DEFAULT_PLATFORM=linux/amd64` on Apple Silicon |
+
+Full troubleshooting: [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
+
+---
 
 We welcome contributions of all sizes.
 

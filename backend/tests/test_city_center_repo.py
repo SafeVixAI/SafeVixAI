@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -44,9 +44,13 @@ class TestGetAllCityCenters:
         row.city_slug = "testville"
         row.lat = 12.0
         row.lon = 77.0
-        result_mock = MagicMock()
-        result_mock.scalars.return_value.all.return_value = [row]
-        db.execute.return_value = AsyncMock(return_value=result_mock)
+
+        async def _mock_execute(*a, **kw):
+            r = MagicMock()
+            r.scalars.return_value.all.return_value = [row]
+            return r
+
+        db.execute.side_effect = _mock_execute
         result = await get_all_city_centers(db=db)
         assert result == {"testville": (12.0, 77.0)}
 
@@ -75,9 +79,13 @@ class TestGetOfflineCenters:
         row.city_slug = "chennai"
         row.lat = 13.08
         row.lon = 80.27
-        result_mock = MagicMock()
-        result_mock.scalars.return_value.all.return_value = [row]
-        db.execute.return_value = AsyncMock(return_value=result_mock)
+
+        async def _mock_execute(*a, **kw):
+            r = MagicMock()
+            r.scalars.return_value.all.return_value = [row]
+            return r
+
+        db.execute.side_effect = _mock_execute
         result = await get_offline_centers(db=db)
         assert "chennai" in result
 
@@ -102,8 +110,12 @@ class TestGetCityCenter:
         row = MagicMock()
         row.lat = 99.0
         row.lon = 99.0
-        result_mock = MagicMock()
-        result_mock.scalar_one_or_none.return_value = row
-        db.execute.return_value = AsyncMock(return_value=result_mock)
+
+        async def _mock_execute(*a, **kw):
+            r = MagicMock()
+            r.scalar_one_or_none.return_value = row
+            return r
+
+        db.execute.side_effect = _mock_execute
         result = await get_city_center("testville", db=db)
         assert result == (99.0, 99.0)

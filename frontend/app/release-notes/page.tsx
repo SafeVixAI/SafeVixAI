@@ -38,7 +38,7 @@ export default function ReleaseNotesPage() {
     } finally {
       setLoading(false);
     }
-  }, [channel, page]);
+  }, [channel, page, limit]);
 
   useEffect(function () { load(); }, [load]);
 

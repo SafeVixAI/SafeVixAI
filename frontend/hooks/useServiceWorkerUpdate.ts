@@ -63,7 +63,9 @@ export function useServiceWorkerUpdate(): SWUpdateHook {
     setDismissed(true);
     try {
       localStorage.setItem('pwa_update_dismissed', Date.now().toString());
-    } catch {}
+    } catch {
+      // localStorage may be unavailable (SSR, private browsing)
+    }
   }, []);
 
   useEffect(function () {
@@ -76,7 +78,9 @@ export function useServiceWorkerUpdate(): SWUpdateHook {
           localStorage.removeItem('pwa_update_dismissed');
         }
       }
-    } catch {}
+    } catch {
+      // localStorage may be unavailable (SSR, private browsing)
+    }
   }, []);
 
   return { waitingSw: waitingSw, updateAvailable: waitingSw !== null && !dismissed, applyUpdate: applyUpdate, dismissUpdate: dismissUpdate };

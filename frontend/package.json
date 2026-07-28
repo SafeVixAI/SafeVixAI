@@ -19,7 +19,8 @@
     "i18n:split": "node scripts/split-namespaces.mjs",
     "i18n:types": "node scripts/generate-i18n-types.mjs",
     "lint:i18n": "node scripts/check-i18n-keys.mjs",
-    "i18n:translate": "python scripts/generate-ai-translations.py"
+    "i18n:translate": "python scripts/generate-ai-translations.py",
+    "update": "node scripts/update.mjs"
   },
   "dependencies": {
     "@base-ui/react": "1.3.0",

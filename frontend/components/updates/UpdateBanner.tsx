@@ -4,11 +4,12 @@
 // Copyright (c) 2026 SafeVixAI Team
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Download, Shield, X, ArrowUp, RotateCcw, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Download, Shield, X, ArrowUp, RotateCcw, AlertTriangle, CheckCircle, FileText } from 'lucide-react';
 import { useShallow } from 'zustand/react/shallow';
 import { useAppStore, useUpdateBannerDismissed, useUpdateInfo } from '@/lib/store';
 import { checkForUpdates, retryOperation, restartApplication, subscribeToDownloadProgress, verifyReleaseIntegrity } from '@/lib/api/update-api';
 import { logClientError } from '@/lib/client-logger';
+import ReleaseNotesModal from './ReleaseNotesModal';
 
 export default function UpdateBanner() {
   const updateInfo = useUpdateInfo();
@@ -23,6 +24,7 @@ export default function UpdateBanner() {
     }))
   );
   const [checking, setChecking] = useState(false);
+  const [showNotes, setShowNotes] = useState(false);
   const cleanupRef = useRef<(() => void) | null>(null);
   const handleRetryRef = useRef<() => void>(() => {});
 
@@ -120,6 +122,7 @@ export default function UpdateBanner() {
   ) : null;
 
   return (
+    <>
     <div
       role="alert"
       className={`relative w-full px-4 py-3 flex items-center justify-between gap-4 text-sm
@@ -165,13 +168,23 @@ export default function UpdateBanner() {
 
       <div className="flex items-center gap-2 shrink-0">
         {updateInfo.status === 'available' && (
-          <button
-            onClick={handleUpdateNow}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium rounded-lg transition-colors"
-          >
-            <Download className="w-3.5 h-3.5" />
-            Update Now
-          </button>
+          <>
+            <button
+              onClick={function () { setShowNotes(true); }}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-700/60 hover:bg-slate-600/60 text-slate-300 text-xs font-medium rounded-lg transition-colors"
+              title="View release notes"
+            >
+              <FileText className="w-3.5 h-3.5" />
+              Release Notes
+            </button>
+            <button
+              onClick={handleUpdateNow}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium rounded-lg transition-colors"
+            >
+              <Download className="w-3.5 h-3.5" />
+              Update Now
+            </button>
+          </>
         )}
         {updateInfo.status === 'installed' && (
           <button
@@ -202,5 +215,12 @@ export default function UpdateBanner() {
         )}
       </div>
     </div>
+    {showNotes && (
+      <ReleaseNotesModal
+        version={updateInfo.latestVersion}
+        onClose={function () { setShowNotes(false); }}
+      />
+    )}
+    </>
   );
 }

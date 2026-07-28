@@ -5,6 +5,17 @@ name: Wiki Documentation Sync
 on:
   push:
     branches: [main]
+    paths:
+      - 'backend/**'
+      - 'chatbot_service/**'
+      - 'frontend/**'
+      - 'docs/**'
+      - 'scripts/docs/**'
+      - 'AGENTS.md'
+      - 'README.md'
+      - 'SETUP.md'
+      - 'DESIGN.md'
+      - 'SKILL.md'
   workflow_dispatch:
     inputs:
       mode:

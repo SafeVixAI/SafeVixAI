@@ -5,8 +5,16 @@ name: Update Master Document
 on:
   push:
     branches: [main]
-    paths-ignore:
-      - 'docs/SafeVixAI_MASTER.docx'
+    paths:
+      - 'backend/**'
+      - 'chatbot_service/**'
+      - 'frontend/**'
+      - 'docs/*.md'
+      - 'scripts/docs/**'
+      - 'AGENTS.md'
+      - 'README.md'
+      - 'SETUP.md'
+      - 'DESIGN.md'
   workflow_dispatch:
 
 concurrency:

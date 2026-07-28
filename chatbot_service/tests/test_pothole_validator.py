@@ -15,6 +15,7 @@ class TestPotholeValidator:
         PotholeValidator._model = None
 
     def test_get_model_file_not_found(self) -> None:
+        PotholeValidator._model = None
         with patch("os.path.exists", return_value=False):
             with patch("services.pothole_validator.YOLO"):
                 with pytest.raises(FileNotFoundError):

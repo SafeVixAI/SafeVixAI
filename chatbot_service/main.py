@@ -245,7 +245,7 @@ def create_app() -> FastAPI:
         ],
     )
 
-    if _HAS_SLOWAPI:
+    if _HAS_SLOWAPI and settings.environment != "test":
         app.state.limiter = limiter
         app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 

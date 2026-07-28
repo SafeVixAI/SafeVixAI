@@ -54,7 +54,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pytest pytest-asyncio pytest-cov pytest-httpx pytest-timeout 2>/dev/null || true
-          pip uninstall -y slowapi 2>/dev/null || true  # Disable rate limiting in tests
 
       - name: Run tests with coverage
         working-directory: chatbot_service

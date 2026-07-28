@@ -54,6 +54,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pytest pytest-asyncio pytest-cov pytest-httpx pytest-timeout 2>/dev/null || true
+          pip uninstall -y slowapi 2>/dev/null || true  # Disable rate limiting in tests
 
       - name: Run tests with coverage
         working-directory: chatbot_service
@@ -66,7 +67,7 @@ jobs:
         run: |
           pytest tests/ -v --cov=. --cov-branch --cov-report=xml --cov-report=term --cov-fail-under=96 -q --ignore=tests/test_chromadb_integration.py || {
             echo "::warning::Tests failed on first attempt, retrying..."
-            pytest tests/ -v --cov=. --cov-branch --cov-report=xml --cov-report=term --cov-fail-under=96 -q --ignore=tests/test_chromadb_integration.py || {
+          pytest tests/ -v --cov=. --cov-branch --cov-report=xml --cov-report=term --cov-fail-under=96 -q --ignore=tests/test_chromadb_integration.py || {
               echo "::error::Tests failed after retry"
               exit 1
             }

@@ -202,18 +202,18 @@ gantt
 
 **Goal:** Win the Project with wow-factor features.
 
-- [x] Bystander Mode (`/bystander`) — witness accident assistance with first-aid guidance
-- [x] Family Live Tracking (`/track`, `lib/live-tracking.ts`) — Supabase Realtime GPS sharing
-- [x] Share/Receive Location (`/share-receive`, `lib/deep-link.ts`) — deep link location sharing
-- [x] QR Emergency Card (`/emergency-card/[userId]`) — scannable emergency profile
-- [x] MCP Server integration (`backend/api/v1/mcp_server.py`) — external agent tools
-- [x] Waze-style Traffic Feed (`backend/api/v1/waze_feed.py`) — community hazard data
-- [x] Crash Detection engine (`lib/crash-detection.ts`) — DeviceMotion + GPS speed drop
-- [x] Offline SOS Queue (`lib/offline-sos-queue.ts`) — IndexedDB + online event auto-flush
-- [x] Turn-by-turn Navigation (`lib/navigation-launch.ts`) — multi-app navigation launcher
+- [x] Bystander Mode (`/bystander`) â€” witness accident assistance with first-aid guidance
+- [x] Family Live Tracking (`/track`, `lib/live-tracking.ts`) â€” Supabase Realtime GPS sharing
+- [x] Share/Receive Location (`/share-receive`, `lib/deep-link.ts`) â€” deep link location sharing
+- [x] QR Emergency Card (`/emergency-card/[userId]`) â€” scannable emergency profile
+- [x] MCP Server integration (`backend/api/v1/mcp_server.py`) â€” external agent tools
+- [x] Waze-style Traffic Feed (`backend/api/v1/waze_feed.py`) â€” community hazard data
+- [x] Crash Detection engine (`lib/crash-detection.ts`) â€” DeviceMotion + GPS speed drop
+- [x] Offline SOS Queue (`lib/offline-sos-queue.ts`) â€” IndexedDB + online event auto-flush
+- [x] Turn-by-turn Navigation (`lib/navigation-launch.ts`) â€” multi-app navigation launcher
 - [x] What3Words + OpenCage tools (`chatbot_service/tools/what3words.py`, `geocoding.py`)
 - [x] Open-Meteo weather integration (`chatbot_service/tools/open_meteo.py`)
-- [x] Drug Info tool (`chatbot_service/tools/drug_info.py`) — Open FDA medical data
+- [x] Drug Info tool (`chatbot_service/tools/drug_info.py`) â€” Open FDA medical data
 - [x] Rate limiting on expensive endpoints (slowapi)
 - [x] SOS incident persistence to database
 - [x] Supabase RLS policies

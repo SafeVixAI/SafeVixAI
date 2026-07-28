@@ -22,8 +22,8 @@ class PotholeValidator:
 
     @classmethod
     def get_model(cls):
-        # Resolve YOLO class — use module-level import if available,
-        # otherwise try runtime import (supports patch.dict in tests)
+        if cls._model is not None:
+            return cls._model
         yolo_cls = YOLO
         if yolo_cls is None:
             try:

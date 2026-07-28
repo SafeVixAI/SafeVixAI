@@ -11,7 +11,7 @@
 | Challan Calculator | DriveLegal | Deterministic MVA 2019 fine calculation with state overrides |
 | Road Reporter | RoadWatch | Geotagged issue reporting with automatic authority routing |
 
-**Total infrastructure cost: ?0** — 100% free and open-source stack.
+**Total infrastructure cost: ?0** â€” 100% free and open-source stack.
 
 **Current status:** All 25 features complete. 2829 unit tests passing (1365 backend + 892 chatbot + 572 frontend). 45/55 E2E tests passing.
 
@@ -19,13 +19,13 @@
 
 ## 2. Problem Statements
 
-### 2.1 SafeVixAI — Emergency Response
+### 2.1 SafeVixAI â€” Emergency Response
 India has over 150,000 road accident deaths annually (WHO 2023). The critical window for emergency response is the first 10 minutes. Existing apps (HumSafar, Rakshak) cover limited geographies, have no AI, and fail offline. SafeVixAI solves this with instant GPS-based emergency service locator that works offline on remote highways.
 
-### 2.2 DriveLegal — Traffic Law Education
+### 2.2 DriveLegal â€” Traffic Law Education
 Most Indians are unaware of traffic fine amounts under the MV Amendment Act 2019. Legal information is buried in gazette notifications. SafeVixAI provides a deterministic challan calculator + RAG-powered legal assistant grounded in the actual Motor Vehicles Act text.
 
-### 2.3 RoadWatch — Road Infrastructure Accountability
+### 2.3 RoadWatch â€” Road Infrastructure Accountability
 India has over 4.5 lakh km of national and state highways with poor pothole reporting mechanisms. Citizens have no way to know which government authority is responsible for a specific road or what the maintenance budget was. SafeVixAI routes complaints to the correct executive engineer automatically.
 
 ---
@@ -45,7 +45,7 @@ India has over 4.5 lakh km of national and state highways with poor pothole repo
 
 ## 4. Functional Requirements
 
-### Module 1 — Emergency Locator
+### Module 1 â€” Emergency Locator
 - [x] GPS auto-detection on page load (high accuracy, 10s timeout)
 - [x] Nearby services map: hospitals (red), police (blue), ambulance (red+cross), fire (orange), towing (amber)
 - [x] Tiered radius fallback: 500m ? 1km ? 5km ? 10km ? 25km ? 50km
@@ -55,7 +55,7 @@ India has over 4.5 lakh km of national and state highways with poor pothole repo
 - [x] Offline emergency map for 25 Indian cities (GeoJSON + Service Worker)
 - [x] First aid guidance via AI chatbot (WHO grounded)
 
-### Module 2 — AI Chatbot
+### Module 2 â€” AI Chatbot
 - [x] 9-intent detection: FIND_HOSPITAL, FIND_POLICE, FIND_AMBULANCE, FIND_TOW, FIRST_AID_INFO, CHALLAN_QUERY, ROAD_REPORT, LEGAL_INFO, OTHER
 - [x] Online RAG: ChatEngine + 10-provider fallback + ChromaDB (MV Act + WHO Guidelines)
 - [x] Offline AI: WebLLM Phi-3 Mini (3.8B, 4-bit) + IndexedDB cache
@@ -65,14 +65,14 @@ India has over 4.5 lakh km of national and state highways with poor pothole repo
 - [x] Safety checker (7-layer defense): blocks harmful queries, always prepends "Call 112 immediately" on injury queries
 - [x] 13 agent tools: SOS, Challan, LegalSearch, FirstAid, Weather, OpenMeteo, RoadInfra, RoadIssues, SubmitReport, Geocoding, DrugInfo, What3Words, Emergency
 
-### Module 3 — Challan Calculator
+### Module 3 â€” Challan Calculator
 - [x] 22+ MVA 2019 violations with base fines and repeat offence amounts
 - [x] State-specific overrides for TN, KA, MH, DL, AP, TS, KL, RJ
 - [x] GPS auto-detects state for pre-selection
 - [x] Offline calculation via DuckDB-Wasm
 - [x] Every answer cites MVA section number
 
-### Module 4 — Road Reporter
+### Module 4 â€” Road Reporter
 - [x] 5-step report form: type, severity, GPS, photo, description
 - [x] In-browser pothole detection: YOLOv8n ONNX via Transformers.js (15MB)
 - [x] Automatic authority routing: NH ? NHAI, SH ? State PWD, MDR ? District Collector
@@ -92,7 +92,7 @@ India has over 4.5 lakh km of national and state highways with poor pothole repo
 | Cost | ?0 total infrastructure cost (all free tiers) | ? |
 | Accessibility | WCAG AA contrast, 44px touch targets, voice input, multilingual | ? |
 | Global | Works in any country via OSM Overpass API | ? |
-| Privacy | All offline AI inference local — no data leaves device | ? |
+| Privacy | All offline AI inference local â€” no data leaves device | ? |
 
 ---
 

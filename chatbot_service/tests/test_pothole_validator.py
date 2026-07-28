@@ -16,8 +16,9 @@ class TestPotholeValidator:
 
     def test_get_model_file_not_found(self) -> None:
         with patch("os.path.exists", return_value=False):
-            with pytest.raises(FileNotFoundError):
-                PotholeValidator.get_model()
+            with patch("services.pothole_validator.YOLO"):
+                with pytest.raises(FileNotFoundError):
+                    PotholeValidator.get_model()
 
     def test_get_model_loads_correctly(self) -> None:
         mock_model = MagicMock()

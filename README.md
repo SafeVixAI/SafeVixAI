@@ -38,7 +38,31 @@ Every second counts in a road emergency. SafeVixAI puts life-saving information 
 
 ---
 
-## Overview
+## Screenshots
+
+> Interactive demo: [safevixai.vercel.app](https://safevixai.vercel.app) — try the live app.
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  SafeVixAI Dashboard         🔍 Search    🌙 Dark Mode    │
+│  ┌──────────┐ ┌─────────────────────────────────────────┐  │
+│  │ 🚑 EMERG │ │  Emergency Locator    ⚠️ 2 active      │  │
+│  │ 🗺️ MAP   │ │  ┌──────────────────────────────────┐  │  │
+│  │ 🤖 CHAT  │ │  │        🗺️ Map View                │  │  │
+│  │ 📋 CHALN  │ │  │   🏥 Apollo Hospital ── 1.2km    │  │  │
+│  │ 📸 REPORT │ │  │   🚓 Police Stn    ── 0.8km    │  │  │
+│  └──────────┘ │  │   🚒 Fire Stn       ── 2.1km    │  │  │
+│               │  └──────────────────────────────────┘  │  │
+│  📱 PWA       │  ┌──────────────────────────────────┐  │  │
+│  Ready        │  │  AI Assistant — online             │  │  │
+│               │  │  "What's the fine for speeding?" │  │  │
+│               │  │  "In Tamil Nadu: ₹2,000 first    │  │  │
+│               │  │   offence under MVA 2019..."     │  │  │
+│               │  └──────────────────────────────────┘  │  │
+└─────────────────────────────────────────────────────────────┘
+```
+
+Key interfaces: **Emergency Locator** (geospatial hospital/police/fire search), **AI Chatbot** (traffic law + first aid + challan calculation), **Command Center** (real-time incident dashboard), **SOS** (hold-to-activate with WebSocket tracking), **Offline Mode** (PWA + DuckDB-Wasm + IndexedDB).
 
 SafeVixAI is a three-service monorepo delivering real-time emergency response, AI-powered traffic legal assistance, and road infrastructure reporting through an offline-capable progressive web application.
 
@@ -432,6 +456,19 @@ We welcome contributions of all sizes.
 - **Roadmap**: [ROADMAP.md](ROADMAP.md) — planned features and priorities
 - **Adopters**: [ADOPTERS.md](ADOPTERS.md) — organizations using SafeVixAI in production
 - **Support**: [SUPPORT.md](SUPPORT.md) — all support channels and response times
+
+## Contributing
+
+We welcome contributions of all sizes — code, docs, tests, bug reports, feature ideas.
+
+1. **Read the docs**: [CONTRIBUTING.md](CONTRIBUTING.md), [STYLE_GUIDE.md](STYLE_GUIDE.md), [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
+2. **Pick an issue**: [Good First Issues](https://github.com/SafeVixAI/SafeVixAI/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)
+3. **Fork & branch**: `git checkout -b feat/your-feature`
+4. **Code**: Follow existing patterns. Run tests. Keep coverage.
+5. **PR**: Open against `main`. CI checks lint, tests, coverage, build.
+6. **Review**: All PRs reviewed by at least one maintainer.
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed workflow, [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) for community standards.
 
 ## License
 

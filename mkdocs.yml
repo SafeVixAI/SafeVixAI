@@ -41,11 +41,10 @@ plugins:
   - search:
       lang: en
       separator: '[\s\-_]+'
-      prebuild_index: true
   - swagger-ui-tag:
       background: "#009688"
-  - mkdocs-glossary:
-      glossary_path: docs/glossary.md
+  - glossary:
+      unknown_warning: false
   - exporter:
       formats:
         pdf:

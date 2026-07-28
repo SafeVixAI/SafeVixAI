@@ -62,8 +62,13 @@ class TestGetAllCityCenters:
 
     async def test_returns_hardcoded_when_db_empty(self) -> None:
         db = MagicMock()
-        db.execute.return_value = AsyncMock()
-        db.execute.return_value.scalars.return_value.all.return_value = []
+
+        async def _mock_execute(*a, **kw):
+            r = MagicMock()
+            r.scalars.return_value.all.return_value = []
+            return r
+
+        db.execute.side_effect = _mock_execute
         result = await get_all_city_centers(db=db)
         assert result == _HARDCODED_CENTERS
 

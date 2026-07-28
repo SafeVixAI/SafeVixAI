@@ -423,6 +423,16 @@ We welcome contributions of all sizes.
 
 ---
 
+## Community
+
+- **GitHub Discussions**: [github.com/SafeVixAI/SafeVixAI/discussions](https://github.com/SafeVixAI/SafeVixAI/discussions) — ask questions, share ideas
+- **Issue Tracker**: [github.com/SafeVixAI/SafeVixAI/issues](https://github.com/SafeVixAI/SafeVixAI/issues) — report bugs, request features
+- **Documentation**: [safevixai.github.io/SafeVixAI/](https://safevixai.github.io/SafeVixAI/) — full MkDocs site
+- **Governance**: [GOVERNANCE.md](GOVERNANCE.md) — project structure, decision-making, maintainer ladder
+- **Roadmap**: [ROADMAP.md](ROADMAP.md) — planned features and priorities
+- **Adopters**: [ADOPTERS.md](ADOPTERS.md) — organizations using SafeVixAI in production
+- **Support**: [SUPPORT.md](SUPPORT.md) — all support channels and response times
+
 ## License
 
 MIT License — see [LICENSE](LICENSE) for details.

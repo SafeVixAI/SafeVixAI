@@ -97,10 +97,17 @@ def _read_csv(path: Path) -> str:
 def _read_pdf(path: Path) -> str:
     if PdfReader is None:
         return ''
-    reader = PdfReader(str(path))
+    try:
+        reader = PdfReader(str(path))
+    except Exception:
+        logger.warning("Failed to read PDF: %s", path)
+        return ''
     pages: list[str] = []
     for index, page in enumerate(reader.pages, start=1):
-        page_text = normalize_text(page.extract_text() or '')
+        try:
+            page_text = normalize_text(page.extract_text() or '')
+        except Exception:
+            page_text = ''
         if page_text:
             pages.append(f'Page {index}: {page_text}')
     return '\n'.join(pages)

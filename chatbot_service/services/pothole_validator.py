@@ -5,6 +5,11 @@ import io
 import logging
 import os
 
+try:
+    from ultralytics import YOLO
+except ImportError:
+    YOLO = None  # type: ignore[assignment]
+
 from PIL import Image
 
 logger = logging.getLogger(__name__)
@@ -17,7 +22,9 @@ class PotholeValidator:
 
     @classmethod
     def get_model(cls):
-        from ultralytics import YOLO
+        if YOLO is None:
+            msg = "ultralytics is not installed. Install with: pip install ultralytics"
+            raise ImportError(msg)
         if cls._model is None:
             # Check relative and absolute paths
             paths_to_check = [
@@ -72,7 +79,7 @@ class PotholeValidator:
                         if conf > max_confidence:  # pragma: no branch
                             max_confidence = conf
 
-                        xyxy = box.xyxy[0].tolist()
+                        xyxy = box.xyxy[0].tolist() if hasattr(box.xyxy[0], 'tolist') else list(box.xyxy[0])
                         boxes_data.append({
                             "class": class_name,
                             "confidence": conf,

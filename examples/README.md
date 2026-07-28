@@ -8,15 +8,13 @@ This directory contains ready-to-run examples demonstrating how to use SafeVixAI
 
 ## Contents
 
-| Example | Description | Language |
-|---------|-------------|----------|
-| [`api-client/`](api-client/) | Python & TypeScript API client examples | Python + TS |
-| [`emergency/`](emergency/) | Emergency locator and SOS integration | Python |
-| [`challan/`](challan/) | Challan calculation examples | Python + SQL |
-| [`chatbot/`](chatbot/) | Chatbot API integration patterns | Python |
-| [`webhooks/`](webhooks/) | Webhook receiver and sender examples | Python |
-| [`offline/`](offline/) | Offline-first PWA patterns | TypeScript |
-| [`cookbook/`](cookbook/) | Recipe-based integration patterns | Various |
+| Example | Description | Files |
+|---------|-------------|-------|
+| [`api-client/`](api-client/) | Python & TypeScript API client classes | `client.py`, `client.ts` |
+| [`emergency/`](emergency/) | SOS trigger, emergency lookup, offline queue | `emergency.py`, `offline-queue.ts` |
+| [`challan/`](challan/) | Online + DuckDB-Wasm offline challan calc | `calculate.py`, `offline.ts`, `query.sql` |
+| [`chatbot/`](chatbot/) | Simple, streaming, provider override, tool routing | `examples.py` |
+| [`cookbook/`](cookbook/) | 5 integration recipes + WebSocket tracking | `recipes.py`, `tracking.ts` |
 
 ---
 

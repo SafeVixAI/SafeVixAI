@@ -8,22 +8,23 @@
 
 ## Trust Boundaries
 
-```
-[User Device]
-    │  TLS 1.2+ (HTTPS/WSS)
-    ▼
-[Frontend — Vercel / PWA]
-    │  JWT Bearer + Internal API Key
-    ▼
-[Backend — Render]
-    │  Internal API Key
-    ├──►[Chatbot Service — Render]
-    │       │  API Key
-    │       ▼
-    │    [LLM Providers — Groq, Cerebras, Gemini, etc.]
-    │
-    ├──►[PostgreSQL + PostGIS — Supabase]
-    └──►[Redis — Upstash]
+```mermaid
+flowchart TB
+    U[User Device]
+    U -->|"TLS 1.2+ (HTTPS/WSS)"| F[Frontend - Vercel / PWA]
+    F -->|"JWT Bearer + Internal API Key"| B[Backend - Render]
+    B -->|"Internal API Key"| C[Chatbot Service - Render]
+    C -->|"API Key"| LLM[LLM Providers - Groq, Cerebras, Gemini, etc.]
+    B --> PG[PostgreSQL + PostGIS - Supabase]
+    B --> RS[Redis - Upstash]
+
+    style U fill:#6e5494,color:#fff
+    style F fill:#1f6feb,color:#fff
+    style B fill:#238636,color:#fff
+    style C fill:#9e6a03,color:#fff
+    style LLM fill:#da3633,color:#fff
+    style PG fill:#238636,color:#fff
+    style RS fill:#da3633,color:#fff
 ```
 
 ### Boundary A: User ↔ Frontend (Untrusted)

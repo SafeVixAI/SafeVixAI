@@ -13,6 +13,33 @@ Instead of fine-tuning, which is static and compute-intensive, we use a **Retrie
 
 ## Agent Orchestration (ChatEngine)
 
+```mermaid
+flowchart TB
+    subgraph AgentPipeline["ChatEngine — Execution Pipeline"]
+        direction TB
+        S1["1. SafetyChecker<br/>Harmful content filter"] --> S2["2. IntentDetector<br/>Rule-based intent classification"]
+        S2 --> S3["3. ContextAssembler<br/>Determine tools + gather context"]
+        S3 --> S4["4. Tool Execution<br/>async concurrent tool calls"]
+        S4 --> S5["5. ProviderRouter<br/>Language detection + provider selection"]
+        S5 --> S6["6. LLM Generation<br/>Response synthesis"]
+        S6 --> S7["7. Safety Post-Check<br/>Verify emergency numbers included"]
+        S7 --> S8["8. Memory Persistence<br/>Redis 24hr TTL"]
+    end
+
+    S4 -->|"Backend API"| BE["Backend :8000<br/>PostGIS / DuckDB"]
+    S4 -->|"Vector search"| CV["ChromaDB<br/>RAG Chunks"]
+    S5 -->|"English"| GC["Groq / Cerebras /<br/>Gemini / GitHub / NVIDIA"]
+    S5 -->|"Indian language"| SA["Sarvam AI<br/>30B / 105B"]
+    S8 --> RM["Redis<br/>Conversation Memory"]
+
+    style AgentPipeline fill:#1f6feb,color:#fff
+    style BE fill:#238636,color:#fff
+    style CV fill:#9e6a03,color:#fff
+    style GC fill:#6e5494,color:#fff
+    style SA fill:#9e6a03,color:#fff
+    style RM fill:#238636,color:#fff
+```
+
 The agent follows a deterministic yet flexible execution sequence defined in `agent/graph.py`:
 
 1. **SafetyChecker**: Evaluates the message for harmful content. Blocks if necessary.

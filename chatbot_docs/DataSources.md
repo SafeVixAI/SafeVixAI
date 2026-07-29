@@ -2,6 +2,52 @@
 
 The SafeVixAI Chatbot relies on high-quality, authoritative data for legal, emergency, and medical accuracy.
 
+```mermaid
+flowchart LR
+    subgraph Sources["Data Sources"]
+        GEO["Geographic & Routing<br/>Nominatim, OSRM, Photon, OpenCage"]
+        EM["Emergency & Location<br/>What3Words, Overpass, Healthsites"]
+        ENV["Environment<br/>Open-Meteo, OpenWeatherMap"]
+        LEGAL["Legal<br/>MV Act 1988, 2019, State Amendments"]
+        MED["Medical<br/>WHO Guidelines, Open FDA"]
+    end
+
+    subgraph Tools["Agent Tools"]
+        SOS[SosTool]
+        CH[ChallanTool]
+        LS[LegalSearchTool]
+        FA[FirstAidTool]
+        WT[WeatherTool]
+        RI[RoadIssuesTool]
+    end
+
+    subgraph Engine["ChatEngine"]
+        CA[ContextAssembler]
+        PR[ProviderRouter]
+        LLM[LLM Provider]
+    end
+
+    GEO --> SOS
+    EM --> SOS
+    ENV --> WT
+    LEGAL --> LS
+    LEGAL --> CH
+    MED --> FA
+    SOS --> CA
+    CH --> CA
+    LS --> CA
+    FA --> CA
+    WT --> CA
+    RI --> CA
+    CA --> PR
+    PR --> LLM
+    LLM --> USER[User Response]
+
+    style Sources fill:#1f6feb,color:#fff
+    style Tools fill:#238636,color:#fff
+    style Engine fill:#9e6a03,color:#fff
+```
+
 ## Geographic & Routing Data
 - **Nominatim (OpenStreetMap)**: Free, primary reverse geocoding to find road and city names from coordinates.
 - **OpenCage**: Standby geocoding fallback, optimizing address resolution for tier-2 Indian cities (requires `OPENCAGE_API_KEY`).

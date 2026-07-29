@@ -9,14 +9,22 @@
 
 ### Execution Flow
 
-```
-User message
-  ? SafetyChecker.evaluate()          # Block harmful queries, prepend "Call 112 immediately" for injuries
-  ? IntentDetector.detect()           # 9 intent classes, keyword/regex, <1ms
-  ? ContextAssembler.assemble()        # Call relevant tools + retrieve RAG chunks
-  ? ProviderRouter.generate()          # LLM call with asyncio.wait_for() timeout + auto-fallback chain
-  ? ConversationMemoryStore.append()   # Redis session persistence (24h TTL)
-  ? ChatResponse
+```mermaid
+flowchart LR
+    UM[User Message] --> SE["SafetyChecker.evaluate()"]
+    SE --> ID["IntentDetector.detect()"]
+    ID --> CA["ContextAssembler.assemble()"]
+    CA --> PR["ProviderRouter.generate()"]
+    PR --> CMS["ConversationMemoryStore.append()"]
+    CMS --> CR[ChatResponse]
+
+    style UM fill:#6e5494,color:#fff
+    style SE fill:#da3633,color:#fff
+    style ID fill:#1f6feb,color:#fff
+    style CA fill:#238636,color:#fff
+    style PR fill:#9e6a03,color:#fff
+    style CMS fill:#1f6feb,color:#fff
+    style CR fill:#238636,color:#fff
 ```
 
 ### Location of Core Components
@@ -109,6 +117,30 @@ If all 10 providers fail, `alert_service.py` (project root) sends an email with 
 | Mistral | `mistral_provider.py` | `MISTRAL_API_KEY` |
 | Together | `together_provider.py` | `TOGETHER_API_KEY` |
 | Template | `template_provider.py` | None (deterministic fallback) |
+
+### LLM Fallback Chain
+
+```mermaid
+flowchart LR
+    G[Groq] -->|"fail"| C[Cerebras]
+    C -->|"fail"| GE[Gemini]
+    GE -->|"fail"| GH[GitHub Models]
+    GH -->|"fail"| NV[NVIDIA NIM]
+    NV -->|"fail"| OR[OpenRouter]
+    OR -->|"fail"| M[Mistral]
+    M -->|"fail"| T[Together]
+    T -->|"fail"| TP[Template<br/>Deterministic]
+
+    style G fill:#238636,color:#fff
+    style C fill:#1f6feb,color:#fff
+    style GE fill:#9e6a03,color:#fff
+    style GH fill:#6e5494,color:#fff
+    style NV fill:#8957e5,color:#fff
+    style OR fill:#da3633,color:#fff
+    style M fill:#238636,color:#fff
+    style T fill:#1f6feb,color:#fff
+    style TP fill:#9e6a03,color:#fff
+```
 
 ### Auto-Routing Rules
 

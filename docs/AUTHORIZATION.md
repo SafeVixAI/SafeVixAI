@@ -8,8 +8,14 @@
 
 ## Role Hierarchy
 
-```
-admin → operator → citizen
+```mermaid
+flowchart BT
+    CIT[citizen] -->|"inherits to"| OP[operator]
+    OP -->|"inherits to"| ADM[admin]
+
+    style CIT fill:#238636,color:#fff
+    style OP fill:#1f6feb,color:#fff
+    style ADM fill:#9e6a03,color:#fff
 ```
 
 Each role inherits the permissions of all roles below it.

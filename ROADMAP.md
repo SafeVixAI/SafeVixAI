@@ -14,39 +14,36 @@
 
 ## Next 12 Months (2026 Q3 – 2027 Q2)
 
-### Q3 2026 (Jul–Sep)
-| Milestone | Details |
-|-----------|---------|
-| v1.1 Release | Bug fixes, performance improvements, accessibility audit |
-| OpenSSF Silver Badge | Complete all Silver criteria: threat model, security requirements, 80% coverage |
-| Accessibility Pass | WCAG 2.1 AA compliance audit and fixes |
-| i18n Expansion | Add Tamil, Hindi, Telugu UI translations (beyond existing speech support) |
-| Load Testing Results | Publish k6 benchmarks and capacity planning guide |
+```mermaid
+gantt
+    title SafeVixAI Roadmap
+    dateFormat  YYYY-MM-DD
+    axisFormat  %Y Q%q
 
-### Q4 2026 (Oct–Dec)
-| Milestone | Details |
-|-----------|---------|
-| v1.2 Release | New features from community feedback |
-| OpenSSF Gold Badge | Complete reproducible builds, branch coverage ≥80%, CI integration |
-| Crash Detection Refinement | Accelerometer-based detection with fewer false positives |
-| Bystander Mode V2 | Real-time incident sharing, witness coordination |
-| Offline AI v2 | WebLLM model quantization for faster local inference |
+    section Q3 2026
+    v1.1 Release           :milestone, m1, 2026-07-01, 2026-09-30
+    OpenSSF Silver Badge   :2026-07-15, 2026-09-30
+    Accessibility Pass     :2026-08-01, 2026-09-30
+    i18n Expansion         :2026-08-15, 2026-09-30
 
-### Q1 2027 (Jan–Mar)
-| Milestone | Details |
-|-----------|---------|
-| v1.3 Release | Enterprise features, API stability guarantee |
-| Terraform GA | Infrastructure-as-Code for production AWS deployment |
-| Penetration Test | Third-party security audit |
-| Performance Budget | Lighthouse scores ≥90 across all categories |
+    section Q4 2026
+    v1.2 Release           :milestone, m2, 2026-10-01, 2026-12-31
+    OpenSSF Gold Badge     :2026-10-15, 2026-12-31
+    Bystander Mode V2      :2026-11-01, 2026-12-31
+    Offline AI v2          :2026-11-01, 2026-12-31
 
-### Q2 2027 (Apr–Jun)
-| Milestone | Details |
-|-----------|---------|
-| v2.0 Release | Major release with breaking API changes if needed |
-| Multi-Region Support | EU data residency option for GDPR compliance |
-| Community Growth | 20+ external contributors, 500+ GitHub stars |
-| Sustainability Report | Infra cost analysis, funding strategy, grant applications |
+    section Q1 2027
+    v1.3 Release           :milestone, m3, 2027-01-01, 2027-03-31
+    Terraform GA           :2027-01-15, 2027-03-31
+    Penetration Test       :2027-02-01, 2027-03-31
+    Performance Budget     :2027-02-15, 2027-03-31
+
+    section Q2 2027
+    v2.0 Release           :milestone, m4, 2027-04-01, 2027-06-30
+    Multi-Region Support   :2027-04-15, 2027-06-30
+    Community Growth       :2027-04-01, 2027-06-30
+    Sustainability Report  :2027-05-01, 2027-06-30
+```
 
 ---
 

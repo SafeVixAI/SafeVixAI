@@ -16,6 +16,29 @@ Complete guide to install dependencies and run both backend and frontend locally
 
 ---
 
+## Architecture Diagram
+
+```mermaid
+sequenceDiagram
+    participant Dev as Developer
+    participant Backend as Backend :8000
+    participant Chatbot as Chatbot :8010
+    participant Frontend as Frontend :3000
+
+    Dev->>Backend: uvicorn main:app --reload --port 8000
+    Dev->>Chatbot: uvicorn main:app --reload --port 8010
+    Dev->>Frontend: npm run dev
+
+    Note over Backend: Health check: GET /health
+    Note over Chatbot: Health check: GET /health
+    Note over Frontend: Open http://localhost:3000
+
+    Frontend->>Backend: REST/WS API calls
+    Frontend->>Chatbot: Chat API calls
+    Backend-->>Frontend: Emergency, challan, tracking data
+    Chatbot-->>Frontend: AI responses
+```
+
 ## Step 1 — Clone the Repository
 
 ```bash

@@ -4,6 +4,21 @@
 
 **SafeVixAI** is an AI-powered road safety platform built for the **AI-powered road safety platform**. It addresses three problem statements in one unified application:
 
+```mermaid
+quadrantChart
+    title Modules vs Problem Statements
+    x-axis "Emergency Response" --> "Traffic Law"
+    y-axis "Offline Capability" --> "Online Intelligence"
+    quadrant-1 "Core Online"
+    quadrant-2 "Specialist Online"
+    quadrant-3 "Core Offline"
+    quadrant-4 "Specialist Offline"
+    Emergency-Locator: [0.3, 0.7]
+    AI-Chatbot: [0.5, 0.8]
+    Challan-Calculator: [0.7, 0.4]
+    Road-Reporter: [0.4, 0.3]
+```
+
 | Module | Problem Statement | Core Value |
 |--------|------------------|------------|
 | Emergency Locator | SafeVixAI | Find nearest hospital/police/ambulance instantly, even offline |

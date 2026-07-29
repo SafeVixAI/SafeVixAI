@@ -6,24 +6,40 @@
 
 ## Three-Service Architecture
 
-```
-+-------------------------------------------------------------+
-�  frontend/         Next.js 15 + React 19 + TypeScript PWA   �
-�  Port 3000         MapLibre GL 5, WebLLM, DuckDB-Wasm       �
-�                    Zustand state, Tailwind CSS, GSAP         �
-+-------------------------------------------------------------+
-               � REST/WS (JWT Bearer)      � REST (JWT Bearer)
-+--------------?---------+  +-------------?------------------+
-�  backend/              �  �  chatbot_service/              �
-�  FastAPI :8000         �  �  FastAPI :8010                  �
-�  PostgreSQL + PostGIS  �?-�  10-provider LLM fallback     �
-�  Redis cache           �  �  ChromaDB RAG vectorstore       �
-�  DuckDB (challan SQL)  �  �  13 agent tools                 �
-�  Overpass/Nominatim    �  �  Redis conversation memory      �
-�  WebSocket /tracking   �  �  Prompt injection defense       �
-�  28 API route modules  �  �  IndicSeamless speech           �
-�  CQRS bus + Redlock    �  �  Lang detection + provider reg  �
-+------------------------+  +--------------------------------+
+```mermaid
+flowchart LR
+    subgraph Frontend["frontend/ — Next.js 15 PWA"]
+        F1[Port 3000]
+        F2[MapLibre GL 5, WebLLM, DuckDB-Wasm]
+        F3[Zustand, Tailwind CSS, GSAP]
+    end
+
+    subgraph Backend["backend/ — FastAPI :8000"]
+        B1[PostgreSQL + PostGIS]
+        B2[Redis Cache]
+        B3[DuckDB - Challan SQL]
+        B4[Overpass / Nominatim]
+        B5[WebSocket - Tracking]
+        B6[28 API route modules]
+        B7[CQRS bus + Redlock]
+    end
+
+    subgraph Chatbot["chatbot_service/ — FastAPI :8010"]
+        C1[10-Provider LLM Fallback]
+        C2[ChromaDB RAG]
+        C3[13 Agent Tools]
+        C4[Redis Conversation Memory]
+        C5[IndicSeamless Speech]
+        C6[Lang Detection + Provider Registry]
+    end
+
+    Frontend -- "REST/WS (JWT Bearer)" --> Backend
+    Frontend -- "REST (JWT Bearer)" --> Chatbot
+    Backend <--> Chatbot
+
+    style Frontend fill:#1f6feb,color:#fff
+    style Backend fill:#238636,color:#fff
+    style Chatbot fill:#9e6a03,color:#fff
 ```
 
 | Service | Port | Tech Stack | Purpose |
@@ -120,22 +136,55 @@ All routes live in `backend/api/v1/`:
 
 ### Middleware Stack (applied in order)
 
-```
-Request
-  +-- IdempotencyMiddleware        � Idempotency-Key header dedup
-  +-- APIVersioningMiddleware       � Accept header / URL prefix version routing
-  +-- SecurityHeadersMiddleware     � HSTS, CSP, X-Frame-Options, X-Content-Type-Options
-  +-- RequestIDMiddleware           � X-Request-ID / X-Correlation-ID injection
-  +-- PrometheusMetricsMiddleware   � Request count, latency, error metrics
-  +-- CSRFMiddleware                � CSRF token validation for state-changing requests
-  +-- TenantIsolationMiddleware     � Multi-tenant data boundary enforcement
-  +-- AllowedHostsMiddleware        � Host header whitelist validation
-  +-- QueryProfilerMiddleware       � Slow query logging and analysis
-  +-- GeoJSONCompressionMiddleware  � Compress large GeoJSON responses
-  +-- CORSCheckMiddleware           � CORS origin pre-validation
-  +-- FastAPI CORSMiddleware        � Standard CORS headers
-  +-- ApiResponseMiddleware         � Uniform API envelope wrapping
-Response
+```mermaid
+flowchart TB
+    subgraph Middleware["Middleware Stack (applied in order)"]
+        direction TB
+        M1[IdempotencyMiddleware]
+        M2[APIVersioningMiddleware]
+        M3[SecurityHeadersMiddleware]
+        M4[RequestIDMiddleware]
+        M5[PrometheusMetricsMiddleware]
+        M6[CSRFMiddleware]
+        M7[TenantIsolationMiddleware]
+        M8[AllowedHostsMiddleware]
+        M9[QueryProfilerMiddleware]
+        M10[GeoJSONCompressionMiddleware]
+        M11[CORSCheckMiddleware]
+        M12[FastAPI CORSMiddleware]
+        M13[ApiResponseMiddleware]
+    end
+
+    Request --> M1
+    M1 --> M2
+    M2 --> M3
+    M3 --> M4
+    M4 --> M5
+    M5 --> M6
+    M6 --> M7
+    M7 --> M8
+    M8 --> M9
+    M9 --> M10
+    M10 --> M11
+    M11 --> M12
+    M12 --> M13
+    M13 --> Response
+
+    style Request fill:#4a9eff,color:#fff
+    style Response fill:#4a9eff,color:#fff
+    style M1 fill:#1f6feb,color:#fff
+    style M2 fill:#1f6feb,color:#fff
+    style M3 fill:#1f6feb,color:#fff
+    style M4 fill:#1f6feb,color:#fff
+    style M5 fill:#1f6feb,color:#fff
+    style M6 fill:#1f6feb,color:#fff
+    style M7 fill:#1f6feb,color:#fff
+    style M8 fill:#1f6feb,color:#fff
+    style M9 fill:#1f6feb,color:#fff
+    style M10 fill:#1f6feb,color:#fff
+    style M11 fill:#1f6feb,color:#fff
+    style M12 fill:#1f6feb,color:#fff
+    style M13 fill:#1f6feb,color:#fff
 ```
 
 ### 18+ Service Modules

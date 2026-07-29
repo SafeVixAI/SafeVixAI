@@ -47,14 +47,25 @@
 
 ## Security Boundaries
 
-| Boundary | Trust Level | Security Controls |
-|----------|-------------|-------------------|
-| User ↔ Frontend | Untrusted | TLS, CSP, XSS protection, Content Security Policy |
-| Frontend ↔ Backend | Low | JWT auth, CORS, rate limiting, input validation |
-| Backend ↔ Chatbot | Medium | Internal API key, private network |
-| Backend ↔ Database | Medium | Network isolation, encrypted connections |
-| Chatbot ↔ LLM Provider External APIs | Low | API keys, network egress controls, timeouts |
-| All ↔ Public Internet | Untrusted | WAF, rate limiting, DDoS protection, CSP |
+```mermaid
+flowchart TB
+    U[User] -->|"Untrusted<br/>TLS, CSP, XSS"| F[Frontend]
+    F -->|"Low Trust<br/>JWT, CORS, Rate Limit"| B[Backend]
+    B -->|"Medium Trust<br/>Internal API Key, Private Network"| C[Chatbot]
+    C -->|"Low Trust<br/>API Keys, Timeouts"| LLM[LLM Providers]
+    B -->|"Medium Trust<br/>Network Isolation"| DB[Database]
+    B -->|"Medium Trust<br/>Encrypted"| RS[Redis]
+    UI[Public Internet] -->|"Untrusted<br/>WAF, DDoS, CSP"| F
+
+    style U fill:#da3633,color:#fff
+    style UI fill:#da3633,color:#fff
+    style F fill:#1f6feb,color:#fff
+    style B fill:#238636,color:#fff
+    style C fill:#9e6a03,color:#fff
+    style LLM fill:#6e5494,color:#fff
+    style DB fill:#238636,color:#fff
+    style RS fill:#8957e5,color:#fff
+```
 
 ## Cryptographic Requirements
 

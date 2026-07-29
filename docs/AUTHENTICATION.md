@@ -14,42 +14,40 @@ SafeVixAI uses JWT-based authentication with RS256 signatures and JWKS key rotat
 
 ## Authentication Flows
 
-### Login
-```
-POST /api/v1/auth/login
-Content-Type: application/json
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant F as Frontend
+    participant B as Backend API
+    participant R as Redis
 
-{
-  "email": "user@example.com",
-  "password": "your-password"
-}
-```
+    rect rgb(40, 40, 60)
+        Note over U,R: Login
+        U->>F: Enter email + password
+        F->>B: POST /api/v1/auth/login
+        B->>B: Validate credentials
+        B->>R: Store refresh token
+        B-->>F: access_token + refresh_token
+        F-->>U: Authenticated session
+    end
 
-Response:
-```json
-{
-  "access_token": "eyJhbGciOiJSUzI1NiIs...",
-  "token_type": "bearer",
-  "expires_in": 3600,
-  "refresh_token": "eyJhbGciOiJSUzI1NiIs..."
-}
-```
+    rect rgb(40, 60, 40)
+        Note over U,R: Token Refresh
+        U->>F: Expired access token
+        F->>B: POST /api/v1/auth/refresh (Bearer refresh_token)
+        B->>R: Verify refresh token
+        B-->>F: New access_token + refresh_token
+        F-->>U: Session refreshed
+    end
 
-### Token Refresh
-```
-POST /api/v1/auth/refresh
-Content-Type: application/json
-Authorization: Bearer <refresh_token>
-
-{
-  "refresh_token": "eyJhbGciOiJSUzI1NiIs..."
-}
-```
-
-### Logout
-```
-POST /api/v1/auth/logout
-Authorization: Bearer <access_token>
+    rect rgb(60, 40, 40)
+        Note over U,R: Logout
+        U->>F: Sign out
+        F->>B: POST /api/v1/auth/logout
+        B->>R: Invalidate refresh token
+        B-->>F: 200 OK
+        F-->>U: Signed out
+    end
 ```
 
 ---

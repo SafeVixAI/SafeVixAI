@@ -42,24 +42,40 @@ Every second counts in a road emergency. SafeVixAI puts life-saving information 
 
 > Interactive demo: [safevixai.vercel.app](https://safevixai.vercel.app) — try the live app.
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│  SafeVixAI Dashboard         🔍 Search    🌙 Dark Mode    │
-│  ┌──────────┐ ┌─────────────────────────────────────────┐  │
-│  │ 🚑 EMERG │ │  Emergency Locator    ⚠️ 2 active      │  │
-│  │ 🗺️ MAP   │ │  ┌──────────────────────────────────┐  │  │
-│  │ 🤖 CHAT  │ │  │        🗺️ Map View                │  │  │
-│  │ 📋 CHALN  │ │  │   🏥 Apollo Hospital ── 1.2km    │  │  │
-│  │ 📸 REPORT │ │  │   🚓 Police Stn    ── 0.8km    │  │  │
-│  └──────────┘ │  │   🚒 Fire Stn       ── 2.1km    │  │  │
-│               │  └──────────────────────────────────┘  │  │
-│  📱 PWA       │  ┌──────────────────────────────────┐  │  │
-│  Ready        │  │  AI Assistant — online             │  │  │
-│               │  │  "What's the fine for speeding?" │  │  │
-│               │  │  "In Tamil Nadu: ₹2,000 first    │  │  │
-│               │  │   offence under MVA 2019..."     │  │  │
-│               │  └──────────────────────────────────┘  │  │
-└─────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    subgraph Dashboard["SafeVixAI Dashboard"]
+        direction TB
+        
+        subgraph Sidebar["Navigation"]
+            S1[Emergency]
+            S2[Map]
+            S3[Chat]
+            S4[Challan]
+            S5[Report]
+        end
+
+        subgraph Main["Main Content Area"]
+            direction LR
+            subgraph MapView["Map View"]
+                H1["Apollo Hospital — 1.2km"]
+                H2["Police Station — 0.8km"]
+                H3["Fire Station — 2.1km"]
+            end
+
+            subgraph AIAssistant["AI Assistant"]
+                A1["Question: What's the fine for speeding?"]
+                A2["Answer: In Tamil Nadu, ₹2000 first offence under MVA 2019"]
+            end
+        end
+
+        subgraph Status["Status Bar"]
+            PWA["PWA Ready"]
+        end
+    end
+
+    Sidebar --- Main
+    Status --- Main
 ```
 
 Key interfaces: **Emergency Locator** (geospatial hospital/police/fire search), **AI Chatbot** (traffic law + first aid + challan calculation), **Command Center** (real-time incident dashboard), **SOS** (hold-to-activate with WebSocket tracking), **Offline Mode** (PWA + DuckDB-Wasm + IndexedDB).

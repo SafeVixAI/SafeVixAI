@@ -22,6 +22,73 @@ SELECT PostGIS_version();
 
 ---
 
+## ER Diagram
+
+```mermaid
+erDiagram
+    users ||--o{ road_issues : "reports"
+    users ||--o{ sos_incidents : "triggers"
+    users ||--o{ challan_records : "incurs"
+    users ||--o{ officers : "is"
+
+    emergency_services {
+        bigint id PK
+        text name
+        text category
+        geometry location "GIST INDEX"
+        text phone
+        text city
+    }
+
+    users {
+        uuid id PK
+        varchar email UK
+        varchar phone UK
+        varchar password_hash
+        varchar role
+        boolean is_active
+    }
+
+    road_issues {
+        bigint id PK
+        uuid user_id FK
+        text issue_type
+        integer severity
+        geometry location "GIST INDEX"
+        text status
+    }
+
+    sos_incidents {
+        bigint id PK
+        uuid user_id FK
+        geometry location "GIST INDEX"
+        varchar status
+    }
+
+    challan_records {
+        bigint id PK
+        uuid user_id FK
+        varchar violation_code
+        integer fine_amount
+        boolean paid
+    }
+
+    officers {
+        bigint id PK
+        uuid user_id FK "UNIQUE"
+        varchar badge_number UK
+        geometry jurisdiction "GIST INDEX"
+        varchar department
+    }
+
+    wards {
+        bigint id PK
+        integer ward_number
+        geometry boundary "GIST INDEX"
+        integer municipality_id FK
+    }
+```
+
 ## ORM Models (30 Python files in `backend/models/`)
 
 All 30 models are defined under `backend/models/` using SQLAlchemy ORM + GeoAlchemy2. The initial Alembic migration (`backend/migrations/001_initial_schema.py`) creates 7 core tables; subsequent migrations add the remaining tables with PostGIS indexes.

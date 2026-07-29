@@ -10,13 +10,41 @@ The SafeVixAI AI chatbot is a **separate Python service** (port 8010) that conne
 5. **Memory (Redis)**: Stores conversation history for session-based persistence.
 
 ## Data Flow
-1. **User Query**: Message sent from frontend with GPS coordinates.
-2. **Safety Check**: `SafetyChecker` evaluates for harmful content.
-3. **Intent Analysis**: Rule-based `IntentDetector` classifies the query type (Emergency, Legal, etc.).
-4. **Tool Interaction**: `ContextAssembler` runs concurrent calls to 13 agent tools, backend APIs, and ChromaDB for live data.
-5. **Provider Selection**: `ProviderRouter` detects language (Unicode script ranges) and selects optimal LLM provider.
-6. **Response Generation**: LLM generates grounded response with tool context.
-7. **Persistence**: The turn is saved to the Redis memory store (24hr TTL).
+
+```mermaid
+flowchart TB
+    subgraph Frontend["Frontend — Chat UI"]
+        UI[Next.js 15 PWA]
+    end
+
+    subgraph Chatbot["Chatbot Service — FastAPI :8010"]
+        direction TB
+        SC[SafetyChecker] --> ID[IntentDetector]
+        ID --> CA[ContextAssembler]
+        CA -->|tool calls| TE[Tool Execution]
+        TE --> PR[ProviderRouter]
+        PR --> LLM[LLM Generation]
+        LLM --> PC[Safety Post-Check]
+        PC --> MEM[Memory Persistence]
+    end
+
+    subgraph External["External Dependencies"]
+        B1["Backend API :8000<br/>PostGIS / DuckDB"]
+        CV["ChromaDB<br/>Vector Store"]
+        RM["Redis<br/>Conversation Memory"]
+        LP["LLM Providers<br/>10-Provider Chain"]
+    end
+
+    UI -->|"Message + GPS"| SC
+    MEM --> RM
+    TE -->|"live data"| B1
+    TE -->|"RAG chunks"| CV
+    LLM --> LP
+
+    style Frontend fill:#1f6feb,color:#fff
+    style Chatbot fill:#9e6a03,color:#fff
+    style External fill:#238636,color:#fff
+```
 
 ## Reliability: 10-provider Fallback Chain
 

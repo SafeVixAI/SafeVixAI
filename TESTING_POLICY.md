@@ -14,6 +14,25 @@ This policy applies to all three codebases in this repository:
 | `chatbot_service/` | Python (FastAPI) | pytest | pytest-cov |
 | `frontend/` | TypeScript (Next.js) | Jest | jest --coverage |
 
+## Test Pyramid
+
+```mermaid
+flowchart TB
+    subgraph Pyramid["Test Pyramid"]
+        direction TB
+        E2E["E2E Tests (5%)<br/>Playwright"]
+        INT["Integration Tests (15%)<br/>pytest + Jest"]
+        UNIT["Unit Tests (80%)<br/>pytest + Jest"]
+    end
+
+    E2E -->|"covers"| INT
+    INT -->|"covers"| UNIT
+
+    style E2E fill:#da3633,color:#fff
+    style INT fill:#1f6feb,color:#fff
+    style UNIT fill:#238636,color:#fff
+```
+
 ## Requirements
 
 ### 1. New Feature Tests

@@ -17,6 +17,23 @@ SafeVixAI is a **full-stack, AI-powered road safety PWA** complete with all core
 
 ---
 
+## Phase Completion Timeline
+
+```mermaid
+gantt
+    title SafeVixAI Build Phases
+    dateFormat  YYYY-MM-DD
+    axisFormat  %b %Y
+
+    Foundation :ph1, 2026-01-01, 2026-02-15
+    Backend Core :ph2, 2026-02-01, 2026-03-15
+    AI Layer :ph3, 2026-03-01, 2026-04-15
+    Frontend :ph4, 2026-03-15, 2026-05-01
+    Offline PWA :ph5, 2026-04-15, 2026-05-15
+    Deploy & Polish :ph6, 2026-05-01, 2026-06-01
+    V2 Features :ph7, 2026-05-15, 2026-06-09
+```
+
 ## Phase Completion Status
 
 ### Phase 1 - Foundation ✅ COMPLETE

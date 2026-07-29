@@ -1,4 +1,4 @@
-# SafeVixAI — Agent Guide
+﻿# SafeVixAI — Agent Guide
 
 > **READ THIS FIRST.** This document is written for any developer, AI agent, or team member who opens this codebase for the first time.
 
@@ -151,22 +151,36 @@ POST /api/v1/chat/stream
 
 ## Architecture (3 Services)
 
-```
-+--------------------------------------------------------------+
-¦  frontend/        Next.js 15 + React 19 + TypeScript PWA     ¦
-¦  Port 3000        MapLibre GL, WebLLM, DuckDB-Wasm           ¦
-¦                   Zustand, Tailwind CSS 3                     ¦
-+--------------------------------------------------------------+
-               ¦ REST/WS (JWT Bearer)      ¦ REST (JWT Bearer)
-+--------------?---------+  +-------------?-------------------+
-¦  backend/              ¦  ¦  chatbot_service/               ¦
-¦  FastAPI :8000         ¦  ¦  FastAPI :8010                   ¦
-¦  PostgreSQL + PostGIS  ¦?-¦  10-provider LLM fallback       ¦
-¦  Redis cache           ¦  ¦  ChromaDB RAG vectorstore        ¦
-¦  DuckDB (challan SQL)  ¦  ¦  13 agent tools                  ¦
-¦  Overpass/Nominatim    ¦  ¦  Redis conversation memory       ¦
-¦  WebSocket /tracking   ¦  ¦  Prompt injection defense        ¦
-+------------------------+  +---------------------------------+
+```mermaid
+flowchart LR
+    subgraph Frontend["frontend/ — Next.js 15 PWA"]
+        F1[Port 3000]
+        F2[MapLibre GL / WebLLM / DuckDB-Wasm]
+        F3[Zustand / Tailwind CSS 3]
+    end
+
+    subgraph Backend["backend/ — FastAPI :8000"]
+        B1[PostgreSQL + PostGIS]
+        B2[Redis Cache]
+        B3[DuckDB - Challan SQL]
+        B4[Overpass / Nominatim]
+        B5[WebSocket - Tracking]
+    end
+
+    subgraph Chatbot["chatbot_service/ — FastAPI :8010"]
+        C1[10-Provider LLM Fallback]
+        C2[ChromaDB RAG Vectorstore]
+        C3[13 Agent Tools]
+        C4[Redis Conversation Memory]
+    end
+
+    Frontend -- "REST/WS (JWT Bearer)" --> Backend
+    Frontend -- "REST (JWT Bearer)" --> Chatbot
+    Backend <--> Chatbot
+
+    style Frontend fill:#1f6feb,color:#fff
+    style Backend fill:#238636,color:#fff
+    style Chatbot fill:#9e6a03,color:#fff
 ```
 
 ---

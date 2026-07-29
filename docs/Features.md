@@ -1,5 +1,63 @@
 # SafeVixAI — Features Specification
 
+## Feature Overview
+
+```mermaid
+flowchart TB
+    subgraph EMERGENCY["Module 1: Emergency Locator"]
+        F1a[GPS Auto-Detection]
+        F1b[Nearby Services Map]
+        F1c[Tiered Radius Fallback]
+        F1d[SOS WhatsApp Share]
+        F1e[Emergency Numbers Bar]
+        F1f[Crash Detection]
+        F1g[Offline Map - 25 Cities]
+        F1h[First Aid Guidance]
+    end
+
+    subgraph CHATBOT["Module 2: AI Chatbot"]
+        F2a[Intent Detection - 9 Classes]
+        F2b[Online RAG Chatbot]
+        F2c[Offline WebLLM]
+        F2d[Multilingual - 14 Languages]
+        F2e[Voice Input/Output]
+        F2f[LLM Fallback Chain - 10 Providers]
+        F2g[Conversation Memory]
+        F2h[Streaming Chat SSE]
+    end
+
+    subgraph CHALLAN["Module 3: Challan Calculator"]
+        F3a[Fine Calculation Engine]
+        F3b[MVA AI Assistant]
+    end
+
+    subgraph ROADWATCH["Module 4: RoadWatch Reporter"]
+        F4a[Geotagged Issue Reporting]
+        F4b[Automatic Authority Routing]
+        F4c[Road Infrastructure Transparency]
+        F4d[Community Issues Map Layer]
+    end
+
+    subgraph SAFETY["Module 5: Safety & Auth"]
+        F5a[Safety Checker]
+        F5b[JWT Authentication]
+        F5c[Circuit Breakers]
+    end
+
+    subgraph OFFLINE["Module 6: Offline"]
+        F6a[Offline SOS Queue]
+        F6b[WebLLM Offline AI]
+        F6c[PWA Share Target]
+    end
+
+    style EMERGENCY fill:#da3633,color:#fff
+    style CHATBOT fill:#1f6feb,color:#fff
+    style CHALLAN fill:#9e6a03,color:#fff
+    style ROADWATCH fill:#238636,color:#fff
+    style SAFETY fill:#6e5494,color:#fff
+    style OFFLINE fill:#8957e5,color:#fff
+```
+
 ## Feature Status (25/25 Complete)
 
 | # | Feature | Status |

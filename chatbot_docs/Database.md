@@ -2,6 +2,30 @@
 
 The chatbot service doesn't have its own primary database but interacts with three critical systems: PostgreSQL (PostGIS), Redis, and ChromaDB.
 
+```mermaid
+flowchart TB
+    subgraph Chatbot["Chatbot Service :8010"]
+        CT[ChatEngine Tools]
+    end
+
+    subgraph DB["Data Systems"]
+        PG["PostgreSQL + PostGIS<br/>Emergency services, road issues"]
+        RS["Redis<br/>Conversation memory, provider health"]
+        CB["ChromaDB<br/>RAG vectorstore"]
+    end
+
+    CT -->|"Query emergency/road data"| PG
+    CT -->|"Read/write session + health"| RS
+    CT -->|"Vector search MV Act, first aid"| CB
+
+    PG -->|"LISTEN/NOTIFY"| RS
+
+    style Chatbot fill:#9e6a03,color:#fff
+    style PG fill:#1f6feb,color:#fff
+    style RS fill:#da3633,color:#fff
+    style CB fill:#238636,color:#fff
+```
+
 ## PostgreSQL (with PostGIS)
 - **Functions**: Stores and queries spatial data for emergency services and road issues.
 - **Tools**:

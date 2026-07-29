@@ -16,12 +16,26 @@ Version source of truth: `VERSION` file at repository root.
 
 ## Branching Model
 
-```
-main       ── Production-ready releases
-  ├── staging   Pre-release validation
-  ├── feat/*    Feature branches
-  ├── fix/*     Bug-fix branches
-  └── chore/*   Tooling, deps, docs
+```mermaid
+gitGraph
+    commit
+    branch staging
+    commit
+    branch feat/feature-1
+    commit
+    commit
+    checkout staging
+    merge feat/feature-1
+    branch fix/bug-1
+    commit
+    checkout staging
+    merge fix/bug-1
+    checkout main
+    merge staging tag: "v1.0.0"
+    branch chore/cleanup
+    commit
+    checkout main
+    merge chore/cleanup
 ```
 
 ## Release Types
@@ -34,6 +48,32 @@ main       ── Production-ready releases
 | Hotfix | Emergency | 1 Core Contributor | Docker + GitHub Release |
 
 ## Release Workflow
+
+```mermaid
+flowchart LR
+    FR[Freeze] --> CL[Changelog]
+    CL --> VB[Version Bump]
+    VB --> CI[CI Validation]
+    CI --> GR[GitHub Release]
+    GR --> PR[Post-Release]
+
+    subgraph CI_Steps["CI Validation"]
+        direction TB
+        T1[All tests pass]
+        T2[Lint + type-check]
+        T3[SBOM generated]
+        T4[Docker images built + signed]
+    end
+
+    CI --> CI_Steps
+
+    style FR fill:#da3633,color:#fff
+    style CL fill:#1f6feb,color:#fff
+    style VB fill:#9e6a03,color:#fff
+    style CI fill:#238636,color:#fff
+    style GR fill:#6e5494,color:#fff
+    style PR fill:#8957e5,color:#fff
+```
 
 1. **Freeze** — All changes for the release are merged to `main`
 2. **Changelog** — `CHANGELOG.md` is updated and frozen

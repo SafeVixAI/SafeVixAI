@@ -1,4 +1,65 @@
-# SafeVixAI v1.0.0 � Deployment Guide
+﻿# SafeVixAI v1.0.0 — Deployment Guide
+
+## Deployment Topology
+
+```mermaid
+flowchart TB
+    subgraph Vercel["Vercel — Frontend CDN"]
+        F1[Next.js 15 PWA]
+        F2[Service Worker]
+        F3[DuckDB-Wasm / WebLLM]
+    end
+
+    subgraph Render["Render.com — Backend Services"]
+        direction TB
+        B1["Backend API :8000<br/>FastAPI"]
+        C1["Chatbot Service :8010<br/>FastAPI"]
+    end
+
+    subgraph FreeTier["Free Tier Dependencies"]
+        S1["Supabase<br/>PostgreSQL + PostGIS"]
+        R1["Upstash<br/>Redis Cache"]
+        H1["Hugging Face<br/>Model CDN"]
+        O1["OSM Overpass API<br/>Mapping Data"]
+    end
+
+    subgraph LLM["10-Provider LLM Chain"]
+        direction LR
+        G1[Groq] --> C2[Cerebras]
+        C2 --> G2[Gemini]
+        G2 --> GH[GitHub Models]
+        GH --> NV[NVIDIA NIM]
+        NV --> OR[OpenRouter]
+        OR --> M[Mistral]
+        M --> T[Together]
+        T --> TP[Template]
+    end
+
+    subgraph GitHub["GitHub Actions CI/CD"]
+        W1["backend.yml"]
+        W2["frontend.yml"]
+        W3["chatbot.yml"]
+        W4["e2e.yml"]
+    end
+
+    GitHub -->|auto-deploy| Vercel
+    GitHub -->|auto-deploy| Render
+    Vercel -->|REST/WS| B1
+    Vercel -->|REST| C1
+    B1 --> S1
+    B1 --> R1
+    C1 --> R1
+    B1 --> O1
+    C1 --> LLM
+    F2 --> H1
+    F3 --> H1
+
+    style Vercel fill:#000,color:#fff
+    style Render fill:#1f6feb,color:#fff
+    style FreeTier fill:#238636,color:#fff
+    style LLM fill:#9e6a03,color:#fff
+    style GitHub fill:#6e5494,color:#fff
+```
 
 ## Infrastructure Overview (All Free Tier)
 

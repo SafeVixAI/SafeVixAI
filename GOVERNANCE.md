@@ -76,13 +76,29 @@ The Project Lead is responsible for enforcing the Code of Conduct. Reports are s
 
 ## Sub-team Structure
 
-| Area | Responsibilities | Lead |
-|------|-----------------|------|
-| Backend | FastAPI, PostgreSQL, Redis, API design | TBD |
-| Chatbot | Agentic RAG, LLM providers, safety | TBD |
-| Frontend | Next.js, React, PWA, MapLibre | TBD |
-| Infra | CI/CD, Docker, Kubernetes, Terraform | TBD |
-| Security | Audit, pentesting, supply chain, vulnerability response | TBD |
+```mermaid
+flowchart TB
+    PL[Project Lead] --> CC[Core Contributors]
+    CC --> BE[Backend Team]
+    CC --> CB[Chatbot Team]
+    CC --> FE[Frontend Team]
+    CC --> INF[Infra Team]
+    CC --> SEC[Security Team]
+
+    BE --> BE1["FastAPI, PostgreSQL, Redis, API Design"]
+    CB --> CB1["Agentic RAG, LLM Providers, Safety"]
+    FE --> FE1["Next.js, React, PWA, MapLibre"]
+    INF --> INF1["CI/CD, Docker, K8s, Terraform"]
+    SEC --> SEC1["Audit, Pentesting, Supply Chain"]
+
+    style PL fill:#9e6a03,color:#fff
+    style CC fill:#1f6feb,color:#fff
+    style BE fill:#238636,color:#fff
+    style CB fill:#6e5494,color:#fff
+    style FE fill:#8957e5,color:#fff
+    style INF fill:#da3633,color:#fff
+    style SEC fill:#da3633,color:#fff
+```
 
 ## Access Continuity
 

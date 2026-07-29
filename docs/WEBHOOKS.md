@@ -10,6 +10,34 @@
 
 SafeVixAI can send webhook notifications for important events. Webhooks are delivered via HTTP POST to a configured URL.
 
+```mermaid
+sequenceDiagram
+    participant App as SafeVixAI
+    participant WH as Webhook Endpoint
+    participant Handler as Event Handler
+
+    rect rgb(40, 60, 40)
+        Note over App,Handler: SOS Activated
+        App->>WH: POST /webhook
+        WH->>Handler: Process sos.activated event
+        Handler-->>WH: 200 OK
+    end
+
+    rect rgb(60, 40, 40)
+        Note over App,Handler: Report Submitted
+        App->>WH: POST /webhook
+        WH->>Handler: Process report.submitted event
+        Handler-->>WH: 200 OK
+    end
+
+    rect rgb(40, 40, 60)
+        Note over App,Handler: Issue Resolved
+        App->>WH: POST /webhook
+        WH->>Handler: Process issue.resolved event
+        Handler-->>WH: 200 OK
+    end
+```
+
 ---
 
 ## Events

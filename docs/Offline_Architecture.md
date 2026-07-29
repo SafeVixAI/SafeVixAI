@@ -102,26 +102,46 @@ SafeVixAI implements a **multi-layer offline architecture** that ensures core em
 
 ## Data Flow Diagram
 
-```
-User Action (Offline)
-    │
-    ├── SOS Button ──────────► IndexedDB Queue ──► (online event) ──► Backend API
-    │
-    ├── AI Chat ─────────────► WebLLM Phi-3 Mini ──► Local Inference
-    │                             │
-    │                             └── Fallback: Chrome AI → Transformers.js → Keyword
-    │
-    ├── Challan Calc ─────────► DuckDB-Wasm ──► violations.csv (cached)
-    │
-    ├── Road Report ──────────► IndexedDB Queue ──► (online) ──► Backend API
-    │                             │
-    │                             └── YOLOv8 (photo) ──► Transformers.js
-    │
-    ├── Emergency Map ────────► Service Worker ──► Cache (india-emergency.geojson)
-    │
-    └── Crash Detection ─────► DeviceMotion API ──► CrashCountdown UI
-                                  │
-                                  └── (online) ──► Backend SOS Dispatch
+```mermaid
+flowchart TB
+    UA[User Action - Offline]
+
+    UA --> SOS[SOS Button]
+    SOS --> IQ1[IndexedDB Queue]
+    IQ1 -->|"online event"| BA[Backend API]
+
+    UA --> CH[AI Chat]
+    CH --> WM[WebLLM Phi-3 Mini]
+    WM --> LI[Local Inference]
+    WM -->|"fallback"| CA[Chrome AI]
+    CA -->|"fallback"| TJ[Transformers.js]
+    TJ -->|"fallback"| KW[Keyword Matching]
+
+    UA --> CC[Challan Calc]
+    CC --> DW[DuckDB-Wasm]
+    DW --> VC[violations.csv cached]
+
+    UA --> RR[Road Report]
+    RR --> IQ2[IndexedDB Queue]
+    IQ2 -->|"online"| BA
+    RR --> YO[YOLOv8 photo]
+    YO --> TJ
+
+    UA --> EM[Emergency Map]
+    EM --> SW[Service Worker]
+    SW --> CA2[Cache - india-emergency.geojson]
+
+    UA --> CD[Crash Detection]
+    CD --> DM[DeviceMotion API]
+    DM --> CU[CrashCountdown UI]
+    CU -->|"online"| BA2[Backend SOS Dispatch]
+
+    style UA fill:#6e5494,color:#fff
+    style BA fill:#238636,color:#fff
+    style BA2 fill:#238636,color:#fff
+    style SW fill:#1f6feb,color:#fff
+    style WM fill:#9e6a03,color:#fff
+    style DW fill:#9e6a03,color:#fff
 ```
 
 ---

@@ -4,25 +4,50 @@
 
 SafeVixAI uses a **three-service architecture** with in-browser AI inference as an offline fallback.
 
-```
-Layer                      Technology                              Cost
----                        ---                                     ---
-Frontend                   Next.js 15 + React 19 + Tailwind        Free (Vercel)
-Backend                    FastAPI + Python 3.11 + Uvicorn         Free (Render.com)
-Chatbot Service            FastAPI + 10 LLM providers + RAG        Free (Render.com)
-Online LLM                 Groq / Gemini / Sarvam AI (chain)       Free (multi-provider)
-Offline LLM                WebLLM Phi-3 Mini 4-bit (WebGPU)       Free (device compute)
-Vector Store               ChromaDB (local persistent)             Free (server disk)
-Spatial DB                 PostgreSQL 16 + PostGIS 3.4             Free (Supabase)
-Cache                      Redis via Upstash                       Free (10K cmds/day)
-Maps                       MapLibre GL (vector tiles)              Free (no API key)
-POI Data                   Overpass API (OSM)                      Free (fair use)
-Geocoding                  Nominatim (OSM)                         Free (1 req/sec)
-Embeddings                 LocalHashEmbeddingFunction              Free (CPU, zero ML dep)
-Edge SQL                   DuckDB-Wasm (browser)                   Free (device compute)
-Edge Vision                Transformers.js + YOLOv8n ONNX          Free (device compute)
-CI/CD                      GitHub Actions                          Free (2000 min/mo)
-Total                                                              ? 0
+```mermaid
+flowchart TB
+    subgraph Frontend["Frontend Layer — Free (Vercel)"]
+        F1[Next.js 15 + React 19 + Tailwind]
+        F2[MapLibre GL - Maps]
+        F3[DuckDB-Wasm - Edge SQL]
+        F4[Transformers.js + YOLOv8 - Edge Vision]
+        F5[WebLLM Phi-3 Mini - Offline LLM]
+    end
+
+    subgraph Backend["Backend Layer — Free (Render.com)"]
+        B1[FastAPI + Python 3.11]
+        B2[ChromaDB - Vector Store]
+        B3[Redis - Cache via Upstash]
+        B4[PostgreSQL 16 + PostGIS]
+    end
+
+    subgraph AI["AI Layer — Free (Multi-Provider)"]
+        A1[Groq / Gemini / Sarvam AI]
+        A2[LocalHashEmbeddingFunction]
+    end
+
+    subgraph Data["Data Sources — Free"]
+        D1[Overpass API - POI Data]
+        D2[Nominatim - Geocoding]
+    end
+
+    subgraph CI["CI/CD — Free (GitHub Actions)"]
+        C1[2000 min/month]
+    end
+
+    F1 --> B1
+    B1 --> B4
+    B1 --> B3
+    B1 --> D1
+    B1 --> D2
+    A1 --> B2
+    F3 --> B1
+
+    style Frontend fill:#1f6feb,color:#fff
+    style Backend fill:#238636,color:#fff
+    style AI fill:#9e6a03,color:#fff
+    style Data fill:#6e5494,color:#fff
+    style CI fill:#8957e5,color:#fff
 ```
 
 ---

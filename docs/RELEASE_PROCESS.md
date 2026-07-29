@@ -27,11 +27,38 @@ A **Release Manager** is assigned from Core Contributors for each release. Respo
 
 ---
 
+```mermaid
+flowchart LR
+    FF["1. Feature Freeze<br/>7 days before"] --> CL["2. Changelog<br/>Finalization"]
+    CL --> QA["3. QA Gates<br/>CI, E2E, Security, Load"]
+    QA --> SBOM["4. SBOM Generation<br/>CycloneDX + SPDX"]
+    SBOM --> SIG["5. Docker Signing<br/>Cosign keyless"]
+    SIG --> REL["6. GitHub Release<br/>Tag v*.*.*"]
+    REL --> VER["7. Post-Release<br/>Smoke Tests"]
+
+    subgraph QA_Detail["QA Gates"]
+        Q1[CI workflows pass]
+        Q2[E2E 55/55]
+        Q3[Security scan]
+        Q4[Load tests]
+        Q5[Mutation tests]
+    end
+    QA --> QA_Detail
+
+    style FF fill:#da3633,color:#fff
+    style CL fill:#1f6feb,color:#fff
+    style QA fill:#9e6a03,color:#fff
+    style SBOM fill:#6e5494,color:#fff
+    style SIG fill:#8957e5,color:#fff
+    style REL fill:#238636,color:#fff
+    style VER fill:#1f6feb,color:#fff
+```
+
 ## Release Steps
 
 ### 1. Feature Freeze (7 days before release)
 - All features for the release must be merged
-- No new features — only bug fixes and documentation
+- No new features - only bug fixes and documentation
 - Release branch created: `release/v{x}.{y}.0`
 
 ### 2. Changelog Finalization

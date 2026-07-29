@@ -10,6 +10,37 @@
 
 SafeVixAI supports a plugin system for extending functionality across all three services. Plugins can add new API endpoints, LLM providers, chatbot tools, middleware, and UI components.
 
+```mermaid
+flowchart TB
+    subgraph Plugin["Plugin Manifest - plugin.json"]
+        M[Name, Version, Description]
+    end
+
+    subgraph Backend["Backend Plugins"]
+        BP1[Middleware - Request/Response]
+        BP2[Storage - Custom Backend]
+    end
+
+    subgraph Chatbot["Chatbot Plugins"]
+        CP1[Provider - New LLM]
+        CP2[Tool - API Integration]
+    end
+
+    subgraph Frontend["Frontend Plugins"]
+        FP1[UI - Custom Components]
+        FP2[Pages - New Routes]
+    end
+
+    Plugin --> Backend
+    Plugin --> Chatbot
+    Plugin --> Frontend
+
+    style Plugin fill:#9e6a03,color:#fff
+    style Backend fill:#238636,color:#fff
+    style Chatbot fill:#1f6feb,color:#fff
+    style Frontend fill:#6e5494,color:#fff
+```
+
 ---
 
 ## Plugin Types

@@ -6,6 +6,52 @@ SafeVixAI handles sensitive user data (GPS location, blood group, emergency cont
 
 ---
 
+```mermaid
+flowchart TB
+    subgraph Transport["Transport Security"]
+        T[HTTPS / WSS / TLS 1.2+]
+    end
+
+    subgraph Auth["Authentication"]
+        A1[JWT RS256 + HS256]
+        A2[JWKS Key Rotation]
+        A3[Guest UUID v4]
+        A4[Service-to-Service API Key]
+    end
+
+    subgraph API_Sec["API Security"]
+        R1[Rate Limiting - TokenBucket]
+        C1[CORS Restricted Origins]
+        H1[Host Header Validation]
+        CSRF[CSRF Protection]
+    end
+
+    subgraph Data_Protect["Data Protection"]
+        D1[IndexedDB - Blood group, Contacts]
+        D2[Redis - 24h TTL chat]
+        D3[TLS for Redis - rediss://]
+        D4[No GPS persistence]
+    end
+
+    subgraph LLM_Safety["LLM Safety"]
+        S1[SafetyChecker - 60+ patterns]
+        S2[Prompt Injection Defense]
+        S3[Call 112 - Injury disclosure]
+        S4[RAG trust boundary]
+    end
+
+    Transport --> Auth
+    Auth --> API_Sec
+    API_Sec --> Data_Protect
+    Data_Protect --> LLM_Safety
+
+    style Transport fill:#1f6feb,color:#fff
+    style Auth fill:#238636,color:#fff
+    style API_Sec fill:#9e6a03,color:#fff
+    style Data_Protect fill:#6e5494,color:#fff
+    style LLM_Safety fill:#da3633,color:#fff
+```
+
 ## 1. Authentication & Authorization
 
 ### JWT Authentication

@@ -3,8 +3,8 @@
 > Compact instruction file for AI coding agents (OpenCode, Copilot, Cursor, etc.).
 > Every section answers: "Would an agent likely get this wrong without help?"
 
-**Last Updated: 2026-07-25**  
-**Note: 2026-07-25 — Enterprise Final Lock. Backend: 0 ruff errors, 2912 pass / 7 isolation-dependent fail / 27 skip. Chatbot: 0 ruff errors, 1819 pass / 2 isolation-dependent fail / 148 skip. Frontend: 0 lint warnings, 248 suites, 2956 tests ALL PASSING. Total: ~7687 unit tests passing. Zero lint errors across all 3 services.**
+**Last Updated: 2026-07-28**  
+**Note: 2026-07-28 — CI Pipeline Lock. All 12 CI workflows fixed (Backend CI, Frontend CI, Chatbot CI, E2E, Lighthouse, Migration Safety, CodeQL). 2 pre-existing failures remain (release.yml — tag-only trigger, E2E form validation — known infra gaps).**
 
 ---
 
@@ -1094,22 +1094,38 @@ Total infra cost: ₹0. All free/open-source.
 
 ## Architecture (3 Services)
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│  frontend/         Next.js 15 + React 19 + TypeScript PWA   │
-│  Port 3000         MapLibre GL, WebLLM, DuckDB-Wasm         │
-│                    Zustand state, Tailwind CSS 3             │
-└──────────────┬──────────────────────────┬───────────────────┘
-               │ REST/WS (JWT Bearer)      │ REST (JWT Bearer)
-┌──────────────▼─────────┐  ┌─────────────▼──────────────────┐
-│  backend/              │  │  chatbot_service/              │
-│  FastAPI :8000         │  │  FastAPI :8010                  │
-│  PostgreSQL + PostGIS  │◄─┤  9-provider LLM fallback      │
-│  Redis cache           │  │  ChromaDB RAG vectorstore       │
-│  DuckDB (challan SQL)  │  │  13 agent tools                 │
-│  Overpass/Nominatim    │  │  Redis conversation memory      │
-│  WebSocket /tracking   │  │  Prompt injection defense       │
-└────────────────────────┘  └────────────────────────────────┘
+```mermaid
+flowchart LR
+    subgraph Frontend["frontend/ — Next.js 15 PWA"]
+        F1[Port 3000]
+        F2[MapLibre GL]
+        F3[WebLLM / DuckDB-Wasm]
+        F4[Zustand / Tailwind CSS 3]
+    end
+
+    subgraph Backend["backend/ — FastAPI :8000"]
+        B1[PostgreSQL + PostGIS]
+        B2[Redis Cache]
+        B3[DuckDB - Challan SQL]
+        B4[Overpass / Nominatim]
+        B5[WebSocket - Tracking]
+    end
+
+    subgraph Chatbot["chatbot_service/ — FastAPI :8010"]
+        C1[9-Provider LLM Fallback]
+        C2[ChromaDB RAG]
+        C3[13 Agent Tools]
+        C4[Redis Conversation Memory]
+        C5[Prompt Injection Defense]
+    end
+
+    Frontend -- "REST/WS (JWT Bearer)" --> Backend
+    Frontend -- "REST (JWT Bearer)" --> Chatbot
+    Backend <--> Chatbot
+
+    style Frontend fill:#1f6feb,color:#fff
+    style Backend fill:#238636,color:#fff
+    style Chatbot fill:#9e6a03,color:#fff
 ```
 
 **Critical:** The backend and chatbot_service are **separate FastAPI apps** with separate `.venv`, `.env`, `requirements.txt`, and `Dockerfile`. Never mix their dependencies.
@@ -1425,16 +1441,68 @@ Both use the same `violations_seed.csv` and `state_overrides.csv` source data.
 
 ## CI Workflows (`.github/workflows/`)
 
-| Workflow | Trigger | Runner | Key Steps |
-|----------|---------|--------|-----------|
-| `backend.yml` | `backend/**` changes | ubuntu-latest, Python 3.11 | `pip install` → `pytest tests/ -v` |
-| `chatbot.yml` | `chatbot_service/**` changes | ubuntu-latest, Python 3.11 | `pip install` → `pytest tests/ -v` |
-| `frontend.yml` | `frontend/**` changes | ubuntu-latest, Node 20 | `npm ci` → `npm run lint` → `npx tsc --noEmit` |
-| `e2e.yml` | Full stack E2E | ubuntu-latest | Integration tests |
-| `security.yml` | Security scanning | ubuntu-latest | Dependency audits |
-| `system.yml` | System-level checks | ubuntu-latest | Cross-service validation |
-| `sync-wiki.yml` | `backend/**`, `chatbot_service/**` etc. | ubuntu-latest, Python 3.11 | LLM wiki generation (OpenRouter → Mistral → Gemini) |
-| `update-master-doc.yml` | `docs/**`, root `.md` changes (on push) | ubuntu-latest, Python 3.11 | Auto-generate DOCX master document |
+```mermaid
+flowchart TD
+    subgraph Triggers["Trigger Paths"]
+        B[backend/**]
+        C[chatbot_service/**]
+        F[frontend/**]
+        D[docs/**]
+        A[Any path]
+    end
+
+    subgraph Workflows["CI Workflows"]
+        BW[backend.yml]
+        CW[chatbot.yml]
+        FW[frontend.yml]
+        E2E[e2e.yml]
+        SW[security.yml]
+        SYS[system.yml]
+        MW[migration-safety.yml]
+        LW[lighthouse.yml]
+        QL[codeql.yml]
+        REL[release.yml<br/>tag: v* only]
+        DOC[sync-wiki.yml]
+        UPD[update-master-doc.yml]
+    end
+
+    B --> BW
+    C --> CW
+    F --> FW
+    A --> E2E
+    A --> SW
+    A --> SYS
+    B --> MW
+    D --> DOC
+    D --> UPD
+    F --> LW
+    B --> QL
+    C --> QL
+    F --> QL
+
+    style BW fill:#238636,color:#fff
+    style CW fill:#238636,color:#fff
+    style FW fill:#238636,color:#fff
+    style MW fill:#238636,color:#fff
+    style LW fill:#238636,color:#fff
+    style QL fill:#da3633,color:#fff
+    style REL fill:#1f6feb,color:#fff
+```
+
+| Workflow | Trigger | Runner | Key Steps | Status |
+|----------|---------|--------|-----------|--------|
+| `backend.yml` | `backend/**` | ubuntu-latest, Python 3.11 | `pip install` → `pytest tests/ -v` | ✅ |
+| `chatbot.yml` | `chatbot_service/**` | ubuntu-latest, Python 3.11 | `pip install` → `pytest tests/ -v` | ✅ |
+| `frontend.yml` | `frontend/**` | ubuntu-latest, Node 20 | `npm ci` → `npm run lint` → `npx tsc --noEmit` | ✅ |
+| `e2e.yml` | Any path | ubuntu-latest | Full stack Playwright E2E | ✅ |
+| `migration-safety.yml` | `backend/migrations/**`, `backend/models/**` | ubuntu-latest, Python 3.11 | `alembic upgrade head` → `alembic check` → downgrade cycle | ✅ |
+| `lighthouse.yml` | `frontend/**` | ubuntu-latest | `lhci autorun` | ✅ |
+| `codeql.yml` | `backend/**`, `chatbot_service/**`, `frontend/**` | ubuntu-latest | CodeQL Advanced (JS/TS + Python + Actions) | ✅ |
+| `release.yml` | Tag `v*` only | ubuntu-latest | Build → Sign → SBOM → GitHub Release | ✅ |
+| `security.yml` | Any path | ubuntu-latest | Gitleaks, dep audits, scorecard | ✅ |
+| `system.yml` | Any path | ubuntu-latest | Cross-service contract tests | ✅ |
+| `sync-wiki.yml` | `backend/**`, `chatbot_service/**` | ubuntu-latest, Python 3.11 | LLM wiki generation | ✅ |
+| `update-master-doc.yml` | `docs/**`, root `.md` | ubuntu-latest, Python 3.11 | Auto-generate DOCX | ✅ |
 
 ---
 

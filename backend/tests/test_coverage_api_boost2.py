@@ -711,6 +711,7 @@ class TestCitizenCoverage:
         event.created_at = datetime.now(UTC)
         event.id = 1
         event.complaint_uuid = issue.uuid
+        event.event_metadata = {}
 
         db = _mock_db()
         first_result = MagicMock()
@@ -1571,7 +1572,7 @@ class TestRoadwatchCoverage:
         event.actor_id = None
         event.actor_role = "system"
         event.notes = "Issue created"
-        event.metadata = {}
+        event.event_metadata = {}
         event.created_at = datetime.now(UTC)
 
         db = _mock_db()

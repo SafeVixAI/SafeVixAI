@@ -15,7 +15,6 @@ from core.security import get_current_user
 from services.provider_encrypt import decrypt_api_key, encrypt_api_key, mask_api_key
 
 
-
 class MockResult:
     """Mocks SQLAlchemy Result.scalar_one_or_none() and scalars().all()."""
 

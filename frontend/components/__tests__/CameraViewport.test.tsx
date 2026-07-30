@@ -16,14 +16,14 @@ describe('CameraViewport', function() {
   })
 
   it('renders camera view when media accessible', async function() {
-    var mockStream = { getTracks: jest.fn(function() { return [{ stop: jest.fn() }] }) }
+    const mockStream = { getTracks: jest.fn(function() { return [{ stop: jest.fn() }] }) }
     Object.defineProperty(global.navigator, 'mediaDevices', {
       value: {
         getUserMedia: jest.fn(function() { return Promise.resolve(mockStream) }),
       },
       configurable: true,
     })
-    var onError = jest.fn()
+    const onError = jest.fn()
     await act(async function() {
       render(React.createElement(CameraViewport, { onError: onError }))
     })
@@ -37,7 +37,7 @@ describe('CameraViewport', function() {
       },
       configurable: true,
     })
-    var onError = jest.fn()
+    const onError = jest.fn()
     await act(async function() {
       render(React.createElement(CameraViewport, { onError: onError }))
     })

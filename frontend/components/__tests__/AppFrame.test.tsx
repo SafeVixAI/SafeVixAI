@@ -5,7 +5,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
-var mockStore = {
+const mockStore = {
   isDesktopSidebarCollapsed: false,
   isThinSidebarEnabled: false,
   setDesktopSidebarCollapsed: jest.fn(),
@@ -107,7 +107,7 @@ describe('AppFrame', function() {
 
   it('has skip to main content link', function() {
     render(<AppFrame>content</AppFrame>);
-    var skipLink = screen.getByText('Skip to main content');
+    const skipLink = screen.getByText('Skip to main content');
     expect(skipLink).toBeInTheDocument();
     expect(skipLink).toHaveAttribute('href', '#main');
   });
@@ -118,7 +118,7 @@ describe('AppFrame', function() {
   });
 
   it('has correct wrapper structure', function() {
-    var { container } = render(<AppFrame>content</AppFrame>);
+    const { container } = render(<AppFrame>content</AppFrame>);
     expect(container.firstChild).toHaveClass('flex');
     expect(container.firstChild).toHaveClass('min-h-dvh');
   });

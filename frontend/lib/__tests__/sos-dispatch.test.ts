@@ -26,12 +26,12 @@ describe('SOS Dispatch — Safety-Critical Tests', function() {
   });
 
   it('triggerSos POST should accept lat/lon params', async function() {
-    var mockResponse = {
+    const mockResponse = {
       services: [],
       numbers: { police: '100', ambulance: '108', fire: '101' },
     };
     (triggerSos as jest.Mock).mockResolvedValue(mockResponse);
-    var result = await triggerSos({ lat: 13.0827, lon: 80.2707 });
+    const result = await triggerSos({ lat: 13.0827, lon: 80.2707 });
     expect(result.numbers.police).toBe('100');
     expect(result.numbers.ambulance).toBe('108');
   });
@@ -42,18 +42,18 @@ describe('SOS Dispatch — Safety-Critical Tests', function() {
   });
 
   it('fetchSosPayload GET should return services + numbers', async function() {
-    var mockPayload = {
+    const mockPayload = {
       services: [{ name: 'Test Hospital', distance: 500, lat: 13.0, lon: 80.2, category: 'hospital' }],
       numbers: { police: '100' },
     };
     (fetchSosPayload as jest.Mock).mockResolvedValue(mockPayload);
-    var result = await fetchSosPayload({ lat: 13.0827, lon: 80.2707 });
+    const result = await fetchSosPayload({ lat: 13.0827, lon: 80.2707 });
     expect(result.services).toHaveLength(1);
     expect(result.services[0].name).toBe('Test Hospital');
   });
 
   it('offline SOS queue should store and retrieve entries', async function() {
-    var entry = { lat: 13.0, lon: 80.0, timestamp: Date.now() };
+    const entry = { lat: 13.0, lon: 80.0, timestamp: Date.now() };
     (enqueueSOS as jest.Mock).mockResolvedValue(undefined);
 
     await enqueueSOS(entry);
@@ -61,15 +61,15 @@ describe('SOS Dispatch — Safety-Critical Tests', function() {
   });
 
   it('SOS numbers should include 112 (pan-India emergency)', async function() {
-    var mockNumbers = { police: '100', ambulance: '108', fire: '101', emergency: '112' };
+    const mockNumbers = { police: '100', ambulance: '108', fire: '101', emergency: '112' };
     (fetchSosPayload as jest.Mock).mockResolvedValue({ services: [], numbers: mockNumbers });
-    var result = await fetchSosPayload({ lat: 13.0827, lon: 80.2707 });
+    const result = await fetchSosPayload({ lat: 13.0827, lon: 80.2707 });
     expect(result.numbers.emergency).toBe('112');
   });
 
   it('SOS should handle empty services gracefully', async function() {
     (fetchSosPayload as jest.Mock).mockResolvedValue({ services: [], numbers: {} });
-    var result = await fetchSosPayload({ lat: 13.0827, lon: 80.2707 });
+    const result = await fetchSosPayload({ lat: 13.0827, lon: 80.2707 });
     expect(result.services).toEqual([]);
   });
 });

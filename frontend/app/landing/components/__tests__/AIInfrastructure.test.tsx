@@ -1,15 +1,15 @@
 jest.mock('@gsap/react', function() { return { useGSAP: jest.fn() } })
 jest.mock('@/lib/gsap', function() { return { gsap: { fromTo: jest.fn(), to: jest.fn(), set: jest.fn() } } })
 jest.mock('../../hooks/useLandingGSAP', function() {
-  var React = require('react')
+  const React = require('react')
   return {
     useScrollReveal: function() { return React.useRef(null) },
   }
 })
 
-var React = require('react')
-var { render, screen: rtlScreen } = require('@testing-library/react')
-var AIInfrastructure = require('../AIInfrastructure').default
+const React = require('react')
+const { render, screen: rtlScreen } = require('@testing-library/react')
+const AIInfrastructure = require('../AIInfrastructure').default
 
 describe('AIInfrastructure', function() {
   it('renders the section overline', function() {
@@ -24,23 +24,23 @@ describe('AIInfrastructure', function() {
 
   it('renders all 5 pipeline node titles', function() {
     render(React.createElement(AIInfrastructure))
-    var ingestionNodes = rtlScreen.getAllByText('Data Ingestion')
+    const ingestionNodes = rtlScreen.getAllByText('Data Ingestion')
     expect(ingestionNodes.length).toBe(2)
-    var aiNodes = rtlScreen.getAllByText('AI Processing')
+    const aiNodes = rtlScreen.getAllByText('AI Processing')
     expect(aiNodes.length).toBe(2)
-    var predictionNodes = rtlScreen.getAllByText('Prediction Engine')
+    const predictionNodes = rtlScreen.getAllByText('Prediction Engine')
     expect(predictionNodes.length).toBe(2)
-    var emergencyNodes = rtlScreen.getAllByText('Emergency Response')
+    const emergencyNodes = rtlScreen.getAllByText('Emergency Response')
     expect(emergencyNodes.length).toBe(2)
-    var analyticsNodes = rtlScreen.getAllByText('Analytics')
+    const analyticsNodes = rtlScreen.getAllByText('Analytics')
     expect(analyticsNodes.length).toBe(2)
   })
 
   it('renders pipeline descriptions', function() {
     render(React.createElement(AIInfrastructure))
-    var descriptions = rtlScreen.getAllByText('Multi-source data collection from sensors, reports, and APIs')
+    const descriptions = rtlScreen.getAllByText('Multi-source data collection from sensors, reports, and APIs')
     expect(descriptions.length).toBe(2)
-    var aiDescs = rtlScreen.getAllByText('Real-time ML inference with Gemini and edge AI models')
+    const aiDescs = rtlScreen.getAllByText('Real-time ML inference with Gemini and edge AI models')
     expect(aiDescs.length).toBe(2)
   })
 

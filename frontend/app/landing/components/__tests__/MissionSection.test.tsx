@@ -1,13 +1,13 @@
 jest.mock('@/app/landing/hooks/useLandingGSAP', function() { return { useTextReveal: function() { return { current: null } }, useScrollReveal: function() { return function() { return { current: null } } } } })
 
-var React = require('react')
-var { render, screen: rtlScreen } = require('@testing-library/react')
-var MissionSection = require('../MissionSection').default
+const React = require('react')
+const { render, screen: rtlScreen } = require('@testing-library/react')
+const MissionSection = require('../MissionSection').default
 
 describe('MissionSection', function() {
   it('renders section with id mission', function() {
-    var { container } = render(React.createElement(MissionSection))
-    var section = container.querySelector('#mission')
+    const { container } = render(React.createElement(MissionSection))
+    const section = container.querySelector('#mission')
     expect(section).toBeTruthy()
   })
 
@@ -22,32 +22,32 @@ describe('MissionSection', function() {
   })
 
   it('renders shield SVG', function() {
-    var { container } = render(React.createElement(MissionSection))
-    var svg = container.querySelector('svg')
+    const { container } = render(React.createElement(MissionSection))
+    const svg = container.querySelector('svg')
     expect(svg).toBeTruthy()
     expect(svg.getAttribute('aria-hidden')).toBe('true')
   })
 
   it('renders with landing-section class', function() {
-    var { container } = render(React.createElement(MissionSection))
+    const { container } = render(React.createElement(MissionSection))
     expect(container.querySelector('.landing-section')).toBeTruthy()
   })
 
   it('renders ambient light gradients', function() {
-    var { container } = render(React.createElement(MissionSection))
-    var divs = container.querySelectorAll('[class*="pointer-events-none"]')
+    const { container } = render(React.createElement(MissionSection))
+    const divs = container.querySelectorAll('[class*="pointer-events-none"]')
     expect(divs.length).toBeGreaterThanOrEqual(2)
   })
 
   it('renders heading with font-space class', function() {
-    var { container } = render(React.createElement(MissionSection))
-    var heading = container.querySelector('.font-space')
+    const { container } = render(React.createElement(MissionSection))
+    const heading = container.querySelector('.font-space')
     expect(heading).toBeTruthy()
   })
 
   it('renders description paragraph with reveal-item', function() {
-    var { container } = render(React.createElement(MissionSection))
-    var paragraphs = container.querySelectorAll('.reveal-item')
+    const { container } = render(React.createElement(MissionSection))
+    const paragraphs = container.querySelectorAll('.reveal-item')
     expect(paragraphs.length).toBeGreaterThan(0)
   })
 

@@ -5,8 +5,6 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
 
-import pytest
-
 from core.alert import AlertService, _last_alert_time, get_alert_service
 
 

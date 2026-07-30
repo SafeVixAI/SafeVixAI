@@ -18,9 +18,9 @@ describe('ErrorState', function() {
   });
 
   it('renders retry button when retry provided', function() {
-    var handleRetry = jest.fn();
+    const handleRetry = jest.fn();
     render(<ErrorState message="Error" retry={handleRetry} />);
-    var button = screen.getByText('Try Again');
+    const button = screen.getByText('Try Again');
     expect(button).toBeInTheDocument();
     fireEvent.click(button);
     expect(handleRetry).toHaveBeenCalledTimes(1);
@@ -37,19 +37,19 @@ describe('ErrorState', function() {
   });
 
   it('renders default AlertTriangle icon', function() {
-    var { container } = render(<ErrorState message="Error" />);
-    var iconContainer = container.querySelector('.flex.h-12.w-12');
+    const { container } = render(<ErrorState message="Error" />);
+    const iconContainer = container.querySelector('.flex.h-12.w-12');
     expect(iconContainer).toBeInTheDocument();
   });
 
   it('applies custom className', function() {
-    var { container } = render(<ErrorState message="Error" className="my-class" />);
+    const { container } = render(<ErrorState message="Error" className="my-class" />);
     expect(container.firstChild).toHaveClass('my-class');
   });
 
   it('renders RotateCw icon inside retry button', function() {
     render(<ErrorState message="Error" retry={() => {}} />);
-    var button = screen.getByText('Try Again');
+    const button = screen.getByText('Try Again');
     expect(button).toBeInTheDocument();
   });
 });

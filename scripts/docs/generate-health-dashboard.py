@@ -10,7 +10,7 @@ import json
 import os
 import re
 import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 WIKI_DIR = Path("docs/wiki")
@@ -28,8 +28,8 @@ def staleness_check(stale_days: int = 90):
         content = f.read_text(encoding="utf-8", errors="replace")
         m = re.search(r"(?:generated|Generated):\s*(\d{4}-\d{2}-\d{2})", content)
         if m:
-            gen_date = datetime.strptime(m.group(1), "%Y-%m-%d").replace(tzinfo=timezone.utc)
-            age = (datetime.now(timezone.utc) - gen_date).days
+            gen_date = datetime.strptime(m.group(1), "%Y-%m-%d").replace(tzinfo=UTC)
+            age = (datetime.now(UTC) - gen_date).days
             if age >= stale_days:
                 stale += 1
             else:
@@ -88,7 +88,7 @@ def main():
     owned_total, owned_count, owners = ownership_coverage()
 
     health = {
-        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "generated_at": datetime.now(UTC).isoformat(),
         "schema_version": 2,
         "wiki": {
             "total_files": total,

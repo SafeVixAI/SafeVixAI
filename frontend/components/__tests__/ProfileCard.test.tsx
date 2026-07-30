@@ -5,7 +5,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
-var mockState = {
+const mockState = {
   userProfile: {
     name: 'John Doe',
     bloodGroup: 'O+',
@@ -20,14 +20,14 @@ jest.mock('@/lib/store', () => ({
 describe('ProfileCard', function() {
   it('renders user name', async function() {
     mockState.userProfile.name = 'John Doe';
-    var ProfileCard = (await import('../dashboard/ProfileCard')).default;
+    const ProfileCard = (await import('../dashboard/ProfileCard')).default;
     render(<ProfileCard />);
     expect(screen.getByText('John Doe')).toBeInTheDocument();
   });
 
   it('shows avatar initials derived from name', async function() {
     mockState.userProfile.name = 'John Doe';
-    var ProfileCard = (await import('../dashboard/ProfileCard')).default;
+    const ProfileCard = (await import('../dashboard/ProfileCard')).default;
     render(<ProfileCard />);
     expect(screen.getByText('JD')).toBeInTheDocument();
   });
@@ -37,7 +37,7 @@ describe('ProfileCard', function() {
     mockState.userProfile.bloodGroup = 'O+';
     mockState.userProfile.vehicleNumber = 'TN01AB1234';
     mockState.userProfile.emergencyContact = '+91-9876543210';
-    var ProfileCard = (await import('../dashboard/ProfileCard')).default;
+    const ProfileCard = (await import('../dashboard/ProfileCard')).default;
     render(<ProfileCard />);
     expect(screen.getByText('O+')).toBeInTheDocument();
     expect(screen.getByText('TN01AB1234')).toBeInTheDocument();
@@ -46,7 +46,7 @@ describe('ProfileCard', function() {
 
   it('shows verified emergency profile status when name exists', async function() {
     mockState.userProfile.name = 'John Doe';
-    var ProfileCard = (await import('../dashboard/ProfileCard')).default;
+    const ProfileCard = (await import('../dashboard/ProfileCard')).default;
     render(<ProfileCard />);
     expect(screen.getByText('Verified emergency profile')).toBeInTheDocument();
   });
@@ -58,7 +58,7 @@ describe('ProfileCard', function() {
       vehicleNumber: '',
       emergencyContact: '',
     };
-    var ProfileCard = (await import('../dashboard/ProfileCard')).default;
+    const ProfileCard = (await import('../dashboard/ProfileCard')).default;
     render(<ProfileCard />);
     expect(screen.getByText('Emergency Profile')).toBeInTheDocument();
     expect(screen.getByText('Blood group')).toBeInTheDocument();
@@ -73,7 +73,7 @@ describe('ProfileCard', function() {
       vehicleNumber: '',
       emergencyContact: '',
     };
-    var ProfileCard = (await import('../dashboard/ProfileCard')).default;
+    const ProfileCard = (await import('../dashboard/ProfileCard')).default;
     render(<ProfileCard />);
     expect(screen.getByText('Complete profile for faster SOS dispatch')).toBeInTheDocument();
   });
@@ -85,7 +85,7 @@ describe('ProfileCard', function() {
       vehicleNumber: '',
       emergencyContact: '',
     };
-    var ProfileCard = (await import('../dashboard/ProfileCard')).default;
+    const ProfileCard = (await import('../dashboard/ProfileCard')).default;
     render(<ProfileCard />);
     expect(screen.getByLabelText('Emergency profile status')).toBeInTheDocument();
   });

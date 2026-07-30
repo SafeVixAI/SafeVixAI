@@ -13,9 +13,9 @@ jest.mock('@/lib/client-logger', function() {
 import { render, waitFor } from '@testing-library/react'
 import React from 'react'
 
-var rumMod: any
-var offlineMod: any
-var loggerMod: any
+let rumMod: any
+let offlineMod: any
+let loggerMod: any
 
 beforeEach(function() {
   jest.clearAllMocks()
@@ -46,7 +46,7 @@ describe('useClientServiceWorker', function() {
   })
 
   it('registers SW when serviceWorker is available', function() {
-    var mockRegister = jest.fn().mockResolvedValue({ scope: '/' })
+    const mockRegister = jest.fn().mockResolvedValue({ scope: '/' })
     ;(navigator as any).serviceWorker = { register: mockRegister }
     render(React.createElement(TestCase))
     expect(mockRegister).toHaveBeenCalledWith('/sw.js')
@@ -54,7 +54,7 @@ describe('useClientServiceWorker', function() {
   })
 
   it('calls logClientError on SW registration failure', async function() {
-    var swError = new Error('SW failed')
+    const swError = new Error('SW failed')
     ;(navigator as any).serviceWorker = { register: jest.fn().mockRejectedValue(swError) }
     render(React.createElement(TestCase))
     await waitFor(function() {

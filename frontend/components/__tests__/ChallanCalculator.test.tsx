@@ -3,9 +3,9 @@
 import { render, screen, fireEvent, act } from '@testing-library/react'
 import React from 'react'
 import ChallanCalculator from '../ChallanCalculator'
-var calculateChallan = require('@/lib/api').calculateChallan
-var haptics = require('@/lib/haptics').haptics
-var track = require('@/lib/analytics').track
+const calculateChallan = require('@/lib/api').calculateChallan
+const haptics = require('@/lib/haptics').haptics
+const track = require('@/lib/analytics').track
 
 // Required mocks for ChallanCalculator dependencies
 jest.mock('@/lib/api', function () {
@@ -38,26 +38,26 @@ describe('ChallanCalculator', function () {
   })
 
   it('renders the calculator form', function () {
-    var { container } = render(React.createElement(ChallanCalculator))
+    const { container } = render(React.createElement(ChallanCalculator))
     expect(container).toBeDefined()
     expect(screen.getByText(/Violation Protocol|01\. Violation/)).toBeDefined()
   })
 
   it('renders violation selection grid', function () {
     render(React.createElement(ChallanCalculator))
-    var buttons = screen.getAllByRole('radio')
+    const buttons = screen.getAllByRole('radio')
     expect(buttons.length).toBeGreaterThan(0)
   })
 
   it('renders state jurisdiction selector', function () {
     render(React.createElement(ChallanCalculator))
-    var selects = screen.getAllByRole('combobox')
+    const selects = screen.getAllByRole('combobox')
     expect(selects.length).toBeGreaterThan(0)
   })
 
   it('changes violation on button click', function () {
     render(React.createElement(ChallanCalculator))
-    var radios = screen.getAllByRole('radio')
+    const radios = screen.getAllByRole('radio')
     fireEvent.click(radios[2])
     expect(haptics.light).toHaveBeenCalled()
     expect(radios[2].getAttribute('aria-checked')).toBe('true')
@@ -65,21 +65,21 @@ describe('ChallanCalculator', function () {
 
   it('changes vehicle class via select', function () {
     render(React.createElement(ChallanCalculator))
-    var selects = screen.getAllByRole('combobox')
+    const selects = screen.getAllByRole('combobox')
     fireEvent.change(selects[0], { target: { value: 'LMV' } })
     expect(haptics.light).toHaveBeenCalled()
   })
 
   it('changes state via select', function () {
     render(React.createElement(ChallanCalculator))
-    var selects = screen.getAllByRole('combobox')
+    const selects = screen.getAllByRole('combobox')
     fireEvent.change(selects[1], { target: { value: 'KA' } })
     expect(haptics.light).toHaveBeenCalled()
   })
 
   it('toggles repeat offender', function () {
     render(React.createElement(ChallanCalculator))
-    var repeatBtn = screen.getByText(/Repeat Offender/i).closest('button')!
+    const repeatBtn = screen.getByText(/Repeat Offender/i).closest('button')!
     fireEvent.click(repeatBtn)
     expect(haptics.light).toHaveBeenCalled()
     expect(repeatBtn.getAttribute('aria-pressed')).toBe('true')
@@ -94,10 +94,10 @@ describe('ChallanCalculator', function () {
 
   it('shows result when API succeeds', async function () {
     render(React.createElement(ChallanCalculator))
-    var calcBtn = screen.getByText(/Calculate Penalty/i)
+    const calcBtn = screen.getByText(/Calculate Penalty/i)
     await act(async function () { fireEvent.click(calcBtn) })
     expect(screen.getByText(/Section 185/i)).toBeTruthy()
-    var drunkTexts = screen.getAllByText('Drunk Driving')
+    const drunkTexts = screen.getAllByText('Drunk Driving')
     expect(drunkTexts.length).toBeGreaterThanOrEqual(1)
     expect(screen.getByText('ONLINE')).toBeTruthy()
   })
@@ -105,32 +105,32 @@ describe('ChallanCalculator', function () {
   it('shows error when API fails', async function () {
     calculateChallan.mockRejectedValueOnce(new Error('Network error'))
     render(React.createElement(ChallanCalculator))
-    var calcBtn = screen.getByText(/Calculate Penalty/i)
+    const calcBtn = screen.getByText(/Calculate Penalty/i)
     await act(async function () { fireEvent.click(calcBtn) })
     expect(screen.getByText(/Unable to calculate/i)).toBeTruthy()
   })
 
   it('shows Processing... while loading', async function () {
-    var neverResolve = new Promise(function () {}) // never resolves
+    const neverResolve = new Promise(function () {}) // never resolves
     calculateChallan.mockReturnValueOnce(neverResolve)
     render(React.createElement(ChallanCalculator))
-    var calcBtn = screen.getByText(/Calculate Penalty/i)
+    const calcBtn = screen.getByText(/Calculate Penalty/i)
     fireEvent.click(calcBtn)
     expect(screen.getByText(/Processing/i)).toBeTruthy()
   })
 
   it('shows Repeat Offence tag when repeat is enabled', async function () {
     render(React.createElement(ChallanCalculator))
-    var repeatBtn = screen.getByText(/Repeat Offender/i).closest('button')!
+    const repeatBtn = screen.getByText(/Repeat Offender/i).closest('button')!
     fireEvent.click(repeatBtn)
-    var calcBtn = screen.getByText(/Calculate Penalty/i)
+    const calcBtn = screen.getByText(/Calculate Penalty/i)
     await act(async function () { fireEvent.click(calcBtn) })
     expect(screen.getByText(/Repeat Offence/i)).toBeTruthy()
   })
 
   it('calls analytics on successful calculation', async function () {
     render(React.createElement(ChallanCalculator))
-    var calcBtn = screen.getByText(/Calculate Penalty/i)
+    const calcBtn = screen.getByText(/Calculate Penalty/i)
     await act(async function () { fireEvent.click(calcBtn) })
     expect(track.challanCalculated).toHaveBeenCalledWith('TN', '185', 10000, false)
   })

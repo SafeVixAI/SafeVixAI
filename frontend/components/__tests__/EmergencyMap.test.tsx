@@ -20,7 +20,7 @@ jest.mock('next/dynamic', () => {
 
 import { EmergencyMap } from '../EmergencyMap';
 
-var defaultProps = {
+const defaultProps = {
   center: [13.0827, 80.2707] as [number, number],
   facilities: [],
 };

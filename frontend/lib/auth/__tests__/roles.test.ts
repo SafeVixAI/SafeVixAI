@@ -14,28 +14,28 @@ import {
   Permission,
 } from '../roles';
 
-var citizenUser: AuthUser = {
+const citizenUser: AuthUser = {
   id: 'cit1',
   name: 'Citizen One',
   role: 'citizen',
   permissions: getPermissionsForRole('citizen'),
 };
 
-var officerUser: AuthUser = {
+const officerUser: AuthUser = {
   id: 'off1',
   name: 'Officer One',
   role: 'officer',
   permissions: getPermissionsForRole('officer'),
 };
 
-var adminUser: AuthUser = {
+const adminUser: AuthUser = {
   id: 'adm1',
   name: 'Admin One',
   role: 'admin',
   permissions: getPermissionsForRole('admin'),
 };
 
-var superAdminUser: AuthUser = {
+const superAdminUser: AuthUser = {
   id: 'sup1',
   name: 'Super Admin One',
   role: 'super_admin',
@@ -44,7 +44,7 @@ var superAdminUser: AuthUser = {
 
 describe('getPermissionsForRole', function() {
   it('should return citizen permissions', function() {
-    var perms = getPermissionsForRole('citizen');
+    const perms = getPermissionsForRole('citizen');
     expect(perms).toContain('emergency:sos');
     expect(perms).toContain('challan:calculate');
     expect(perms).toContain('assistant:chat');
@@ -56,7 +56,7 @@ describe('getPermissionsForRole', function() {
   });
 
   it('should return officer permissions', function() {
-    var perms = getPermissionsForRole('officer');
+    const perms = getPermissionsForRole('officer');
     expect(perms).toContain('report:resolve');
     expect(perms).toContain('emergency:sos');
     expect(perms).toContain('tracking:view');
@@ -65,7 +65,7 @@ describe('getPermissionsForRole', function() {
   });
 
   it('should return admin permissions', function() {
-    var perms = getPermissionsForRole('admin');
+    const perms = getPermissionsForRole('admin');
     expect(perms).toContain('admin:users_view');
     expect(perms).toContain('admin:users_manage');
     expect(perms).toContain('admin:analytics_view');
@@ -76,7 +76,7 @@ describe('getPermissionsForRole', function() {
   });
 
   it('should return super_admin permissions', function() {
-    var perms = getPermissionsForRole('super_admin');
+    const perms = getPermissionsForRole('super_admin');
     expect(perms).toContain('admin:roles_manage');
     expect(perms).toContain('admin:users_view');
     expect(perms).toContain('admin:users_manage');
@@ -86,7 +86,7 @@ describe('getPermissionsForRole', function() {
   });
 
   it('should return undefined for unknown role', function() {
-    var perms = getPermissionsForRole('unknown_role' as Role);
+    const perms = getPermissionsForRole('unknown_role' as Role);
     expect(perms).toBeUndefined();
   });
 });
@@ -183,17 +183,17 @@ describe('isPublicRoute', function() {
 
 describe('getRequiredPermissionsForRoute', function() {
   it('should return permissions for exact matching route', function() {
-    var perms = getRequiredPermissionsForRoute('/admin');
+    const perms = getRequiredPermissionsForRoute('/admin');
     expect(perms).toEqual(['admin:users_view']);
   });
 
   it('should return permissions for matching subpath', function() {
-    var perms = getRequiredPermissionsForRoute('/admin/users');
+    const perms = getRequiredPermissionsForRoute('/admin/users');
     expect(perms).toEqual(['admin:users_view']);
   });
 
   it('should return permissions for nested subpaths', function() {
-    var perms = getRequiredPermissionsForRoute('/admin/users/123');
+    const perms = getRequiredPermissionsForRoute('/admin/users/123');
     expect(perms).toEqual(['admin:users_view']);
   });
 
@@ -268,8 +268,8 @@ describe('canAccessRoute', function() {
 
 describe('Role hierarchy', function() {
   it('super_admin should have all admin permissions plus admin:roles_manage', function() {
-    var supPerms = getPermissionsForRole('super_admin');
-    var adminPerms = getPermissionsForRole('admin');
+    const supPerms = getPermissionsForRole('super_admin');
+    const adminPerms = getPermissionsForRole('admin');
     adminPerms.forEach(function(p) {
       expect(supPerms).toContain(p);
     });
@@ -277,28 +277,28 @@ describe('Role hierarchy', function() {
   });
 
   it('citizen should not have officer/admin permissions', function() {
-    var citizenPerms = getPermissionsForRole('citizen');
+    const citizenPerms = getPermissionsForRole('citizen');
     expect(citizenPerms).not.toContain('report:resolve');
     expect(citizenPerms).not.toContain('admin:users_view');
     expect(citizenPerms).not.toContain('admin:roles_manage');
   });
 
   it('officer should have report:resolve but not offline assistant', function() {
-    var offPerms = getPermissionsForRole('officer');
+    const offPerms = getPermissionsForRole('officer');
     expect(offPerms).toContain('report:resolve');
     expect(offPerms).not.toContain('assistant:offline');
     expect(offPerms).not.toContain('admin:users_view');
   });
 
   it('admin should not have admin:roles_manage', function() {
-    var adminPerms = getPermissionsForRole('admin');
+    const adminPerms = getPermissionsForRole('admin');
     expect(adminPerms).not.toContain('admin:roles_manage');
   });
 
   it('all roles should have emergency:sos', function() {
-    var roles: Role[] = ['citizen', 'officer', 'admin', 'super_admin'];
+    const roles: Role[] = ['citizen', 'officer', 'admin', 'super_admin'];
     roles.forEach(function(role) {
-      var perms = getPermissionsForRole(role);
+      const perms = getPermissionsForRole(role);
       expect(perms).toContain('emergency:sos');
     });
   });
@@ -306,19 +306,19 @@ describe('Role hierarchy', function() {
 
 describe('Edge cases', function() {
   it('should handle user with empty permissions array', function() {
-    var emptyPermUser: AuthUser = { id: 'empty', name: 'Empty', role: 'citizen', permissions: [] };
+    const emptyPermUser: AuthUser = { id: 'empty', name: 'Empty', role: 'citizen', permissions: [] };
     expect(hasPermission(emptyPermUser, 'emergency:sos')).toBe(false);
     expect(hasAnyPermission(emptyPermUser, ['emergency:sos'])).toBe(false);
     expect(hasAllPermissions(emptyPermUser, [])).toBe(true);
   });
 
   it('should throw if permissions property is missing', function() {
-    var malformedUser = {} as AuthUser;
+    const malformedUser = {} as AuthUser;
     expect(function() { hasPermission(malformedUser, 'emergency:sos' as Permission); }).toThrow();
   });
 
   it('hasPermission should be case sensitive for permission names', function() {
-    var found = citizenUser.permissions.includes('Emergency:SOS' as Permission);
+    const found = citizenUser.permissions.includes('Emergency:SOS' as Permission);
     expect(found).toBe(false);
     expect(hasPermission(citizenUser, 'Emergency:SOS' as Permission)).toBe(false);
   });

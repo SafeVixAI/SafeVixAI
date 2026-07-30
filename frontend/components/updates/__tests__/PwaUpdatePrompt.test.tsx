@@ -5,8 +5,8 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import PwaUpdatePrompt from '@/components/updates/PwaUpdatePrompt';
 
-var mockApplyUpdate = jest.fn();
-var mockDismissUpdate = jest.fn();
+const mockApplyUpdate = jest.fn();
+const mockDismissUpdate = jest.fn();
 
 jest.mock('@/hooks/useServiceWorkerUpdate', function () {
   return {
@@ -14,12 +14,12 @@ jest.mock('@/hooks/useServiceWorkerUpdate', function () {
   };
 });
 
-var mockUseServiceWorkerUpdate = jest.fn();
+let mockUseServiceWorkerUpdate = jest.fn();
 
 beforeEach(function () {
   jest.clearAllMocks();
   jest.isolateModules(function () {
-    var mod = require('@/hooks/useServiceWorkerUpdate');
+    const mod = require('@/hooks/useServiceWorkerUpdate');
     mockUseServiceWorkerUpdate = mod.useServiceWorkerUpdate;
   });
 });
@@ -43,7 +43,7 @@ describe('PwaUpdatePrompt', function () {
       dismissUpdate: mockDismissUpdate,
       waitingSw: null,
     });
-    var { container } = render(React.createElement(PwaUpdatePrompt));
+    const { container } = render(React.createElement(PwaUpdatePrompt));
     expect(container.innerHTML).toBe('');
   });
 

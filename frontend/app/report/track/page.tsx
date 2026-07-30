@@ -79,7 +79,7 @@ export default function TrackPage() {
 
     try {
       // Clean query input if they paste RS- prefix or raw uuid
-      let identifier = ref.trim();
+      const identifier = ref.trim();
       
       // If it's a reference e.g. RS-XXXX, search by ref, else assume UUID
       let issueUuid = identifier;

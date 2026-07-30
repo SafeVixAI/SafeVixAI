@@ -35,7 +35,7 @@ jest.mock('@/lib/store/notification-slice', function() {
   }
 })
 jest.mock('@/lib/store', function() {
-  var appState = { operatorName: 'TestOp' }
+  const appState = { operatorName: 'TestOp' }
   return {
     useAppStore: Object.assign(function(sel) { return typeof sel === 'function' ? sel(appState) : appState }, {
       getState: function() { return appState }, setState: jest.fn(), subscribe: jest.fn(),
@@ -44,46 +44,46 @@ jest.mock('@/lib/store', function() {
 })
 jest.mock('lucide-react', function() { return new Proxy({}, { get: function() { return function() { return null } } }) })
 jest.mock('@/components/notifications/NotificationCenter', function() {
-  return { NotificationCenter: function(props) { var React = require('react'); return React.createElement('div', { 'data-testid': 'notification-center' }, props.onClose ? React.createElement('button', { onClick: props.onClose }, 'close') : null) } }
+  return { NotificationCenter: function(props) { const React = require('react'); return React.createElement('div', { 'data-testid': 'notification-center' }, props.onClose ? React.createElement('button', { onClick: props.onClose }, 'close') : null) } }
 })
 jest.mock('@/components/notifications/NotificationPreferencesPanel', function() {
-  return { NotificationPreferencesPanel: function(props) { var React = require('react'); return React.createElement('div', { 'data-testid': 'notification-preferences' }, props.onClose ? React.createElement('button', { onClick: props.onClose }, 'close') : null) } }
+  return { NotificationPreferencesPanel: function(props) { const React = require('react'); return React.createElement('div', { 'data-testid': 'notification-preferences' }, props.onClose ? React.createElement('button', { onClick: props.onClose }, 'close') : null) } }
 })
 
-var React = require('react')
-var { render, screen, fireEvent, act } = require('@testing-library/react')
-var { NotificationBell } = require('@/components/notifications/NotificationBell')
+const React = require('react')
+const { render, screen, fireEvent, act } = require('@testing-library/react')
+const { NotificationBell } = require('@/components/notifications/NotificationBell')
 
 describe('NotificationBell', function() {
   beforeEach(function() {
     jest.clearAllMocks()
-    var store = require('@/lib/store/notification-slice').useNotificationStore
+    const store = require('@/lib/store/notification-slice').useNotificationStore
     store.setState({ items: [], unreadCount: 0, isCenterOpen: false, preferencesOpen: false })
   })
 
   it('renders bell button with notification aria-label', function() {
     render(React.createElement(NotificationBell))
-    var btn = screen.getByLabelText('Notifications')
+    const btn = screen.getByLabelText('Notifications')
     expect(btn).toBeTruthy()
   })
 
   it('shows unread count in aria-label when unread > 0', function() {
-    var store = require('@/lib/store/notification-slice').useNotificationStore
+    const store = require('@/lib/store/notification-slice').useNotificationStore
     store.setState({ unreadCount: 3 })
     render(React.createElement(NotificationBell))
-    var btn = screen.getByLabelText('Notifications (3 unread)')
+    const btn = screen.getByLabelText('Notifications (3 unread)')
     expect(btn).toBeTruthy()
   })
 
   it('shows unread badge with count', function() {
-    var store = require('@/lib/store/notification-slice').useNotificationStore
+    const store = require('@/lib/store/notification-slice').useNotificationStore
     store.setState({ unreadCount: 5 })
     render(React.createElement(NotificationBell))
     expect(screen.getByText('5')).toBeTruthy()
   })
 
   it('clamps unread badge to 99+', function() {
-    var store = require('@/lib/store/notification-slice').useNotificationStore
+    const store = require('@/lib/store/notification-slice').useNotificationStore
     store.setState({ unreadCount: 150 })
     render(React.createElement(NotificationBell))
     expect(screen.getByText('99+')).toBeTruthy()
@@ -95,26 +95,26 @@ describe('NotificationBell', function() {
   })
 
   it('toggles center open on click', function() {
-    var { rerender } = render(React.createElement(NotificationBell))
-    var btn = screen.getByLabelText('Notifications')
+    const { rerender } = render(React.createElement(NotificationBell))
+    const btn = screen.getByLabelText('Notifications')
     fireEvent.click(btn)
     rerender(React.createElement(NotificationBell))
     expect(screen.getByTestId('notification-center')).toBeTruthy()
   })
 
   it('closes center by clicking backdrop', function() {
-    var { rerender } = render(React.createElement(NotificationBell))
-    var btn = screen.getByLabelText('Notifications')
+    const { rerender } = render(React.createElement(NotificationBell))
+    const btn = screen.getByLabelText('Notifications')
     fireEvent.click(btn)
     rerender(React.createElement(NotificationBell))
     expect(screen.getByTestId('notification-center')).toBeTruthy()
-    var backdrop = document.querySelector('.fixed.inset-0 > div:first-child')
+    const backdrop = document.querySelector('.fixed.inset-0 > div:first-child')
     if (backdrop) fireEvent.click(backdrop)
   })
 
   it('renders with custom className', function() {
-    var { container } = render(React.createElement(NotificationBell, { className: 'custom-class' }))
-    var outer = container.querySelector('.custom-class')
+    const { container } = render(React.createElement(NotificationBell, { className: 'custom-class' }))
+    const outer = container.querySelector('.custom-class')
     expect(outer).toBeTruthy()
   })
 })

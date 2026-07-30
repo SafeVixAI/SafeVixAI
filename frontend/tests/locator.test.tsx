@@ -50,9 +50,9 @@ jest.mock('../app/locator/components/LocatorResults', function() { return { Desk
 jest.mock('../app/locator/locator-components', function() { return { EmptyState: function() { return null }, RouteStatusCard: function() { return null } } })
 jest.mock('../app/locator/locator-utils', function() { return {} })
 
-var React = require('react')
-var { render, screen: rtlScreen } = require('@testing-library/react')
-var Page = require('../app/locator/page').default
+const React = require('react')
+const { render, screen: rtlScreen } = require('@testing-library/react')
+const Page = require('../app/locator/page').default
 
 describe('LocatorPage', function() {
   it('renders Emergency Locator sr-only heading', function() {
@@ -66,7 +66,7 @@ describe('LocatorPage', function() {
   })
 
   it('renders mobile locator container', function() {
-    var { container } = render(React.createElement(Page))
+    const { container } = render(React.createElement(Page))
     expect(container).toBeTruthy()
     expect(container.querySelector('main') || container.querySelector('div[class*="locator"]')).toBeTruthy()
   })

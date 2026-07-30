@@ -7,7 +7,7 @@ import '@testing-library/jest-dom';
 import { Select } from '../ui/Select';
 
 describe('Select', function() {
-  var options = [
+  const options = [
     { value: 'opt1', label: 'Option 1' },
     { value: 'opt2', label: 'Option 2' },
   ];
@@ -35,7 +35,7 @@ describe('Select', function() {
 
   it('links label to select via htmlFor', function() {
     render(<Select options={options} value="" onChange={() => {}} label="My Label" />);
-    var label = screen.getByText('My Label');
+    const label = screen.getByText('My Label');
     expect(label).toHaveAttribute('for', 'my-label');
   });
 
@@ -50,15 +50,15 @@ describe('Select', function() {
   });
 
   it('does not render error when not provided', function() {
-    var { container } = render(<Select options={options} value="" onChange={() => {}} />);
-    var alerts = container.querySelectorAll('[role="alert"]');
+    const { container } = render(<Select options={options} value="" onChange={() => {}} />);
+    const alerts = container.querySelectorAll('[role="alert"]');
     expect(alerts.length).toBe(0);
   });
 
   it('calls onChange when selection changes', function() {
-    var handleChange = jest.fn();
+    const handleChange = jest.fn();
     render(<Select options={options} value="" onChange={handleChange} />);
-    var select = screen.getByRole('combobox');
+    const select = screen.getByRole('combobox');
     fireEvent.change(select, { target: { value: 'opt1' } });
     expect(handleChange).toHaveBeenCalledWith('opt1');
   });
@@ -75,25 +75,25 @@ describe('Select', function() {
 
   it('handles empty options array', function() {
     render(<Select options={[]} value="" onChange={() => {}} />);
-    var select = screen.getByRole('combobox');
+    const select = screen.getByRole('combobox');
     expect(select.children.length).toBe(1);
     expect(select.children[0]).toHaveValue('');
   });
 
   it('selects the current value', function() {
     render(<Select options={options} value="opt2" onChange={() => {}} />);
-    var select = screen.getByRole('combobox') as HTMLSelectElement;
+    const select = screen.getByRole('combobox') as HTMLSelectElement;
     expect(select.value).toBe('opt2');
   });
 
   it('applies error border class when error present', function() {
-    var { container } = render(<Select options={options} value="" onChange={() => {}} error="Error" />);
-    var select = container.querySelector('select');
+    const { container } = render(<Select options={options} value="" onChange={() => {}} error="Error" />);
+    const select = container.querySelector('select');
     expect(select).toHaveClass('border-emergency');
   });
 
   it('applies custom className', function() {
-    var { container } = render(<Select options={options} value="" onChange={() => {}} className="my-class" />);
+    const { container } = render(<Select options={options} value="" onChange={() => {}} className="my-class" />);
     expect(container.firstChild).toHaveClass('my-class');
   });
 });

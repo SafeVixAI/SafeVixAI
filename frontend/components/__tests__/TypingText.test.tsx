@@ -15,15 +15,15 @@ describe('TypingText', function() {
   });
 
   it('renders empty initially', async function() {
-    var TypingText = (await import('../dashboard/TypingText')).default;
-    var { container } = render(<TypingText text="Hello World" />);
-    var span = container.querySelector('span');
+    const TypingText = (await import('../dashboard/TypingText')).default;
+    const { container } = render(<TypingText text="Hello World" />);
+    const span = container.querySelector('span');
     expect(span).toBeInTheDocument();
     expect(span?.textContent).toBe('');
   });
 
   it('types text step by step', async function() {
-    var TypingText = (await import('../dashboard/TypingText')).default;
+    const TypingText = (await import('../dashboard/TypingText')).default;
     render(<TypingText text="Hi" />);
     act(() => { jest.advanceTimersByTime(10); });
     act(() => { jest.advanceTimersByTime(10); });
@@ -31,7 +31,7 @@ describe('TypingText', function() {
   });
 
   it('displays full text after advancing enough', async function() {
-    var TypingText = (await import('../dashboard/TypingText')).default;
+    const TypingText = (await import('../dashboard/TypingText')).default;
     render(<TypingText text="AB" />);
     for (let i = 0; i < 5; i++) {
       act(() => { jest.advanceTimersByTime(10); });
@@ -40,8 +40,8 @@ describe('TypingText', function() {
   });
 
   it('calls onComplete when typing finishes', async function() {
-    var onComplete = jest.fn();
-    var TypingText = (await import('../dashboard/TypingText')).default;
+    const onComplete = jest.fn();
+    const TypingText = (await import('../dashboard/TypingText')).default;
     render(<TypingText text="A" onComplete={onComplete} />);
     for (let i = 0; i < 5; i++) {
       act(() => { jest.advanceTimersByTime(10); });
@@ -50,8 +50,8 @@ describe('TypingText', function() {
   });
 
   it('resets when text changes', async function() {
-    var TypingText = (await import('../dashboard/TypingText')).default;
-    var { rerender } = render(<TypingText text="Hello" />);
+    const TypingText = (await import('../dashboard/TypingText')).default;
+    const { rerender } = render(<TypingText text="Hello" />);
     for (let i = 0; i < 10; i++) {
       act(() => { jest.advanceTimersByTime(10); });
     }

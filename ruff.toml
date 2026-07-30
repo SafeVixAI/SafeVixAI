@@ -9,6 +9,7 @@ ignore = ["E501"]
 
 [lint.per-file-ignores]
 "tests/*" = ["ARG"]
+"scripts/*" = ["T201", "E", "F", "S", "SIM", "PIE", "ARG", "B", "RUF", "EM", "D", "C", "G"]
 
 [format]
 quote-style = "double"

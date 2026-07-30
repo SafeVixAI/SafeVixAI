@@ -4,8 +4,8 @@ jest.mock('next/dynamic', function() { return function() { return function() { r
 jest.mock('next/link', function() { return function({ children, href }) { return React.createElement('a', { href: href }, children) } })
 
 var React = require('react')
-var { render, screen: rtlScreen } = require('@testing-library/react')
-var HeroSection = require('../HeroSection').default
+const { render, screen: rtlScreen } = require('@testing-library/react')
+const HeroSection = require('../HeroSection').default
 
 describe('HeroSection', function() {
   it('renders overline text', function() {

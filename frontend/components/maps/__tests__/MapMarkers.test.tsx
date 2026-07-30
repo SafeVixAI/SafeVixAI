@@ -1,7 +1,7 @@
 jest.mock('maplibre-gl', function() {
-  var fn = jest.fn;
-  var sharedMap: Record<string, any> = {};
-  var api = {
+  const fn = jest.fn;
+  const sharedMap: Record<string, any> = {};
+  const api = {
     __mapInstance: sharedMap,
     Map: fn(function() { return sharedMap }),
     NavigationControl: fn(),
@@ -30,7 +30,7 @@ jest.mock('maplibre-gl', function() {
 jest.mock('@/components/maps/map-utils', function() {
   return {
     buildMarkerElement: function() {
-      var el = document.createElement('div');
+      const el = document.createElement('div');
       el.setAttribute('role', 'img');
       return el;
     },
@@ -81,7 +81,7 @@ describe('MapMarkers', function() {
   });
 
   it('renders null (no DOM output)', function() {
-    var { container } = render(React.createElement(MapMarkers, {
+    const { container } = render(React.createElement(MapMarkers, {
       map: getMap() as any,
       currentLocation: null,
       styleRevision: 0,
@@ -97,7 +97,7 @@ describe('MapMarkers', function() {
     }));
     expect(maplibregl.Marker).toHaveBeenCalled();
     expect(maplibregl.Popup).toHaveBeenCalled();
-    var markerCalls = (maplibregl.Marker as jest.Mock).mock.instances;
+    const markerCalls = (maplibregl.Marker as jest.Mock).mock.instances;
     expect(markerCalls.length).toBeGreaterThanOrEqual(1);
   });
 
@@ -134,7 +134,7 @@ describe('MapMarkers', function() {
   });
 
   it('listens for svai:fly-to custom event', function() {
-    var addSpy = jest.spyOn(window, 'addEventListener');
+    const addSpy = jest.spyOn(window, 'addEventListener');
     render(React.createElement(MapMarkers, {
       map: getMap() as any,
       styleRevision: 0,
@@ -148,7 +148,7 @@ describe('MapMarkers', function() {
       map: getMap() as any,
       styleRevision: 0,
     }));
-    var event = new CustomEvent('svai:fly-to', { detail: { lat: 13.0, lng: 80.0 } });
+    const event = new CustomEvent('svai:fly-to', { detail: { lat: 13.0, lng: 80.0 } });
     window.dispatchEvent(event);
     expect(getMap().flyTo).toHaveBeenCalledWith(expect.objectContaining({ zoom: 16 }));
   });

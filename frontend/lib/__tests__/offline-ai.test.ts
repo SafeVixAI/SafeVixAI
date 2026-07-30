@@ -7,10 +7,10 @@ jest.mock('../features', function() { return { FEATURES: { webllmOffline: true }
 var tfPipeline = jest.fn().mockRejectedValue(new Error('mock no tf'));
 
 describe('offline-ai', function() {
-  var mod: typeof import('../offline-ai');
-  var logClientError: jest.Mock;
-  var logClientWarning: jest.Mock;
-  var FEATURES: { webllmOffline: boolean };
+  let mod: typeof import('../offline-ai');
+  let logClientError: jest.Mock;
+  let logClientWarning: jest.Mock;
+  let FEATURES: { webllmOffline: boolean };
 
   beforeEach(async function() {
     jest.clearAllMocks();
@@ -37,7 +37,7 @@ describe('offline-ai', function() {
 
   describe('getOfflineAI', function() {
     it('returns fallback when no AI and transformers fails', async function() {
-      var result = await mod.getOfflineAI();
+      const result = await mod.getOfflineAI();
       expect(result.type).toBe('fallback');
     });
 
@@ -47,30 +47,30 @@ describe('offline-ai', function() {
           capabilities: jest.fn().mockResolvedValue({ available: 'after-download' }),
         },
       };
-      var result = await mod.getOfflineAI();
+      const result = await mod.getOfflineAI();
       expect(result.type).toBe('fallback');
     });
 
     it('calls onProgress callback during flow', async function() {
-      var onProgress = jest.fn();
+      const onProgress = jest.fn();
       await mod.getOfflineAI(onProgress);
       expect(onProgress).toHaveBeenCalledWith(expect.objectContaining({ status: 'checking_system' }));
     });
 
     it('returns system when Chrome built-in AI available', async function() {
-      var mockSession = { prompt: jest.fn().mockResolvedValue('hi') };
+      const mockSession = { prompt: jest.fn().mockResolvedValue('hi') };
       (window as any).ai = {
         languageModel: {
           capabilities: jest.fn().mockResolvedValue({ available: 'readily' }),
           create: jest.fn().mockResolvedValue(mockSession),
         },
       };
-      var result = await mod.getOfflineAI();
+      const result = await mod.getOfflineAI();
       expect(result.type).toBe('system');
     });
 
     it('early returns system on second call when Chrome AI ready', async function() {
-      var mockSession = { prompt: jest.fn().mockResolvedValue('hi') };
+      const mockSession = { prompt: jest.fn().mockResolvedValue('hi') };
       (window as any).ai = {
         languageModel: {
           capabilities: jest.fn().mockResolvedValue({ available: 'readily' }),
@@ -78,19 +78,19 @@ describe('offline-ai', function() {
         },
       };
       await mod.getOfflineAI();
-      var result = await mod.getOfflineAI();
+      const result = await mod.getOfflineAI();
       expect(result.type).toBe('system');
     });
 
     it('returns ready immediately on second call', async function() {
       await mod.getOfflineAI();
-      var result = await mod.getOfflineAI();
+      const result = await mod.getOfflineAI();
       expect(result.type).toBe('fallback');
     });
 
     it('returns fallback when webllmOffline feature disabled', async function() {
       FEATURES.webllmOffline = false;
-      var result = await mod.getOfflineAI();
+      const result = await mod.getOfflineAI();
       expect(result.type).toBe('fallback');
     });
 
@@ -101,7 +101,7 @@ describe('offline-ai', function() {
 
     it('returns fallback on low memory device (< 4GB)', async function() {
       Object.defineProperty(navigator, 'deviceMemory', { value: 3.5, configurable: true });
-      var result = await mod.getOfflineAI();
+      const result = await mod.getOfflineAI();
       expect(result.type).toBe('fallback');
     });
 
@@ -110,7 +110,7 @@ describe('offline-ai', function() {
         return [{ generated_text: 'ok' }];
       });
       await mod.getOfflineAI();
-      var result = await mod.getOfflineAI();
+      const result = await mod.getOfflineAI();
       expect(result.type).toBe('transformers');
     });
 
@@ -118,8 +118,8 @@ describe('offline-ai', function() {
       tfPipeline.mockResolvedValue(async function() {
         return [{ generated_text: 'test' }];
       });
-      var onProgress = jest.fn();
-      var result = await mod.getOfflineAI(onProgress);
+      const onProgress = jest.fn();
+      const result = await mod.getOfflineAI(onProgress);
       expect(result.type).toBe('transformers');
       expect(onProgress).toHaveBeenCalledWith(expect.objectContaining({ status: 'ready', percent: 100 }));
     });
@@ -132,7 +132,7 @@ describe('offline-ai', function() {
           return [{ generated_text: 'ok' }];
         };
       });
-      var onProgress = jest.fn();
+      const onProgress = jest.fn();
       await mod.getOfflineAI(onProgress);
       expect(onProgress).toHaveBeenCalledWith(expect.objectContaining({ status: 'downloading', percent: 50 }));
       expect(onProgress).toHaveBeenCalledWith(expect.objectContaining({ status: 'downloading', percent: 100 }));
@@ -145,7 +145,7 @@ describe('offline-ai', function() {
           return [{ generated_text: 'ok' }];
         };
       });
-      var onProgress = jest.fn();
+      const onProgress = jest.fn();
       await mod.getOfflineAI(onProgress);
       expect(onProgress).toHaveBeenCalledWith(expect.objectContaining({ status: 'downloading', percent: 30 }));
     });
@@ -153,17 +153,17 @@ describe('offline-ai', function() {
 
   describe('askOfflineAI', function() {
     it('returns keyword fallback for hospital', async function() {
-      var response = await mod.askOfflineAI('What is the hospital number?');
+      const response = await mod.askOfflineAI('What is the hospital number?');
       expect(response).toContain('Locator');
     });
 
     it('returns default message for unrecognized prompt', async function() {
-      var response = await mod.askOfflineAI('the meaning of life');
+      const response = await mod.askOfflineAI('the meaning of life');
       expect(response).toContain('offline mode');
     });
 
     it('uses Chrome AI session when available', async function() {
-      var mockSession = { prompt: jest.fn().mockResolvedValue('Chrome AI response') };
+      const mockSession = { prompt: jest.fn().mockResolvedValue('Chrome AI response') };
       (window as any).ai = {
         languageModel: {
           capabilities: jest.fn().mockResolvedValue({ available: 'readily' }),
@@ -171,12 +171,12 @@ describe('offline-ai', function() {
         },
       };
       await mod.getOfflineAI();
-      var response = await mod.askOfflineAI('hello');
+      const response = await mod.askOfflineAI('hello');
       expect(response).toBe('Chrome AI response');
     });
 
     it('falls back to keyword when session.prompt throws', async function() {
-      var mockSession = { prompt: jest.fn().mockRejectedValue(new Error('AI error')) };
+      const mockSession = { prompt: jest.fn().mockRejectedValue(new Error('AI error')) };
       (window as any).ai = {
         languageModel: {
           capabilities: jest.fn().mockResolvedValue({ available: 'readily' }),
@@ -184,7 +184,7 @@ describe('offline-ai', function() {
         },
       };
       await mod.getOfflineAI();
-      var response = await mod.askOfflineAI('hospital');
+      const response = await mod.askOfflineAI('hospital');
       expect(response).toContain('Locator');
       expect(logClientWarning).toHaveBeenCalled();
     });
@@ -194,7 +194,7 @@ describe('offline-ai', function() {
         return [{ generated_text: 'Gemma 4 response text' }];
       });
       await mod.getOfflineAI();
-      var response = await mod.askOfflineAI('Tell me about road safety');
+      const response = await mod.askOfflineAI('Tell me about road safety');
       expect(response).toBe('Gemma 4 response text');
     });
 
@@ -203,8 +203,8 @@ describe('offline-ai', function() {
         return [{ generated_text: 'audio processed' }];
       });
       await mod.getOfflineAI();
-      var audioBlob = new Blob(['fake-audio'], { type: 'audio/webm' });
-      var response = await mod.askOfflineAI('What is this sound?', audioBlob);
+      const audioBlob = new Blob(['fake-audio'], { type: 'audio/webm' });
+      const response = await mod.askOfflineAI('What is this sound?', audioBlob);
       expect(response).toBe('audio processed');
     });
 
@@ -213,7 +213,7 @@ describe('offline-ai', function() {
         return [{ generated_text: null }];
       });
       await mod.getOfflineAI();
-      var response = await mod.askOfflineAI('test');
+      const response = await mod.askOfflineAI('test');
       expect(response).toBe('No response generated.');
     });
 
@@ -222,7 +222,7 @@ describe('offline-ai', function() {
         return [{ generated_text: [{ content: 'extracted content' }] }];
       });
       await mod.getOfflineAI();
-      var response = await mod.askOfflineAI('test');
+      const response = await mod.askOfflineAI('test');
       expect(response).toBe('extracted content');
     });
 
@@ -231,58 +231,58 @@ describe('offline-ai', function() {
         throw new Error('pipeline error');
       });
       await mod.getOfflineAI();
-      var response = await mod.askOfflineAI('police number');
+      const response = await mod.askOfflineAI('police number');
       expect(response).toContain('100');
       expect(logClientWarning).toHaveBeenCalled();
     });
 
     it('matches prompt case-insensitively for accident', async function() {
-      var response = await mod.askOfflineAI('ACCIDENT on highway');
+      const response = await mod.askOfflineAI('ACCIDENT on highway');
       expect(response).toContain('Section 134');
     });
 
     it('returns fire response for fire keyword', async function() {
-      var response = await mod.askOfflineAI('fire near my car');
+      const response = await mod.askOfflineAI('fire near my car');
       expect(response).toContain('101');
     });
 
     it('keyword matching for ambulance', async function() {
-      var response = await mod.askOfflineAI('need an ambulance');
+      const response = await mod.askOfflineAI('need an ambulance');
       expect(response).toContain('102');
     });
 
     it('keyword matching for police', async function() {
-      var response = await mod.askOfflineAI('call police');
+      const response = await mod.askOfflineAI('call police');
       expect(response).toContain('100');
     });
 
     it('keyword matching for pothole', async function() {
-      var response = await mod.askOfflineAI('report pothole');
+      const response = await mod.askOfflineAI('report pothole');
       expect(response).toContain('RoadWatch');
     });
 
     it('keyword matching for challan', async function() {
-      var response = await mod.askOfflineAI('what is the challan for speeding');
+      const response = await mod.askOfflineAI('what is the challan for speeding');
       expect(response).toContain('Challan Calculator');
     });
 
     it('keyword matching for helmet', async function() {
-      var response = await mod.askOfflineAI('helmet fine');
+      const response = await mod.askOfflineAI('helmet fine');
       expect(response).toContain('₹1,000');
     });
 
     it('keyword matching for seatbelt', async function() {
-      var response = await mod.askOfflineAI('seatbelt rule');
+      const response = await mod.askOfflineAI('seatbelt rule');
       expect(response).toContain('₹1,000');
     });
 
     it('keyword matching for drunk driving', async function() {
-      var response = await mod.askOfflineAI('drunk driving penalty');
+      const response = await mod.askOfflineAI('drunk driving penalty');
       expect(response).toContain('₹10,000');
     });
 
     it('keyword matching for speed', async function() {
-      var response = await mod.askOfflineAI('speeding fine');
+      const response = await mod.askOfflineAI('speeding fine');
       expect(response).toContain('₹1,000');
     });
   });

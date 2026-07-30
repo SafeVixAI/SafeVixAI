@@ -5,7 +5,7 @@ jest.mock('@/lib/analytics', function() {
 import { render } from '@testing-library/react'
 import React from 'react'
 
-var analyticsMod: any
+let analyticsMod: any
 
 beforeEach(function() {
   jest.clearAllMocks()
@@ -19,7 +19,7 @@ function TestCase() {
 
 describe('usePageLoadTiming', function() {
   it('calls pageLoadTiming when document is complete', function() {
-    var orig = Object.getOwnPropertyDescriptor(Document.prototype, 'readyState')
+    const orig = Object.getOwnPropertyDescriptor(Document.prototype, 'readyState')
     Object.defineProperty(Document.prototype, 'readyState', { value: 'complete', configurable: true })
     render(React.createElement(TestCase))
     expect(analyticsMod.track.pageLoadTiming).toHaveBeenCalledTimes(1)
@@ -27,9 +27,9 @@ describe('usePageLoadTiming', function() {
   })
 
   it('adds load listener when document is not complete', function() {
-    var orig = Object.getOwnPropertyDescriptor(Document.prototype, 'readyState')
+    const orig = Object.getOwnPropertyDescriptor(Document.prototype, 'readyState')
     Object.defineProperty(Document.prototype, 'readyState', { value: 'loading', configurable: true })
-    var addListener = jest.fn()
+    const addListener = jest.fn()
     window.addEventListener = addListener
     render(React.createElement(TestCase))
     expect(addListener).toHaveBeenCalledWith('load', expect.any(Function), { once: true })

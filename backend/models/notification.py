@@ -5,17 +5,17 @@ from __future__ import annotations
 
 import uuid
 from datetime import UTC, datetime
-from enum import Enum as PyEnum
+from enum import StrEnum
 from typing import Any
 
-from sqlalchemy import JSON, Boolean, DateTime, Enum, Integer, String, Text, Float
+from sqlalchemy import JSON, Boolean, DateTime, Enum, Float, Integer, String, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
 from core.database import Base
 
 
-class NotificationChannel(str, PyEnum):
+class NotificationChannel(StrEnum):
     IN_APP = 'in_app'
     DESKTOP = 'desktop'
     EMAIL = 'email'
@@ -27,14 +27,14 @@ class NotificationChannel(str, PyEnum):
     TEAMS = 'teams'
 
 
-class NotificationPriority(str, PyEnum):
+class NotificationPriority(StrEnum):
     LOW = 'low'
     NORMAL = 'normal'
     HIGH = 'high'
     CRITICAL = 'critical'
 
 
-class NotificationCategory(str, PyEnum):
+class NotificationCategory(StrEnum):
     SYSTEM_HEALTH = 'system_health'
     AI = 'ai'
     SECURITY = 'security'
@@ -52,7 +52,7 @@ class NotificationCategory(str, PyEnum):
     GENERAL = 'general'
 
 
-class NotificationStatus(str, PyEnum):
+class NotificationStatus(StrEnum):
     PENDING = 'pending'
     SENT = 'sent'
     DELIVERED = 'delivered'

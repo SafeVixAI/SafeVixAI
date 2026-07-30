@@ -1,16 +1,16 @@
 jest.mock('@gsap/react', function() { return { useGSAP: jest.fn() } })
 jest.mock('@/lib/gsap', function() { return { gsap: { fromTo: jest.fn(), to: jest.fn(), set: jest.fn() } } })
 jest.mock('../../hooks/useLandingGSAP', function() {
-  var React = require('react')
+  const React = require('react')
   return {
     useScrollReveal: function() { return React.useRef(null) },
     useCountUp: function() { return React.useRef(null) },
   }
 })
 
-var React = require('react')
-var { render, screen: rtlScreen } = require('@testing-library/react')
-var CrisisSection = require('../CrisisSection').default
+const React = require('react')
+const { render, screen: rtlScreen } = require('@testing-library/react')
+const CrisisSection = require('../CrisisSection').default
 
 describe('CrisisSection', function() {
   it('renders the crisis overline', function() {
@@ -38,7 +38,7 @@ describe('CrisisSection', function() {
 
   it('renders the metric countdown numbers', function() {
     render(React.createElement(CrisisSection))
-    var zeros = rtlScreen.getAllByText('0')
+    const zeros = rtlScreen.getAllByText('0')
     expect(zeros.length).toBeGreaterThanOrEqual(4)
   })
 })

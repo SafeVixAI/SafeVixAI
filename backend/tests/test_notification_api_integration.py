@@ -15,13 +15,10 @@ pytestmark = pytest.mark.skipif(
     reason="requires pytest-httpx library",
 )
 
-from core.config import Settings
 from models.notification import (
     Notification,
     NotificationCategory,
-    NotificationChannel,
     NotificationPriority,
-    NotificationStatus,
 )
 from services.notification_service import NotificationService
 

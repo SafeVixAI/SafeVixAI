@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 from uuid import UUID
 
 import pytest
@@ -16,11 +16,9 @@ from models.notification import (
     NotificationCategory,
     NotificationChannel,
     NotificationDigest,
-    NotificationEvent,
     NotificationPreference,
     NotificationPriority,
     NotificationStatus,
-    NotificationTemplate,
     WebhookEndpoint,
 )
 from services.notification_service import NotificationService, create_default_templates

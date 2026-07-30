@@ -5,11 +5,11 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import React from 'react'
 import ErrorBoundary from '../ui/ErrorBoundary'
 
-var ErrorThrower = function() {
+const ErrorThrower = function() {
   throw new Error('Test error')
 }
 
-var SafeComponent = function() {
+const SafeComponent = function() {
   return React.createElement('div', { 'data-testid': 'safe-child' }, 'All good')
 }
 
@@ -35,7 +35,7 @@ describe('ErrorBoundary', function() {
   })
 
   it('renders custom fallback instead of default', function() {
-    var CustomFallback = function() {
+    const CustomFallback = function() {
       return React.createElement('div', { 'data-testid': 'custom-fallback' }, 'Custom error')
     }
     render(React.createElement(ErrorBoundary, { fallback: React.createElement(CustomFallback) }, React.createElement(ErrorThrower)))
@@ -53,7 +53,7 @@ describe('ErrorBoundary', function() {
   })
 
   it('calls onError callback when error occurs', function() {
-    var onError = jest.fn()
+    const onError = jest.fn()
     render(React.createElement(ErrorBoundary, { onError: onError }, React.createElement(ErrorThrower)))
     expect(onError).toHaveBeenCalledTimes(1)
     expect(onError.mock.calls[0][0]).toBeInstanceOf(Error)

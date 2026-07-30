@@ -48,13 +48,13 @@ describe('TerminalHeader', function() {
   });
 
   it('has sv-terminal-header class', function() {
-    var { container } = render(<TerminalHeader title="SafeVix" />);
+    const { container } = render(<TerminalHeader title="SafeVix" />);
     expect(container.firstChild).toHaveClass('sv-terminal-header');
   });
 
   it('shows terminal-styled branding', function() {
     render(<TerminalHeader title="SafeVix" />);
-    var h1 = screen.getByText('SafeVix');
+    const h1 = screen.getByText('SafeVix');
     expect(h1).toHaveClass('sv-terminal-overline');
   });
 });

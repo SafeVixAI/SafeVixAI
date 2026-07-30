@@ -15,10 +15,10 @@ describe('Guest Auth (Progressive Auth)', function() {
   });
 
   it('getOrCreateGuestId should create a persistent ID', function() {
-    var id = getOrCreateGuestId();
+    const id = getOrCreateGuestId();
     expect(id).toBeTruthy();
     expect(id.length).toBe(32);
-    var id2 = getOrCreateGuestId();
+    const id2 = getOrCreateGuestId();
     expect(id2).toBe(id);
   });
 
@@ -28,7 +28,7 @@ describe('Guest Auth (Progressive Auth)', function() {
 
   it('getGuestProfile should return profile after creation', function() {
     getOrCreateGuestId();
-    var profile = getGuestProfile();
+    const profile = getGuestProfile();
     expect(profile).not.toBeNull();
     expect(profile!.id).toBeTruthy();
     expect(profile!.createdAt).toBeGreaterThan(0);
@@ -37,7 +37,7 @@ describe('Guest Auth (Progressive Auth)', function() {
   it('updateGuestProfile should merge fields', function() {
     getOrCreateGuestId();
     updateGuestProfile({ bloodGroup: 'O+', preferredLanguage: 'hi' });
-    var profile = getGuestProfile();
+    const profile = getGuestProfile();
     expect(profile!.bloodGroup).toBe('O+');
     expect(profile!.preferredLanguage).toBe('hi');
   });
@@ -46,7 +46,7 @@ describe('Guest Auth (Progressive Auth)', function() {
     getOrCreateGuestId();
     updateGuestProfile({ bloodGroup: 'O+' });
     updateGuestProfile({ preferredLanguage: 'ta' });
-    var profile = getGuestProfile();
+    const profile = getGuestProfile();
     expect(profile!.bloodGroup).toBe('O+');
     expect(profile!.preferredLanguage).toBe('ta');
   });
@@ -65,7 +65,7 @@ describe('Guest Auth (Progressive Auth)', function() {
   });
 
   it('generated IDs should be unique', function() {
-    var ids = new Set<string>();
+    const ids = new Set<string>();
     for (let i = 0; i < 100; i++) {
       ids.add(getOrCreateGuestId());
       localStorage.clear();

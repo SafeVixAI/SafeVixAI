@@ -5,9 +5,9 @@ import React from 'react';
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
-var mockSubmitReport = jest.fn();
-var mockEnqueueRoadReport = jest.fn();
-var mockTrackReportSubmitted = jest.fn();
+const mockSubmitReport = jest.fn();
+const mockEnqueueRoadReport = jest.fn();
+const mockTrackReportSubmitted = jest.fn();
 
 jest.mock('../../lib/api', () => ({
   submitReport: (...args: unknown[]) => mockSubmitReport(...args),
@@ -25,7 +25,7 @@ jest.mock('sonner', () => ({
   toast: { error: jest.fn(), success: jest.fn() },
 }));
 
-var mockChatStore: Record<string, unknown>;
+let mockChatStore: Record<string, unknown>;
 
 jest.mock('../../lib/store', () => {
   const mockFn: jest.Mock & { getState?: () => unknown } = jest.fn(
@@ -47,7 +47,7 @@ beforeEach(function() {
 });
 
 function renderReportForm() {
-  var ReportForm = require('../ReportForm').default;
+  const ReportForm = require('../ReportForm').default;
   return render(<ReportForm />);
 }
 
@@ -97,7 +97,7 @@ describe('ReportForm', function() {
     await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: /broadcast report/i }));
     });
-    var { toast } = require('sonner');
+    const { toast } = require('sonner');
     expect(toast.error).toHaveBeenCalledWith(
       expect.stringContaining('Location')
     );
@@ -146,8 +146,8 @@ describe('ReportForm', function() {
     renderReportForm();
     goToStep2();
 
-    var largeFile = new File(['x'.repeat(6 * 1024 * 1024)], 'large.jpg', { type: 'image/jpeg' });
-    var fileInput = screen.getByLabelText(/attach evidence photo/i);
+    const largeFile = new File(['x'.repeat(6 * 1024 * 1024)], 'large.jpg', { type: 'image/jpeg' });
+    const fileInput = screen.getByLabelText(/attach evidence photo/i);
     await act(async () => {
       fireEvent.change(fileInput, { target: { files: [largeFile] } });
     });
@@ -156,7 +156,7 @@ describe('ReportForm', function() {
       fireEvent.click(screen.getByRole('button', { name: /broadcast report/i }));
     });
 
-    var { toast } = require('sonner');
+    const { toast } = require('sonner');
     expect(toast.error).toHaveBeenCalledWith(expect.stringMatching(/5MB|less/i));
     expect(mockSubmitReport).not.toHaveBeenCalled();
   });
@@ -166,8 +166,8 @@ describe('ReportForm', function() {
     renderReportForm();
     goToStep2();
 
-    var invalidFile = new File(['x'], 'doc.pdf', { type: 'application/pdf' });
-    var fileInput = screen.getByLabelText(/attach evidence photo/i);
+    const invalidFile = new File(['x'], 'doc.pdf', { type: 'application/pdf' });
+    const fileInput = screen.getByLabelText(/attach evidence photo/i);
     await act(async () => {
       fireEvent.change(fileInput, { target: { files: [invalidFile] } });
     });
@@ -176,7 +176,7 @@ describe('ReportForm', function() {
       fireEvent.click(screen.getByRole('button', { name: /broadcast report/i }));
     });
 
-    var { toast } = require('sonner');
+    const { toast } = require('sonner');
     expect(toast.error).toHaveBeenCalledWith(expect.stringMatching(/JPEG|PNG|WebP/i));
     expect(mockSubmitReport).not.toHaveBeenCalled();
   });

@@ -6,7 +6,7 @@ jest.mock('@/lib/api', function() {
 })
 
 jest.mock('@/lib/geolocation', function() {
-  var mockLocation = { lat: 13.0827, lon: 80.2707, accuracy: 50 }
+  const mockLocation = { lat: 13.0827, lon: 80.2707, accuracy: 50 }
   return {
     useGeolocation: function() { return { location: mockLocation, error: null, refresh: jest.fn() } },
   }
@@ -22,7 +22,7 @@ import { render } from '@testing-library/react'
 import React from 'react'
 import DashboardMapBootstrap from '../dashboard/DashboardMapBootstrap'
 
-var mockSetFunctions = {
+const mockSetFunctions = {
   setConnectivity: jest.fn(),
   setGpsLocation: jest.fn(),
   setNearbyServices: jest.fn(),
@@ -31,7 +31,7 @@ var mockSetFunctions = {
   setRoadIssueSearchMeta: jest.fn(),
 }
 
-var mockAppState = {
+const mockAppState = {
   gpsLocation: null as any,
   mapSearchTarget: null as any,
   connectivity: 'online',
@@ -41,7 +41,7 @@ var mockAppState = {
 }
 
 jest.mock('@/lib/store', function() {
-  var actual = jest.requireActual('@/lib/store')
+  const actual = jest.requireActual('@/lib/store')
   return {
     ...actual,
     useAppStore: function(selector: any) {
@@ -50,7 +50,7 @@ jest.mock('@/lib/store', function() {
   }
 })
 
-var api = require('@/lib/api')
+const api = require('@/lib/api')
 
 describe('DashboardMapBootstrap', function() {
   beforeEach(function() {
@@ -63,21 +63,21 @@ describe('DashboardMapBootstrap', function() {
   })
 
   it('renders null (no DOM output)', function() {
-    var container = render(React.createElement(DashboardMapBootstrap))
+    const container = render(React.createElement(DashboardMapBootstrap))
     expect(container.container.innerHTML).toBe('')
   })
 
   it('calls fetchRoadIssues on mount with lat/lon from geolocation', function() {
     render(React.createElement(DashboardMapBootstrap))
     expect(api.fetchRoadIssues).toHaveBeenCalledTimes(1)
-    var call = api.fetchRoadIssues.mock.calls[0][0]
+    const call = api.fetchRoadIssues.mock.calls[0][0]
     expect(call.lat).toBeCloseTo(13.0827, 3)
     expect(call.lon).toBeCloseTo(80.2707, 3)
   })
 
   it('passes limit 12 and signal to fetchRoadIssues', function() {
     render(React.createElement(DashboardMapBootstrap))
-    var call = api.fetchRoadIssues.mock.calls[0][0]
+    const call = api.fetchRoadIssues.mock.calls[0][0]
     expect(call.limit).toBe(12)
     expect(call.signal).toBeDefined()
   })
@@ -85,7 +85,7 @@ describe('DashboardMapBootstrap', function() {
   it('uses mapSearchTarget coords for fetchRoadIssues when set', function() {
     mockAppState.mapSearchTarget = { lat: 12.97, lon: 77.59, label: 'Bangalore', timestamp: Date.now() }
     render(React.createElement(DashboardMapBootstrap))
-    var call = api.fetchRoadIssues.mock.calls[0][0]
+    const call = api.fetchRoadIssues.mock.calls[0][0]
     expect(call.lat).toBeCloseTo(12.97, 2)
     expect(call.lon).toBeCloseTo(77.59, 2)
   })
@@ -93,7 +93,7 @@ describe('DashboardMapBootstrap', function() {
   it('calls fetchNearbyServices with limit 24 and signal', function() {
     render(React.createElement(DashboardMapBootstrap))
     expect(api.fetchNearbyServices).toHaveBeenCalled()
-    var call = api.fetchNearbyServices.mock.calls[0][0]
+    const call = api.fetchNearbyServices.mock.calls[0][0]
     expect(call.limit).toBe(24)
     expect(call.signal).toBeDefined()
   })
@@ -106,19 +106,19 @@ describe('DashboardMapBootstrap', function() {
   it('passes serviceCategory as categories when not "all"', function() {
     mockAppState.serviceCategory = 'hospital'
     render(React.createElement(DashboardMapBootstrap))
-    var call = api.fetchNearbyServices.mock.calls[0][0]
+    const call = api.fetchNearbyServices.mock.calls[0][0]
     expect(call.categories).toBe('hospital')
   })
 
   it('fetches nearby services with first radius step', function() {
     render(React.createElement(DashboardMapBootstrap))
-    var call = api.fetchNearbyServices.mock.calls[0][0]
+    const call = api.fetchNearbyServices.mock.calls[0][0]
     expect(call.radius).toBe(500)
   })
 
   it('fetches road issues with serviceRadius', function() {
     render(React.createElement(DashboardMapBootstrap))
-    var call = api.fetchRoadIssues.mock.calls[0][0]
+    const call = api.fetchRoadIssues.mock.calls[0][0]
     expect(call.radius).toBe(5000)
   })
 

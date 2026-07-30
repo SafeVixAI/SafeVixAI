@@ -12,7 +12,7 @@ describe('EmptyState', function () {
   })
 
   it('renders with custom icon', function () {
-    var CustomIcon = function () { return React.createElement('svg', { 'data-testid': 'custom-icon' }) }
+    const CustomIcon = function () { return React.createElement('svg', { 'data-testid': 'custom-icon' }) }
     render(React.createElement(EmptyState, { title: 'Test', description: 'Desc', icon: CustomIcon as any }))
     expect(screen.getByTestId('custom-icon')).toBeInTheDocument()
   })

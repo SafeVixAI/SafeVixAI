@@ -65,7 +65,7 @@ def get_header(filepath: str) -> str | None:
 
 
 def add_header(filepath: str, header: str) -> bool:
-    with open(filepath, "r", encoding="utf-8", errors="replace") as f:
+    with open(filepath, encoding="utf-8", errors="replace") as f:
         content = f.read()
 
     if has_spdx(content):

@@ -5,7 +5,7 @@ jest.mock('@/lib/notifications', function() {
   }
 })
 jest.mock('@/lib/store', function() {
-  var appState = { operatorName: 'TestOp' }
+  const appState = { operatorName: 'TestOp' }
   return {
     useAppStore: Object.assign(function(sel) { return typeof sel === 'function' ? sel(appState) : appState }, {
       getState: function() { return appState }, setState: jest.fn(), subscribe: jest.fn(),
@@ -14,9 +14,9 @@ jest.mock('@/lib/store', function() {
 })
 jest.mock('lucide-react', function() { return new Proxy({}, { get: function() { return function() { return null } } }) })
 
-var React = require('react')
-var { render, screen, fireEvent, waitFor } = require('@testing-library/react')
-var { NotificationPreferencesPanel } = require('@/components/notifications/NotificationPreferencesPanel')
+const React = require('react')
+const { render, screen, fireEvent, waitFor } = require('@testing-library/react')
+const { NotificationPreferencesPanel } = require('@/components/notifications/NotificationPreferencesPanel')
 
 function defaultPrefs() {
   return {
@@ -35,7 +35,7 @@ function defaultPrefs() {
 describe('NotificationPreferencesPanel', function() {
   beforeEach(function() {
     jest.clearAllMocks()
-    var notif = require('@/lib/notifications')
+    const notif = require('@/lib/notifications')
     notif.fetchPreferences.mockResolvedValue(defaultPrefs())
     notif.updatePreferences.mockImplementation(function(uid, payload) {
       return Promise.resolve(Object.assign({}, defaultPrefs(), payload))
@@ -43,10 +43,10 @@ describe('NotificationPreferencesPanel', function() {
   })
 
   it('shows loading state initially', function() {
-    var notif = require('@/lib/notifications')
+    const notif = require('@/lib/notifications')
     notif.fetchPreferences.mockReturnValue(new Promise(function() {}))
-    var { container } = render(React.createElement(NotificationPreferencesPanel))
-    var loadingContainer = container.querySelector('.flex.items-center.justify-center.py-16')
+    const { container } = render(React.createElement(NotificationPreferencesPanel))
+    const loadingContainer = container.querySelector('.flex.items-center.justify-center.py-16')
     expect(loadingContainer).toBeTruthy()
   })
 
@@ -86,9 +86,9 @@ describe('NotificationPreferencesPanel', function() {
   })
 
   it('shows DND hours when enabled', async function() {
-    var { container } = render(React.createElement(NotificationPreferencesPanel))
+    const { container } = render(React.createElement(NotificationPreferencesPanel))
     await waitFor(function() { expect(screen.getByText('Enable DND')).toBeTruthy() })
-    var checkbox = container.querySelector('input[type="checkbox"]')
+    const checkbox = container.querySelector('input[type="checkbox"]')
     if (checkbox) { fireEvent.click(checkbox); await waitFor(function() { expect(screen.getByText(':00')).toBeTruthy() }) }
   })
 
@@ -116,7 +116,7 @@ describe('NotificationPreferencesPanel', function() {
   it('changes locale selection', async function() {
     render(React.createElement(NotificationPreferencesPanel))
     await waitFor(function() { expect(screen.getByText('English')).toBeTruthy() })
-    var select = document.querySelector('select')
+    const select = document.querySelector('select')
     if (select) { fireEvent.change(select, { target: { value: 'hi' } }); expect(select.value).toBe('hi') }
   })
 
@@ -137,7 +137,7 @@ describe('NotificationPreferencesPanel', function() {
   })
 
   it('shows error on save failure', async function() {
-    var notif = require('@/lib/notifications')
+    const notif = require('@/lib/notifications')
     notif.updatePreferences.mockRejectedValue(new Error('Save failed'))
     render(React.createElement(NotificationPreferencesPanel))
     await waitFor(function() { expect(screen.getByText('Save Preferences')).toBeTruthy() })
@@ -146,32 +146,32 @@ describe('NotificationPreferencesPanel', function() {
   })
 
   it('shows error state when fetchPreferences fails', async function() {
-    var notif = require('@/lib/notifications')
+    const notif = require('@/lib/notifications')
     notif.fetchPreferences.mockRejectedValue(new Error('Load failed'))
     render(React.createElement(NotificationPreferencesPanel))
     await waitFor(function() { expect(screen.getByText(/Load failed/)).toBeTruthy() })
   })
 
   it('handles onClose callback', async function() {
-    var onClose = jest.fn()
+    const onClose = jest.fn()
     render(React.createElement(NotificationPreferencesPanel, { onClose: onClose }))
     await waitFor(function() { expect(screen.getByText('Notification Preferences')).toBeTruthy() })
-    var container = document.querySelector('.flex.h-full.flex-col')
-    var allBtns = container ? Array.from(container.querySelectorAll('button')) : []
-    var xBtn = allBtns.length > 0 ? allBtns[0] : null
+    const container = document.querySelector('.flex.h-full.flex-col')
+    const allBtns = container ? Array.from(container.querySelectorAll('button')) : []
+    const xBtn = allBtns.length > 0 ? allBtns[0] : null
     if (xBtn) { fireEvent.click(xBtn); expect(onClose).toHaveBeenCalled() }
   })
 
   it('renders digest frequency dropdown when digest enabled', async function() {
-    var { container } = render(React.createElement(NotificationPreferencesPanel))
+    const { container } = render(React.createElement(NotificationPreferencesPanel))
     await waitFor(function() { expect(screen.getByText('Enable Digest')).toBeTruthy() })
-    var checkboxes = container.querySelectorAll('input[type="checkbox"]')
-    var digestCheckbox = checkboxes.length > 1 ? checkboxes[1] : null
+    const checkboxes = container.querySelectorAll('input[type="checkbox"]')
+    const digestCheckbox = checkboxes.length > 1 ? checkboxes[1] : null
     if (digestCheckbox) { fireEvent.click(digestCheckbox); await waitFor(function() { expect(screen.getByText('Hourly')).toBeTruthy() }) }
   })
 
   it('does not show locale section text when loading', function() {
-    var notif = require('@/lib/notifications')
+    const notif = require('@/lib/notifications')
     notif.fetchPreferences.mockReturnValue(new Promise(function() {}))
     render(React.createElement(NotificationPreferencesPanel))
     expect(screen.queryByText('Locale')).toBeNull()
@@ -180,7 +180,7 @@ describe('NotificationPreferencesPanel', function() {
   it('renders email input', async function() {
     render(React.createElement(NotificationPreferencesPanel))
     await waitFor(function() {
-      var input = screen.getByDisplayValue('test@example.com')
+      const input = screen.getByDisplayValue('test@example.com')
       expect(input.type).toBe('email')
     })
   })
@@ -188,7 +188,7 @@ describe('NotificationPreferencesPanel', function() {
   it('renders phone input', async function() {
     render(React.createElement(NotificationPreferencesPanel))
     await waitFor(function() {
-      var input = screen.getByDisplayValue('+911234567890')
+      const input = screen.getByDisplayValue('+911234567890')
       expect(input.type).toBe('tel')
     })
   })
@@ -196,7 +196,7 @@ describe('NotificationPreferencesPanel', function() {
   it('changes email value', async function() {
     render(React.createElement(NotificationPreferencesPanel))
     await waitFor(function() {
-      var input = screen.getByDisplayValue('test@example.com')
+      const input = screen.getByDisplayValue('test@example.com')
       fireEvent.change(input, { target: { value: 'new@test.com' } })
       expect(input.value).toBe('new@test.com')
     })
@@ -205,14 +205,14 @@ describe('NotificationPreferencesPanel', function() {
   it('changes phone value', async function() {
     render(React.createElement(NotificationPreferencesPanel))
     await waitFor(function() {
-      var input = screen.getByDisplayValue('+911234567890')
+      const input = screen.getByDisplayValue('+911234567890')
       fireEvent.change(input, { target: { value: '+919999999999' } })
       expect(input.value).toBe('+919999999999')
     })
   })
 
   it('shows Saving... on save button during save', async function() {
-    var notif = require('@/lib/notifications')
+    const notif = require('@/lib/notifications')
     notif.updatePreferences.mockReturnValue(new Promise(function() {}))
     render(React.createElement(NotificationPreferencesPanel))
     await waitFor(function() { expect(screen.getByText('Save Preferences')).toBeTruthy() })

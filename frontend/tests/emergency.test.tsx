@@ -48,42 +48,42 @@ describe('EmergencyProtocolsPage', function() {
 
   it('renders filter category buttons', function() {
     render(React.createElement(Page))
-    var radios = screen.getAllByRole('radio')
+    const radios = screen.getAllByRole('radio')
     expect(radios.length).toBeGreaterThanOrEqual(5)
     expect(radios[0].textContent).toBe('All')
   })
 
   it('switches filter to Medical and shows only medical protocols', function() {
     render(React.createElement(Page))
-    var radios = screen.getAllByRole('radio')
+    const radios = screen.getAllByRole('radio')
     act(function() { fireEvent.click(radios[1]) })
     expect(screen.getByText('Cardiopulmonary Resuscitation (CPR)')).toBeTruthy()
   })
 
   it('switches filter to Fire and shows fire protocols', function() {
     render(React.createElement(Page))
-    var radios = screen.getAllByRole('radio')
+    const radios = screen.getAllByRole('radio')
     act(function() { fireEvent.click(radios[2]) })
     expect(screen.getByText('Fire Emergency Response')).toBeTruthy()
   })
 
   it('switches filter to Accident and shows accident protocols', function() {
     render(React.createElement(Page))
-    var radios = screen.getAllByRole('radio')
+    const radios = screen.getAllByRole('radio')
     act(function() { fireEvent.click(radios[3]) })
     expect(screen.getByText('Road Accident Response')).toBeTruthy()
   })
 
   it('shows protocol count after filter', function() {
     render(React.createElement(Page))
-    var radios = screen.getAllByRole('radio')
+    const radios = screen.getAllByRole('radio')
     act(function() { fireEvent.click(radios[1]) })
     expect(screen.getByText(/2 INTEL FOLDERS ACCESSED/)).toBeTruthy()
   })
 
   it('expands CPR protocol card on click', function() {
     render(React.createElement(Page))
-    var cards = screen.getAllByText('Step-by-Step Tactical Guide')
+    const cards = screen.getAllByText('Step-by-Step Tactical Guide')
     expect(cards.length).toBeGreaterThanOrEqual(1)
   })
 

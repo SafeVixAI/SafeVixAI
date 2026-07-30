@@ -23,7 +23,7 @@ describe('FirstAidCard', function() {
   });
 
   it('renders steps as ordered list', function() {
-    var steps = ['Step one', 'Step two', 'Step three'];
+    const steps = ['Step one', 'Step two', 'Step three'];
     render(<FirstAidCard title="First Aid" icon="+" steps={steps} />);
     expect(screen.getByText('Step one')).toBeInTheDocument();
     expect(screen.getByText('Step two')).toBeInTheDocument();
@@ -31,28 +31,28 @@ describe('FirstAidCard', function() {
   });
 
   it('renders empty steps without crashing', function() {
-    var { container } = render(<FirstAidCard title="CPR" icon="+" steps={[]} />);
-    var list = container.querySelector('ol');
+    const { container } = render(<FirstAidCard title="CPR" icon="+" steps={[]} />);
+    const list = container.querySelector('ol');
     expect(list).toBeInTheDocument();
     expect(list?.children.length).toBe(0);
   });
 
   it('renders bold text from ** markers', function() {
-    var steps = ['Call **112** immediately'];
+    const steps = ['Call **112** immediately'];
     render(<FirstAidCard title="Emergency" icon="!" steps={steps} />);
-    var strong = screen.getByText('112');
+    const strong = screen.getByText('112');
     expect(strong.tagName).toBe('STRONG');
   });
 
   it('renders plain text around bold markers', function() {
-    var steps = ['Call **112** immediately'];
-    var { container } = render(<FirstAidCard title="Emergency" icon="!" steps={steps} />);
+    const steps = ['Call **112** immediately'];
+    const { container } = render(<FirstAidCard title="Emergency" icon="!" steps={steps} />);
     expect(container.querySelector('strong')).toHaveTextContent('112');
     expect(container.querySelectorAll('span').length).toBeGreaterThan(0);
   });
 
   it('renders steps without bold markers', function() {
-    var steps = ['Check for breathing'];
+    const steps = ['Check for breathing'];
     render(<FirstAidCard title="First Aid" icon="+" steps={steps} />);
     expect(screen.getByText('Check for breathing')).toBeInTheDocument();
   });
@@ -63,12 +63,12 @@ describe('FirstAidCard', function() {
   });
 
   it('has card-glass class', function() {
-    var { container } = render(<FirstAidCard title="CPR" icon="+" steps={[]} />);
+    const { container } = render(<FirstAidCard title="CPR" icon="+" steps={[]} />);
     expect(container.firstChild).toHaveClass('card-glass');
   });
 
   it('renders step with multiple bold segments', function() {
-    var steps = ['Check **A** for **B** and **C**'];
+    const steps = ['Check **A** for **B** and **C**'];
     render(<FirstAidCard title="MultiBold" icon="!" steps={steps} />);
     expect(screen.getByText('A')).toBeInTheDocument();
     expect(screen.getByText('B')).toBeInTheDocument();
@@ -79,36 +79,36 @@ describe('FirstAidCard', function() {
   });
 
   it('renders step that is only bold text', function() {
-    var steps = ['**URGENT**'];
+    const steps = ['**URGENT**'];
     render(<FirstAidCard title="Urgent" icon="!" steps={steps} />);
-    var strong = screen.getByText('URGENT');
+    const strong = screen.getByText('URGENT');
     expect(strong.tagName).toBe('STRONG');
   });
 
   it('renders step starting with bold', function() {
-    var steps = ['**Note**: Important instruction'];
-    var { container } = render(<FirstAidCard title="Note" icon="!" steps={steps} />);
-    var strongs = container.querySelectorAll('strong');
+    const steps = ['**Note**: Important instruction'];
+    const { container } = render(<FirstAidCard title="Note" icon="!" steps={steps} />);
+    const strongs = container.querySelectorAll('strong');
     expect(strongs.length).toBe(1);
     expect(strongs[0]).toHaveTextContent('Note');
     expect(screen.getByText(': Important instruction')).toBeInTheDocument();
   });
 
   it('renders unclosed bold marker gracefully', function() {
-    var steps = ['Check **this out'];
+    const steps = ['Check **this out'];
     render(<FirstAidCard title="Malformed" icon="!" steps={steps} />);
     expect(screen.getByText('Check **this out')).toBeInTheDocument();
   });
 
   it('renders empty bold markers', function() {
-    var steps = ['Test **** done'];
+    const steps = ['Test **** done'];
     render(<FirstAidCard title="EmptyBold" icon="!" steps={steps} />);
     expect(screen.getByText('Test')).toBeInTheDocument();
     expect(screen.getByText('done')).toBeInTheDocument();
   });
 
   it('renders step with unicode characters', function() {
-    var steps = ['उपचार **112** पर कॉल करें'];
+    const steps = ['उपचार **112** पर कॉल करें'];
     render(<FirstAidCard title="Hindi" icon="!" steps={steps} />);
     expect(screen.getByText('112')).toBeInTheDocument();
     expect(screen.getByText(/उपचार/)).toBeInTheDocument();
@@ -116,7 +116,7 @@ describe('FirstAidCard', function() {
   });
 
   it('renders many steps without crashing', function() {
-    var steps = Array.from({ length: 20 }, (_, i) => `Step number ${i + 1}`);
+    const steps = Array.from({ length: 20 }, (_, i) => `Step number ${i + 1}`);
     render(<FirstAidCard title="ManySteps" icon="+" steps={steps} />);
     expect(screen.getByText('Step number 20')).toBeInTheDocument();
   });

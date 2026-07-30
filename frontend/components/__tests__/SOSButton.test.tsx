@@ -34,19 +34,19 @@ describe('SOSButton', function() {
   })
 
   it('renders SOS button', async function() {
-    var { SOSButton } = await import('../SOSButton')
+    const { SOSButton } = await import('../SOSButton')
     render(React.createElement(SOSButton))
     expect(screen.getByLabelText('Emergency SOS')).toBeInTheDocument()
   })
 
   it('shows SOS badge text', async function() {
-    var { SOSButton } = await import('../SOSButton')
+    const { SOSButton } = await import('../SOSButton')
     render(React.createElement(SOSButton))
     expect(screen.getByText('SOS')).toBeInTheDocument()
   })
 
   it('opens confirmation panel on click', async function() {
-    var { SOSButton } = await import('../SOSButton')
+    const { SOSButton } = await import('../SOSButton')
     render(React.createElement(SOSButton))
     fireEvent.click(screen.getByLabelText('Emergency SOS'))
     expect(screen.getByText('Confirm SOS Trigger')).toBeInTheDocument()
@@ -54,21 +54,21 @@ describe('SOSButton', function() {
   })
 
   it('shows Cancel button after expanding', async function() {
-    var { SOSButton } = await import('../SOSButton')
+    const { SOSButton } = await import('../SOSButton')
     render(React.createElement(SOSButton))
     fireEvent.click(screen.getByLabelText('Emergency SOS'))
     expect(screen.getByText('Cancel')).toBeInTheDocument()
   })
 
   it('displays GPS coordinates in confirmation', async function() {
-    var { SOSButton } = await import('../SOSButton')
+    const { SOSButton } = await import('../SOSButton')
     render(React.createElement(SOSButton))
     fireEvent.click(screen.getByLabelText('Emergency SOS'))
     expect(screen.getByText('13.0827, 80.2707')).toBeInTheDocument()
   })
 
   it('closes panel when Cancel is clicked', async function() {
-    var { SOSButton } = await import('../SOSButton')
+    const { SOSButton } = await import('../SOSButton')
     render(React.createElement(SOSButton))
     fireEvent.click(screen.getByLabelText('Emergency SOS'))
     expect(screen.getByText('Cancel')).toBeInTheDocument()
@@ -78,7 +78,7 @@ describe('SOSButton', function() {
 
   it('calls window.open for WhatsApp', async function() {
     window.open = jest.fn(function() { return { opener: null, close: jest.fn() } }) as jest.Mock
-    var { SOSButton } = await import('../SOSButton')
+    const { SOSButton } = await import('../SOSButton')
     render(React.createElement(SOSButton))
     fireEvent.click(screen.getByLabelText('Emergency SOS'))
     fireEvent.click(screen.getByLabelText('Send emergency alert via WhatsApp'))
@@ -86,15 +86,15 @@ describe('SOSButton', function() {
   })
 
   it('has SMS alert button', async function() {
-    var { SOSButton } = await import('../SOSButton')
+    const { SOSButton } = await import('../SOSButton')
     render(React.createElement(SOSButton))
     fireEvent.click(screen.getByLabelText('Emergency SOS'))
     expect(screen.getByLabelText('Send emergency alert via SMS')).toBeInTheDocument()
   })
 
   it('triggers SMS alert and calls generateSosSmsLink', async function() {
-    var sosShare = require('../../lib/sos-share')
-    var { SOSButton } = await import('../SOSButton')
+    const sosShare = require('../../lib/sos-share')
+    const { SOSButton } = await import('../SOSButton')
     render(React.createElement(SOSButton))
     fireEvent.click(screen.getByLabelText('Emergency SOS'))
     fireEvent.click(screen.getByLabelText('Send emergency alert via SMS'))
@@ -109,7 +109,7 @@ describe('SOSButton', function() {
         soundsEnabled: false,
       }
     })
-    var { SOSButton } = await import('../SOSButton')
+    const { SOSButton } = await import('../SOSButton')
     render(React.createElement(SOSButton))
     fireEvent.click(screen.getByLabelText('Emergency SOS'))
     expect(screen.getByText('Acquiring GPS...')).toBeInTheDocument()
@@ -123,8 +123,8 @@ describe('SOSButton', function() {
         soundsEnabled: true,
       }
     })
-    var sounds = require('../../lib/sounds')
-    var { SOSButton } = await import('../SOSButton')
+    const sounds = require('../../lib/sounds')
+    const { SOSButton } = await import('../SOSButton')
     window.open = jest.fn(function() { return null }) as jest.Mock
     render(React.createElement(SOSButton))
     fireEvent.click(screen.getByLabelText('Emergency SOS'))
@@ -133,9 +133,9 @@ describe('SOSButton', function() {
   })
 
   it('sets popup.opener to null when popup exists', async function() {
-    var popup = { opener: null, close: jest.fn() }
+    const popup = { opener: null, close: jest.fn() }
     window.open = jest.fn(function() { return popup }) as jest.Mock
-    var { SOSButton } = await import('../SOSButton')
+    const { SOSButton } = await import('../SOSButton')
     render(React.createElement(SOSButton))
     fireEvent.click(screen.getByLabelText('Emergency SOS'))
     fireEvent.click(screen.getByLabelText('Send emergency alert via WhatsApp'))
@@ -143,7 +143,7 @@ describe('SOSButton', function() {
   })
 
   it('closes panel when SOS button clicked again', async function() {
-    var { SOSButton } = await import('../SOSButton')
+    const { SOSButton } = await import('../SOSButton')
     render(React.createElement(SOSButton))
     fireEvent.click(screen.getByLabelText('Emergency SOS'))
     expect(screen.getByText('Confirm SOS Trigger')).toBeInTheDocument()

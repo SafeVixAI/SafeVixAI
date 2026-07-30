@@ -77,7 +77,7 @@ describe('useGeolocation', function() {
   });
 
   it('reports geolocation timeout clearly', async function() {
-    var timeoutError = { code: 3 } as GeolocationPositionError;
+    const timeoutError = { code: 3 } as GeolocationPositionError;
     setBrowserLocationSupport({
       geolocation: {
         getCurrentPosition: jest.fn((_success, error) => error?.(timeoutError)),
@@ -97,7 +97,7 @@ describe('useGeolocation', function() {
   });
 
   it('reports permission denied error code', async function() {
-    var deniedError = { code: 1 } as GeolocationPositionError;
+    const deniedError = { code: 1 } as GeolocationPositionError;
     setBrowserLocationSupport({
       permissionState: 'granted',
       geolocation: {
@@ -118,7 +118,7 @@ describe('useGeolocation', function() {
   });
 
   it('reports unavailable error code', async function() {
-    var unavailableError = { code: 2 } as GeolocationPositionError;
+    const unavailableError = { code: 2 } as GeolocationPositionError;
     setBrowserLocationSupport({
       permissionState: 'granted',
       geolocation: {
@@ -139,7 +139,7 @@ describe('useGeolocation', function() {
   });
 
   it('handles successful geolocation', async function() {
-    var pos = {
+    const pos = {
       coords: { latitude: 13.08, longitude: 80.27, accuracy: 30 },
       timestamp: 2000,
     } as GeolocationPosition;
@@ -176,7 +176,7 @@ describe('useGeolocation', function() {
   })
 
   it('calls clearWatch on unmount', async function() {
-    var clearWatch = jest.fn();
+    const clearWatch = jest.fn();
     setBrowserLocationSupport({
       permissionState: 'granted',
       geolocation: {
@@ -185,7 +185,7 @@ describe('useGeolocation', function() {
         clearWatch: clearWatch,
       },
     });
-    var { unmount } = renderHook(() => useGeolocation());
+    const { unmount } = renderHook(() => useGeolocation());
     await waitFor(() => {
       expect(useAppStore.getState().gpsLocation?.lat).toBe(13.0);
     });

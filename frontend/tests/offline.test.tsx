@@ -1,12 +1,12 @@
 jest.mock('@/hooks/usePageEntry', function() { return { usePageEntry: function() { return { current: null } } } })
-jest.mock('next/link', function() { return function({ children, ...rest }) { var React = require('react'); return React.createElement('a', rest, children) } })
+jest.mock('next/link', function() { return function({ children, ...rest }) { const React = require('react'); return React.createElement('a', rest, children) } })
 jest.mock('react-i18next', function() { return { useTranslation: function() { return { t: function(k, fb) { return typeof fb === 'string' ? fb : k } } } } })
 jest.mock('@/components/dashboard/SystemHeader', function() { return function() { return null } })
 jest.mock('lucide-react', function() { return new Proxy({}, { get: function() { return function() { return null } } }) })
 
-var React = require('react')
-var { render, screen: rtlScreen } = require('@testing-library/react')
-var OfflinePage = require('../app/offline/page').default
+const React = require('react')
+const { render, screen: rtlScreen } = require('@testing-library/react')
+const OfflinePage = require('../app/offline/page').default
 
 describe('Offline Page', function() {
   it('renders Offline Mode label', function() {
@@ -67,13 +67,13 @@ describe('Offline Page', function() {
 
   it('renders SOS link with correct href', function() {
     render(React.createElement(OfflinePage))
-    var sosLink = rtlScreen.getByText('Open Emergency SOS').closest('a')
+    const sosLink = rtlScreen.getByText('Open Emergency SOS').closest('a')
     expect(sosLink.getAttribute('href')).toBe('/sos')
   })
 
   it('renders First Aid link with correct href', function() {
     render(React.createElement(OfflinePage))
-    var firstAidLink = rtlScreen.getByText('Open First Aid Guides').closest('a')
+    const firstAidLink = rtlScreen.getByText('Open First Aid Guides').closest('a')
     expect(firstAidLink.getAttribute('href')).toBe('/first-aid')
   })
 })

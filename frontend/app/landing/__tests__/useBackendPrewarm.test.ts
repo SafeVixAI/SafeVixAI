@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 SafeVixAI Team
-var React = require('react');
-var rtl = require('@testing-library/react');
+const React = require('react');
+const rtl = require('@testing-library/react');
 
 describe('useBackendPrewarm', function() {
-  var mockFetch: jest.Mock;
-  var originalApiUrl: string | undefined;
-  var originalChatbotUrl: string | undefined;
+  let mockFetch: jest.Mock;
+  let originalApiUrl: string | undefined;
+  let originalChatbotUrl: string | undefined;
 
   beforeEach(function() {
     jest.useFakeTimers();
@@ -25,9 +25,9 @@ describe('useBackendPrewarm', function() {
   });
 
   function renderHook() {
-    var result: { current: unknown } = { current: null };
+    const result: { current: unknown } = { current: null };
     function TestComponent() {
-      var mod = require('../hooks/useBackendPrewarm');
+      const mod = require('../hooks/useBackendPrewarm');
       mod.useBackendPrewarm();
       React.useEffect(function() { result.current = 'mounted'; }, []);
       return null;
@@ -66,9 +66,9 @@ describe('useBackendPrewarm', function() {
 
   it('cleans up timer on unmount', function() {
     process.env.NEXT_PUBLIC_API_URL = 'http://localhost:8000';
-    var clearSpy = jest.spyOn(global, 'clearTimeout');
-    var comp = rtl.render(React.createElement(function() {
-      var mod = require('../hooks/useBackendPrewarm');
+    const clearSpy = jest.spyOn(global, 'clearTimeout');
+    const comp = rtl.render(React.createElement(function() {
+      const mod = require('../hooks/useBackendPrewarm');
       mod.useBackendPrewarm();
       return null;
     }));

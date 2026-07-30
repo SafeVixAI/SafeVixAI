@@ -20,7 +20,7 @@ describe('Root app components', function() {
   })
 
   it('renders PrintButton and calls window.print on click', function() {
-    var printSpy = jest.spyOn(window, 'print').mockImplementation(function() {})
+    const printSpy = jest.spyOn(window, 'print').mockImplementation(function() {})
     render(React.createElement(PrintButton))
     expect(screen.getByText('Print / Save')).toBeTruthy()
     fireEvent.click(screen.getByText('Print / Save'))
@@ -29,7 +29,7 @@ describe('Root app components', function() {
   })
 
   it('renders root error boundary with error details', function() {
-    var testError = new Error('Root crash')
+    const testError = new Error('Root crash')
     ;(testError as any).digest = 'abc123'
     render(React.createElement(GlobalError, { error: testError, reset: jest.fn() }))
     expect(logClientError).toHaveBeenCalled()
@@ -37,7 +37,7 @@ describe('Root app components', function() {
   })
 
   it('root error renders without digest when digest missing', function() {
-    var testError = new Error('No digest')
+    const testError = new Error('No digest')
     render(React.createElement(GlobalError, { error: testError, reset: jest.fn() }))
     expect(screen.queryByText(/Digest:/)).toBeNull()
   })

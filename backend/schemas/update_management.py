@@ -5,7 +5,6 @@ from __future__ import annotations
 
 from datetime import datetime
 from enum import StrEnum
-from typing import Optional
 
 from pydantic import BaseModel, Field
 
@@ -32,22 +31,22 @@ class UpdateStatusEnum(StrEnum):
 
 class UpdateReleaseBase(BaseModel):
     version: str = Field(min_length=1, max_length=32)
-    previous_version: Optional[str] = Field(None, max_length=32)
+    previous_version: str | None = Field(None, max_length=32)
     channel: ReleaseChannel = ReleaseChannel.STABLE
     title: str = Field(min_length=1, max_length=256)
-    body: Optional[str] = None
+    body: str | None = None
     is_mandatory: bool = False
     is_security: bool = False
-    download_url: Optional[str] = Field(None, max_length=1024)
-    checksum_sha256: Optional[str] = Field(None, max_length=64)
-    signature_gpg: Optional[str] = None
-    asset_size_bytes: Optional[int] = None
-    release_notes_url: Optional[str] = Field(None, max_length=1024)
-    github_release_id: Optional[int] = None
-    github_tag_name: Optional[str] = Field(None, max_length=64)
+    download_url: str | None = Field(None, max_length=1024)
+    checksum_sha256: str | None = Field(None, max_length=64)
+    signature_gpg: str | None = None
+    asset_size_bytes: int | None = None
+    release_notes_url: str | None = Field(None, max_length=1024)
+    github_release_id: int | None = None
+    github_tag_name: str | None = Field(None, max_length=64)
     is_draft: bool = False
     is_prerelease: bool = False
-    published_at: Optional[datetime] = None
+    published_at: datetime | None = None
 
 
 class UpdateReleaseCreate(UpdateReleaseBase):
@@ -68,14 +67,14 @@ class UpdateReleaseSummary(BaseModel):
     title: str
     is_mandatory: bool
     is_security: bool
-    published_at: Optional[datetime] = None
+    published_at: datetime | None = None
     created_at: datetime
 
 
 class UpdateInstallationBase(BaseModel):
     release_id: int
     release_version: str
-    previous_version: Optional[str] = None
+    previous_version: str | None = None
     channel: ReleaseChannel = ReleaseChannel.STABLE
     is_offline: bool = False
 
@@ -84,11 +83,11 @@ class UpdateInstallationResponse(UpdateInstallationBase):
     id: int
     uuid: str
     status: UpdateStatusEnum
-    error_message: Optional[str] = None
-    downloaded_bytes: Optional[int] = 0
-    total_bytes: Optional[int] = 0
-    started_at: Optional[datetime] = None
-    completed_at: Optional[datetime] = None
+    error_message: str | None = None
+    downloaded_bytes: int | None = 0
+    total_bytes: int | None = 0
+    started_at: datetime | None = None
+    completed_at: datetime | None = None
     created_at: datetime
 
 
@@ -109,10 +108,10 @@ class UpdateSettingsUpdate(UpdateSettingsBase):
 class UpdateSettingsResponse(UpdateSettingsBase):
     id: int
     uuid: str
-    gpg_public_key: Optional[str] = None
-    last_checked_at: Optional[datetime] = None
-    last_check_result: Optional[str] = None
-    last_update_version: Optional[str] = None
+    gpg_public_key: str | None = None
+    last_checked_at: datetime | None = None
+    last_check_result: str | None = None
+    last_update_version: str | None = None
     created_at: datetime
     updated_at: datetime
 
@@ -125,19 +124,19 @@ class UpdateCheckRequest(BaseModel):
 class UpdateCheckResponse(BaseModel):
     update_available: bool
     current_version: str
-    latest_version: Optional[str] = None
-    latest_release: Optional[UpdateReleaseSummary] = None
+    latest_version: str | None = None
+    latest_release: UpdateReleaseSummary | None = None
     is_mandatory: bool = False
     is_security: bool = False
     channel: ReleaseChannel = ReleaseChannel.STABLE
-    last_checked_at: Optional[datetime] = None
+    last_checked_at: datetime | None = None
 
 
 class UpdateActionResponse(BaseModel):
     success: bool
     message: str
-    installation_id: Optional[int] = None
-    version: Optional[str] = None
+    installation_id: int | None = None
+    version: str | None = None
 
 
 class UpdateHistoryResponse(BaseModel):
@@ -149,11 +148,11 @@ class UpdateHistoryResponse(BaseModel):
 
 class VersionInfo(BaseModel):
     current_version: str
-    latest_version: Optional[str] = None
+    latest_version: str | None = None
     update_available: bool
     channel: ReleaseChannel
-    last_checked_at: Optional[datetime] = None
-    uptime_seconds: Optional[float] = None
+    last_checked_at: datetime | None = None
+    uptime_seconds: float | None = None
 
 
 class ChecksumVerifyResponse(BaseModel):
@@ -165,14 +164,14 @@ class ChecksumVerifyResponse(BaseModel):
 
 class SignatureVerifyResponse(BaseModel):
     valid: bool
-    fingerprint: Optional[str] = None
+    fingerprint: str | None = None
     status: str
-    error: Optional[str] = None
+    error: str | None = None
 
 
 class SchedulerStatusResponse(BaseModel):
     running: bool
-    last_check: Optional[str] = None
+    last_check: str | None = None
     task_active: bool
 
 
@@ -194,6 +193,6 @@ class DownloadProgressEvent(BaseModel):
     downloaded_bytes: int = 0
     total_bytes: int = 0
     percentage: float = 0.0
-    speed_kbps: Optional[float] = None
-    eta_seconds: Optional[float] = None
+    speed_kbps: float | None = None
+    eta_seconds: float | None = None
     status: str = "downloading"

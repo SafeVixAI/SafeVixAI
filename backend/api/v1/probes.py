@@ -3,8 +3,6 @@
 
 from __future__ import annotations
 
-import time
-
 import httpx
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse

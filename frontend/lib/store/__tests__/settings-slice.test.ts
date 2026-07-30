@@ -13,8 +13,8 @@ describe('SettingsSlice', function() {
   }
 
   it('has default values', function() {
-    var store = createTestStore()
-    var state = store.getState()
+    const store = createTestStore()
+    const state = store.getState()
     expect(state.soundsEnabled).toBe(false)
     expect(state.speedAlert).toBe(false)
     expect(state.hazardNotifs).toBe(true)
@@ -26,7 +26,7 @@ describe('SettingsSlice', function() {
   })
 
   it('toggles soundsEnabled', function() {
-    var store = createTestStore()
+    const store = createTestStore()
     store.getState().setSoundsEnabled(true)
     expect(store.getState().soundsEnabled).toBe(true)
     store.getState().setSoundsEnabled(false)
@@ -34,55 +34,55 @@ describe('SettingsSlice', function() {
   })
 
   it('toggles speedAlert', function() {
-    var store = createTestStore()
+    const store = createTestStore()
     store.getState().setSpeedAlert(true)
     expect(store.getState().speedAlert).toBe(true)
   })
 
   it('toggles hazardNotifs', function() {
-    var store = createTestStore()
+    const store = createTestStore()
     store.getState().setHazardNotifs(false)
     expect(store.getState().hazardNotifs).toBe(false)
   })
 
   it('toggles locationTracking', function() {
-    var store = createTestStore()
+    const store = createTestStore()
     store.getState().setLocationTracking(false)
     expect(store.getState().locationTracking).toBe(false)
   })
 
   it('toggles sosVibration', function() {
-    var store = createTestStore()
+    const store = createTestStore()
     store.getState().setSosVibration(false)
     expect(store.getState().sosVibration).toBe(false)
   })
 
   it('toggles autoOffline', function() {
-    var store = createTestStore()
+    const store = createTestStore()
     store.getState().setAutoOffline(false)
     expect(store.getState().autoOffline).toBe(false)
   })
 
   it('toggles analyticsOptIn', function() {
-    var store = createTestStore()
+    const store = createTestStore()
     store.getState().setAnalyticsOptIn(true)
     expect(store.getState().analyticsOptIn).toBe(true)
   })
 
   it('sets navApp to waze', function() {
-    var store = createTestStore()
+    const store = createTestStore()
     store.getState().setNavApp('waze')
     expect(store.getState().navApp).toBe('waze')
   })
 
   it('sets navApp to apple', function() {
-    var store = createTestStore()
+    const store = createTestStore()
     store.getState().setNavApp('apple')
     expect(store.getState().navApp).toBe('apple')
   })
 
   it('sets all settings in sequence', function() {
-    var store = createTestStore()
+    const store = createTestStore()
     store.getState().setSoundsEnabled(true)
     store.getState().setSpeedAlert(true)
     store.getState().setHazardNotifs(false)
@@ -91,7 +91,7 @@ describe('SettingsSlice', function() {
     store.getState().setAutoOffline(false)
     store.getState().setAnalyticsOptIn(true)
     store.getState().setNavApp('waze')
-    var s = store.getState()
+    const s = store.getState()
     expect(s.soundsEnabled).toBe(true)
     expect(s.speedAlert).toBe(true)
     expect(s.hazardNotifs).toBe(false)

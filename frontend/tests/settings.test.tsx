@@ -4,14 +4,14 @@ jest.mock('@/hooks/usePageEntry', function() { return { usePageEntry: function()
 jest.mock('next/navigation', function() { return { useRouter: function() { return { push: jest.fn(), back: jest.fn() } } } })
 jest.mock('@/components/ui/TerminalHeader', function() { return { TerminalHeader: function() { return null } } })
 jest.mock('@/components/ui/SurfaceCard', function() { return { SurfaceCard: function({ children }) { return children } } })
-jest.mock('@/components/ui/SettingRow', function() { return { SettingRow: function({ title, description }) { var React = require('react'); return React.createElement('div', { 'data-testid': 'setting-row' }, title, description) } } })
+jest.mock('@/components/ui/SettingRow', function() { return { SettingRow: function({ title, description }) { const React = require('react'); return React.createElement('div', { 'data-testid': 'setting-row' }, title, description) } } })
 jest.mock('@/components/dashboard/Toggle', function() { return function() { return null } })
 jest.mock('@/components/dashboard/ProfileCard', function() { return function() { return null } })
 jest.mock('@/components/dashboard/TopSearch', function() { return function() { return null } })
 jest.mock('@/components/dashboard/Toast', function() { return function() { return null } })
 jest.mock('@/components/ui/LanguageSelector', function() { return function() { return null } })
 jest.mock('@/lib/store', function() {
-  var state = { crashDetectionEnabled: false, isAuthenticated: true, operatorName: 'TestOp', userProfile: {}, speedAlert: false, hazardNotifs: true, locationTracking: false, sosVibration: true, autoOffline: false, analyticsOptIn: false, navApp: 'google', soundsEnabled: true, setCrashDetectionEnabled: jest.fn(), setSpeedAlert: jest.fn(), setHazardNotifs: jest.fn(), setLocationTracking: jest.fn(), setSosVibration: jest.fn(), setAutoOffline: jest.fn(), setAnalyticsOptIn: jest.fn(), setNavApp: jest.fn(), setSoundsEnabled: jest.fn(), setServerWarming: jest.fn(), updateInfo: { hasUpdate: false, version: null, channel: 'stable', releaseDate: null, releaseNotes: null, downloadSize: null, isMandatory: false, isSecurity: false, downloadProgress: null, status: 'idle' }, setUpdateInfo: jest.fn(), setUpdateStatus: jest.fn(), dismissUpdateBanner: jest.fn(), resetUpdateBanner: jest.fn(), setDownloadProgress: jest.fn() }
+  const state = { crashDetectionEnabled: false, isAuthenticated: true, operatorName: 'TestOp', userProfile: {}, speedAlert: false, hazardNotifs: true, locationTracking: false, sosVibration: true, autoOffline: false, analyticsOptIn: false, navApp: 'google', soundsEnabled: true, setCrashDetectionEnabled: jest.fn(), setSpeedAlert: jest.fn(), setHazardNotifs: jest.fn(), setLocationTracking: jest.fn(), setSosVibration: jest.fn(), setAutoOffline: jest.fn(), setAnalyticsOptIn: jest.fn(), setNavApp: jest.fn(), setSoundsEnabled: jest.fn(), setServerWarming: jest.fn(), updateInfo: { hasUpdate: false, version: null, channel: 'stable', releaseDate: null, releaseNotes: null, downloadSize: null, isMandatory: false, isSecurity: false, downloadProgress: null, status: 'idle' }, setUpdateInfo: jest.fn(), setUpdateStatus: jest.fn(), dismissUpdateBanner: jest.fn(), resetUpdateBanner: jest.fn(), setDownloadProgress: jest.fn() }
   return { useAppStore: Object.assign(function(sel) { return typeof sel === 'function' ? sel(state) : state }, { getState: function() { return state }, setState: jest.fn(), subscribe: jest.fn() }), useUpdateInfo: function() { return state.updateInfo } }
 })
 jest.mock('@/components/ThemeProvider', function() { return { useTheme: function() { return { theme: 'dark', setTheme: jest.fn() } } } })
@@ -21,9 +21,9 @@ jest.mock('posthog-js', function() { return { opt_in_capturing: jest.fn(), opt_o
 jest.mock('react-i18next', function() { return { useTranslation: function() { return { t: function(k, fb) { return typeof fb === 'string' ? fb : k } } } } })
 jest.mock('lucide-react', function() { return new Proxy({}, { get: function() { return function() { return null } } }) })
 
-var React = require('react')
-var { render, screen: rtlScreen } = require('@testing-library/react')
-var SettingsPage = require('../app/settings/page').default
+const React = require('react')
+const { render, screen: rtlScreen } = require('@testing-library/react')
+const SettingsPage = require('../app/settings/page').default
 
 describe('Settings Page', function() {
   it('renders sr-only Settings heading', function() {
@@ -33,7 +33,7 @@ describe('Settings Page', function() {
 
   it('renders setting rows', function() {
     render(React.createElement(SettingsPage))
-    var rows = rtlScreen.getAllByTestId('setting-row')
+    const rows = rtlScreen.getAllByTestId('setting-row')
     expect(rows.length).toBeGreaterThan(0)
   })
 

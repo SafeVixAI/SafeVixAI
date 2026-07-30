@@ -28,12 +28,12 @@ describe('FilterChip', function() {
   });
 
   it('applies active class when active', function() {
-    var { container } = render(<FilterChip label="All" active={true} />);
+    const { container } = render(<FilterChip label="All" active={true} />);
     expect(container.firstChild).toHaveClass('sv-chip-active');
   });
 
   it('does not apply active class by default', function() {
-    var { container } = render(<FilterChip label="All" />);
+    const { container } = render(<FilterChip label="All" />);
     expect(container.firstChild).not.toHaveClass('sv-chip-active');
   });
 
@@ -43,20 +43,20 @@ describe('FilterChip', function() {
   });
 
   it('does not render icon wrapper when icon not provided', function() {
-    var { container } = render(<FilterChip label="All" />);
-    var spans = container.querySelectorAll('span');
+    const { container } = render(<FilterChip label="All" />);
+    const spans = container.querySelectorAll('span');
     expect(spans.length).toBe(0);
   });
 
   it('calls onClick when clicked', function() {
-    var handleClick = jest.fn();
+    const handleClick = jest.fn();
     render(<FilterChip label="All" onClick={handleClick} />);
     fireEvent.click(screen.getByRole('radio'));
     expect(handleClick).toHaveBeenCalledTimes(1);
   });
 
   it('applies custom className', function() {
-    var { container } = render(<FilterChip label="All" className="my-class" />);
+    const { container } = render(<FilterChip label="All" className="my-class" />);
     expect(container.firstChild).toHaveClass('my-class');
   });
 
@@ -67,7 +67,7 @@ describe('FilterChip', function() {
 
   it('forwards additional button props', function() {
     render(<FilterChip label="All" data-testid="filter-chip" disabled />);
-    var chip = screen.getByTestId('filter-chip');
+    const chip = screen.getByTestId('filter-chip');
     expect(chip).toBeDisabled();
   });
 });

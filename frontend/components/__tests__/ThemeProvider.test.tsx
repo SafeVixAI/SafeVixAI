@@ -6,8 +6,8 @@ import { render, screen, act, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { ThemeProvider, useTheme } from '../ThemeProvider';
 
-var mqListeners: Function[] = [];
-var mqMatches = false;
+let mqListeners: Function[] = [];
+let mqMatches = false;
 
 beforeEach(function() {
   mqListeners = [];
@@ -26,7 +26,7 @@ beforeEach(function() {
 });
 
 function TestConsumer() {
-  var { theme, resolvedTheme, setTheme } = useTheme();
+  const { theme, resolvedTheme, setTheme } = useTheme();
   return (
     <div>
       <span data-testid="theme">{theme}</span>
@@ -131,7 +131,7 @@ describe('ThemeProvider', function() {
     renderWithTheme(<TestConsumer />);
     act(() => { fireEvent.click(screen.getByTestId('set-dark')); });
     // Fire only the last (active) listener — it should have theme='dark' in its closure
-    var lastListener = mqListeners[mqListeners.length - 1];
+    const lastListener = mqListeners[mqListeners.length - 1];
     act(() => { lastListener(); });
     expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
   });

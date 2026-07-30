@@ -3,19 +3,19 @@ import { render, screen } from '@testing-library/react';
 import { MapCore } from '../MapCore';
 
 describe('MapCore', function() {
-  var divRef: React.RefObject<HTMLDivElement | null>;
+  let divRef: React.RefObject<HTMLDivElement | null>;
 
   beforeEach(function() {
     divRef = { current: document.createElement('div') };
   });
 
   it('renders map container div with correct aria attributes', function() {
-    var { container } = render(React.createElement(MapCore, {
+    const { container } = render(React.createElement(MapCore, {
       mapNodeRef: divRef,
       status: 'loading' as const,
       statusMessage: 'Loading map...',
     }));
-    var mapDiv = container.querySelector('[role="application"]');
+    const mapDiv = container.querySelector('[role="application"]');
     expect(mapDiv).toBeTruthy();
     expect(mapDiv!.getAttribute('aria-label')).toContain('Interactive map');
   });
@@ -52,7 +52,7 @@ describe('MapCore', function() {
   });
 
   it('ref prop is attached to the map container div', function() {
-    var ref = { current: null as HTMLDivElement | null };
+    const ref = { current: null as HTMLDivElement | null };
     render(React.createElement(MapCore, {
       mapNodeRef: ref,
       status: 'loading' as const,
@@ -62,12 +62,12 @@ describe('MapCore', function() {
   });
 
   it('map container has tabIndex of 0', function() {
-    var { container } = render(React.createElement(MapCore, {
+    const { container } = render(React.createElement(MapCore, {
       mapNodeRef: { current: document.createElement('div') },
       status: 'loading' as const,
       statusMessage: '',
     }));
-    var mapDiv = container.querySelector('[role="application"]');
+    const mapDiv = container.querySelector('[role="application"]');
     expect(mapDiv!.getAttribute('tabindex')).toBe('0');
   });
 

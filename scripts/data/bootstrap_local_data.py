@@ -4,15 +4,14 @@ from __future__ import annotations
 
 import argparse
 import csv
-from io import BytesIO
 import json
 import math
 import shutil
 import struct
 import sys
 import zipfile
+from io import BytesIO
 from pathlib import Path
-
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 BACKEND_ROOT = PROJECT_ROOT / 'backend'
@@ -25,7 +24,8 @@ def _load_backend_module(rel_path: str, module_name: str):
     sys.modules under *module_name*.  This makes the import fully transparent
     to Pylance/Pyright (no opaque sys.path mutation) while still satisfying
     Python internals that need __module__ to be resolvable (e.g. dataclasses
-    with slots=True)."""
+    with slots=True).
+    """
     abs_path = BACKEND_ROOT / rel_path
     spec = _ilu.spec_from_file_location(module_name, abs_path)
     mod = _ilu.module_from_spec(spec)  # type: ignore[arg-type]

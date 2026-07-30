@@ -9,43 +9,43 @@ function createTouchEvent(clientX: number, clientY: number, type: 'touchstart' |
 
 describe('useSwipe', function() {
   it('calls onSwipeRight when dx > 50 and horizontal', function() {
-    var onSwipeRight = jest.fn()
-    var { result } = renderHook(() => require('../useSwipe').useSwipe({ onSwipeRight }))
+    const onSwipeRight = jest.fn()
+    const { result } = renderHook(() => require('../useSwipe').useSwipe({ onSwipeRight }))
     result.current.onTouchStart(createTouchEvent(0, 0, 'touchstart'))
     result.current.onTouchEnd(createTouchEvent(100, 5, 'touchend'))
     expect(onSwipeRight).toHaveBeenCalled()
   })
 
   it('calls onSwipeLeft when dx < -50 and horizontal', function() {
-    var onSwipeLeft = jest.fn()
-    var { result } = renderHook(() => require('../useSwipe').useSwipe({ onSwipeLeft }))
+    const onSwipeLeft = jest.fn()
+    const { result } = renderHook(() => require('../useSwipe').useSwipe({ onSwipeLeft }))
     result.current.onTouchStart(createTouchEvent(100, 0, 'touchstart'))
     result.current.onTouchEnd(createTouchEvent(0, 5, 'touchend'))
     expect(onSwipeLeft).toHaveBeenCalled()
   })
 
   it('calls onSwipeDown when dy > 50 and vertical', function() {
-    var onSwipeDown = jest.fn()
-    var { result } = renderHook(() => require('../useSwipe').useSwipe({ onSwipeDown }))
+    const onSwipeDown = jest.fn()
+    const { result } = renderHook(() => require('../useSwipe').useSwipe({ onSwipeDown }))
     result.current.onTouchStart(createTouchEvent(0, 0, 'touchstart'))
     result.current.onTouchEnd(createTouchEvent(5, 100, 'touchend'))
     expect(onSwipeDown).toHaveBeenCalled()
   })
 
   it('calls onSwipeUp when dy < -50 and vertical', function() {
-    var onSwipeUp = jest.fn()
-    var { result } = renderHook(() => require('../useSwipe').useSwipe({ onSwipeUp }))
+    const onSwipeUp = jest.fn()
+    const { result } = renderHook(() => require('../useSwipe').useSwipe({ onSwipeUp }))
     result.current.onTouchStart(createTouchEvent(0, 100, 'touchstart'))
     result.current.onTouchEnd(createTouchEvent(5, 0, 'touchend'))
     expect(onSwipeUp).toHaveBeenCalled()
   })
 
   it('does not call handlers for short swipes below 50px threshold', function() {
-    var onSwipeRight = jest.fn()
-    var onSwipeLeft = jest.fn()
-    var onSwipeUp = jest.fn()
-    var onSwipeDown = jest.fn()
-    var { result } = renderHook(() => require('../useSwipe').useSwipe({ onSwipeRight, onSwipeLeft, onSwipeUp, onSwipeDown }))
+    const onSwipeRight = jest.fn()
+    const onSwipeLeft = jest.fn()
+    const onSwipeUp = jest.fn()
+    const onSwipeDown = jest.fn()
+    const { result } = renderHook(() => require('../useSwipe').useSwipe({ onSwipeRight, onSwipeLeft, onSwipeUp, onSwipeDown }))
     result.current.onTouchStart(createTouchEvent(0, 0, 'touchstart'))
     result.current.onTouchEnd(createTouchEvent(30, 30, 'touchend'))
     expect(onSwipeRight).not.toHaveBeenCalled()
@@ -55,7 +55,7 @@ describe('useSwipe', function() {
   })
 
   it('returns onTouchStart and onTouchEnd handlers', function() {
-    var { result } = renderHook(() => require('../useSwipe').useSwipe({}))
+    const { result } = renderHook(() => require('../useSwipe').useSwipe({}))
     expect(result.current).toHaveProperty('onTouchStart')
     expect(result.current).toHaveProperty('onTouchEnd')
     expect(typeof result.current.onTouchStart).toBe('function')

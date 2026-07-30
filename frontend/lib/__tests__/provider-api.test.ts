@@ -2,13 +2,13 @@
  * Tests for the provider API client module.
  */
 
-var BUILTIN_RESP = [
+const BUILTIN_RESP = [
   { name: 'groq', display: 'Groq', base_url: 'https://api.groq.com/openai/v1/chat/completions', models: ['llama-3.1-8b-instant'] },
   { name: 'openai', display: 'OpenAI', base_url: 'https://api.openai.com/v1/chat/completions', models: ['gpt-4o'] },
   { name: 'gemini', display: 'Gemini', base_url: 'https://generativelanguage.googleapis.com/v1beta/models', models: ['gemini-2.0-flash'] },
 ];
 
-var CONFIG_RESP = [
+const CONFIG_RESP = [
   { id: '1', providerName: 'groq', displayName: 'My Groq', apiKeyMasked: 'gsk_****', isActive: true, priority: 0, isCustom: false },
   { id: '2', providerName: 'custom-ollama', displayName: 'Local Ollama', apiKeyMasked: '***', baseUrl: 'http://localhost:11434/v1/chat/completions', defaultModel: 'llama3.2', isActive: true, priority: 1, isCustom: true },
 ];
@@ -19,10 +19,10 @@ jest.mock('@/lib/public-env', function() {
   };
 });
 
-var providerApi = require('@/lib/provider-api');
+const providerApi = require('@/lib/provider-api');
 
 describe('provider-api', function() {
-  var originalFetch;
+  let originalFetch;
 
   beforeAll(function() {
     originalFetch = global.fetch;
@@ -42,7 +42,7 @@ describe('provider-api', function() {
         ok: true,
         json: function() { return Promise.resolve(BUILTIN_RESP); },
       });
-      var result = await providerApi.fetchBuiltinProviders();
+      const result = await providerApi.fetchBuiltinProviders();
       expect(result).toHaveLength(3);
       expect(result[0].name).toBe('groq');
       expect(fetch).toHaveBeenCalledWith('http://test.local/api/v1/providers/builtins');
@@ -64,7 +64,7 @@ describe('provider-api', function() {
         ok: true,
         json: function() { return Promise.resolve(CONFIG_RESP); },
       });
-      var result = await providerApi.fetchProviderConfigs();
+      const result = await providerApi.fetchProviderConfigs();
       expect(result).toHaveLength(2);
       expect(result[0].providerName).toBe('groq');
     });
@@ -72,7 +72,7 @@ describe('provider-api', function() {
 
   describe('createProviderConfig', function() {
     it('should POST provider config and return created record', async function() {
-      var newConfig = {
+      const newConfig = {
         providerName: 'test-groq',
         displayName: 'Test Groq',
         apiKey: 'sk-test',
@@ -80,13 +80,13 @@ describe('provider-api', function() {
         priority: 0,
         isCustom: false,
       };
-      var expected = { id: '3', ...newConfig, apiKeyMasked: 'sk-****', apiKey: undefined };
+      const expected = { id: '3', ...newConfig, apiKeyMasked: 'sk-****', apiKey: undefined };
       global.fetch = jest.fn().mockResolvedValue({
         ok: true,
         status: 201,
         json: function() { return Promise.resolve(expected); },
       });
-      var result = await providerApi.createProviderConfig(newConfig);
+      const result = await providerApi.createProviderConfig(newConfig);
       expect(result.displayName).toBe('Test Groq');
       expect(fetch).toHaveBeenCalledWith(
         'http://test.local/api/v1/providers',
@@ -95,7 +95,7 @@ describe('provider-api', function() {
     });
 
     it('should POST provider config without API key', async function() {
-      var newConfig = {
+      const newConfig = {
         providerName: 'test-groq',
         displayName: 'Test Groq',
         apiKey: '',
@@ -108,8 +108,8 @@ describe('provider-api', function() {
         status: 201,
         json: function() { return Promise.resolve({ id: '4', ...newConfig, apiKeyMasked: '' }); },
       });
-      var result = await providerApi.createProviderConfig(newConfig);
-      var callBody = JSON.parse((fetch as any).mock.calls[0][1].body);
+      const result = await providerApi.createProviderConfig(newConfig);
+      const callBody = JSON.parse((fetch as any).mock.calls[0][1].body);
       expect(callBody.api_key).toBeUndefined()
       expect(result.providerName).toBe('test-groq');
     });
@@ -121,7 +121,7 @@ describe('provider-api', function() {
         ok: true,
         json: function() { return Promise.resolve({ id: '1', displayName: 'Updated' }); },
       });
-      var result = await providerApi.updateProviderConfig('1', { displayName: 'Updated' });
+      const result = await providerApi.updateProviderConfig('1', { displayName: 'Updated' });
       expect(result.displayName).toBe('Updated');
       expect(fetch).toHaveBeenCalledWith(
         'http://test.local/api/v1/providers/1',
@@ -138,7 +138,7 @@ describe('provider-api', function() {
         status: 200,
         json: function() { return Promise.resolve({ id: '1', isActive: false, provider_name: 'groq', display_name: 'Groq' }); },
       } as any);
-      var result = await providerApi.updateProviderConfig('1', { isActive: false });
+      const result = await providerApi.updateProviderConfig('1', { isActive: false });
       expect(result).toBeTruthy();
       expect(result.isActive).toBe(false);
     });
@@ -166,12 +166,12 @@ describe('provider-api', function() {
 
   describe('testProviderConnection', function() {
     it('should POST test connection and return result', async function() {
-      var testResult = { status: 'ok', message: 'Connected', provider: 'groq', model: 'test' };
+      const testResult = { status: 'ok', message: 'Connected', provider: 'groq', model: 'test' };
       global.fetch = jest.fn().mockResolvedValue({
         ok: true,
         json: function() { return Promise.resolve(testResult); },
       });
-      var result = await providerApi.testProviderConnection({
+      const result = await providerApi.testProviderConnection({
         providerName: 'groq',
         apiKey: 'sk-test',
         model: 'test',
@@ -180,12 +180,12 @@ describe('provider-api', function() {
     });
 
     it('should work with empty model and baseUrl fields', async function() {  // A2
-      var testResult = { status: 'ok', message: 'Connected' };
+      const testResult = { status: 'ok', message: 'Connected' };
       global.fetch = jest.fn().mockResolvedValue({
         ok: true,
         json: function() { return Promise.resolve(testResult); },
       });
-      var result = await providerApi.testProviderConnection({
+      const result = await providerApi.testProviderConnection({
         providerName: 'groq',
         apiKey: 'sk-test',
         model: '',
@@ -197,12 +197,12 @@ describe('provider-api', function() {
 
   describe('syncProvidersToChatbot', function() {
     it('should POST sync and return result', async function() {
-      var syncResult = { synced: 3, providers: ['groq', 'openai'] };
+      const syncResult = { synced: 3, providers: ['groq', 'openai'] };
       global.fetch = jest.fn().mockResolvedValue({
         ok: true,
         json: function() { return Promise.resolve(syncResult); },
       });
-      var result = await providerApi.syncProvidersToChatbot();
+      const result = await providerApi.syncProvidersToChatbot();
       expect(result.synced).toBe(3);
       expect(result.providers).toContain('groq');
     });

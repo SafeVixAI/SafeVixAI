@@ -5,22 +5,18 @@
 
 from __future__ import annotations
 
-import hashlib
-import hmac
-import json
 import logging
 import os
-import re
 import smtplib
 import string
-import time
-from datetime import UTC, date, datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from email.message import EmailMessage
-from typing import Any, Literal
+from typing import Any
 
 import httpx
 from prometheus_client import Counter, Histogram
-from sqlalchemy import Boolean as SABoolean, cast, select, func
+from sqlalchemy import Boolean as SABoolean
+from sqlalchemy import cast, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.config import get_settings
@@ -320,7 +316,6 @@ class NotificationService:
         # Service Worker receives the WS message and fires a Browser Notification.
         # No blocking call needed here; the WS manager already broadcasts to connected clients.
         # If the user is offline, the offline queue handles it.
-        pass
 
     async def _dispatch_email(
         self, notification: Notification, prefs: NotificationPreference | None

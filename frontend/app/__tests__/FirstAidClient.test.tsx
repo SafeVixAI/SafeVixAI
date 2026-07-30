@@ -39,7 +39,7 @@ jest.mock('react-i18next', function() {
   };
 });
 
-var GUIDE_DATA = {
+const GUIDE_DATA = {
   cpr: { id: 'cpr', title: 'CPR', subtitle: 'Chest compressions', accent: 'red', icon: 'HeartPulse', iconType: 'filled' as const, steps: ['Check responsiveness', 'Call 112', 'Start compressions'] },
   choking: { id: 'choking', title: 'Choking', subtitle: 'Airway obstruction', accent: 'orange', icon: 'Activity', iconType: 'outlined' as const, steps: ['Encourage coughing', 'Back blows'] },
   burns: { id: 'burns', title: 'Burns', subtitle: 'Thermal injury', accent: 'yellow', icon: 'Flame', iconType: 'filled' as const, steps: ['Cool under running water'] },
@@ -48,7 +48,7 @@ var GUIDE_DATA = {
 };
 
 function renderFirstAid() {
-  var FirstAidClient = require('../first-aid/FirstAidClient').FirstAidClient;
+  const FirstAidClient = require('../first-aid/FirstAidClient').FirstAidClient;
   return render(React.createElement(FirstAidClient, { guides: GUIDE_DATA }));
 }
 
@@ -74,7 +74,7 @@ describe('FirstAidClient', function() {
 
   it('filters guides by search query', function() {
     renderFirstAid();
-    var searchInput = screen.getByPlaceholderText('Search emergency protocol...');
+    const searchInput = screen.getByPlaceholderText('Search emergency protocol...');
     fireEvent.change(searchInput, { target: { value: 'cpr' } });
     expect(screen.getByText('CPR')).toBeTruthy();
     expect(screen.queryByText('Burns')).toBeNull();
@@ -82,14 +82,14 @@ describe('FirstAidClient', function() {
 
   it('shows empty state when no guides match', function() {
     renderFirstAid();
-    var searchInput = screen.getByPlaceholderText('Search emergency protocol...');
+    const searchInput = screen.getByPlaceholderText('Search emergency protocol...');
     fireEvent.change(searchInput, { target: { value: 'zzzzzxyz' } });
     expect(screen.getByText(/No protocols match/)).toBeTruthy();
   });
 
   it('shows Start Guide buttons on cards', function() {
     renderFirstAid();
-    var startButtons = screen.getAllByText('Start Guide');
+    const startButtons = screen.getAllByText('Start Guide');
     expect(startButtons.length).toBeGreaterThanOrEqual(4);
   });
 
@@ -118,7 +118,7 @@ describe('FirstAidClient', function() {
 
   it('shows normal mode toggle and switches to emergency mode', function() {
     renderFirstAid();
-    var modeBtn = screen.getByText('Normal Mode');
+    const modeBtn = screen.getByText('Normal Mode');
     expect(modeBtn).toBeTruthy();
     fireEvent.click(modeBtn);
     expect(screen.getByText('Emergency Active')).toBeTruthy();
@@ -134,7 +134,7 @@ describe('FirstAidClient', function() {
   it('shows Call 112 button in guide modal', function() {
     renderFirstAid();
     fireEvent.click(screen.getByText('CPR'));
-    var call112Buttons = screen.getAllByText('Call 112');
+    const call112Buttons = screen.getAllByText('Call 112');
     expect(call112Buttons.length).toBeGreaterThanOrEqual(1);
   });
 

@@ -20,7 +20,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { ServiceCard } from '../ServiceCard';
 
-var mockService = {
+const mockService = {
   id: '1',
   name: 'Apollo Hospital',
   category: 'hospital' as const,
@@ -52,26 +52,26 @@ describe('ServiceCard', function() {
   });
 
   it('renders distance in metres when < 1km', function() {
-    var nearbyService = { ...mockService, distance: 500 };
+    const nearbyService = { ...mockService, distance: 500 };
     render(<ServiceCard service={nearbyService} />);
     expect(screen.getByText('500 m')).toBeInTheDocument();
   });
 
   it('renders distance 0m', function() {
-    var nearbyService = { ...mockService, distance: 0 };
+    const nearbyService = { ...mockService, distance: 0 };
     render(<ServiceCard service={nearbyService} />);
     expect(screen.getByText('0 m')).toBeInTheDocument();
   });
 
   it('renders phone call link when phone is provided', function() {
     render(<ServiceCard service={mockService} />);
-    var callLink = screen.getByLabelText('Call Apollo Hospital: +911234567890');
+    const callLink = screen.getByLabelText('Call Apollo Hospital: +911234567890');
     expect(callLink).toBeInTheDocument();
     expect(callLink).toHaveAttribute('href', 'tel:+911234567890');
   });
 
   it('does not render call link when phone is missing', function() {
-    var noPhoneService = { ...mockService, phone: undefined };
+    const noPhoneService = { ...mockService, phone: undefined };
     render(<ServiceCard service={noPhoneService} />);
     expect(screen.queryByText('Call')).not.toBeInTheDocument();
   });
@@ -82,8 +82,8 @@ describe('ServiceCard', function() {
   });
 
   it('renders offline source indicator', function() {
-    var offlineService = { ...mockService, source: 'offline' as const };
-    var { container } = render(<ServiceCard service={offlineService} />);
+    const offlineService = { ...mockService, source: 'offline' as const };
+    const { container } = render(<ServiceCard service={offlineService} />);
     expect(container.textContent).toContain('offline cache');
   });
 
@@ -94,7 +94,7 @@ describe('ServiceCard', function() {
 
   it('has role article with aria-label', function() {
     render(<ServiceCard service={mockService} />);
-    var article = screen.getByRole('article');
+    const article = screen.getByRole('article');
     expect(article).toHaveAttribute('aria-label', 'Apollo Hospital');
   });
 
@@ -113,7 +113,7 @@ describe('ServiceCard', function() {
 
   it('hides dropdown on second chooser click', function() {
     render(<ServiceCard service={mockService} />);
-    var chooser = screen.getByLabelText('Choose navigation app');
+    const chooser = screen.getByLabelText('Choose navigation app');
     fireEvent.click(chooser);
     expect(screen.getByText('Google Maps')).toBeInTheDocument();
     fireEvent.click(chooser);
@@ -121,7 +121,7 @@ describe('ServiceCard', function() {
   });
 
   it('renders all category labels', function() {
-    var categories = [
+    const categories = [
       { category: 'ambulance' as const, label: 'Ambulance' },
       { category: 'police' as const, label: 'Police Station' },
       { category: 'fire' as const, label: 'Fire Station' },
@@ -131,40 +131,40 @@ describe('ServiceCard', function() {
       { category: 'showroom' as const, label: 'Showroom' },
     ];
     for (const { category, label } of categories) {
-      var { unmount } = render(<ServiceCard service={{ ...mockService, category }} />);
+      const { unmount } = render(<ServiceCard service={{ ...mockService, category }} />);
       expect(screen.getByText(label)).toBeInTheDocument();
       unmount();
     }
   });
 
   it('applies custom className', function() {
-    var { container } = render(<ServiceCard service={mockService} className="my-class" />);
+    const { container } = render(<ServiceCard service={mockService} className="my-class" />);
     expect(container.firstChild).toHaveClass('my-class');
   });
 
   it('calls openBestNavApp on Map Directions click', function() {
-    var nav = require('@/lib/navigation-launch');
+    const nav = require('@/lib/navigation-launch');
     render(<ServiceCard service={mockService} />);
     fireEvent.click(screen.getByLabelText('Get directions to Apollo Hospital'));
     expect(nav.openBestNavApp).toHaveBeenCalled();
   });
 
   it('selects nav app from dropdown', function() {
-    var nav = require('@/lib/navigation-launch');
+    const nav = require('@/lib/navigation-launch');
     render(<ServiceCard service={mockService} />);
     fireEvent.click(screen.getByLabelText('Choose navigation app'));
-    var wazeBtn = screen.getByText('Waze');
+    const wazeBtn = screen.getByText('Waze');
     fireEvent.click(wazeBtn);
     expect(nav.setPreferredNavApp).toHaveBeenCalledWith('waze');
     expect(nav.openNavApp).toHaveBeenCalled();
   });
 
   it('shows preferred nav as active in dropdown', function() {
-    var nav = require('@/lib/navigation-launch');
+    const nav = require('@/lib/navigation-launch');
     nav.getPreferredNavApp.mockReturnValue('waze');
     render(<ServiceCard service={mockService} />);
     fireEvent.click(screen.getByLabelText('Choose navigation app'));
-    var wazeBtn = screen.getByText('Waze');
+    const wazeBtn = screen.getByText('Waze');
     expect(wazeBtn).toBeInTheDocument();
     nav.getPreferredNavApp.mockReturnValue('google-maps');
   });

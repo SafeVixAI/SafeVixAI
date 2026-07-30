@@ -1,6 +1,6 @@
 jest.mock('@/lib/client-logger', function () { return { logClientError: jest.fn(), logClientWarning: jest.fn() } })
 jest.mock('@/lib/languages', function () {
-  var mockLangs = [
+  const mockLangs = [
     { code: 'en', name: 'English', recognitionCode: 'en-IN', speechTargetCode: 'eng', synthesisCode: 'en-IN' },
     { code: 'hi', name: 'हिन्दी', recognitionCode: 'hi-IN', speechTargetCode: 'hin', synthesisCode: 'hi-IN' },
     { code: 'ta', name: 'தமிழ்', recognitionCode: 'ta-IN', speechTargetCode: 'tam', synthesisCode: 'ta-IN' },
@@ -15,8 +15,8 @@ import { render, screen, fireEvent, act } from '@testing-library/react'
 import React, { type Dispatch, type SetStateAction } from 'react'
 import { PureMultimodalInput, type Attachment } from '../chat/multimodal-ai-chat-input'
 
-var origCreateObjectURL = URL.createObjectURL
-var origRevokeObjectURL = URL.revokeObjectURL
+const origCreateObjectURL = URL.createObjectURL
+const origRevokeObjectURL = URL.revokeObjectURL
 
 describe('PureMultimodalInput', function () {
   beforeAll(function () {
@@ -60,14 +60,14 @@ describe('PureMultimodalInput', function () {
 
   it('uses value from parent when provided', function () {
     render(React.createElement(PureMultimodalInput, { value: 'parent text', onChange: function () {} }))
-    var textarea = screen.getByLabelText('Chat message input') as HTMLTextAreaElement
+    const textarea = screen.getByLabelText('Chat message input') as HTMLTextAreaElement
     expect(textarea.value).toBe('parent text')
   })
 
   it('calls onChange when text changes', function () {
-    var onChange = jest.fn()
+    const onChange = jest.fn()
     render(React.createElement(PureMultimodalInput, { value: '', onChange: onChange }))
-    var textarea = screen.getByLabelText('Chat message input')
+    const textarea = screen.getByLabelText('Chat message input')
     fireEvent.change(textarea, { target: { value: 'hello' } })
     expect(onChange).toHaveBeenCalledWith('hello')
   })
@@ -104,7 +104,7 @@ describe('PureMultimodalInput', function () {
   })
 
   it('calls onStopGenerating when stop button clicked', function () {
-    var onStop = jest.fn()
+    const onStop = jest.fn()
     render(React.createElement(PureMultimodalInput, { isGenerating: true, onStopGenerating: onStop }))
     fireEvent.click(screen.getByLabelText('Stop generating'))
     expect(onStop).toHaveBeenCalled()
@@ -113,23 +113,23 @@ describe('PureMultimodalInput', function () {
   // ── Submit Form ──
 
   it('calls onSendMessage when send button clicked', function () {
-    var onSend = jest.fn()
+    const onSend = jest.fn()
     render(React.createElement(PureMultimodalInput, { onSendMessage: onSend, value: 'test', onChange: function () {} }))
     fireEvent.click(screen.getByLabelText('Send message'))
     expect(onSend).toHaveBeenCalledWith(expect.objectContaining({ input: 'test' }))
   })
 
   it('does not call onSendMessage when send button clicked with empty input', function () {
-    var onSend = jest.fn()
+    const onSend = jest.fn()
     render(React.createElement(PureMultimodalInput, { onSendMessage: onSend, value: '', onChange: function () {} }))
     fireEvent.click(screen.getByLabelText('Send message'))
     expect(onSend).not.toHaveBeenCalled()
   })
 
   it('submitForm clears input and attachments', function () {
-    var onSend = jest.fn()
-    var attachments: Attachment[] = [{ url: 'blob:test', name: 'img.png', contentType: 'image/png', size: 100 }]
-    var setAttachments: Dispatch<SetStateAction<Attachment[]>> = jest.fn()
+    const onSend = jest.fn()
+    const attachments: Attachment[] = [{ url: 'blob:test', name: 'img.png', contentType: 'image/png', size: 100 }]
+    const setAttachments: Dispatch<SetStateAction<Attachment[]>> = jest.fn()
     render(React.createElement(PureMultimodalInput, {
       onSendMessage: onSend,
       value: 'hi',
@@ -145,32 +145,32 @@ describe('PureMultimodalInput', function () {
   // ── Enter Key Submit ──
 
   it('submits on Enter key', function () {
-    var onSend = jest.fn()
+    const onSend = jest.fn()
     render(React.createElement(PureMultimodalInput, { onSendMessage: onSend, value: 'hello', onChange: function () {} }))
-    var textarea = screen.getByLabelText('Chat message input')
+    const textarea = screen.getByLabelText('Chat message input')
     fireEvent.keyDown(textarea, { key: 'Enter', shiftKey: false })
     expect(onSend).toHaveBeenCalled()
   })
 
   it('does not submit on Shift+Enter', function () {
-    var onSend = jest.fn()
+    const onSend = jest.fn()
     render(React.createElement(PureMultimodalInput, { onSendMessage: onSend, value: 'hello', onChange: function () {} }))
-    var textarea = screen.getByLabelText('Chat message input')
+    const textarea = screen.getByLabelText('Chat message input')
     fireEvent.keyDown(textarea, { key: 'Enter', shiftKey: true })
     expect(onSend).not.toHaveBeenCalled()
   })
 
   it('does not submit on Enter when input empty and no attachments', function () {
-    var onSend = jest.fn()
+    const onSend = jest.fn()
     render(React.createElement(PureMultimodalInput, { onSendMessage: onSend, value: '', onChange: function () {} }))
-    var textarea = screen.getByLabelText('Chat message input')
+    const textarea = screen.getByLabelText('Chat message input')
     fireEvent.keyDown(textarea, { key: 'Enter', shiftKey: false })
     expect(onSend).not.toHaveBeenCalled()
   })
 
   it('submits with attachments only via Enter', function () {
-    var onSend = jest.fn()
-    var attachments: Attachment[] = [{ url: 'blob:img', name: 'pic.jpg', contentType: 'image/jpeg', size: 200 }]
+    const onSend = jest.fn()
+    const attachments: Attachment[] = [{ url: 'blob:img', name: 'pic.jpg', contentType: 'image/jpeg', size: 200 }]
     render(React.createElement(PureMultimodalInput, {
       onSendMessage: onSend,
       value: '',
@@ -178,7 +178,7 @@ describe('PureMultimodalInput', function () {
       attachments: attachments,
       setAttachments: function () {},
     }))
-    var textarea = screen.getByLabelText('Chat message input')
+    const textarea = screen.getByLabelText('Chat message input')
     fireEvent.keyDown(textarea, { key: 'Enter', shiftKey: false })
     expect(onSend).toHaveBeenCalled()
   })
@@ -201,7 +201,7 @@ describe('PureMultimodalInput', function () {
   })
 
   it('calls onLanguageChange when external handler provided', function () {
-    var onLangChange = jest.fn()
+    const onLangChange = jest.fn()
     render(React.createElement(PureMultimodalInput, { selectedLanguage: 'en', onLanguageChange: onLangChange }))
     fireEvent.click(screen.getByTitle('chat.select_language'))
     fireEvent.click(screen.getByText('தமிழ்'))
@@ -211,7 +211,7 @@ describe('PureMultimodalInput', function () {
   // ── Attachments ──
 
   it('renders attachment previews', function () {
-    var attachments: Attachment[] = [
+    const attachments: Attachment[] = [
       { url: 'blob:1', name: 'doc.pdf', contentType: 'application/pdf', size: 500 },
     ]
     render(React.createElement(PureMultimodalInput, { attachments: attachments }))
@@ -219,7 +219,7 @@ describe('PureMultimodalInput', function () {
   })
 
   it('renders image attachment with Img tag', function () {
-    var attachments: Attachment[] = [
+    const attachments: Attachment[] = [
       { url: 'blob:img', name: 'photo.jpg', contentType: 'image/jpeg', size: 300 },
     ]
     render(React.createElement(PureMultimodalInput, { attachments: attachments }))
@@ -227,7 +227,7 @@ describe('PureMultimodalInput', function () {
   })
 
   it('renders non-image attachment as file extension', function () {
-    var attachments: Attachment[] = [
+    const attachments: Attachment[] = [
       { url: 'blob:doc', name: 'document.pdf', contentType: 'application/pdf', size: 500 },
     ]
     render(React.createElement(PureMultimodalInput, { attachments: attachments }))
@@ -242,8 +242,8 @@ describe('PureMultimodalInput', function () {
       onChange: function () {},
     }))
     // Trigger file change to create upload queue
-    var fileInput = screen.getByLabelText('Upload attachment files')
-    var file = new File(['test'], 'report.pdf', { type: 'application/pdf' })
+    const fileInput = screen.getByLabelText('Upload attachment files')
+    const file = new File(['test'], 'report.pdf', { type: 'application/pdf' })
     fireEvent.change(fileInput, { target: { files: [file] } })
     // wait for setTimeout in uploadFile
     act(function () { jest.advanceTimersByTime(710) })
@@ -254,7 +254,7 @@ describe('PureMultimodalInput', function () {
 
   it('handleFileChange handles empty file list', function () {
     render(React.createElement(PureMultimodalInput, {}))
-    var fileInput = screen.getByLabelText('Upload attachment files') as HTMLInputElement
+    const fileInput = screen.getByLabelText('Upload attachment files') as HTMLInputElement
     fireEvent.change(fileInput, { target: { files: [] } })
     // Should not throw - no-op behavior
   })
@@ -268,13 +268,13 @@ describe('PureMultimodalInput', function () {
   // ── removeAttachment ──
 
   it('displays remove button on attachments', function () {
-    var attachments: Attachment[] = [
+    const attachments: Attachment[] = [
       { url: 'blob:1', name: 'test.pdf', contentType: 'application/pdf', size: 100 },
     ]
     render(React.createElement(PureMultimodalInput, { attachments: attachments }))
     // Should have a button with X icon to remove
-    var removeButtons = screen.getAllByRole('button')
-    var xButton = removeButtons.find(function (b) { return b.querySelector('svg') })
+    const removeButtons = screen.getAllByRole('button')
+    const xButton = removeButtons.find(function (b) { return b.querySelector('svg') })
     expect(xButton).toBeTruthy()
   })
 
@@ -282,7 +282,7 @@ describe('PureMultimodalInput', function () {
 
   it('manages input state internally when no value/onChange provided', function () {
     render(React.createElement(PureMultimodalInput, {}))
-    var textarea = screen.getByLabelText('Chat message input') as HTMLTextAreaElement
+    const textarea = screen.getByLabelText('Chat message input') as HTMLTextAreaElement
     expect(textarea.value).toBe('')
     fireEvent.change(textarea, { target: { value: 'typing' } })
     expect(textarea.value).toBe('typing')
@@ -292,8 +292,8 @@ describe('PureMultimodalInput', function () {
 
   it('attachments button click triggers file input', function () {
     render(React.createElement(PureMultimodalInput, {}))
-    var fileInput = screen.getByLabelText('Upload attachment files') as HTMLInputElement
-    var clickSpy = jest.fn()
+    const fileInput = screen.getByLabelText('Upload attachment files') as HTMLInputElement
+    const clickSpy = jest.fn()
     fileInput.click = clickSpy
     fireEvent.click(screen.getByTestId('attachments-button'))
     expect(clickSpy).toHaveBeenCalled()
@@ -302,9 +302,9 @@ describe('PureMultimodalInput', function () {
   // ─── iOS visualViewport keyboard handling ──
 
   it('handles visualViewport resize for keyboard', function () {
-    var addEventListenerSpy = jest.fn()
-    var removeEventListenerSpy = jest.fn()
-    var mockVisualViewport = {
+    const addEventListenerSpy = jest.fn()
+    const removeEventListenerSpy = jest.fn()
+    const mockVisualViewport = {
       addEventListener: addEventListenerSpy,
       removeEventListener: removeEventListenerSpy,
       height: 500,
@@ -314,10 +314,10 @@ describe('PureMultimodalInput', function () {
       configurable: true,
       writable: true,
     })
-    var innerHeight = window.innerHeight
+    const innerHeight = window.innerHeight
     window.innerHeight = 800
 
-    var { unmount } = render(React.createElement(PureMultimodalInput, {}))
+    const { unmount } = render(React.createElement(PureMultimodalInput, {}))
     expect(addEventListenerSpy).toHaveBeenCalledWith('resize', expect.any(Function))
 
     unmount()
@@ -326,7 +326,7 @@ describe('PureMultimodalInput', function () {
   })
 
   it('handles empty visualViewport', function () {
-    var origViewport = window.visualViewport
+    const origViewport = window.visualViewport
     Object.defineProperty(window, 'visualViewport', {
       value: null,
       configurable: true,
@@ -352,12 +352,12 @@ describe('PureMultimodalInput', function () {
   })
 
   it('handles vibration error gracefully', function () {
-    var origVibrate = navigator.vibrate
+    const origVibrate = navigator.vibrate
     Object.defineProperty(navigator, 'vibrate', {
       value: function () { throw new Error('no vibrate') },
       configurable: true,
     })
-    var onSend = jest.fn()
+    const onSend = jest.fn()
     render(React.createElement(PureMultimodalInput, { onSendMessage: onSend, value: 'hi', onChange: function () {} }))
     fireEvent.click(screen.getByLabelText('Send message'))
     expect(onSend).toHaveBeenCalled()
@@ -368,7 +368,7 @@ describe('PureMultimodalInput', function () {
 
   it('renders mic button non-active state', function () {
     render(React.createElement(PureMultimodalInput, {}))
-    var micBtn = screen.getByLabelText('Use microphone')
+    const micBtn = screen.getByLabelText('Use microphone')
     expect(micBtn).not.toBeDisabled()
   })
 
@@ -385,7 +385,7 @@ describe('PureMultimodalInput', function () {
   // ── Additional coverage ──
 
   it('does not submit on Enter when canSend is false', function () {
-    var onSend = jest.fn()
+    const onSend = jest.fn()
     render(React.createElement(PureMultimodalInput, { onSendMessage: onSend, value: 'hello', onChange: function () {}, canSend: false }))
     fireEvent.keyDown(screen.getByLabelText('Chat message input'), { key: 'Enter', shiftKey: false })
     expect(onSend).not.toHaveBeenCalled()

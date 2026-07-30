@@ -5,8 +5,8 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
-var mockSetConnectivity = jest.fn();
-var mockUseAppStore = jest.fn();
+const mockSetConnectivity = jest.fn();
+const mockUseAppStore = jest.fn();
 
 jest.mock('@/lib/store', () => ({
   useAppStore: (selector: any) => mockUseAppStore(selector),
@@ -36,7 +36,7 @@ describe('ConnectivityProvider', function() {
   });
 
   it('wraps children in a fragment provider structure', function() {
-    var { container } = render(
+    const { container } = render(
       <ConnectivityProvider>
         <span>foo</span>
         <span>bar</span>

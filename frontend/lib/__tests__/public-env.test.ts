@@ -36,24 +36,24 @@ describe('public-env', function() {
     });
 
     it('preserves query parameters', function() {
-      var url = publicApiWebSocketUrl('/tracking?group=abc');
+      const url = publicApiWebSocketUrl('/tracking?group=abc');
       expect(url).toBe('ws://localhost:8000/tracking?group=abc');
     });
 
     it('removes hash fragment', function() {
-      var url = publicApiWebSocketUrl('/path#section');
+      const url = publicApiWebSocketUrl('/path#section');
       expect(url).toBe('ws://localhost:8000/path');
     });
   });
 
   describe('fallback behavior', function() {
     it('uses fallback defaults when env vars are missing', function() {
-      var OLD_API = process.env.NEXT_PUBLIC_API_URL;
-      var OLD_CHAT = process.env.NEXT_PUBLIC_CHATBOT_URL;
+      const OLD_API = process.env.NEXT_PUBLIC_API_URL;
+      const OLD_CHAT = process.env.NEXT_PUBLIC_CHATBOT_URL;
       delete process.env.NEXT_PUBLIC_API_URL;
       delete process.env.NEXT_PUBLIC_CHATBOT_URL;
 
-      var mod: typeof import('../public-env');
+      let mod: typeof import('../public-env');
       jest.isolateModules(() => {
         mod = require('../public-env');
       });
@@ -66,13 +66,13 @@ describe('public-env', function() {
     });
 
     it('logs warning when env vars missing and not in test mode', function() {
-      var OLD_API = process.env.NEXT_PUBLIC_API_URL;
-      var OLD_CHAT = process.env.NEXT_PUBLIC_CHATBOT_URL;
-      var OLD_NODE_ENV = process.env.NODE_ENV;
+      const OLD_API = process.env.NEXT_PUBLIC_API_URL;
+      const OLD_CHAT = process.env.NEXT_PUBLIC_CHATBOT_URL;
+      const OLD_NODE_ENV = process.env.NODE_ENV;
       delete process.env.NEXT_PUBLIC_API_URL;
       delete process.env.NEXT_PUBLIC_CHATBOT_URL;
       process.env.NODE_ENV = 'development';
-      var warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+      const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
       jest.isolateModules(() => {
         require('../public-env');
       });
@@ -84,11 +84,11 @@ describe('public-env', function() {
     });
 
     it('does not log warning in test mode when env vars missing', function() {
-      var OLD_API = process.env.NEXT_PUBLIC_API_URL;
-      var OLD_CHAT = process.env.NEXT_PUBLIC_CHATBOT_URL;
+      const OLD_API = process.env.NEXT_PUBLIC_API_URL;
+      const OLD_CHAT = process.env.NEXT_PUBLIC_CHATBOT_URL;
       delete process.env.NEXT_PUBLIC_API_URL;
       delete process.env.NEXT_PUBLIC_CHATBOT_URL;
-      var warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+      const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
       jest.isolateModules(() => {
         require('../public-env');
       });

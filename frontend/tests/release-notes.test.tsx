@@ -5,7 +5,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import ReleaseNotesPage from '@/app/release-notes/page';
 
-var mockFetchReleases = jest.fn();
+const mockFetchReleases = jest.fn();
 
 jest.mock('@/lib/api/update-api', function () {
   return {
@@ -13,11 +13,11 @@ jest.mock('@/lib/api/update-api', function () {
   };
 });
 
-jest.mock('@/components/layout/TerminalHeader', function () {
+jest.mock('@/components/ui/TerminalHeader', function () {
   return { TerminalHeader: function () { return React.createElement('div', { 'data-testid': 'terminal-header' }); } };
 });
 
-var releases = [
+const releases = [
   { id: 1, version: '1.1.0', channel: 'stable', title: 'Bug fixes', is_security: false, published_at: '2026-07-01T00:00:00Z' },
   { id: 2, version: '1.2.0-beta', channel: 'beta', title: 'New features', is_security: true, published_at: '2026-07-15T00:00:00Z' },
 ];

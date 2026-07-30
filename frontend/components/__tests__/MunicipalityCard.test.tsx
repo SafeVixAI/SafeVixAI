@@ -9,7 +9,7 @@ jest.mock('next/link', function() {
 })
 
 describe('MunicipalityCard', function () {
-  var baseMuni = {
+  const baseMuni = {
     slug: 'chennai',
     name: 'Chennai',
     shortName: 'Chennai',
@@ -55,7 +55,7 @@ describe('MunicipalityCard', function () {
   })
 
   it('renders dash for null population', function () {
-    var muni = Object.assign({}, baseMuni, { population: null })
+    const muni = Object.assign({}, baseMuni, { population: null })
     render(React.createElement(MunicipalityCard, { municipality: muni }))
     expect(screen.queryByText('Cr')).not.toBeInTheDocument()
     expect(screen.queryByText('L')).not.toBeInTheDocument()
@@ -68,7 +68,7 @@ describe('MunicipalityCard', function () {
   })
 
   it('does not render ward count when zero', function () {
-    var muni = Object.assign({}, baseMuni, { wardCount: 0 })
+    const muni = Object.assign({}, baseMuni, { wardCount: 0 })
     render(React.createElement(MunicipalityCard, { municipality: muni }))
     expect(screen.queryByText('wards')).not.toBeInTheDocument()
   })
@@ -79,45 +79,45 @@ describe('MunicipalityCard', function () {
   })
 
   it('does not render distance when null', function () {
-    var muni = Object.assign({}, baseMuni, { distanceKm: null })
+    const muni = Object.assign({}, baseMuni, { distanceKm: null })
     render(React.createElement(MunicipalityCard, { municipality: muni }))
     expect(screen.queryByText('km')).not.toBeInTheDocument()
   })
 
   it('does not render helpline when missing', function () {
-    var muni = Object.assign({}, baseMuni, { helplinePhone: null })
+    const muni = Object.assign({}, baseMuni, { helplinePhone: null })
     render(React.createElement(MunicipalityCard, { municipality: muni }))
     expect(screen.queryByText('1913')).not.toBeInTheDocument()
   })
 
   it('renders Corp badge for municipal_corporation', function () {
-    var muni = Object.assign({}, baseMuni, { municipalityType: 'municipal_corporation' })
+    const muni = Object.assign({}, baseMuni, { municipalityType: 'municipal_corporation' })
     render(React.createElement(MunicipalityCard, { municipality: muni }))
     expect(screen.getByText('Corp')).toBeInTheDocument()
   })
 
   it('renders Muni badge for municipality', function () {
-    var muni = Object.assign({}, baseMuni, { municipalityType: 'municipality' })
+    const muni = Object.assign({}, baseMuni, { municipalityType: 'municipality' })
     render(React.createElement(MunicipalityCard, { municipality: muni }))
     expect(screen.getByText('Muni')).toBeInTheDocument()
   })
 
   it('has correct Link href to /guide/{slug}', function () {
     render(React.createElement(MunicipalityCard, { municipality: baseMuni }))
-    var link = screen.getByTestId('next-link')
+    const link = screen.getByTestId('next-link')
     expect(link.getAttribute('href')).toBe('/guide/chennai')
   })
 
   it('applies known state color class', function () {
     render(React.createElement(MunicipalityCard, { municipality: baseMuni }))
-    var badge = screen.getByText('TN')
+    const badge = screen.getByText('TN')
     expect(badge.className).toMatch(/emerald/)
   })
 
   it('applies fallback state color for unknown state', function () {
-    var muni = Object.assign({}, baseMuni, { stateCode: 'XX' })
+    const muni = Object.assign({}, baseMuni, { stateCode: 'XX' })
     render(React.createElement(MunicipalityCard, { municipality: muni }))
-    var badge = screen.getByText('XX')
+    const badge = screen.getByText('XX')
     expect(badge.className).toMatch(/brand/)
   })
 })

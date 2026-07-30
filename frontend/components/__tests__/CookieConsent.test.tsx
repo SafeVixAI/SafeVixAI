@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 SafeVixAI Team
 
-var mockSetAnalyticsOptIn = jest.fn()
+const mockSetAnalyticsOptIn = jest.fn()
 jest.mock('@/lib/store', function() {
   return {
     useAppStore: function(selector: any) {
@@ -32,7 +32,7 @@ describe('CookieConsent', function() {
   })
 
   it('starts hidden', function() {
-    var { container } = render(React.createElement(CookieConsent))
+    const { container } = render(React.createElement(CookieConsent))
     expect(container.innerHTML).toBe('')
   })
 
@@ -46,7 +46,7 @@ describe('CookieConsent', function() {
 
   it('stays hidden when consent already stored', function() {
     localStorage.setItem(ANALYTICS_CONSENT_KEY, 'granted')
-    var { container } = render(React.createElement(CookieConsent))
+    const { container } = render(React.createElement(CookieConsent))
     act(function() { jest.advanceTimersByTime(5000) })
     expect(container.innerHTML).toBe('')
   })
@@ -71,7 +71,7 @@ describe('CookieConsent', function() {
 
   it('stays hidden when E2E skip flag is set', function() {
     localStorage.setItem('__E2E_SKIP_AUTH__', 'true')
-    var { container } = render(React.createElement(CookieConsent))
+    const { container } = render(React.createElement(CookieConsent))
     act(function() { jest.advanceTimersByTime(5000) })
     expect(container.innerHTML).toBe('')
   })

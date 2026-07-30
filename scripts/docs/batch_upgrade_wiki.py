@@ -1,20 +1,19 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2026 SafeVixAI Team
 #!/usr/bin/env python3
-"""
-Batch upgrade AST stubs to LLM docs with email alerts on failure.
+"""Batch upgrade AST stubs to LLM docs with email alerts on failure.
 Usage: python scripts/batch_upgrade_wiki.py [--limit N] [--delay SECS]
 """
-import os
-import sys
-import re
 import json
-import time
+import os
+import re
 import smtplib
-from pathlib import Path
+import sys
+import time
 from email.mime.text import MIMEText
-from urllib.request import Request, urlopen
+from pathlib import Path
 from urllib.error import HTTPError
+from urllib.request import Request, urlopen
 
 ROOT = Path(__file__).resolve().parent.parent.parent
 WIKI_CONTENT = ROOT / "docs" / "wiki" / "content"

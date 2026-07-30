@@ -19,14 +19,14 @@ describe('EMAIL_RULE', function() {
   });
 
   it('should accept valid email addresses', function() {
-    var valid = ['user@example.com', 'a@b.co', 'test.user@domain.org', 'name+tag@company.in', '123@xyz.ai'];
+    const valid = ['user@example.com', 'a@b.co', 'test.user@domain.org', 'name+tag@company.in', '123@xyz.ai'];
     valid.forEach(function(email) {
       expect(EMAIL_RULE.pattern!.test(email)).toBe(true);
     });
   });
 
   it('should reject invalid email addresses', function() {
-    var invalid = ['', '   ', 'notanemail', '@nodomain', 'nouser@', 'space in@test.com', 'a@b', 'a@.com'];
+    const invalid = ['', '   ', 'notanemail', '@nodomain', 'nouser@', 'space in@test.com', 'a@b', 'a@.com'];
     invalid.forEach(function(email) {
       expect(EMAIL_RULE.pattern!.test(email)).toBe(false);
     });
@@ -86,8 +86,8 @@ describe('LOGIN_RULES', function() {
 });
 
 describe('SIGNUP_RULES', function() {
-  var password = 'securePass123';
-  var rules: ValidationRule[];
+  const password = 'securePass123';
+  let rules: ValidationRule[];
 
   beforeEach(function() {
     rules = SIGNUP_RULES(password);
@@ -121,34 +121,34 @@ describe('SIGNUP_RULES', function() {
   });
 
   it('confirmPassword validate should return null when passwords match', function() {
-    var err = rules[3].validate!(password);
+    const err = rules[3].validate!(password);
     expect(err).toBeNull();
   });
 
   it('confirmPassword validate should return error when passwords do not match', function() {
-    var err = rules[3].validate!('differentPassword');
+    const err = rules[3].validate!('differentPassword');
     expect(err).toBe('Passwords do not match');
   });
 
   it('confirmPassword validate should return error when confirm is empty', function() {
-    var err = rules[3].validate!('');
+    const err = rules[3].validate!('');
     expect(err).toBe('Passwords do not match');
   });
 
   it('should return separate instances per call', function() {
-    var rules2 = SIGNUP_RULES('otherPass');
+    const rules2 = SIGNUP_RULES('otherPass');
     expect(rules2[3].validate!('securePass123')).toBe('Passwords do not match');
     expect(rules2[3].validate!('otherPass')).toBeNull();
   });
 
   it('should handle empty password parameter', function() {
-    var emptyRules = SIGNUP_RULES('');
+    const emptyRules = SIGNUP_RULES('');
     expect(emptyRules[3].validate!('')).toBeNull();
     expect(emptyRules[3].validate!('x')).toBe('Passwords do not match');
   });
 
   it('should handle special characters in password', function() {
-    var specialRules = SIGNUP_RULES('p@$$w0rd!');
+    const specialRules = SIGNUP_RULES('p@$$w0rd!');
     expect(specialRules[3].validate!('p@$$w0rd!')).toBeNull();
     expect(specialRules[3].validate!('p@$$w0rd')).toBe('Passwords do not match');
   });
@@ -167,12 +167,12 @@ describe('RESET_RULES', function() {
 
 describe('SIGNUP_RULES with empty string edge cases', function() {
   it('confirmPassword validate should handle null-ish matching', function() {
-    var rules = SIGNUP_RULES('');
+    const rules = SIGNUP_RULES('');
     expect(rules[3].validate!('')).toBeNull();
   });
 
   it('confirmPassword validate should handle whitespace', function() {
-    var rules = SIGNUP_RULES('  ');
+    const rules = SIGNUP_RULES('  ');
     expect(rules[3].validate!('  ')).toBeNull();
     expect(rules[3].validate!('')).toBe('Passwords do not match');
   });

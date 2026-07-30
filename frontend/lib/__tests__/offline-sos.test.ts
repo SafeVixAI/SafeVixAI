@@ -1,20 +1,20 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 SafeVixAI Team
 
-var mockRecords: Array<Record<string, unknown>> = [];
+const mockRecords: Array<Record<string, unknown>> = [];
 
-var mockStore = {
+const mockStore = {
   getAllKeys: jest.fn(async () => mockRecords.map((record) => record.id as number)),
   getAll: jest.fn(async () => [...mockRecords]),
   delete: jest.fn(async (key: number) => {
-    var index = mockRecords.findIndex((record) => record.id === key);
+    const index = mockRecords.findIndex((record) => record.id === key);
     if (index >= 0) {
       mockRecords.splice(index, 1);
     }
   }),
 };
 
-var mockDb = {
+const mockDb = {
   add: jest.fn(async (_storeName: string, value: Record<string, unknown>) => {
     mockRecords.push({ ...value, id: mockRecords.length + 1 });
   }),
@@ -25,7 +25,7 @@ var mockDb = {
   })),
 };
 
-var mockOpenDB = jest.fn(async () => mockDb);
+const mockOpenDB = jest.fn(async () => mockDb);
 
 jest.mock('idb', () => ({
   openDB: () => mockOpenDB(),

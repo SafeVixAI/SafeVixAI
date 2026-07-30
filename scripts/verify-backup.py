@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2026 SafeVixAI Team
-"""
-verify-backup.py — Automated backup restore verification.
+"""verify-backup.py — Automated backup restore verification.
 
 Usage:
   python scripts/verify-backup.py                    # Use latest backup artifact
@@ -16,13 +15,10 @@ from __future__ import annotations
 
 import argparse
 import gzip
-import os
 import subprocess
 import sys
-import tempfile
 import time
 from pathlib import Path
-
 
 REQUIRED_TABLES = [
     "sos_incidents",

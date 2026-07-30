@@ -2,6 +2,7 @@
 # Copyright (c) 2026 SafeVixAI Team
 """Run on new machine to restore large data files from HuggingFace."""
 import os
+
 from huggingface_hub import snapshot_download
 
 snapshot_download(

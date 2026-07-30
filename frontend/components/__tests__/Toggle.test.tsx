@@ -10,18 +10,18 @@ jest.mock('@/lib/gsap', function() { return { gsap: { fromTo: jest.fn(), to: jes
 describe('Toggle', function() {
   it('renders unchecked by default', function() {
     render(React.createElement(Toggle, { checked: false, onChange: function() {} }))
-    var input = screen.getByRole('checkbox')
+    const input = screen.getByRole('checkbox')
     expect(input).toBeTruthy()
   })
 
   it('renders checked when checked is true', function() {
     render(React.createElement(Toggle, { checked: true, onChange: function() {} }))
-    var input = screen.getByRole('checkbox')
+    const input = screen.getByRole('checkbox')
     expect(input).toBeTruthy()
   })
 
   it('calls onChange with true when toggled on', function() {
-    var onChange = jest.fn()
+    const onChange = jest.fn()
     render(React.createElement(Toggle, { checked: false, onChange: onChange }))
     fireEvent.click(screen.getByRole('checkbox'))
   })

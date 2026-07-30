@@ -1,4 +1,4 @@
-var mockRouter = { push: jest.fn(), back: jest.fn(), replace: jest.fn() }
+const mockRouter = { push: jest.fn(), back: jest.fn(), replace: jest.fn() }
 jest.mock('next/navigation', function() { return { useRouter: function() { return mockRouter }, useSearchParams: function() { return new URLSearchParams() }, useParams: function() { return {} } } })
 jest.mock('next/image', function() { return function(props) { return React.createElement('img', props) } })
 jest.mock('lucide-react', function() { return new Proxy({}, { get: function() { return function() { return null } } }) })
@@ -36,8 +36,8 @@ import TermsError from '@/app/terms/error'
 import TrackSessionIdError from '@/app/track/[session_id]/error'
 import TrackingError from '@/app/tracking/error'
 
-var testError = new Error('Test error message')
-var mockReset = jest.fn()
+const testError = new Error('Test error message')
+const mockReset = jest.fn()
 
 function R(Comp) { render(React.createElement(Comp, { error: testError, reset: mockReset })) }
 

@@ -1,15 +1,15 @@
 jest.mock('@gsap/react', function() { return { useGSAP: jest.fn() } })
 jest.mock('@/lib/gsap', function() { return { gsap: { fromTo: jest.fn(), to: jest.fn(), set: jest.fn() } } })
 jest.mock('../../hooks/useLandingGSAP', function() {
-  var React = require('react')
+  const React = require('react')
   return {
     useScrollReveal: function() { return React.useRef(null) },
   }
 })
 
-var React = require('react')
-var { render, screen: rtlScreen } = require('@testing-library/react')
-var CommandCenter = require('../CommandCenter').default
+const React = require('react')
+const { render, screen: rtlScreen } = require('@testing-library/react')
+const CommandCenter = require('../CommandCenter').default
 
 describe('CommandCenter', function() {
   it('renders the section overline', function() {
@@ -54,17 +54,17 @@ describe('CommandCenter', function() {
 
   it('renders severity badges', function() {
     render(React.createElement(CommandCenter))
-    var p0Badges = rtlScreen.getAllByText('P0')
+    const p0Badges = rtlScreen.getAllByText('P0')
     expect(p0Badges.length).toBeGreaterThanOrEqual(2)
-    var p1Badges = rtlScreen.getAllByText('P1')
+    const p1Badges = rtlScreen.getAllByText('P1')
     expect(p1Badges.length).toBeGreaterThanOrEqual(1)
-    var p2Badges = rtlScreen.getAllByText('P2')
+    const p2Badges = rtlScreen.getAllByText('P2')
     expect(p2Badges.length).toBeGreaterThanOrEqual(1)
   })
 
   it('renders the India SVG map', function() {
     render(React.createElement(CommandCenter))
-    var map = rtlScreen.getByRole('img')
+    const map = rtlScreen.getByRole('img')
     expect(map.getAttribute('aria-label')).toContain('India')
   })
 

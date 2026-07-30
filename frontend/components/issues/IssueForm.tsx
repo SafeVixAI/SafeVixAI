@@ -14,6 +14,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { logClientError } from '@/lib/client-logger';
 import { useAppStore } from '@/lib/store';
 import type { IssueType, IssueSeverity, IssuePriority } from '@/lib/api/types';
+import { createIssue } from '@/lib/api/issues';
 
 const ISSUE_TYPE_OPTIONS: Array<{ value: IssueType; label: string; icon: React.ReactNode }> = [
   { value: 'bug', label: 'Bug Report', icon: <Bug className="h-4 w-4" /> },
@@ -81,7 +82,6 @@ export function IssueForm({ onSuccess, prefilledType }: IssueFormProps) {
 
     setIsSubmitting(true);
     try {
-      const { createIssue } = await import('@/lib/api/issues');
       const result = await createIssue({
         issueType,
         severity,

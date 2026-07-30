@@ -3,7 +3,7 @@ jest.mock('@/lib/geolocation', function() { return { useGeolocation: function() 
 jest.mock('@/lib/client-logger', function() { return { logClientError: jest.fn() } })
 jest.mock('@/lib/offline-ai', function() { return { getOfflineAI: jest.fn(function() { return Promise.resolve() }), askOfflineAI: jest.fn(function() { return Promise.resolve('Offline reply') }) } })
 jest.mock('@/lib/store', function() {
-  var state = { aiMode: 'online', setAiMode: jest.fn(), authToken: null }
+  const state = { aiMode: 'online', setAiMode: jest.fn(), authToken: null }
   return {
     useAppStore: function(selector: any) {
       if (typeof selector === 'function') return selector(state)
@@ -17,7 +17,7 @@ jest.mock('@/components/ConnectivityBadge', function() {
 })
 
 jest.mock('lucide-react', function() {
-  var React = require('react')
+  const React = require('react')
   return {
     Send: function() { return React.createElement('span', { 'data-testid': 'send-icon' }) },
     Loader2: function() { return React.createElement('span', { 'data-testid': 'loader-icon' }) },
@@ -69,14 +69,14 @@ describe('ChatInterface', function() {
 
   it('enables send button when input has text', function() {
     render(React.createElement(ChatInterface))
-    var input = screen.getByLabelText('Chat message input')
+    const input = screen.getByLabelText('Chat message input')
     fireEvent.change(input, { target: { value: 'Hello' } })
     expect(screen.getByLabelText('Send message')).not.toBeDisabled()
   })
 
   it('sends message on Enter key', function() {
     render(React.createElement(ChatInterface))
-    var input = screen.getByLabelText('Chat message input')
+    const input = screen.getByLabelText('Chat message input')
     fireEvent.change(input, { target: { value: 'Hello' } })
     fireEvent.keyDown(input, { key: 'Enter', shiftKey: false })
     expect(screen.getByText('Hello')).toBeInTheDocument()
@@ -84,7 +84,7 @@ describe('ChatInterface', function() {
 
   it('clears input after sending', function() {
     render(React.createElement(ChatInterface))
-    var input = screen.getByLabelText('Chat message input') as HTMLInputElement
+    const input = screen.getByLabelText('Chat message input') as HTMLInputElement
     fireEvent.change(input, { target: { value: 'Hello' } })
     fireEvent.keyDown(input, { key: 'Enter', shiftKey: false })
     expect(input.value).toBe('')
@@ -92,7 +92,7 @@ describe('ChatInterface', function() {
 
   it('shows user message bubble with avatar', function() {
     render(React.createElement(ChatInterface))
-    var input = screen.getByLabelText('Chat message input')
+    const input = screen.getByLabelText('Chat message input')
     fireEvent.change(input, { target: { value: 'Test message' } })
     fireEvent.keyDown(input, { key: 'Enter', shiftKey: false })
     expect(screen.getByText('Test message')).toBeInTheDocument()
@@ -113,7 +113,7 @@ describe('ChatInterface', function() {
   it('handles fetch error in online mode', async function() {
     global.fetch = jest.fn(function() { return Promise.reject(new Error('Network error')) }) as jest.Mock
     render(React.createElement(ChatInterface))
-    var input = screen.getByLabelText('Chat message input')
+    const input = screen.getByLabelText('Chat message input')
     fireEvent.change(input, { target: { value: 'Hi' } })
     fireEvent.keyDown(input, { key: 'Enter', shiftKey: false })
     await waitFor(function() {
@@ -124,7 +124,7 @@ describe('ChatInterface', function() {
   it('handles non-ok response in online mode', async function() {
     global.fetch = jest.fn(function() { return Promise.resolve({ ok: false, status: 500 }) }) as jest.Mock
     render(React.createElement(ChatInterface))
-    var input = screen.getByLabelText('Chat message input')
+    const input = screen.getByLabelText('Chat message input')
     fireEvent.change(input, { target: { value: 'Hi' } })
     fireEvent.keyDown(input, { key: 'Enter', shiftKey: false })
     await waitFor(function() {
@@ -135,7 +135,7 @@ describe('ChatInterface', function() {
   it('sends message via offline mode', async function() {
     require('@/lib/store').__setState({ aiMode: 'offline' })
     render(React.createElement(ChatInterface))
-    var input = screen.getByLabelText('Chat message input')
+    const input = screen.getByLabelText('Chat message input')
     fireEvent.change(input, { target: { value: 'Hello offline' } })
     fireEvent.keyDown(input, { key: 'Enter', shiftKey: false })
     await waitFor(function() {
@@ -145,10 +145,10 @@ describe('ChatInterface', function() {
 
   it('handles offline mode error', async function() {
     require('@/lib/store').__setState({ aiMode: 'offline' })
-    var askOfflineAI = require('@/lib/offline-ai').askOfflineAI
+    const askOfflineAI = require('@/lib/offline-ai').askOfflineAI
     askOfflineAI.mockRejectedValueOnce(new Error('Model error'))
     render(React.createElement(ChatInterface))
-    var input = screen.getByLabelText('Chat message input')
+    const input = screen.getByLabelText('Chat message input')
     fireEvent.change(input, { target: { value: 'Hello' } })
     fireEvent.keyDown(input, { key: 'Enter', shiftKey: false })
     await waitFor(function() {

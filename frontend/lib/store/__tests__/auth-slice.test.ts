@@ -13,8 +13,8 @@ describe('AuthSlice', function() {
   }
 
   it('has default values', function() {
-    var store = createTestStore()
-    var state = store.getState()
+    const store = createTestStore()
+    const state = store.getState()
     expect(state.isAuthenticated).toBe(false)
     expect(state.operatorName).toBe('')
     expect(state.authToken).toBeNull()
@@ -22,9 +22,9 @@ describe('AuthSlice', function() {
   })
 
   it('setAuth sets all state', function() {
-    var store = createTestStore()
+    const store = createTestStore()
     store.getState().setAuth('John Doe', 'token-123', 'admin')
-    var state = store.getState()
+    const state = store.getState()
     expect(state.isAuthenticated).toBe(true)
     expect(state.operatorName).toBe('John Doe')
     expect(state.authToken).toBe('token-123')
@@ -32,9 +32,9 @@ describe('AuthSlice', function() {
   })
 
   it('setAuth with minimal arguments', function() {
-    var store = createTestStore()
+    const store = createTestStore()
     store.getState().setAuth('Jane')
-    var state = store.getState()
+    const state = store.getState()
     expect(state.isAuthenticated).toBe(true)
     expect(state.operatorName).toBe('Jane')
     expect(state.authToken).toBeNull()
@@ -42,10 +42,10 @@ describe('AuthSlice', function() {
   })
 
   it('clearAuth resets to defaults', function() {
-    var store = createTestStore()
+    const store = createTestStore()
     store.getState().setAuth('John Doe', 'token-123', 'admin')
     store.getState().clearAuth()
-    var state = store.getState()
+    const state = store.getState()
     expect(state.isAuthenticated).toBe(false)
     expect(state.operatorName).toBe('')
     expect(state.authToken).toBeNull()
@@ -53,7 +53,7 @@ describe('AuthSlice', function() {
   })
 
   it('setAuthToken updates only token', function() {
-    var store = createTestStore()
+    const store = createTestStore()
     store.getState().setAuth('John', 'old-token')
     store.getState().setAuthToken('new-token')
     expect(store.getState().authToken).toBe('new-token')
@@ -61,9 +61,9 @@ describe('AuthSlice', function() {
   })
 
   it('setAuthRole updates only role', function() {
-    var store = createTestStore()
+    const store = createTestStore()
     store.getState().setAuthRole('officer')
-    var state = store.getState()
+    const state = store.getState()
     expect(state.authRole).toBe('officer')
     expect(state.isAuthenticated).toBe(false)
   })

@@ -1,5 +1,5 @@
-var mockTokenValue = ''
-var mockSessionId = 'session-abc'
+let mockTokenValue = ''
+let mockSessionId = 'session-abc'
 jest.mock('@/lib/live-tracking', function() { return { subscribeToTracking: jest.fn().mockReturnValue({ unsubscribe: jest.fn() }) } })
 jest.mock('@/lib/supabase-auth', function() { return { getSupabaseBrowserClient: function() { var c = { channel: function() { return c }, on: function() { return c }, subscribe: function() { return c }, removeChannel: jest.fn() }; return c } } })
 jest.mock('@/lib/gsap', function() { return { gsap: { to: jest.fn(), fromTo: jest.fn(), timeline: function() { return { to: jest.fn(), fromTo: jest.fn() } } } } })
@@ -10,11 +10,11 @@ jest.mock('next/navigation', function() {
 })
 jest.mock('lucide-react', function() { return new Proxy({}, { get: function() { return function() { return null } } }) })
 
-var { render, screen: rtlScreen, waitFor } = require('@testing-library/react')
-var React = require('react')
-var FamilyTrackingPage = require('../app/track/[session_id]/page').default
+const { render, screen: rtlScreen, waitFor } = require('@testing-library/react')
+const React = require('react')
+const FamilyTrackingPage = require('../app/track/[session_id]/page').default
 
-var mockLocationData = {
+const mockLocationData = {
   session_id: 'session-abc', user_name: 'Jane Doe', blood_group: 'A+',
   vehicle_number: 'TN-07-CD-5678', latitude: 13.0827, longitude: 80.2707,
   accuracy: 15, speed_kmh: 32, battery_percent: 75, is_active: true,
@@ -37,17 +37,17 @@ describe('FamilyTrackingPage', function() {
   })
 
   it('renders session expired message', async function() {
-    var { container } = render(React.createElement(FamilyTrackingPage, { params: Promise.resolve({ session_id: 'test-session' }) }))
+    const { container } = render(React.createElement(FamilyTrackingPage, { params: Promise.resolve({ session_id: 'test-session' }) }))
     await waitFor(function() { expect(container.textContent).toContain('Session Ended') })
   })
 
   it('renders without crashing for different session IDs', async function() {
-    var { container } = render(React.createElement(FamilyTrackingPage, { params: Promise.resolve({ session_id: 'another-session' }) }))
+    const { container } = render(React.createElement(FamilyTrackingPage, { params: Promise.resolve({ session_id: 'another-session' }) }))
     await waitFor(function() { expect(container).toBeTruthy() })
   })
 
   it('renders with session status indicator', async function() {
-    var { container } = render(React.createElement(FamilyTrackingPage, { params: Promise.resolve({ session_id: 'test-123' }) }))
+    const { container } = render(React.createElement(FamilyTrackingPage, { params: Promise.resolve({ session_id: 'test-123' }) }))
     await waitFor(function() { expect(container.textContent).toBeTruthy() })
   })
 

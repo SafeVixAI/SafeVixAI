@@ -1,8 +1,8 @@
 import React from 'react'
 
-var mockPosthogInit = jest.fn()
-var mockPosthog = { init: mockPosthogInit, capture: jest.fn() }
-var mockPostHogProvider = function MockPostHogProvider(_a: any) { var children = _a.children; return React.createElement(React.Fragment, null, children) }
+const mockPosthogInit = jest.fn()
+const mockPosthog = { init: mockPosthogInit, capture: jest.fn() }
+const mockPostHogProvider = function MockPostHogProvider(_a: any) { const children = _a.children; return React.createElement(React.Fragment, null, children) }
 
 jest.mock('posthog-js', function() { return { __esModule: true, default: mockPosthog } })
 jest.mock('posthog-js/react', function() { return { __esModule: true, PostHogProvider: mockPostHogProvider } })
@@ -11,7 +11,7 @@ import { render, screen } from '@testing-library/react'
 import { AnalyticsProvider } from '../analytics-provider'
 import { useAppStore } from '../store'
 
-var originalEnv = process.env
+const originalEnv = process.env
 
 beforeEach(function() {
   process.env = { ...originalEnv }

@@ -5,8 +5,6 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock
 
-import pytest
-
 from services.city_center_repo import (
     _HARDCODED_CENTERS,
     _OFFLINE_CENTERS,

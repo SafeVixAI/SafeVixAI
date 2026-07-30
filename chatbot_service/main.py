@@ -14,6 +14,7 @@ except ImportError:
     sentry_sdk = None
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+
 try:
     from slowapi import _rate_limit_exceeded_handler
     from slowapi.errors import RateLimitExceeded

@@ -7,7 +7,6 @@ import csv
 import json
 from pathlib import Path
 
-
 ROOT_DIR = Path(__file__).resolve().parents[1]
 DEFAULT_INPUT = ROOT_DIR / 'chatbot_service' / 'data' / 'accidents' / 'morth_2022'
 DEFAULT_OUTPUT_CSV = ROOT_DIR / 'chatbot_service' / 'data' / 'accidents' / 'accident_blackspots_preview.csv'

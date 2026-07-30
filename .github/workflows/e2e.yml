@@ -147,6 +147,8 @@ jobs:
         env:
           BACKEND_URL: http://localhost:8000
           CHATBOT_URL: http://localhost:8010
+          E2E_PORT: "3000"
+          E2E_BASE_URL: http://localhost:3000
         run: |
           npx playwright test e2e/ --reporter=github --grep-invert="Visual Regression|visual|Live tracking|Form validation|form_validation" 2>&1 || echo "E2E tests completed (non-blocking)"
 

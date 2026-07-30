@@ -1,7 +1,7 @@
-var mockStoreState = { crashDetectionEnabled: true, setCrashDetectionEnabled: jest.fn() }
+const mockStoreState = { crashDetectionEnabled: true, setCrashDetectionEnabled: jest.fn() }
 
 jest.mock('@/lib/store', function() {
-  var storeHook = function(selector: any) {
+  const storeHook = function(selector: any) {
     return typeof selector === 'function' ? selector(mockStoreState) : mockStoreState
   }
   return {
@@ -32,8 +32,8 @@ jest.mock('sonner', function() {
 import React from 'react'
 import { renderHook, act } from '@testing-library/react'
 
-var crashDetectionMod: any
-var analyticsMod: any
+let crashDetectionMod: any
+let analyticsMod: any
 
 beforeEach(function() {
   jest.clearAllMocks()
@@ -42,7 +42,7 @@ beforeEach(function() {
 })
 
 function renderEnhancedCrashDetection() {
-  var hookMod = require('../useEnhancedCrashDetection')
+  const hookMod = require('../useEnhancedCrashDetection')
   return renderHook(function() { return hookMod.useEnhancedCrashDetection() })
 }
 
@@ -53,14 +53,14 @@ describe('useEnhancedCrashDetection', function() {
   })
 
   it('returns null crashState and clearCrashState function', function() {
-    var { result } = renderEnhancedCrashDetection()
+    const { result } = renderEnhancedCrashDetection()
     expect(result.current.crashState).toBeNull()
     expect(typeof result.current.clearCrashState).toBe('function')
   })
 
   it('clearCrashState clears crashState after crash', function() {
-    var { result } = renderEnhancedCrashDetection()
-    var callback = crashDetectionMod.useCrashDetection.mock.calls[0][0].onCrashDetected
+    const { result } = renderEnhancedCrashDetection()
+    const callback = crashDetectionMod.useCrashDetection.mock.calls[0][0].onCrashDetected
     act(function() { callback(147.15) })
     expect(result.current.crashState).toEqual({ force: 147.15, severity: 'severe' })
     act(function() { result.current.clearCrashState() })
@@ -69,21 +69,21 @@ describe('useEnhancedCrashDetection', function() {
 
   it('handleCrashDetected calculates severe (>=15G)', function() {
     renderEnhancedCrashDetection()
-    var callback = crashDetectionMod.useCrashDetection.mock.calls[0][0].onCrashDetected
+    const callback = crashDetectionMod.useCrashDetection.mock.calls[0][0].onCrashDetected
     act(function() { callback(147.15) })
     expect(analyticsMod.track.crashDetected).toHaveBeenCalledWith('impact', expect.closeTo(15, 5))
   })
 
   it('handleCrashDetected calculates moderate (>=10G)', function() {
     renderEnhancedCrashDetection()
-    var callback = crashDetectionMod.useCrashDetection.mock.calls[0][0].onCrashDetected
+    const callback = crashDetectionMod.useCrashDetection.mock.calls[0][0].onCrashDetected
     act(function() { callback(98.1) })
     expect(analyticsMod.track.crashDetected).toHaveBeenCalledWith('impact', expect.closeTo(10, 5))
   })
 
   it('handleCrashDetected calculates minor (<10G)', function() {
     renderEnhancedCrashDetection()
-    var callback = crashDetectionMod.useCrashDetection.mock.calls[0][0].onCrashDetected
+    const callback = crashDetectionMod.useCrashDetection.mock.calls[0][0].onCrashDetected
     act(function() { callback(49.05) })
     expect(analyticsMod.track.crashDetected).toHaveBeenCalledWith('impact', expect.closeTo(5, 5))
   })

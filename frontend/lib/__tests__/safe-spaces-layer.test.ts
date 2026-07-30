@@ -11,7 +11,7 @@ describe('addSafeSpacesLayer', function() {
   });
 
   it('loads backend places response and adds a map layer', async function() {
-    var fetchMock = global.fetch as jest.Mock;
+    const fetchMock = global.fetch as jest.Mock;
     fetchMock.mockResolvedValue({
       ok: true,
       json: async () => ({
@@ -29,7 +29,7 @@ describe('addSafeSpacesLayer', function() {
       }),
     });
 
-    var map = {
+    const map = {
       getSource: jest.fn(() => undefined),
       addSource: jest.fn(),
       addLayer: jest.fn(),
@@ -64,7 +64,7 @@ describe('addSafeSpacesLayer', function() {
       json: async () => ({}),
     });
 
-    var map = {
+    const map = {
       getSource: jest.fn(() => undefined),
       addSource: jest.fn(),
       addLayer: jest.fn(),
@@ -74,7 +74,7 @@ describe('addSafeSpacesLayer', function() {
   });
 
   it('updates existing source via setData when source already exists (lines 54-58)', async function() {
-    var setData = jest.fn();
+    const setData = jest.fn();
     (global.fetch as jest.Mock).mockResolvedValue({
       ok: true,
       json: async () => [
@@ -82,7 +82,7 @@ describe('addSafeSpacesLayer', function() {
       ],
     });
 
-    var map = {
+    const map = {
       getSource: jest.fn(() => ({ setData } as any)),
       addSource: jest.fn(),
       addLayer: jest.fn(),
@@ -111,7 +111,7 @@ describe('addSafeSpacesLayer', function() {
       ],
     });
 
-    var map = {
+    const map = {
       getSource: jest.fn(() => undefined),
       addSource: jest.fn(),
       addLayer: jest.fn(),

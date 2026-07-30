@@ -7,7 +7,7 @@ import { Modal } from '../Modal'
 
 describe('Modal', function () {
   it('returns null when not open', function () {
-    var { container } = render(React.createElement(Modal, { open: false, onClose: jest.fn(), title: 'Test' }, null))
+    const { container } = render(React.createElement(Modal, { open: false, onClose: jest.fn(), title: 'Test' }, null))
     expect(container.innerHTML).toBe('')
   })
 
@@ -37,29 +37,29 @@ describe('Modal', function () {
   })
 
   it('close button calls onClose', function () {
-    var onClose = jest.fn()
+    const onClose = jest.fn()
     render(React.createElement(Modal, { open: true, onClose: onClose, title: 'Test' }, null))
     fireEvent.click(screen.getByLabelText('Close'))
     expect(onClose).toHaveBeenCalledTimes(1)
   })
 
   it('backdrop click calls onClose', function () {
-    var onClose = jest.fn()
+    const onClose = jest.fn()
     render(React.createElement(Modal, { open: true, onClose: onClose, title: 'Test' }, null))
-    var dialog = screen.getByRole('dialog')
+    const dialog = screen.getByRole('dialog')
     fireEvent.click(dialog)
     expect(onClose).toHaveBeenCalledTimes(1)
   })
 
   it('click inside panel does not trigger onClose', function () {
-    var onClose = jest.fn()
+    const onClose = jest.fn()
     render(React.createElement(Modal, { open: true, onClose: onClose, title: 'Test' }, React.createElement('button', null, 'Inner')))
     fireEvent.click(screen.getByText('Inner'))
     expect(onClose).not.toHaveBeenCalled()
   })
 
   it('Escape key calls onClose', function () {
-    var onClose = jest.fn()
+    const onClose = jest.fn()
     render(React.createElement(Modal, { open: true, onClose: onClose, title: 'Test' }, null))
     fireEvent.keyDown(document, { key: 'Escape' })
     expect(onClose).toHaveBeenCalledTimes(1)
@@ -67,25 +67,25 @@ describe('Modal', function () {
 
   it('uses size sm class', function () {
     render(React.createElement(Modal, { open: true, onClose: jest.fn(), title: 'Test', size: 'sm' }, null))
-    var dialog = screen.getByRole('dialog')
+    const dialog = screen.getByRole('dialog')
     expect(dialog.querySelector('.max-w-sm')).toBeTruthy()
   })
 
   it('uses size lg class', function () {
     render(React.createElement(Modal, { open: true, onClose: jest.fn(), title: 'Test', size: 'lg' }, null))
-    var dialog = screen.getByRole('dialog')
+    const dialog = screen.getByRole('dialog')
     expect(dialog.querySelector('.max-w-lg')).toBeTruthy()
   })
 
   it('has correct aria attributes', function () {
     render(React.createElement(Modal, { open: true, onClose: jest.fn(), title: 'Accessible Modal' }, null))
-    var dialog = screen.getByRole('dialog')
+    const dialog = screen.getByRole('dialog')
     expect(dialog.getAttribute('aria-modal')).toBe('true')
     expect(dialog.getAttribute('aria-label')).toBe('Accessible Modal')
   })
 
   it('traps focus with Tab', function () {
-    var firstBtn: HTMLElement // eslint-disable-line @typescript-eslint/no-unused-vars
+    let firstBtn: HTMLElement // eslint-disable-line @typescript-eslint/no-unused-vars
     render(React.createElement(Modal, { open: true, onClose: jest.fn(), title: 'Focus Test' },
       React.createElement('button', { ref: function(el) { if (el) firstBtn = el } }, 'First'),
       React.createElement('button', null, 'Last'),
@@ -94,18 +94,18 @@ describe('Modal', function () {
   })
 
   it('wraps Tab from last to first element', function () {
-    var onClose = jest.fn()
+    const onClose = jest.fn()
     render(React.createElement(Modal, { open: true, onClose: onClose, title: 'Tab Test' },
       React.createElement('button', { 'data-testid': 'tab-btn' }, 'Only'),
     ))
-    var btn = screen.getByTestId('tab-btn')
+    const btn = screen.getByTestId('tab-btn')
     btn.focus()
     fireEvent.keyDown(document, { key: 'Tab', shiftKey: false })
     expect(document.activeElement).toBe(screen.getByLabelText('Close'))
   })
 
   it('wraps Shift+Tab from first to last element', function () {
-    var onClose = jest.fn()
+    const onClose = jest.fn()
     render(React.createElement(Modal, { open: true, onClose: onClose, title: 'Tab Test' },
       React.createElement('button', { 'data-testid': 'tab-btn' }, 'Only'),
     ))
@@ -115,21 +115,21 @@ describe('Modal', function () {
   })
 
   it('unmounts cleanly without error', function () {
-    var { unmount } = render(React.createElement(Modal, { open: true, onClose: jest.fn(), title: 'Cleanup' }, null))
+    const { unmount } = render(React.createElement(Modal, { open: true, onClose: jest.fn(), title: 'Cleanup' }, null))
     expect(function() { unmount() }).not.toThrow()
   })
 
   it('removes event listeners on unmount', function () {
-    var onClose = jest.fn()
-    var { unmount } = render(React.createElement(Modal, { open: true, onClose: onClose, title: 'Test' }, null))
+    const onClose = jest.fn()
+    const { unmount } = render(React.createElement(Modal, { open: true, onClose: onClose, title: 'Test' }, null))
     unmount()
     fireEvent.keyDown(document, { key: 'Escape' })
     expect(onClose).not.toHaveBeenCalled()
   })
 
   it('returns null when open is false after being open', function () {
-    var onClose = jest.fn()
-    var { rerender } = render(React.createElement(Modal, { open: true, onClose: onClose, title: 'Test' }, null))
+    const onClose = jest.fn()
+    const { rerender } = render(React.createElement(Modal, { open: true, onClose: onClose, title: 'Test' }, null))
     expect(screen.getByRole('dialog')).toBeTruthy()
     rerender(React.createElement(Modal, { open: false, onClose: onClose, title: 'Test' }, null))
     expect(screen.queryByRole('dialog')).toBeNull()

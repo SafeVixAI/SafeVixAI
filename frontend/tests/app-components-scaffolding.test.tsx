@@ -2,17 +2,17 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
 
 // --- LocatorComponents mocks ---
-var mockFormatCoverageRadius = jest.fn((m: number) => m >= 1000 ? `${(m / 1000).toFixed(1)} km` : `${m} m`);
-var mockFormatDistance = jest.fn((m: number) => m >= 1000 ? `${(m / 1000).toFixed(1)} km` : `${m} m`);
-var mockFormatDuration = jest.fn((s: number) => {
+const mockFormatCoverageRadius = jest.fn((m: number) => m >= 1000 ? `${(m / 1000).toFixed(1)} km` : `${m} m`);
+const mockFormatDistance = jest.fn((m: number) => m >= 1000 ? `${(m / 1000).toFixed(1)} km` : `${m} m`);
+const mockFormatDuration = jest.fn((s: number) => {
   const min = Math.floor(s / 60);
   if (min < 60) return `${min} min`;
   const h = Math.floor(min / 60);
   const m = min % 60;
   return m ? `${h}h ${m}m` : `${h}h`;
 });
-var mockFallbackNumber = jest.fn((_: string) => '+91-108');
-var mockFilterChips: string[] = ['All', 'Hospital', 'Ambulance', 'Police', 'Fire', 'Towing', 'Mechanic', 'Pharmacy'];
+const mockFallbackNumber = jest.fn((_: string) => '+91-108');
+const mockFilterChips: string[] = ['All', 'Hospital', 'Ambulance', 'Police', 'Fire', 'Towing', 'Mechanic', 'Pharmacy'];
 
 jest.mock('@/app/locator/locator-utils', () => ({
   formatCoverageRadius: (...args: unknown[]) => mockFormatCoverageRadius(...args),
@@ -52,7 +52,7 @@ jest.mock('@tanstack/react-virtual', () => ({
   }),
 }));
 
-var mockGsapFromTo = jest.fn();
+const mockGsapFromTo = jest.fn();
 jest.mock('@/lib/gsap', () => ({
   gsap: { fromTo: (...args: unknown[]) => mockGsapFromTo(...args) },
 }));
@@ -69,11 +69,11 @@ jest.mock('@/components/EmergencyMap', () => ({
 }));
 
 // --- Imports ---
-var { ServiceIcon, EmptyState, RouteStatusCard } = require('@/app/locator/locator-components');
-var { LocatorFilters } = require('@/app/locator/components/LocatorFilters');
-var { LocatorMap } = require('@/app/locator/components/LocatorMap');
-var { MobileResultsList, DesktopResultsList } = require('@/app/locator/components/LocatorResults');
-var {
+const { ServiceIcon, EmptyState, RouteStatusCard } = require('@/app/locator/locator-components');
+const { LocatorFilters } = require('@/app/locator/components/LocatorFilters');
+const { LocatorMap } = require('@/app/locator/components/LocatorMap');
+const { MobileResultsList, DesktopResultsList } = require('@/app/locator/components/LocatorResults');
+const {
   EmergencyCardClient,
   decodeBase64Url,
   parseHashPayload,
@@ -83,46 +83,46 @@ var {
 describe('locator-components', () => {
   describe('ServiceIcon', () => {
     it('renders Hospital icon', () => {
-      var { container } = render(React.createElement(ServiceIcon, { type: 'Hospital' as never }));
+      const { container } = render(React.createElement(ServiceIcon, { type: 'Hospital' as never }));
       expect(container.querySelector('svg')).toBeTruthy();
     });
     it('renders Ambulance icon', () => {
-      var { container } = render(React.createElement(ServiceIcon, { type: 'Ambulance' as never }));
+      const { container } = render(React.createElement(ServiceIcon, { type: 'Ambulance' as never }));
       expect(container.querySelector('svg')).toBeTruthy();
     });
     it('renders Pharmacy icon', () => {
-      var { container } = render(React.createElement(ServiceIcon, { type: 'Pharmacy' as never }));
+      const { container } = render(React.createElement(ServiceIcon, { type: 'Pharmacy' as never }));
       expect(container.querySelector('svg')).toBeTruthy();
     });
     it('renders Police icon', () => {
-      var { container } = render(React.createElement(ServiceIcon, { type: 'Police' as never }));
+      const { container } = render(React.createElement(ServiceIcon, { type: 'Police' as never }));
       expect(container.querySelector('svg')).toBeTruthy();
     });
     it('renders Fire icon', () => {
-      var { container } = render(React.createElement(ServiceIcon, { type: 'Fire' as never }));
+      const { container } = render(React.createElement(ServiceIcon, { type: 'Fire' as never }));
       expect(container.querySelector('svg')).toBeTruthy();
     });
     it('renders Towing icon', () => {
-      var { container } = render(React.createElement(ServiceIcon, { type: 'Towing' as never }));
+      const { container } = render(React.createElement(ServiceIcon, { type: 'Towing' as never }));
       expect(container.querySelector('svg')).toBeTruthy();
     });
     it('renders Mechanic icon with default', () => {
-      var { container } = render(React.createElement(ServiceIcon, { type: 'Mechanic' as never }));
+      const { container } = render(React.createElement(ServiceIcon, { type: 'Mechanic' as never }));
       expect(container.querySelector('svg')).toBeTruthy();
     });
     it('renders unknown type with default Wrench', () => {
-      var { container } = render(React.createElement(ServiceIcon, { type: 'Unknown' as never }));
+      const { container } = render(React.createElement(ServiceIcon, { type: 'Unknown' as never }));
       expect(container.querySelector('svg')).toBeTruthy();
     });
     it('applies className prop', () => {
-      var { container } = render(React.createElement(ServiceIcon, { type: 'Police' as never, className: 'w-8 h-8' }));
-      var svg = container.querySelector('svg');
+      const { container } = render(React.createElement(ServiceIcon, { type: 'Police' as never, className: 'w-8 h-8' }));
+      const svg = container.querySelector('svg');
       expect(svg?.classList.contains('w-8')).toBe(true);
     });
   });
 
   describe('EmptyState', () => {
-    var baseMeta = { radiusUsed: 5000, count: 0 };
+    const baseMeta = { radiusUsed: 5000, count: 0 };
     it('renders locating state', () => {
       render(React.createElement(EmptyState, {
         locating: true,
@@ -158,18 +158,18 @@ describe('locator-components', () => {
   });
 
   describe('RouteStatusCard', () => {
-    var baseRoute = {
+    const baseRoute = {
       provider: 'OSRM',
       warnings: [],
       routes: [
         { routeId: 'r1', label: 'Fastest', durationSeconds: 600, distanceMeters: 5000, path: [], steps: [{ index: 1, instruction: 'Turn left', streetName: 'Main St', distanceMeters: 100, durationSeconds: 30 }] },
       ],
     };
-    var baseOption = { routeId: 'r1', label: 'Fastest', durationSeconds: 600, distanceMeters: 5000, path: [], steps: [{ index: 1, instruction: 'Turn left', streetName: 'Main St', distanceMeters: 100, durationSeconds: 30 }] };
-    var onSelect = jest.fn();
+    const baseOption = { routeId: 'r1', label: 'Fastest', durationSeconds: 600, distanceMeters: 5000, path: [], steps: [{ index: 1, instruction: 'Turn left', streetName: 'Main St', distanceMeters: 100, durationSeconds: 30 }] };
+    const onSelect = jest.fn();
 
     it('returns null when no route/error/loading', () => {
-      var { container } = render(React.createElement(RouteStatusCard, {
+      const { container } = render(React.createElement(RouteStatusCard, {
         activeRoute: null, activeRouteOption: null, routeError: null, loadingLabel: null,
         selectedServiceName: null, navigationHref: null, selectedRouteId: null,
         onSelectRoute: onSelect, rerouting: false,
@@ -211,7 +211,7 @@ describe('locator-components', () => {
       expect(screen.getByText(/Rerouting/i)).toBeTruthy();
     });
     it('renders route warnings', () => {
-      var routeWithWarning = { ...baseRoute, warnings: ['Traffic congestion ahead'] };
+      const routeWithWarning = { ...baseRoute, warnings: ['Traffic congestion ahead'] };
       render(React.createElement(RouteStatusCard, {
         activeRoute: routeWithWarning as never, activeRouteOption: baseOption as never, routeError: null, loadingLabel: null,
         selectedServiceName: 'City Hospital', navigationHref: null, selectedRouteId: null,
@@ -220,7 +220,7 @@ describe('locator-components', () => {
       expect(screen.getByText('Traffic congestion ahead')).toBeTruthy();
     });
     it('renders route options when multiple routes', () => {
-      var multiRoute = {
+      const multiRoute = {
         provider: 'ORS',
         warnings: [],
         routes: [
@@ -237,7 +237,7 @@ describe('locator-components', () => {
       expect(screen.getByText(/Shortest/)).toBeTruthy();
     });
     it('calls onSelectRoute when route option clicked', () => {
-      var multiRoute = {
+      const multiRoute = {
         provider: 'ORS',
         warnings: [],
         routes: [
@@ -250,7 +250,7 @@ describe('locator-components', () => {
         selectedServiceName: 'City Hospital', navigationHref: 'https://maps.google.com', selectedRouteId: 'r1',
         onSelectRoute: onSelect, rerouting: false,
       }));
-      var buttons = screen.getAllByText(/Shortest/);
+      const buttons = screen.getAllByText(/Shortest/);
       fireEvent.click(buttons[0]);
       expect(onSelect).toHaveBeenCalledWith('r2');
     });
@@ -271,7 +271,7 @@ describe('locator-components', () => {
       expect(screen.queryByText('Open External Navigation')).toBeNull();
     });
     it('returns null when activeRoute is set but activeRouteOption is null', () => {
-      var { container } = render(React.createElement(RouteStatusCard, {
+      const { container } = render(React.createElement(RouteStatusCard, {
         activeRoute: baseRoute as never, activeRouteOption: null, routeError: null, loadingLabel: null,
         selectedServiceName: 'City Hospital', navigationHref: null, selectedRouteId: null,
         onSelectRoute: onSelect, rerouting: false,
@@ -290,7 +290,7 @@ describe('locator-components', () => {
 });
 
 describe('LocatorFilters', () => {
-  var setFilter = jest.fn();
+  const setFilter = jest.fn();
   beforeEach(() => { setFilter.mockClear(); });
 
   it('renders all filter chips', () => {
@@ -302,7 +302,7 @@ describe('LocatorFilters', () => {
   });
   it('highlights active filter', () => {
     render(React.createElement(LocatorFilters, { activeFilter: 'Police' as never, setActiveFilter: setFilter }));
-    var radio = screen.getByLabelText('Filter by Police');
+    const radio = screen.getByLabelText('Filter by Police');
     expect(radio.getAttribute('aria-checked')).toBe('true');
   });
   it('calls setActiveFilter on click', () => {
@@ -311,7 +311,7 @@ describe('LocatorFilters', () => {
     expect(setFilter).toHaveBeenCalledWith('Hospital');
   });
   it('applies custom className', () => {
-    var { container } = render(React.createElement(LocatorFilters, {
+    const { container } = render(React.createElement(LocatorFilters, {
       activeFilter: 'All' as never, setActiveFilter: setFilter, className: 'custom-class',
     }));
     expect(container.querySelector('.custom-class')).toBeTruthy();
@@ -319,11 +319,11 @@ describe('LocatorFilters', () => {
 });
 
 describe('LocatorMap', () => {
-  var mockFiltered = [{
+  const mockFiltered = [{
     id: '1', name: 'City Hospital', coords: [13.0, 80.2] as [number, number],
     type: 'Hospital' as never, accentColor: '#0070f3', distance: '1.2 km',
   }];
-  var mockRouteOption = {
+  const mockRouteOption = {
     routeId: 'r1', label: 'Fastest', durationSeconds: 600, distanceMeters: 5000,
     path: [[13.0, 80.2], [13.1, 80.3]] as [number, number][], steps: [],
   };
@@ -355,12 +355,12 @@ describe('LocatorMap', () => {
 });
 
 describe('MobileResultsList / DesktopResultsList', () => {
-  var mockServices = [
+  const mockServices = [
     { id: '1', name: 'City Hospital', type: 'Hospital', distance: '1.2 km', address: '123 Main St', accentColor: '#0070f3', phone: '+91-9876543210', coords: [13.0, 80.2], filterType: 'Hospital' },
     { id: '2', name: 'Fire Station 1', type: 'Fire', distance: '2.5 km', address: '456 Oak Ave', accentColor: '#ff4500', phone: null, coords: [13.1, 80.3], filterType: 'Fire' },
   ];
-  var onLocate = jest.fn();
-  var onPreview = jest.fn();
+  const onLocate = jest.fn();
+  const onPreview = jest.fn();
 
   beforeEach(() => {
     onLocate.mockClear();
@@ -387,7 +387,7 @@ describe('MobileResultsList / DesktopResultsList', () => {
         onLocateService: onLocate,
         onPreviewService: onPreview,
       }));
-      var cards = document.querySelectorAll('.locator-result-card');
+      const cards = document.querySelectorAll('.locator-result-card');
       expect(cards.length).toBe(2);
     });
     it('shows loading spinner when routing for a service', () => {
@@ -408,7 +408,7 @@ describe('MobileResultsList / DesktopResultsList', () => {
         onLocateService: onLocate,
         onPreviewService: onPreview,
       }));
-      var locateButtons = screen.getAllByText('Locate');
+      const locateButtons = screen.getAllByText('Locate');
       fireEvent.click(locateButtons[0]);
       expect(onLocate).toHaveBeenCalledWith(mockServices[0]);
     });
@@ -420,7 +420,7 @@ describe('MobileResultsList / DesktopResultsList', () => {
         onLocateService: onLocate,
         onPreviewService: onPreview,
       }));
-      var focusButtons = screen.getAllByText('Focus');
+      const focusButtons = screen.getAllByText('Focus');
       fireEvent.click(focusButtons[1]);
       expect(onPreview).toHaveBeenCalledWith(mockServices[1]);
     });
@@ -432,7 +432,7 @@ describe('MobileResultsList / DesktopResultsList', () => {
         onLocateService: onLocate,
         onPreviewService: onPreview,
       }));
-      var locateButtons = screen.getAllByText('Routing');
+      const locateButtons = screen.getAllByText('Routing');
       expect(locateButtons[0].closest('button')?.getAttribute('disabled')).toBe('');
     });
     it('renders phone link for services', () => {
@@ -443,7 +443,7 @@ describe('MobileResultsList / DesktopResultsList', () => {
         onLocateService: onLocate,
         onPreviewService: onPreview,
       }));
-      var links = document.querySelectorAll('a[href^="tel:"]');
+      const links = document.querySelectorAll('a[href^="tel:"]');
       expect(links.length).toBe(2);
       expect(links[0].getAttribute('href')).toBe('tel:+91-9876543210');
     });
@@ -455,7 +455,7 @@ describe('MobileResultsList / DesktopResultsList', () => {
         onLocateService: onLocate,
         onPreviewService: onPreview,
       }));
-      var links = document.querySelectorAll('a[href^="tel:"]');
+      const links = document.querySelectorAll('a[href^="tel:"]');
       expect(links[1].getAttribute('href')).toBe('tel:+91-108');
     });
   });
@@ -479,7 +479,7 @@ describe('MobileResultsList / DesktopResultsList', () => {
         onLocateService: onLocate,
         onPreviewService: onPreview,
       }));
-      var cards = document.querySelectorAll('.locator-result-card');
+      const cards = document.querySelectorAll('.locator-result-card');
       expect(cards.length).toBe(2);
     });
     it('shows loading when routing', () => {
@@ -522,7 +522,7 @@ describe('MobileResultsList / DesktopResultsList', () => {
         onLocateService: onLocate,
         onPreviewService: onPreview,
       }));
-      var routingButtons = screen.getAllByText('Routing');
+      const routingButtons = screen.getAllByText('Routing');
       expect(routingButtons[0].closest('button')?.getAttribute('disabled')).toBe('');
     });
     it('uses fallback number when phone is null', () => {
@@ -533,7 +533,7 @@ describe('MobileResultsList / DesktopResultsList', () => {
         onLocateService: onLocate,
         onPreviewService: onPreview,
       }));
-      var links = document.querySelectorAll('a[href^="tel:"]');
+      const links = document.querySelectorAll('a[href^="tel:"]');
       expect(links[1].getAttribute('href')).toBe('tel:+91-108');
     });
   });
@@ -542,12 +542,12 @@ describe('MobileResultsList / DesktopResultsList', () => {
 describe('EmergencyCardClient utilities', () => {
   describe('decodeBase64Url', () => {
     it('decodes standard base64url to string', () => {
-      var encoded = btoa('{"name":"John"}').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-      var result = decodeBase64Url(encoded);
+      const encoded = btoa('{"name":"John"}').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+      const result = decodeBase64Url(encoded);
       expect(result).toBe('{"name":"John"}');
     });
     it('handles padding correctly', () => {
-      var result = decodeBase64Url(btoa('ab').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''));
+      const result = decodeBase64Url(btoa('ab').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''));
       expect(result).toBe('ab');
     });
   });
@@ -577,23 +577,23 @@ describe('EmergencyCardClient utilities', () => {
       expect(parseHashPayload()).toBeNull();
     });
     it('parses valid encoded payload', () => {
-      var payload = { name: 'John', blood: 'O+' };
-      var encoded = btoa(JSON.stringify(payload)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+      const payload = { name: 'John', blood: 'O+' };
+      const encoded = btoa(JSON.stringify(payload)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
       window.location.hash = '#data=' + encoded;
-      var result = parseHashPayload();
+      const result = parseHashPayload();
       expect(result?.name).toBe('John');
       expect(result?.blood).toBe('O+');
     });
     it('handles non-string fields gracefully', () => {
-      var payload = { name: null, blood: 123 };
-      var encoded = btoa(JSON.stringify(payload)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+      const payload = { name: null, blood: 123 };
+      const encoded = btoa(JSON.stringify(payload)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
       window.location.hash = '#data=' + encoded;
-      var result = parseHashPayload();
+      const result = parseHashPayload();
       expect(result?.name).toBe('');
       expect(result?.blood).toBe('');
     });
     it('returns null on invalid JSON', () => {
-      var encoded = btoa('not-json').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+      const encoded = btoa('not-json').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
       window.location.hash = '#data=' + encoded;
       expect(parseHashPayload()).toBeNull();
     });
@@ -601,7 +601,7 @@ describe('EmergencyCardClient utilities', () => {
 });
 
 describe('EmergencyCardClient component', () => {
-  var initialData = { name: 'John Doe', blood: 'O+', contact: '+91-9876543210', vehicle: 'TN01AB1234' };
+  const initialData = { name: 'John Doe', blood: 'O+', contact: '+91-9876543210', vehicle: 'TN01AB1234' };
 
   it('renders user data', () => {
     render(React.createElement(EmergencyCardClient, { userId: 'user-1', initialData: initialData as never }));
@@ -620,7 +620,7 @@ describe('EmergencyCardClient component', () => {
   });
   it('renders emergency contact link', () => {
     render(React.createElement(EmergencyCardClient, { userId: 'user-1', initialData: initialData as never }));
-    var link = document.querySelector('a[href^="tel:"]');
+    const link = document.querySelector('a[href^="tel:"]');
     expect(link?.getAttribute('href')).toBe('tel:+919876543210');
   });
   it('renders India emergency lines', () => {
@@ -654,8 +654,8 @@ describe('EmergencyCardClient component', () => {
     expect(screen.queryByText('Call Emergency Contact')).toBeNull();
   });
   it('merges hash payload with initial data on mount', async function() {
-    var payload = JSON.stringify({ name: 'Hash Name', contact: '+919999999999' });
-    var encoded = btoa(payload).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    const payload = JSON.stringify({ name: 'Hash Name', contact: '+919999999999' });
+    const encoded = btoa(payload).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
     window.location.hash = '#data=' + encoded;
     render(React.createElement(EmergencyCardClient, { userId: 'user-1', initialData: { blood: 'O+' } as never }));
     await waitFor(function() { expect(screen.getByText('Hash Name')).toBeTruthy() });

@@ -1,4 +1,4 @@
-var mockDuckDBModule = { selectBundle: jest.fn(), ConsoleLogger: jest.fn(), AsyncDuckDB: jest.fn() };
+const mockDuckDBModule = { selectBundle: jest.fn(), ConsoleLogger: jest.fn(), AsyncDuckDB: jest.fn() };
 
 jest.mock('../client-logger', function() { return { logClientError: jest.fn(), logClientWarning: jest.fn() } })
 
@@ -9,7 +9,7 @@ function createFreshMocks() {
     db: { connect: jest.fn(), instantiate: jest.fn(), registerFileText: jest.fn() },
   };
 }
-var mocks = createFreshMocks();
+let mocks = createFreshMocks();
 
 jest.mock('@duckdb/duckdb-wasm', function() { return mockDuckDBModule });
 
@@ -18,7 +18,7 @@ if (typeof URL.createObjectURL !== 'function') {
   (globalThis as any).URL.createObjectURL = function() { return 'blob:http://localhost/mock-' + Date.now(); };
   (globalThis as any).URL.revokeObjectURL = function() {};
 }
-var MockWorker = function MockWorker(this: any, _url: string) {
+const MockWorker = function MockWorker(this: any, _url: string) {
   this.postMessage = jest.fn();
   this.terminate = jest.fn();
   this.addEventListener = jest.fn();
@@ -30,10 +30,10 @@ if (typeof Worker === 'undefined' || (globalThis as any).Worker.toString().inclu
 
 import { initOfflineChallanDB, calculateOfflineChallan, __testResetDbInstance } from '../duckdb-challan';
 
-var VIOLATIONS_CSV = 'violation_code,section,description,base_fine,base_fine_2w,base_fine_4w,repeat_fine,repeat_fine_2w,repeat_fine_4w\n' +
+const VIOLATIONS_CSV = 'violation_code,section,description,base_fine,base_fine_2w,base_fine_4w,repeat_fine,repeat_fine_2w,repeat_fine_4w\n' +
   'MVA_185,185,Drunken driving,10000,8000,12000,15000,12000,18000\n' +
   'MVA_183,183(1),Over-speeding,2000,1500,2500,4000,3000,5000\n';
-var OVERRIDES_CSV = 'violation_code,state_code,vehicle_class,base_fine,repeat_fine,section,description\n' +
+const OVERRIDES_CSV = 'violation_code,state_code,vehicle_class,base_fine,repeat_fine,section,description\n' +
   'MVA_185,TN,LMV,15000,20000,185-A,Enhanced TN fine\n' +
   'MVA_183,KA,,3000,6000,183(2),KA override\n';
 
@@ -69,7 +69,7 @@ describe('duckdb-challan', function() {
         .mockResolvedValueOnce({ ok: true, text: async function() { return VIOLATIONS_CSV } })
         .mockResolvedValueOnce({ ok: true, text: async function() { return OVERRIDES_CSV } });
 
-      var result = await calculateOfflineChallan('MVA_185', '4W', false, 'TN');
+      const result = await calculateOfflineChallan('MVA_185', '4W', false, 'TN');
 
       expect(result).toBeTruthy();
       expect(result!.section).toBe('185-A');
@@ -82,7 +82,7 @@ describe('duckdb-challan', function() {
         .mockResolvedValueOnce({ ok: true, text: async function() { return VIOLATIONS_CSV } })
         .mockResolvedValueOnce({ ok: true, text: async function() { return 'violation_code,state_code,vehicle_class,base_fine\n' } });
 
-      var result = await calculateOfflineChallan('MVA_183', '2W', false, 'MH');
+      const result = await calculateOfflineChallan('MVA_183', '2W', false, 'MH');
 
       expect(result).toBeTruthy();
       expect(result!.base_fine).toBe(1500);
@@ -92,13 +92,13 @@ describe('duckdb-challan', function() {
   describe('initOfflineChallanDB', function() {
     it('returns true when DuckDB initializes successfully', async function() {
       (global.fetch as jest.Mock).mockResolvedValue({ ok: true, text: async function() { return 'worker script'; } });
-      var ok = await initOfflineChallanDB();
+      const ok = await initOfflineChallanDB();
       expect(ok).toBe(true);
     });
 
     it('returns false when DuckDB init throws', async function() {
       mockDuckDBModule.selectBundle.mockRejectedValue(new Error('bundle failed'));
-      var ok = await initOfflineChallanDB();
+      const ok = await initOfflineChallanDB();
       expect(ok).toBe(false);
     });
   });
@@ -123,7 +123,7 @@ describe('duckdb-challan', function() {
         });
       (global.fetch as jest.Mock).mockResolvedValue(workerFetch());
 
-      var result = await calculateOfflineChallan('MVA_185', '4W', false, 'TN');
+      const result = await calculateOfflineChallan('MVA_185', '4W', false, 'TN');
       expect(result).toBeTruthy();
       expect(result!.section).toBe('185-A');
       expect(result!.description).toBe('Enhanced TN fine');
@@ -147,13 +147,13 @@ describe('duckdb-challan', function() {
             },
           });
         });
-      var csvText = 'violation_code,section,description,base_fine\nMVA_183,183(1),Over-speeding,1000';
+      const csvText = 'violation_code,section,description,base_fine\nMVA_183,183(1),Over-speeding,1000';
       (global.fetch as jest.Mock)
         .mockResolvedValueOnce(workerFetch())           // getDuckDB worker
         .mockResolvedValueOnce({ ok: true, text: async function() { return csvText; } })  // violations.csv
         .mockResolvedValueOnce({ ok: true, text: async function() { return ''; } });      // state_overrides.csv
 
-      var result = await calculateOfflineChallan('MVA_183', '2W', false, 'KA');
+      const result = await calculateOfflineChallan('MVA_183', '2W', false, 'KA');
       expect(result).toBeTruthy();
       expect(result!.section).toBe('183(1)');
       expect(result!.description).toBe('Over-speeding');
@@ -170,7 +170,7 @@ describe('duckdb-challan', function() {
         .mockResolvedValueOnce({ ok: true, text: async function() { return VIOLATIONS_CSV; } })
         .mockResolvedValueOnce({ ok: true, text: async function() { return OVERRIDES_CSV; } });
 
-      var result = await calculateOfflineChallan('MVA_185', '4W', false, 'TN');
+      const result = await calculateOfflineChallan('MVA_185', '4W', false, 'TN');
       expect(result).toBeTruthy();
       expect(result!.section).toBe('185-A');
       expect(result!.description).toBe('Enhanced TN fine');
@@ -185,7 +185,7 @@ describe('duckdb-challan', function() {
         .mockResolvedValueOnce({ ok: true, text: async function() { return 'violation_code,section,description,base_fine\n' } })
         .mockResolvedValueOnce({ ok: true, text: async function() { return 'violation_code,state_code\n' } });
 
-      var result = await calculateOfflineChallan('185', '4W', false);
+      const result = await calculateOfflineChallan('185', '4W', false);
 
       expect(result).toBeTruthy();
       expect(result!.base_fine).toBe(10000);
@@ -199,7 +199,7 @@ describe('duckdb-challan', function() {
         .mockResolvedValueOnce({ ok: true, text: async function() { return 'violation_code,section,description,base_fine\n' } })
         .mockResolvedValueOnce({ ok: true, text: async function() { return 'violation_code,state_code\n' } });
 
-      var result = await calculateOfflineChallan('UNKNOWN_CODE', '4W', false);
+      const result = await calculateOfflineChallan('UNKNOWN_CODE', '4W', false);
 
       expect(result).toBeTruthy();
       expect(result!.base_fine).toBe(0);
@@ -212,7 +212,7 @@ describe('duckdb-challan', function() {
         .mockResolvedValueOnce({ ok: true, text: async function() { return 'violation_code,section,description,base_fine\n' } })
         .mockResolvedValueOnce({ ok: true, text: async function() { return 'violation_code,state_code\n' } });
 
-      var result = await calculateOfflineChallan('183', '4W', false);
+      const result = await calculateOfflineChallan('183', '4W', false);
 
       expect(result).toBeTruthy();
       expect(result!.base_fine).toBe(1000);
@@ -222,7 +222,7 @@ describe('duckdb-challan', function() {
   describe('error handling', function() {
     it('falls back to in-memory dict on network error', async function() {
       (global.fetch as jest.Mock).mockRejectedValue(new Error('net error'));
-      var result = await calculateOfflineChallan('185', '4W', false);
+      const result = await calculateOfflineChallan('185', '4W', false);
       expect(result).toBeTruthy();
       expect(result!.description).toContain('Drunken driving');
     });
@@ -233,7 +233,7 @@ describe('duckdb-challan', function() {
         .mockResolvedValueOnce({ ok: false, text: async function() { return '' } })
         .mockResolvedValueOnce({ ok: false, text: async function() { return '' } });
 
-      var result = await calculateOfflineChallan('185', '4W', false);
+      const result = await calculateOfflineChallan('185', '4W', false);
       expect(result).toBeTruthy();
       expect(result!.description).toContain('Drunken driving');
     });
@@ -246,19 +246,19 @@ describe('duckdb-challan', function() {
         .mockResolvedValueOnce({ ok: true, text: async function() { return '' } })
         .mockResolvedValueOnce({ ok: true, text: async function() { return '' } });
 
-      var result = await calculateOfflineChallan('MVA_185', '4W', false);
+      const result = await calculateOfflineChallan('MVA_185', '4W', false);
       expect(result).toBeTruthy();
       expect(result!.description).toBe('Violation not found');
     });
 
     it('parses quoted CSV fields correctly', async function() {
-      var quotedCSV = 'violation_code,section,description,base_fine\n"185","Section 185","Drunken, driving",10000\n';
+      const quotedCSV = 'violation_code,section,description,base_fine\n"185","Section 185","Drunken, driving",10000\n';
       (global.fetch as jest.Mock)
         .mockResolvedValueOnce({ ok: true, text: async function() { return 'not-a-wasm' } })
         .mockResolvedValueOnce({ ok: true, text: async function() { return quotedCSV; } })
         .mockResolvedValueOnce({ ok: true, text: async function() { return 'violation_code,state_code\n' } });
 
-      var result = await calculateOfflineChallan('185', '4W', false);
+      const result = await calculateOfflineChallan('185', '4W', false);
       expect(result).toBeTruthy();
       expect(result!.description).toBe('Drunken, driving');
       expect(result!.section).toBe('Section 185');

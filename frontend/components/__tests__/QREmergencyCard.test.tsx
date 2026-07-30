@@ -2,13 +2,13 @@
 // Copyright (c) 2026 SafeVixAI Team
 
 if (typeof global.TextEncoder === 'undefined') {
-  var util = require('util')
+  const util = require('util')
   global.TextEncoder = util.TextEncoder
 }
 
 jest.mock('@/lib/analytics', function() { return { track: { qrCardAction: jest.fn() } } })
 jest.mock('qrcode.react', function() {
-  var React = require('react')
+  const React = require('react')
   return {
     QRCodeSVG: function() {
       return React.createElement('div', { 'data-testid': 'qr-code' }, 'QR')
@@ -22,7 +22,7 @@ import { render, screen, fireEvent, act } from '@testing-library/react'
 import React from 'react'
 import QREmergencyCard from '../profile/QREmergencyCard'
 import { useAppStore } from '@/lib/store'
-var track = require('@/lib/analytics').track
+const track = require('@/lib/analytics').track
 
 describe('QREmergencyCard', function() {
   beforeEach(function() {
@@ -100,29 +100,29 @@ describe('QREmergencyCard', function() {
   })
 
   it('copies link to clipboard on share when navigator.share unavailable', async function() {
-    var writeText = jest.fn().mockResolvedValue(undefined)
+    const writeText = jest.fn().mockResolvedValue(undefined)
     Object.assign(navigator, { clipboard: { writeText } })
     render(React.createElement(QREmergencyCard))
-    var shareBtn = screen.getByText('Share Card')
+    const shareBtn = screen.getByText('Share Card')
     await act(async function() { fireEvent.click(shareBtn) })
     expect(track.qrCardAction).toHaveBeenCalledWith('share')
     expect(writeText).toHaveBeenCalled()
   })
 
   it('shows Copied state after copying', async function() {
-    var writeText = jest.fn().mockResolvedValue(undefined)
+    const writeText = jest.fn().mockResolvedValue(undefined)
     Object.assign(navigator, { clipboard: { writeText } })
     render(React.createElement(QREmergencyCard))
-    var shareBtn = screen.getByText('Share Card')
+    const shareBtn = screen.getByText('Share Card')
     await act(async function() { fireEvent.click(shareBtn) })
     expect(screen.getByText('Copied!')).toBeTruthy()
   })
 
   it('calls navigator.share when available', async function() {
-    var shareMock = jest.fn().mockResolvedValue(undefined)
+    const shareMock = jest.fn().mockResolvedValue(undefined)
     Object.assign(navigator, { share: shareMock, clipboard: { writeText: jest.fn() } })
     render(React.createElement(QREmergencyCard))
-    var shareBtn = screen.getByText('Share Card')
+    const shareBtn = screen.getByText('Share Card')
     await act(async function() { fireEvent.click(shareBtn) })
     expect(shareMock).toHaveBeenCalled()
     expect(shareMock.mock.calls[0][0].title).toBe('SafeVixAI Emergency Card')
@@ -130,7 +130,7 @@ describe('QREmergencyCard', function() {
 
   it('opens preview modal on Preview button click', function() {
     render(React.createElement(QREmergencyCard))
-    var previewBtn = screen.getByText('Preview')
+    const previewBtn = screen.getByText('Preview')
     fireEvent.click(previewBtn)
     expect(track.qrCardAction).toHaveBeenCalledWith('preview')
     expect(screen.getByRole('dialog')).toBeTruthy()
@@ -145,7 +145,7 @@ describe('QREmergencyCard', function() {
   it('preview modal shows display ID from profile', function() {
     render(React.createElement(QREmergencyCard))
     fireEvent.click(screen.getByText('Preview'))
-    var idEls = screen.getAllByText('test-1')
+    const idEls = screen.getAllByText('test-1')
     expect(idEls.length).toBeGreaterThanOrEqual(2)
   })
 
@@ -156,11 +156,11 @@ describe('QREmergencyCard', function() {
   })
 
   it('preview modal share button calls navigator.share', async function() {
-    var shareMock = jest.fn().mockResolvedValue(undefined)
+    const shareMock = jest.fn().mockResolvedValue(undefined)
     Object.assign(navigator, { share: shareMock })
     render(React.createElement(QREmergencyCard))
     fireEvent.click(screen.getByText('Preview'))
-    var shareBtns = screen.getAllByText('Share')
+    const shareBtns = screen.getAllByText('Share')
     await act(async function() { fireEvent.click(shareBtns[shareBtns.length - 1]) })
     expect(shareMock).toHaveBeenCalled()
   })
@@ -176,7 +176,7 @@ describe('QREmergencyCard', function() {
   it('preview modal closes on backdrop click', function() {
     render(React.createElement(QREmergencyCard))
     fireEvent.click(screen.getByText('Preview'))
-    var backdrop = document.querySelector('.fixed.inset-0')
+    const backdrop = document.querySelector('.fixed.inset-0')
     expect(backdrop).toBeTruthy()
     fireEvent.click(backdrop!)
     expect(screen.queryByRole('dialog')).toBeNull()
@@ -193,10 +193,10 @@ describe('QREmergencyCard', function() {
   it('traps Tab focus cycling forward in preview modal', function() {
     render(React.createElement(QREmergencyCard))
     fireEvent.click(screen.getByText('Preview'))
-    var dialog = screen.getByRole('dialog')
-    var buttons = dialog.querySelectorAll('button')
-    var firstBtn = buttons[0]
-    var lastBtn = buttons[buttons.length - 1]
+    const dialog = screen.getByRole('dialog')
+    const buttons = dialog.querySelectorAll('button')
+    const firstBtn = buttons[0]
+    const lastBtn = buttons[buttons.length - 1]
     jest.spyOn(firstBtn, 'focus')
     jest.spyOn(lastBtn, 'focus')
     lastBtn.focus()
@@ -207,10 +207,10 @@ describe('QREmergencyCard', function() {
   it('traps Shift+Tab focus cycling backward in preview modal', function() {
     render(React.createElement(QREmergencyCard))
     fireEvent.click(screen.getByText('Preview'))
-    var dialog = screen.getByRole('dialog')
-    var buttons = dialog.querySelectorAll('button')
-    var firstBtn = buttons[0]
-    var lastBtn = buttons[buttons.length - 1]
+    const dialog = screen.getByRole('dialog')
+    const buttons = dialog.querySelectorAll('button')
+    const firstBtn = buttons[0]
+    const lastBtn = buttons[buttons.length - 1]
     jest.spyOn(firstBtn, 'focus')
     jest.spyOn(lastBtn, 'focus')
     firstBtn.focus()
@@ -221,9 +221,9 @@ describe('QREmergencyCard', function() {
   it('does not cycle focus on non-Tab key in preview modal', function() {
     render(React.createElement(QREmergencyCard))
     fireEvent.click(screen.getByText('Preview'))
-    var dialog = screen.getByRole('dialog')
-    var buttons = dialog.querySelectorAll('button')
-    var firstBtn = buttons[0]
+    const dialog = screen.getByRole('dialog')
+    const buttons = dialog.querySelectorAll('button')
+    const firstBtn = buttons[0]
     jest.spyOn(firstBtn, 'focus')
     fireEvent.keyDown(document, { key: 'a' })
     expect(firstBtn.focus).not.toHaveBeenCalled()

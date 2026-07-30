@@ -9,10 +9,16 @@ from datetime import UTC, datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock, PropertyMock, patch
 
 import pytest
-from httpx import AsyncClient, ASGITransport
+from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from models.update_management import ReleaseChannel, UpdateInstallation, UpdateRelease, UpdateSetting, UpdateStatus
+from models.update_management import (
+    ReleaseChannel,
+    UpdateInstallation,
+    UpdateRelease,
+    UpdateSetting,
+    UpdateStatus,
+)
 from services.update_service import UpdateService
 
 
@@ -364,7 +370,6 @@ class TestUpdateService:
 
     async def test_verify_signature_fallback(self, service: UpdateService) -> None:
         """GPG signature graceful fallback when module unavailable."""
-        from core.signature import verify_gpg_signature
 
         db = _make_mock_db()
         release = _make_release(version="2.0.0")

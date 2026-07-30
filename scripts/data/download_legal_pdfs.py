@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2026 SafeVixAI Team
-"""
-download_legal_pdfs.py
+"""download_legal_pdfs.py
 ======================
 Downloads the three critical RAG knowledge-base PDFs from official government
 and WHO sources. All URLs are verified working as of April 2026.
@@ -14,10 +13,9 @@ The three placeholder files will be replaced with real PDFs.
 from __future__ import annotations
 
 import sys
-import urllib.request
 import urllib.error
+import urllib.request
 from pathlib import Path
-
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 CHATBOT_DATA = PROJECT_ROOT / "chatbot_service" / "data"
@@ -98,7 +96,7 @@ def download_first_working(sources: list[str], destination: Path) -> bool:
             print(f"    HTTP {exc.code}: {exc.reason}")
         except urllib.error.URLError as exc:
             print(f"    Network error: {exc.reason}")
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             print(f"    Unexpected error: {exc}")
     return False
 

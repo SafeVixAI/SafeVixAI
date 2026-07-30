@@ -2,9 +2,9 @@ jest.mock('next/navigation', function() { return { useRouter: function() { retur
 jest.mock('lucide-react', function() { return new Proxy({}, { get: function() { return function() { return null } } }) })
 jest.mock('@/lib/public-env', function() { return { PUBLIC_API_BASE_URL: 'http://test' } })
 
-var React = require('react')
-var { render, screen: rtlScreen, waitFor } = require('@testing-library/react')
-var Page = require('../app/share-receive/page').default
+const React = require('react')
+const { render, screen: rtlScreen, waitFor } = require('@testing-library/react')
+const Page = require('../app/share-receive/page').default
 
 describe('ShareReceivePage', function() {
   it('renders SafeVixAI branding', function() {

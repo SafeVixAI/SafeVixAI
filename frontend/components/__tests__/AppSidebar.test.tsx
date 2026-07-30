@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 SafeVixAI Team
 
-var mockPathname = '/'
+let mockPathname = '/'
 jest.mock('next/navigation', function() {
   return { usePathname: function() { return mockPathname } }
 })
 
-var mockState: any = { isDesktopSidebarCollapsed: true, setDesktopSidebarCollapsed: jest.fn(), isThinSidebarEnabled: false, setThinSidebarEnabled: jest.fn() }
+let mockState: any = { isDesktopSidebarCollapsed: true, setDesktopSidebarCollapsed: jest.fn(), isThinSidebarEnabled: false, setThinSidebarEnabled: jest.fn() }
 jest.mock('@/lib/store', function() {
   return {
     useAppStore: function(selector: any) {

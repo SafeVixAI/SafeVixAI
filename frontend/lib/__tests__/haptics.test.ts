@@ -2,7 +2,7 @@
 // Copyright (c) 2026 SafeVixAI Team
 describe('haptics', function () {
   it('exports haptics object with all feedback types', async function () {
-    var mod = await import('../haptics')
+    const mod = await import('../haptics')
     expect(typeof mod.haptics.light).toBe('function')
     expect(typeof mod.haptics.medium).toBe('function')
     expect(typeof mod.haptics.heavy).toBe('function')
@@ -11,7 +11,7 @@ describe('haptics', function () {
   })
 
   it('calls do not throw when navigator.vibrate is undefined', async function () {
-    var mod = await import('../haptics')
+    const mod = await import('../haptics')
     expect(function () { mod.haptics.light() }).not.toThrow()
     expect(function () { mod.haptics.medium() }).not.toThrow()
     expect(function () { mod.haptics.heavy() }).not.toThrow()
@@ -20,10 +20,10 @@ describe('haptics', function () {
   })
 
   it('calls navigator.vibrate when available', async function () {
-    var vibrate = jest.fn()
-    var orig = navigator.vibrate
+    const vibrate = jest.fn()
+    const orig = navigator.vibrate
     ;(navigator as any).vibrate = vibrate
-    var mod = await import('../haptics')
+    const mod = await import('../haptics')
     mod.haptics.light()
     expect(vibrate).toHaveBeenCalledWith(10)
     mod.haptics.medium()

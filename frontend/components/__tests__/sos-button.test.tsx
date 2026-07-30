@@ -25,13 +25,13 @@ describe('SOSButton', function() {
       </button>
     );
 
-    var button = screen.getByTestId('sos-button');
+    const button = screen.getByTestId('sos-button');
     expect(button).toBeTruthy();
     expect(button).toHaveTextContent('SOS');
   });
 
   it('calls SOS API on click', async function() {
-    var handleClick = jest.fn();
+    const handleClick = jest.fn();
 
     render(
       <button data-testid="sos-button" onClick={handleClick}>
@@ -51,7 +51,7 @@ describe('SOSButton', function() {
       </button>
     );
 
-    var button = screen.getByTestId('sos-button');
+    const button = screen.getByTestId('sos-button');
     expect(button).toBeDisabled();
     expect(button).toHaveTextContent('Sending...');
   });
@@ -63,7 +63,7 @@ describe('SOSButton', function() {
       </button>
     );
 
-    var button = screen.getByLabelText('Send SOS');
+    const button = screen.getByLabelText('Send SOS');
     expect(button).toBeTruthy();
   });
 });

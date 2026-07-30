@@ -10,7 +10,7 @@ describe('map-defaults', function () {
   })
 
   it('exports FALLBACK_MAP_CENTER as [lat, lon]', async function () {
-    var mod = await import('../map-defaults')
+    const mod = await import('../map-defaults')
     expect(Array.isArray(mod.FALLBACK_MAP_CENTER)).toBe(true)
     expect(mod.FALLBACK_MAP_CENTER).toHaveLength(2)
     expect(typeof mod.FALLBACK_MAP_CENTER[0]).toBe('number')
@@ -18,7 +18,7 @@ describe('map-defaults', function () {
   })
 
   it('exports FALLBACK_MAP_ZOOM and LIVE_MAP_ZOOM as numbers', async function () {
-    var mod = await import('../map-defaults')
+    const mod = await import('../map-defaults')
     expect(typeof mod.FALLBACK_MAP_ZOOM).toBe('number')
     expect(typeof mod.LIVE_MAP_ZOOM).toBe('number')
   })
@@ -29,7 +29,7 @@ describe('map-defaults', function () {
     process.env.NEXT_PUBLIC_MAP_FALLBACK_ZOOM = '10'
     process.env.NEXT_PUBLIC_MAP_DEFAULT_ZOOM = '15'
     jest.resetModules()
-    var mod = await import('../map-defaults')
+    const mod = await import('../map-defaults')
     expect(mod.FALLBACK_MAP_CENTER[0]).toBe(12.9716)
     expect(mod.FALLBACK_MAP_CENTER[1]).toBe(77.5946)
     expect(mod.FALLBACK_MAP_ZOOM).toBe(10)
@@ -37,7 +37,7 @@ describe('map-defaults', function () {
   })
 
   it('uses default fallback center when env vars are missing', async function () {
-    var mod = await import('../map-defaults')
+    const mod = await import('../map-defaults')
     expect(mod.FALLBACK_MAP_CENTER[0]).toBe(20.5937)
     expect(mod.FALLBACK_MAP_CENTER[1]).toBe(78.9629)
     expect(mod.FALLBACK_MAP_ZOOM).toBe(5)

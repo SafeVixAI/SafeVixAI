@@ -1,15 +1,15 @@
 jest.mock('@gsap/react', function() { return { useGSAP: jest.fn() } })
 jest.mock('@/lib/gsap', function() { return { gsap: { fromTo: jest.fn(), to: jest.fn(), set: jest.fn(), timeline: function() { return { fromTo: jest.fn(), to: jest.fn(), kill: jest.fn() } } } } })
 jest.mock('../../hooks/useLandingGSAP', function() {
-  var React = require('react')
+  const React = require('react')
   return {
     useScrollReveal: function() { return React.useRef(null) },
   }
 })
 
-var React = require('react')
-var { render, screen: rtlScreen } = require('@testing-library/react')
-var HowItWorks = require('../HowItWorks').default
+const React = require('react')
+const { render, screen: rtlScreen } = require('@testing-library/react')
+const HowItWorks = require('../HowItWorks').default
 
 describe('HowItWorks', function() {
   it('renders the section overline', function() {

@@ -15,9 +15,9 @@ jest.mock('../app/landing/components/MissionSection', function() { return functi
 jest.mock('../app/landing/components/CTASection', function() { return function() { return null } })
 jest.mock('../app/landing/components/LandingFooter', function() { return function() { return null } })
 
-var React = require('react')
-var { render, screen: rtlScreen } = require('@testing-library/react')
-var LandingPage = require('../app/landing/page').default
+const React = require('react')
+const { render, screen: rtlScreen } = require('@testing-library/react')
+const LandingPage = require('../app/landing/page').default
 
 describe('Landing Page', function() {
   it('renders sr-only heading', function() {
@@ -31,7 +31,7 @@ describe('Landing Page', function() {
   })
 
   it('renders without error', function() {
-    var { container } = render(React.createElement(LandingPage))
+    const { container } = render(React.createElement(LandingPage))
     expect(container).toBeTruthy()
   })
 })

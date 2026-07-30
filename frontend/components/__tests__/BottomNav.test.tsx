@@ -5,7 +5,7 @@ jest.mock('@/lib/gsap', function() {
 })
 
 jest.mock('@gsap/react', function() {
-  var React2 = require('react');
+  const React2 = require('react');
   return {
     useGSAP: function(cb: any, opts?: any) {
       React2.useEffect(function() {
@@ -34,16 +34,16 @@ describe('BottomNav', function () {
 
   it('sets aria-current on active link', function () {
     render(React.createElement(BottomNav, null))
-    var links = screen.getAllByRole('link')
-    var activeLink = links.find(function(l) { return l.getAttribute('aria-current') === 'page' })
+    const links = screen.getAllByRole('link')
+    const activeLink = links.find(function(l) { return l.getAttribute('aria-current') === 'page' })
     expect(activeLink).toBeDefined()
   })
 
   it('dispatches vibrate on nav link click', function () {
-    var vibrateSpy = jest.fn()
+    const vibrateSpy = jest.fn()
     ;(navigator as any).vibrate = vibrateSpy
     render(React.createElement(BottomNav, null))
-    var mapLink = screen.getByText('Map').closest('a')
+    const mapLink = screen.getByText('Map').closest('a')
     fireEvent.click(mapLink!)
     expect(vibrateSpy).toHaveBeenCalledWith(8)
   })
@@ -56,16 +56,16 @@ describe('BottomNav', function () {
 
   it('renders nav items with correct hrefs', function () {
     render(React.createElement(BottomNav, null))
-    var links = screen.getAllByRole('link')
-    var locatorLink = links.find(function(l) { return l.getAttribute('href') === '/locator' })
+    const links = screen.getAllByRole('link')
+    const locatorLink = links.find(function(l) { return l.getAttribute('href') === '/locator' })
     expect(locatorLink).toBeDefined()
-    var chatLink = links.find(function(l) { return l.getAttribute('href') === '/assistant' })
+    const chatLink = links.find(function(l) { return l.getAttribute('href') === '/assistant' })
     expect(chatLink).toBeDefined()
   })
 
   it('uses gsap for indicator animation', function () {
     render(React.createElement(BottomNav, null))
-    var gsapMock = require('@/lib/gsap')
+    const gsapMock = require('@/lib/gsap')
     expect(gsapMock.gsap.to).toHaveBeenCalled()
     expect(gsapMock.gsap.fromTo).toHaveBeenCalled()
   })

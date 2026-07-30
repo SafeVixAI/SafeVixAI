@@ -5,14 +5,14 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
-var mockIsOnline = false;
+let mockIsOnline = false;
 
 jest.mock('@/hooks/useOnlineStatus', function() {
   return { useOnlineStatus: function() { return mockIsOnline } }
 });
 
 jest.mock('lucide-react', function() {
-  var React2 = require('react');
+  const React2 = require('react');
   return { WifiOff: function() { return React2.createElement('span', { 'data-testid': 'wifi-off-icon' }) } }
 });
 
@@ -26,7 +26,7 @@ jest.mock('@/lib/gsap', function() {
 });
 
 jest.mock('@gsap/react', function() {
-  var React = require('react');
+  const React = require('react');
   return {
     useGSAP: function(cb: any, _opts?: any) {
       React.useEffect(function() {
@@ -67,8 +67,8 @@ describe('OfflineBanner', function() {
   });
 
   it('shows correct styling for offline state', function() {
-    var { container } = render(<OfflineBanner />);
-    var banner = container.firstChild as HTMLElement;
+    const { container } = render(<OfflineBanner />);
+    const banner = container.firstChild as HTMLElement;
     expect(banner.className).toContain('fixed');
     expect(banner.className).toContain('z-[999]');
     expect(banner.className).toContain('bg-brand');
@@ -76,7 +76,7 @@ describe('OfflineBanner', function() {
 
   it('returns null when online', function() {
     mockIsOnline = true;
-    var { container } = render(<OfflineBanner />);
+    const { container } = render(<OfflineBanner />);
     expect(container.firstChild).toBeNull();
     mockIsOnline = false;
   });
@@ -84,16 +84,16 @@ describe('OfflineBanner', function() {
   it('calls gsap.fromTo when offline', function() {
     mockIsOnline = false;
     render(<OfflineBanner />);
-    var gsapMock = require('@/lib/gsap');
+    const gsapMock = require('@/lib/gsap');
     expect(gsapMock.gsap.fromTo).toHaveBeenCalled();
   });
 
   it('calls gsap.to onComplete when transitioning to online', function() {
     mockIsOnline = false;
-    var { rerender } = render(<OfflineBanner />);
+    const { rerender } = render(<OfflineBanner />);
     mockIsOnline = true;
     rerender(<OfflineBanner />);
-    var gsapMock = require('@/lib/gsap');
+    const gsapMock = require('@/lib/gsap');
     expect(gsapMock.gsap.to).toHaveBeenCalled();
   });
 

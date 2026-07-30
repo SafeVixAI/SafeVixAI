@@ -4,11 +4,11 @@ jest.mock('../store', function () {
   }
 })
 
-var mockGetState = require('../store').useAppStore.getState
-var mockFetch = jest.fn()
+const mockGetState = require('../store').useAppStore.getState
+const mockFetch = jest.fn()
 global.fetch = mockFetch
 
-var origGeolocation = (navigator as any).geolocation
+const origGeolocation = (navigator as any).geolocation
 
 describe('live-tracking', function () {
   beforeAll(function () {
@@ -41,8 +41,8 @@ describe('live-tracking', function () {
       ok: true,
       json: async function () { return { session_id: 'abc', tracking_url: 'http://t.co/abc', expires_at: '2026-07-01T00:00:00Z' } },
     })
-    var mod = await import('../live-tracking')
-    var result = await mod.startFamilyTracking({
+    const mod = await import('../live-tracking')
+    const result = await mod.startFamilyTracking({
       userName: 'Alice',
       latitude: 13.08,
       longitude: 80.27,
@@ -56,7 +56,7 @@ describe('live-tracking', function () {
 
   it('startFamilyTracking throws on non-ok response', async function () {
     mockFetch.mockResolvedValueOnce({ ok: false })
-    var mod = await import('../live-tracking')
+    const mod = await import('../live-tracking')
     await expect(mod.startFamilyTracking({
       userName: 'Alice',
       latitude: 13.08,
@@ -69,7 +69,7 @@ describe('live-tracking', function () {
       ok: true,
       json: async function () { return { session_id: 'abc', tracking_url: 'http://t.co/abc', expires_at: '2026-07-01T00:00:00Z' } },
     })
-    var mod = await import('../live-tracking')
+    const mod = await import('../live-tracking')
     await mod.startFamilyTracking({
       userName: 'Bob',
       bloodGroup: 'O+',
@@ -78,7 +78,7 @@ describe('live-tracking', function () {
       longitude: 80.25,
       batteryPercent: 85,
     })
-    var callBody = JSON.parse(mockFetch.mock.calls[0][1].body)
+    const callBody = JSON.parse(mockFetch.mock.calls[0][1].body)
     expect(callBody.blood_group).toBe('O+')
     expect(callBody.vehicle_number).toBe('TN01AB1234')
     expect(callBody.battery_percent).toBe(85)
@@ -88,10 +88,10 @@ describe('live-tracking', function () {
 
   it('authHeaders returns empty object when no token', async function () {
     mockGetState.mockReturnValue({ authToken: null })
-    var mod = await import('../live-tracking')
+    const mod = await import('../live-tracking')
     mockFetch.mockResolvedValueOnce({ ok: true, json: async function () { return {} } })
     await mod.startFamilyTracking({ userName: 'A', latitude: 0, longitude: 0 })
-    var headers = mockFetch.mock.calls[0][1].headers
+    const headers = mockFetch.mock.calls[0][1].headers
     expect(headers['Authorization']).toBeUndefined()
   })
 
@@ -99,7 +99,7 @@ describe('live-tracking', function () {
 
   it('stopFamilyTracking sends DELETE', async function () {
     mockFetch.mockResolvedValueOnce({ ok: true })
-    var mod = await import('../live-tracking')
+    const mod = await import('../live-tracking')
     await mod.stopFamilyTracking('session-1')
     expect(mockFetch).toHaveBeenCalledWith(
       expect.stringContaining('/api/v1/live-tracking/session/session-1'),
@@ -109,7 +109,7 @@ describe('live-tracking', function () {
 
   it('stopFamilyTracking does not throw on network error', async function () {
     mockFetch.mockRejectedValueOnce(new Error('network'))
-    var mod = await import('../live-tracking')
+    const mod = await import('../live-tracking')
     await expect(mod.stopFamilyTracking('session-1')).resolves.toBeUndefined()
   })
 
@@ -117,14 +117,14 @@ describe('live-tracking', function () {
 
   it('beginLocationBroadcast returns a stop function', async function () {
     (navigator.geolocation as any).getCurrentPosition = jest.fn()
-    var mod = await import('../live-tracking')
-    var stop = mod.beginLocationBroadcast('session-1')
+    const mod = await import('../live-tracking')
+    const stop = mod.beginLocationBroadcast('session-1')
     expect(typeof stop).toBe('function')
     stop()
   })
 
   it('beginLocationBroadcast pushes location and retrieves battery', async function () {
-    var mockGetCurrentPosition = jest.fn(function (success: Function) {
+    const mockGetCurrentPosition = jest.fn(function (success: Function) {
       success({
         coords: { latitude: 13.08, longitude: 80.27, accuracy: 10, speed: null },
         timestamp: Date.now(),
@@ -134,8 +134,8 @@ describe('live-tracking', function () {
     ;(navigator as any).getBattery = jest.fn().mockResolvedValue({ level: 0.85 })
 
     mockFetch.mockResolvedValue({ ok: true })
-    var mod = await import('../live-tracking')
-    var stop = mod.beginLocationBroadcast('session-abc')
+    const mod = await import('../live-tracking')
+    const stop = mod.beginLocationBroadcast('session-abc')
 
     // Wait for async push (geolocation -> battery -> fetch) to complete
     await new Promise(function (resolve) { return setTimeout(resolve, 50) })
@@ -144,7 +144,7 @@ describe('live-tracking', function () {
       expect.stringContaining('/api/v1/live-tracking/update'),
       expect.objectContaining({ method: 'PUT' }),
     )
-    var body = JSON.parse(mockFetch.mock.calls[0][1].body)
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body)
     expect(body.latitude).toBe(13.08)
     expect(body.battery_percent).toBe(85)
     expect(body.session_id).toBe('session-abc')
@@ -152,15 +152,15 @@ describe('live-tracking', function () {
   })
 
   it('beginLocationBroadcast stops on 401', async function () {
-    var mockGetCurrentPosition = jest.fn(function (success: Function) {
+    const mockGetCurrentPosition = jest.fn(function (success: Function) {
       success({ coords: { latitude: 0, longitude: 0, accuracy: 0, speed: 0 }, timestamp: Date.now() })
     })
     ;(navigator as any).geolocation.getCurrentPosition = mockGetCurrentPosition
     ;(navigator as any).getBattery = jest.fn().mockResolvedValue({ level: 0.5 })
 
     mockFetch.mockResolvedValue({ ok: false, status: 401 })
-    var mod = await import('../live-tracking')
-    var stop = mod.beginLocationBroadcast('session-expired')
+    const mod = await import('../live-tracking')
+    const stop = mod.beginLocationBroadcast('session-expired')
 
     await new Promise(function (resolve) { return setTimeout(resolve, 50) })
     expect(mockFetch).toHaveBeenCalled()
@@ -168,14 +168,14 @@ describe('live-tracking', function () {
   })
 
   it('beginLocationBroadcast handles geolocation error', async function () {
-    var mockGetCurrentPosition = jest.fn(function (success: Function, error: Function) {
+    const mockGetCurrentPosition = jest.fn(function (success: Function, error: Function) {
       error(new Error('permission denied'))
     })
     ;(navigator as any).geolocation.getCurrentPosition = mockGetCurrentPosition
     ;(navigator as any).getBattery = jest.fn().mockResolvedValue({ level: 0.5 })
 
-    var mod = await import('../live-tracking')
-    var stop = mod.beginLocationBroadcast('session-err')
+    const mod = await import('../live-tracking')
+    const stop = mod.beginLocationBroadcast('session-err')
 
     await new Promise(function (resolve) { return setTimeout(resolve, 50) })
     stop()
@@ -184,17 +184,17 @@ describe('live-tracking', function () {
   // ── subscribeToTracking ──
 
   it('subscribeToTracking returns a stop function', async function () {
-    var mod = await import('../live-tracking')
-    var stop = mod.subscribeToTracking('session-1', 'token', jest.fn(), jest.fn(), 100000)
+    const mod = await import('../live-tracking')
+    const stop = mod.subscribeToTracking('session-1', 'token', jest.fn(), jest.fn(), 100000)
     expect(typeof stop).toBe('function')
     stop()
   })
 
   it('subscribeToTracking calls onExpired on 404', async function () {
     mockFetch.mockResolvedValueOnce({ status: 404 })
-    var mod = await import('../live-tracking')
-    var onExpired = jest.fn()
-    var stop = mod.subscribeToTracking('session-1', 'token', jest.fn(), onExpired, 100000)
+    const mod = await import('../live-tracking')
+    const onExpired = jest.fn()
+    const stop = mod.subscribeToTracking('session-1', 'token', jest.fn(), onExpired, 100000)
     await new Promise(function (resolve) { return setTimeout(resolve, 50) })
     expect(onExpired).toHaveBeenCalled()
     stop()
@@ -212,10 +212,10 @@ describe('live-tracking', function () {
         }
       },
     })
-    var mod = await import('../live-tracking')
-    var onExpired = jest.fn()
-    var onUpdate = jest.fn()
-    var stop = mod.subscribeToTracking('session-1', 'token', onUpdate, onExpired, 100000)
+    const mod = await import('../live-tracking')
+    const onExpired = jest.fn()
+    const onUpdate = jest.fn()
+    const stop = mod.subscribeToTracking('session-1', 'token', onUpdate, onExpired, 100000)
     await new Promise(function (resolve) { return setTimeout(resolve, 50) })
     expect(onExpired).toHaveBeenCalled()
     expect(onUpdate).not.toHaveBeenCalled()
@@ -234,9 +234,9 @@ describe('live-tracking', function () {
         }
       },
     })
-    var mod = await import('../live-tracking')
-    var onUpdate = jest.fn()
-    var stop = mod.subscribeToTracking('session-1', 'token', onUpdate, jest.fn(), 100000)
+    const mod = await import('../live-tracking')
+    const onUpdate = jest.fn()
+    const stop = mod.subscribeToTracking('session-1', 'token', onUpdate, jest.fn(), 100000)
     await new Promise(function (resolve) { return setTimeout(resolve, 50) })
     expect(onUpdate).toHaveBeenCalledWith(expect.objectContaining({ latitude: 13.08 }))
     stop()
@@ -244,9 +244,9 @@ describe('live-tracking', function () {
 
   it('subscribeToTracking handles network error', async function () {
     mockFetch.mockRejectedValueOnce(new Error('network fail'))
-    var mod = await import('../live-tracking')
-    var onUpdate = jest.fn()
-    var stop = mod.subscribeToTracking('session-1', 'token', onUpdate, jest.fn(), 100000)
+    const mod = await import('../live-tracking')
+    const onUpdate = jest.fn()
+    const stop = mod.subscribeToTracking('session-1', 'token', onUpdate, jest.fn(), 100000)
     await new Promise(function (resolve) { return setTimeout(resolve, 50) })
     expect(onUpdate).not.toHaveBeenCalled()
     stop()
@@ -255,20 +255,20 @@ describe('live-tracking', function () {
   // ── notifyContactsViaWhatsApp ──
 
   it('notifyContactsViaWhatsApp no-ops for empty contacts', async function () {
-    var openMock = jest.fn()
-    var windowOpen = window.open
+    const openMock = jest.fn()
+    const windowOpen = window.open
     window.open = openMock
-    var mod = await import('../live-tracking')
+    const mod = await import('../live-tracking')
     mod.notifyContactsViaWhatsApp([], 'Alice', 'http://track.me')
     expect(openMock).not.toHaveBeenCalled()
     window.open = windowOpen
   })
 
   it('notifyContactsViaWhatsApp opens first contact immediately', async function () {
-    var openMock = jest.fn()
-    var windowOpen = window.open
+    const openMock = jest.fn()
+    const windowOpen = window.open
     window.open = openMock
-    var mod = await import('../live-tracking')
+    const mod = await import('../live-tracking')
     mod.notifyContactsViaWhatsApp(['+919876543210'], 'Alice', 'http://track.me')
     expect(openMock).toHaveBeenCalledTimes(1)
     expect(openMock.mock.calls[0][0]).toContain('wa.me')
@@ -277,8 +277,8 @@ describe('live-tracking', function () {
   })
 
   it('notifyContactsViaWhatsApp opens all contacts with delays', function (done) {
-    var openMock = jest.fn()
-    var windowOpen = window.open
+    const openMock = jest.fn()
+    const windowOpen = window.open
     window.open = openMock
     import('../live-tracking').then(function (mod) {
       jest.useFakeTimers()
@@ -295,45 +295,45 @@ describe('live-tracking', function () {
   })
 
   it('notifyContactsViaWhatsApp validates invalid phone', async function () {
-    var openMock = jest.fn()
-    var windowOpen = window.open
+    const openMock = jest.fn()
+    const windowOpen = window.open
     window.open = openMock
-    var mod = await import('../live-tracking')
+    const mod = await import('../live-tracking')
     mod.notifyContactsViaWhatsApp(['not-a-phone'], 'Alice', 'http://track.me')
     expect(openMock).not.toHaveBeenCalled()
     window.open = windowOpen
   })
 
   it('openEmergencyWhatsApp handles international formatted numbers', async function () {
-    var openMock = jest.fn()
-    var windowOpen = window.open
+    const openMock = jest.fn()
+    const windowOpen = window.open
     window.open = openMock
-    var mod = await import('../live-tracking')
+    const mod = await import('../live-tracking')
     mod.notifyContactsViaWhatsApp(['+1 (555) 123-4567'], 'Alice', 'http://track.me')
     expect(openMock).toHaveBeenCalled()
-    var url = openMock.mock.calls[0][0]
+    const url = openMock.mock.calls[0][0]
     expect(url).toContain('15551234567')
     window.open = windowOpen
   })
 
   it('openEmergencyWhatsApp handles phone without + prefix', async function () {
-    var openMock = jest.fn()
-    var windowOpen = window.open
+    const openMock = jest.fn()
+    const windowOpen = window.open
     window.open = openMock
-    var mod = await import('../live-tracking')
+    const mod = await import('../live-tracking')
     mod.notifyContactsViaWhatsApp(['919876543210'], 'Alice', 'http://track.me')
     expect(openMock).toHaveBeenCalled()
-    var url = openMock.mock.calls[0][0]
+    const url = openMock.mock.calls[0][0]
     expect(url).toContain('919876543210')
     window.open = windowOpen
   })
 
   it('openEmergencyWhatsApp sets opener to null', async function () {
-    var mockPopup = { opener: 'original' }
-    var openMock = jest.fn().mockReturnValue(mockPopup)
-    var windowOpen = window.open
+    const mockPopup = { opener: 'original' }
+    const openMock = jest.fn().mockReturnValue(mockPopup)
+    const windowOpen = window.open
     window.open = openMock
-    var mod = await import('../live-tracking')
+    const mod = await import('../live-tracking')
     mod.notifyContactsViaWhatsApp(['+919876543210'], 'Alice', 'http://track.me')
     expect(mockPopup.opener).toBeNull()
     window.open = windowOpen

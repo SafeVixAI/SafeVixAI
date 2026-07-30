@@ -21,7 +21,7 @@ describe('Button', function() {
   it('renders all variant props without error', function() {
     const variants = ['default', 'brand', 'emergency', 'terminal', 'safeGhost', 'outline', 'secondary', 'ghost', 'destructive', 'link'] as const;
     for (const variant of variants) {
-      var { unmount } = render(<Button variant={variant}>{variant}</Button>);
+      const { unmount } = render(<Button variant={variant}>{variant}</Button>);
       expect(screen.getByText(variant)).toBeInTheDocument();
       unmount();
     }
@@ -30,7 +30,7 @@ describe('Button', function() {
   it('renders all size props without error', function() {
     const sizes = ['default', 'xs', 'sm', 'lg', 'icon', 'icon-xs', 'icon-sm', 'icon-lg'] as const;
     for (const size of sizes) {
-      var { unmount } = render(<Button size={size}>{size}</Button>);
+      const { unmount } = render(<Button size={size}>{size}</Button>);
       expect(screen.getByText(size)).toBeInTheDocument();
       unmount();
     }
@@ -58,7 +58,7 @@ describe('Button', function() {
 
   it('applies default variant classes', function() {
     render(<Button>Default</Button>);
-    var btn = screen.getByText('Default');
+    const btn = screen.getByText('Default');
     expect(btn.className).toContain('inline-flex');
     expect(btn.className).toContain('rounded-lg');
     expect(btn.className).toContain('font-medium');

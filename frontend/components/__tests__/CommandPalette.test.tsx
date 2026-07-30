@@ -2,7 +2,7 @@ jest.mock('@/lib/gsap', function() {
   return { gsap: { fromTo: jest.fn(function() { return {} }), to: jest.fn() } }
 })
 jest.mock('@gsap/react', function() {
-  var React2 = require('react');
+  const React2 = require('react');
   return {
     useGSAP: function(cb: any, opts?: any) {
       React2.useEffect(function() {
@@ -12,7 +12,7 @@ jest.mock('@gsap/react', function() {
   };
 })
 jest.mock('cmdk', function() {
-  var React = require('react')
+  const React = require('react')
   function FakeInput() { return null }
   function FakeList(props: any) { return React.createElement('div', null, props.children) }
   function FakeEmpty() { return null }
@@ -28,7 +28,7 @@ jest.mock('cmdk', function() {
   FakeRoot.Item = FakeItem
   return { Command: FakeRoot, Input: FakeInput, List: FakeList, Empty: FakeEmpty, Group: FakeGroup, Item: FakeItem }
 })
-var mockPush = jest.fn()
+const mockPush = jest.fn()
 jest.mock('next/navigation', function() {
   return { useRouter: function() { return { push: mockPush } }, usePathname: function() { return '/' }, useSearchParams: function() { return new URLSearchParams() } }
 })
@@ -38,9 +38,9 @@ import React from 'react'
 import { CommandPalette } from '../search/CommandPalette'
 
 describe('CommandPalette', function() {
-  var map: Record<string, Function> = {}
-  var originalAddEventListener = document.addEventListener.bind(document)
-  var originalRemoveEventListener = document.removeEventListener.bind(document)
+  let map: Record<string, Function> = {}
+  const originalAddEventListener = document.addEventListener.bind(document)
+  const originalRemoveEventListener = document.removeEventListener.bind(document)
 
   beforeEach(function() {
     jest.clearAllMocks()
@@ -55,7 +55,7 @@ describe('CommandPalette', function() {
   })
 
   it('returns null when not open', function() {
-    var c = render(React.createElement(CommandPalette))
+    const c = render(React.createElement(CommandPalette))
     expect(c.container.innerHTML).toBe('')
   })
 
@@ -66,21 +66,21 @@ describe('CommandPalette', function() {
 
   it('opens on Cmd+K keypress', async function() {
     render(React.createElement(CommandPalette))
-    var keydown = map['keydown']
+    const keydown = map['keydown']
     if (keydown) keydown({ key: 'k', metaKey: true, preventDefault: jest.fn() })
     await waitFor(function() { expect(screen.getByTestId('cmdk-root')).toBeInTheDocument() })
   })
 
   it('opens on Ctrl+K keypress', async function() {
     render(React.createElement(CommandPalette))
-    var keydown = map['keydown']
+    const keydown = map['keydown']
     if (keydown) keydown({ key: 'k', ctrlKey: true, preventDefault: jest.fn() })
     await waitFor(function() { expect(screen.getByTestId('cmdk-root')).toBeInTheDocument() })
   })
 
   it('toggles closed on second Cmd+K', async function() {
     render(React.createElement(CommandPalette))
-    var keydown = map['keydown']
+    const keydown = map['keydown']
     if (keydown) keydown({ key: 'k', metaKey: true, preventDefault: jest.fn() })
     await waitFor(function() { expect(screen.getByTestId('cmdk-root')).toBeInTheDocument() })
     if (keydown) keydown({ key: 'k', metaKey: true, preventDefault: jest.fn() })
@@ -89,23 +89,23 @@ describe('CommandPalette', function() {
 
   it('closes when clicking overlay', async function() {
     render(React.createElement(CommandPalette))
-    var keydown = map['keydown']
+    const keydown = map['keydown']
     if (keydown) keydown({ key: 'k', metaKey: true, preventDefault: jest.fn() })
     await waitFor(function() { expect(screen.getByTestId('cmdk-root')).toBeInTheDocument() })
-    var overlay = document.querySelector('[class*="fixed"]')
+    const overlay = document.querySelector('[class*="fixed"]')
     if (overlay) fireEvent.click(overlay)
     expect(screen.queryByTestId('cmdk-root')).not.toBeInTheDocument()
   })
 
   it('removes keydown listener on unmount', function() {
-    var c = render(React.createElement(CommandPalette))
+    const c = render(React.createElement(CommandPalette))
     c.unmount()
     expect(document.removeEventListener).toHaveBeenCalledWith('keydown', expect.any(Function))
   })
 
   it('renders navigation items when open', async function() {
     render(React.createElement(CommandPalette))
-    var keydown = map['keydown']
+    const keydown = map['keydown']
     if (keydown) keydown({ key: 'k', metaKey: true, preventDefault: jest.fn() })
     await waitFor(function() { expect(screen.getByText('Find nearest hospital')).toBeInTheDocument() })
     expect(screen.getByText('Activate Emergency SOS')).toBeInTheDocument()
@@ -117,7 +117,7 @@ describe('CommandPalette', function() {
 
   it('navigates to locator on Find nearest hospital click', async function() {
     render(React.createElement(CommandPalette))
-    var keydown = map['keydown']
+    const keydown = map['keydown']
     if (keydown) keydown({ key: 'k', metaKey: true, preventDefault: jest.fn() })
     await waitFor(function() { expect(screen.getByText('Find nearest hospital')).toBeInTheDocument() })
     fireEvent.click(screen.getByText('Find nearest hospital'))
@@ -126,7 +126,7 @@ describe('CommandPalette', function() {
 
   it('navigates to first-aid on First Aid Guide click', async function() {
     render(React.createElement(CommandPalette))
-    var keydown = map['keydown']
+    const keydown = map['keydown']
     if (keydown) keydown({ key: 'k', metaKey: true, preventDefault: jest.fn() })
     await waitFor(function() { expect(screen.getByText('First Aid Guide')).toBeInTheDocument() })
     fireEvent.click(screen.getByText('First Aid Guide'))
@@ -135,7 +135,7 @@ describe('CommandPalette', function() {
 
   it('navigates to challan on Calculate Traffic Fine click', async function() {
     render(React.createElement(CommandPalette))
-    var keydown = map['keydown']
+    const keydown = map['keydown']
     if (keydown) keydown({ key: 'k', metaKey: true, preventDefault: jest.fn() })
     await waitFor(function() { expect(screen.getByText('Calculate Traffic Fine')).toBeInTheDocument() })
     fireEvent.click(screen.getByText('Calculate Traffic Fine'))
@@ -144,7 +144,7 @@ describe('CommandPalette', function() {
 
   it('navigates to report on Report Road Issue click', async function() {
     render(React.createElement(CommandPalette))
-    var keydown = map['keydown']
+    const keydown = map['keydown']
     if (keydown) keydown({ key: 'k', metaKey: true, preventDefault: jest.fn() })
     await waitFor(function() { expect(screen.getByText('Report Road Issue')).toBeInTheDocument() })
     fireEvent.click(screen.getByText('Report Road Issue'))
@@ -153,7 +153,7 @@ describe('CommandPalette', function() {
 
   it('navigates to assistant on AI Assistant click', async function() {
     render(React.createElement(CommandPalette))
-    var keydown = map['keydown']
+    const keydown = map['keydown']
     if (keydown) keydown({ key: 'k', metaKey: true, preventDefault: jest.fn() })
     await waitFor(function() { expect(screen.getByText('AI Assistant')).toBeInTheDocument() })
     fireEvent.click(screen.getByText('AI Assistant'))

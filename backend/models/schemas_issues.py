@@ -4,13 +4,13 @@
 from __future__ import annotations
 
 from datetime import datetime
-from enum import Enum
-from typing import Any, Literal
+from enum import StrEnum
+from typing import Any
 
 from pydantic import BaseModel, Field, field_validator
 
 
-class IssueType(str, Enum):
+class IssueType(StrEnum):
     bug = 'bug'
     feature_request = 'feature_request'
     feedback = 'feedback'
@@ -21,7 +21,7 @@ class IssueType(str, Enum):
     other = 'other'
 
 
-class IssueCategory(str, Enum):
+class IssueCategory(StrEnum):
     frontend = 'frontend'
     backend = 'backend'
     api = 'api'
@@ -33,7 +33,7 @@ class IssueCategory(str, Enum):
     other = 'other'
 
 
-class IssueSeverity(str, Enum):
+class IssueSeverity(StrEnum):
     critical = 'critical'
     high = 'high'
     medium = 'medium'
@@ -41,14 +41,14 @@ class IssueSeverity(str, Enum):
     cosmetic = 'cosmetic'
 
 
-class IssuePriority(str, Enum):
+class IssuePriority(StrEnum):
     urgent = 'urgent'
     high = 'high'
     normal = 'normal'
     low = 'low'
 
 
-class IssueStatus(str, Enum):
+class IssueStatus(StrEnum):
     new = 'new'
     triaged = 'triaged'
     acknowledged = 'acknowledged'
@@ -94,7 +94,8 @@ class CreateIssueRequest(BaseModel):
     def title_not_empty(cls, v: str) -> str:
         stripped = v.strip()
         if not stripped:
-            raise ValueError('Title cannot be empty')
+            msg = 'Title cannot be empty'
+            raise ValueError(msg)
         return stripped
 
     @field_validator('description')
@@ -102,7 +103,8 @@ class CreateIssueRequest(BaseModel):
     def description_not_empty(cls, v: str) -> str:
         stripped = v.strip()
         if not stripped:
-            raise ValueError('Description cannot be empty')
+            msg = 'Description cannot be empty'
+            raise ValueError(msg)
         return stripped
 
 

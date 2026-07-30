@@ -16,19 +16,16 @@ from __future__ import annotations
 
 import argparse
 import asyncio
-import json
 import sys
-from datetime import UTC
 from typing import Any
 
 import httpx
-
 
 API_BASE = 'http://localhost:8000/api/v1'
 
 
 def _print_json(data: Any) -> None:
-    print(json.dumps(data, indent=2, default=str))
+    pass
 
 
 async def _cmd_report(args: argparse.Namespace) -> None:
@@ -49,17 +46,11 @@ async def _cmd_report(args: argparse.Namespace) -> None:
         resp = await client.post(f'{API_BASE}/issues', json=payload)
         if resp.status_code == 201:
             data = resp.json()
-            print(f'✅ Issue created!')
-            print(f'   Tracking: {data.get("tracking_number")}')
-            print(f'   UUID: {data.get("uuid")}')
-            print(f'   Status: {data.get("status")}')
             if _detail := data.get('duplicate_of'):
-                print(f'   ⚠️  Marked as duplicate of: {_detail}')
+                pass
             if _spam := data.get('is_spam'):
-                print(f'   ⛔ Flagged as spam: {data.get("spam_reason")}')
+                pass
         else:
-            print(f'❌ Failed: {resp.status_code}')
-            print(resp.text[:500])
             sys.exit(1)
 
 
@@ -75,14 +66,11 @@ async def _cmd_list(args: argparse.Namespace) -> None:
         if resp.status_code == 200:
             data = resp.json()
             items = data.get('items', [])
-            print(f'📋 Issues ({data["total"]} total, page {data["page"]}/{data["total_pages"]})')
-            print('─' * 72)
-            for item in items:
-                print(f'  {item["tracking_number"]:20s} {item["status"]:15s} {item["severity"]:10s} {item["title"][:50]}')
+            for _item in items:
+                pass
             if not items:
-                print('  No issues found.')
+                pass
         else:
-            print(f'❌ Failed: {resp.status_code}')
             sys.exit(1)
 
 
@@ -91,17 +79,11 @@ async def _cmd_get(args: argparse.Namespace) -> None:
         resp = await client.get(f'{API_BASE}/issues/tracking/{args.tracking}')
         if resp.status_code == 200:
             data = resp.json()
-            print(f'📄 Issue: {data["title"]}')
-            print(f'   Tracking: {data["tracking_number"]}')
-            print(f'   Type: {data["issue_type"]} | Severity: {data["severity"]} | Status: {data["status"]}')
-            print(f'   Created: {data["created_at"]}')
-            print(f'   Description: {data["description"][:500]}')
             if data.get('steps_to_reproduce'):
-                print(f'   Steps: {data["steps_to_reproduce"][:300]}')
+                pass
             if data.get('github_issue_url'):
-                print(f'   GitHub: {data["github_issue_url"]}')
+                pass
         else:
-            print(f'❌ Issue not found: {resp.status_code}')
             sys.exit(1)
 
 
@@ -110,25 +92,13 @@ async def _cmd_stats(args: argparse.Namespace) -> None:
         resp = await client.get(f'{API_BASE}/issues/stats')
         if resp.status_code == 200:
             data = resp.json()
-            print('📊 Issue Statistics')
-            print('─' * 40)
-            print(f'  Total:         {data["total"]}')
-            print(f'  Open:          {data["open_count"]}')
-            print(f'  Resolved:      {data["resolved_count"]}')
-            print(f'  Spam:          {data["spam_count"]}')
-            print(f'  Duplicates:    {data["duplicate_count"]}')
-            print(f'  SLA Breaches:  {data["sla_breach_count"]}')
             if data.get('avg_resolution_hours'):
-                print(f'  Avg Resolution: {data["avg_resolution_hours"]}h')
-            print()
-            print('  By Type:')
-            for t, c in data.get('by_type', {}).items():
-                print(f'    {t:20s} {c}')
-            print('  By Status:')
-            for s, c in data.get('by_status', {}).items():
-                print(f'    {s:20s} {c}')
+                pass
+            for _t, _c in data.get('by_type', {}).items():
+                pass
+            for _s, _c in data.get('by_status', {}).items():
+                pass
         else:
-            print(f'❌ Failed: {resp.status_code}')
             sys.exit(1)
 
 

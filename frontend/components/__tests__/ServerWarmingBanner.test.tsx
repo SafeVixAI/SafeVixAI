@@ -5,7 +5,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
-var mockStore = { serverWarming: true };
+const mockStore = { serverWarming: true };
 
 jest.mock('@/lib/store', () => ({
   useAppStore: (selector: any) => selector(mockStore),
@@ -22,7 +22,7 @@ jest.mock('@/lib/gsap', function() {
 });
 
 jest.mock('@gsap/react', function() {
-  var React = require('react');
+  const React = require('react');
   return {
     useGSAP: function(cb: any, _opts?: any) {
       React.useEffect(function() {
@@ -33,7 +33,7 @@ jest.mock('@gsap/react', function() {
 });
 
 jest.mock('lucide-react', function() {
-  var React2 = require('react');
+  const React2 = require('react');
   return { Loader2: function() { return React2.createElement('span', { 'data-testid': 'loader-icon' }) } }
 });
 
@@ -61,7 +61,7 @@ describe('ServerWarmingBanner', function() {
   });
 
   it('has warming styling classes', function() {
-    var { container } = render(<ServerWarmingBanner />);
+    const { container } = render(<ServerWarmingBanner />);
     expect(container.firstChild).toHaveClass('fixed');
     expect(container.firstChild).toHaveClass('rounded-full');
     expect(container.firstChild).toHaveClass('shadow-2xl');
@@ -69,7 +69,7 @@ describe('ServerWarmingBanner', function() {
 
   it('does not render when serverWarming is false', function() {
     mockStore.serverWarming = false;
-    var { container } = render(<ServerWarmingBanner />);
+    const { container } = render(<ServerWarmingBanner />);
     expect(container.firstChild).toBeNull();
     mockStore.serverWarming = true;
   });
@@ -77,16 +77,16 @@ describe('ServerWarmingBanner', function() {
   it('calls gsap.fromTo when serverWarming is true', function() {
     mockStore.serverWarming = true;
     render(<ServerWarmingBanner />);
-    var gsapMock = require('@/lib/gsap');
+    const gsapMock = require('@/lib/gsap');
     expect(gsapMock.gsap.fromTo).toHaveBeenCalled();
   });
 
   it('calls gsap.to onComplete when serverWarming transitions to false', function() {
     mockStore.serverWarming = true;
-    var { rerender } = render(<ServerWarmingBanner />);
+    const { rerender } = render(<ServerWarmingBanner />);
     mockStore.serverWarming = false;
     rerender(<ServerWarmingBanner />);
-    var gsapMock = require('@/lib/gsap');
+    const gsapMock = require('@/lib/gsap');
     expect(gsapMock.gsap.to).toHaveBeenCalled();
   });
 });

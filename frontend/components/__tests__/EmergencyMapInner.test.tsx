@@ -4,13 +4,13 @@ import { render } from '@testing-library/react'
 import React from 'react'
 import EmergencyMapInner from '../EmergencyMapInner'
 
-var mockFacilities = [
+const mockFacilities = [
   { id: '1', name: 'City Hospital', type: 'hospital', coords: [80.2707, 13.0827] as [number, number], accentColor: '#ff0000', distance: '2 km' },
 ]
 
 describe('EmergencyMapInner', function () {
   it('renders map with facilities', function () {
-    var { container } = render(
+    const { container } = render(
       React.createElement(EmergencyMapInner, {
         center: [80.2707, 13.0827] as [number, number],
         facilities: mockFacilities,
@@ -20,7 +20,7 @@ describe('EmergencyMapInner', function () {
   })
 
   it('renders with route and currentLocation', function () {
-    var { container } = render(
+    const { container } = render(
       React.createElement(EmergencyMapInner, {
         center: [80.2707, 13.0827] as [number, number],
         facilities: mockFacilities,
@@ -42,8 +42,8 @@ describe('EmergencyMapInner', function () {
   })
 
   it('renders with ambulance facility type', function () {
-    var facilities = [{ ...mockFacilities[0], type: 'ambulance' }]
-    var { container } = render(
+    const facilities = [{ ...mockFacilities[0], type: 'ambulance' }]
+    const { container } = render(
       React.createElement(EmergencyMapInner, {
         center: [80.2707, 13.0827] as [number, number],
         facilities: facilities,
@@ -53,8 +53,8 @@ describe('EmergencyMapInner', function () {
   })
 
   it('renders with pharmacy facility type', function () {
-    var facilities = [{ ...mockFacilities[0], type: 'pharmacy' }]
-    var { container } = render(
+    const facilities = [{ ...mockFacilities[0], type: 'pharmacy' }]
+    const { container } = render(
       React.createElement(EmergencyMapInner, {
         center: [80.2707, 13.0827] as [number, number],
         facilities: facilities,
@@ -64,8 +64,8 @@ describe('EmergencyMapInner', function () {
   })
 
   it('renders with police facility type', function () {
-    var facilities = [{ ...mockFacilities[0], type: 'police' }]
-    var { container } = render(
+    const facilities = [{ ...mockFacilities[0], type: 'police' }]
+    const { container } = render(
       React.createElement(EmergencyMapInner, {
         center: [80.2707, 13.0827] as [number, number],
         facilities: facilities,
@@ -75,8 +75,8 @@ describe('EmergencyMapInner', function () {
   })
 
   it('renders with fire facility type', function () {
-    var facilities = [{ ...mockFacilities[0], type: 'fire' }]
-    var { container } = render(
+    const facilities = [{ ...mockFacilities[0], type: 'fire' }]
+    const { container } = render(
       React.createElement(EmergencyMapInner, {
         center: [80.2707, 13.0827] as [number, number],
         facilities: facilities,
@@ -86,8 +86,8 @@ describe('EmergencyMapInner', function () {
   })
 
   it('renders with towing facility type', function () {
-    var facilities = [{ ...mockFacilities[0], type: 'towing' }]
-    var { container } = render(
+    const facilities = [{ ...mockFacilities[0], type: 'towing' }]
+    const { container } = render(
       React.createElement(EmergencyMapInner, {
         center: [80.2707, 13.0827] as [number, number],
         facilities: facilities,
@@ -97,8 +97,8 @@ describe('EmergencyMapInner', function () {
   })
 
   it('renders with mechanic facility type', function () {
-    var facilities = [{ ...mockFacilities[0], type: 'mechanic' }]
-    var { container } = render(
+    const facilities = [{ ...mockFacilities[0], type: 'mechanic' }]
+    const { container } = render(
       React.createElement(EmergencyMapInner, {
         center: [80.2707, 13.0827] as [number, number],
         facilities: facilities,
@@ -108,8 +108,8 @@ describe('EmergencyMapInner', function () {
   })
 
   it('renders with unknown facility type', function () {
-    var facilities = [{ ...mockFacilities[0], type: 'showroom' }]
-    var { container } = render(
+    const facilities = [{ ...mockFacilities[0], type: 'showroom' }]
+    const { container } = render(
       React.createElement(EmergencyMapInner, {
         center: [80.2707, 13.0827] as [number, number],
         facilities: facilities,
@@ -119,7 +119,7 @@ describe('EmergencyMapInner', function () {
   })
 
   it('renders with alternative routes', function () {
-    var { container } = render(
+    const { container } = render(
       React.createElement(EmergencyMapInner, {
         center: [80.2707, 13.0827] as [number, number],
         facilities: mockFacilities,

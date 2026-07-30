@@ -11,7 +11,7 @@ describe('ProgressRing', function () {
   })
 
   it('renders with default total', function () {
-    var container = render(React.createElement(ProgressRing, { seconds: 15 }))
+    const container = render(React.createElement(ProgressRing, { seconds: 15 }))
     expect(container.container.querySelector('svg')).toBeInTheDocument()
     expect(container.container.querySelector('[aria-label="15 seconds remaining"]')).toBeInTheDocument()
   })
@@ -22,10 +22,10 @@ describe('ProgressRing', function () {
   })
 
   it('does nothing when circleRef is null', function () {
-    var useGSAP = require('@gsap/react').useGSAP
-    var origImpl = useGSAP.getMockImplementation()
+    const useGSAP = require('@gsap/react').useGSAP
+    const origImpl = useGSAP.getMockImplementation()
     useGSAP.mockImplementation(function (fn) { fn() })
-    var gsapMock = require('@/lib/gsap').gsap
+    const gsapMock = require('@/lib/gsap').gsap
     gsapMock.to.mockClear()
     render(React.createElement(ProgressRing, { seconds: 15 }))
     expect(gsapMock.to).not.toHaveBeenCalled()
@@ -38,8 +38,8 @@ describe('ProgressRing', function () {
   })
 
   it('invokes useGSAP callback after render', function () {
-    var useGSAP = require('@gsap/react').useGSAP
-    var capture: Function[] = []
+    const useGSAP = require('@gsap/react').useGSAP
+    const capture: Function[] = []
     useGSAP.mockImplementation(function (fn: Function) {
       capture.push(fn)
     })
@@ -48,18 +48,18 @@ describe('ProgressRing', function () {
   })
 
   it('calls gsap.to when useGSAP callback fires with populated ref', function () {
-    var useGSAP = require('@gsap/react').useGSAP
-    var capture: Function[] = []
+    const useGSAP = require('@gsap/react').useGSAP
+    const capture: Function[] = []
     useGSAP.mockImplementation(function (fn: Function) {
       capture.push(fn)
     })
     render(React.createElement(ProgressRing, { seconds: 3 }))
 
-    var gsapMock = require('@/lib/gsap').gsap
+    const gsapMock = require('@/lib/gsap').gsap
     gsapMock.to.mockClear()
 
     // After React commits, circleRef.current is populated. Fire the callback.
-    var cb = capture[0]
+    const cb = capture[0]
     expect(typeof cb).toBe('function')
     cb()
 
@@ -67,36 +67,36 @@ describe('ProgressRing', function () {
   })
 
   it('fires gsap.to with stroke #FF6B6B for seconds=7 (10 < s <= 5)', function () {
-    var useGSAP = require('@gsap/react').useGSAP
-    var capture: Function[] = []
+    const useGSAP = require('@gsap/react').useGSAP
+    const capture: Function[] = []
     useGSAP.mockImplementation(function (fn: Function) { capture.push(fn) })
     render(React.createElement(ProgressRing, { seconds: 7 }))
-    var gsapMock = require('@/lib/gsap').gsap
+    const gsapMock = require('@/lib/gsap').gsap
     gsapMock.to.mockClear()
     capture[0]()
     expect(gsapMock.to).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ stroke: '#FF6B6B' }))
   })
 
   it('fires gsap.to with stroke #FF0000 for seconds=3', function () {
-    var useGSAP = require('@gsap/react').useGSAP
-    var capture: Function[] = []
+    const useGSAP = require('@gsap/react').useGSAP
+    const capture: Function[] = []
     useGSAP.mockImplementation(function (fn: Function) { capture.push(fn) })
     render(React.createElement(ProgressRing, { seconds: 3 }))
-    var gsapMock = require('@/lib/gsap').gsap
+    const gsapMock = require('@/lib/gsap').gsap
     gsapMock.to.mockClear()
     capture[0]()
     expect(gsapMock.to).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ stroke: '#FF0000' }))
   })
 
   it('does not change stroke color for seconds > 10', function () {
-    var useGSAP = require('@gsap/react').useGSAP
-    var capture: Function[] = []
+    const useGSAP = require('@gsap/react').useGSAP
+    const capture: Function[] = []
     useGSAP.mockImplementation(function (fn: Function) { capture.push(fn) })
     render(React.createElement(ProgressRing, { seconds: 15 }))
-    var gsapMock = require('@/lib/gsap').gsap
+    const gsapMock = require('@/lib/gsap').gsap
     gsapMock.to.mockClear()
     capture[0]()
-    var strokeCalls = gsapMock.to.mock.calls.filter(function(c) { return c[1] && c[1].stroke })
+    const strokeCalls = gsapMock.to.mock.calls.filter(function(c) { return c[1] && c[1].stroke })
     expect(strokeCalls.length).toBe(0)
   })
 })

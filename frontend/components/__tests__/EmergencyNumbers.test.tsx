@@ -34,13 +34,13 @@ describe('EmergencyNumbers', function () {
   })
 
   it('renders bar dividers between items', function () {
-    var container = render(React.createElement(EmergencyNumbers))
-    var dividers = container.container.querySelectorAll('.bar-divider')
+    const container = render(React.createElement(EmergencyNumbers))
+    const dividers = container.container.querySelectorAll('.bar-divider')
     expect(dividers.length).toBe(2)
   })
 
   it('calls emergencyCallMade analytics on click', function () {
-    var analytics = require('@/lib/analytics')
+    const analytics = require('@/lib/analytics')
     render(React.createElement(EmergencyNumbers))
     fireEvent.click(screen.getByText('112'))
     expect(analytics.track.emergencyCallMade).toHaveBeenCalledWith('112')
@@ -48,7 +48,7 @@ describe('EmergencyNumbers', function () {
 
   it('renders tel: hrefs on each anchor', function () {
     render(React.createElement(EmergencyNumbers))
-    var links = screen.getAllByRole('link')
+    const links = screen.getAllByRole('link')
     expect(links[0]).toHaveAttribute('href', 'tel:112')
     expect(links[1]).toHaveAttribute('href', 'tel:108')
     expect(links[2]).toHaveAttribute('href', 'tel:101')

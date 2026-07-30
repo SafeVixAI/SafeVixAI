@@ -7,7 +7,7 @@ import React from 'react'
 import { fetchNearbyServices, submitReport } from '@/lib/api'
 import BystanderModePage from '../app/bystander/page'
 
-var mockGetCurrentPosition = jest.fn()
+let mockGetCurrentPosition = jest.fn()
 
 describe('BystanderModePage', function() {
   beforeEach(function() {
@@ -131,7 +131,7 @@ describe('BystanderModePage', function() {
     render(React.createElement(BystanderModePage))
     fireEvent.click(screen.getByText('Activate Bystander Mode'))
     await waitFor(function() { expect(screen.getByText(/STOP your vehicle safely/i)).toBeTruthy() })
-    var buttons = screen.getAllByRole('button')
+    const buttons = screen.getAllByRole('button')
     buttons.forEach(function(b) { fireEvent.click(b) })
     await waitFor(function() { expect(screen.getByText('All Steps Done')).toBeTruthy() })
   })

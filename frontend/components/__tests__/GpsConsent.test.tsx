@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 SafeVixAI Team
 
-var mockSetLocationTracking = jest.fn()
+const mockSetLocationTracking = jest.fn()
 jest.mock('@/lib/store', function() {
   return {
     useAppStore: function(selector: any) {
@@ -26,7 +26,7 @@ describe('GpsConsent', function() {
   })
 
   it('starts hidden', function() {
-    var { container } = render(React.createElement(GpsConsent))
+    const { container } = render(React.createElement(GpsConsent))
     expect(container.innerHTML).toBe('')
   })
 
@@ -40,7 +40,7 @@ describe('GpsConsent', function() {
 
   it('stays hidden when consent already stored', function() {
     localStorage.setItem(GPS_CONSENT_KEY, 'granted')
-    var { container } = render(React.createElement(GpsConsent))
+    const { container } = render(React.createElement(GpsConsent))
     act(function() { jest.advanceTimersByTime(5000) })
     expect(container.innerHTML).toBe('')
   })
@@ -71,7 +71,7 @@ describe('GpsConsent', function() {
 
   it('skips rendering when E2E bypass flag is set', function() {
     localStorage.setItem('__E2E_SKIP_AUTH__', 'true')
-    var { container } = render(React.createElement(GpsConsent))
+    const { container } = render(React.createElement(GpsConsent))
     act(function() { jest.advanceTimersByTime(5000) })
     expect(container.innerHTML).toBe('')
   })

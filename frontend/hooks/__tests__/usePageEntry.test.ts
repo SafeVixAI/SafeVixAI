@@ -10,7 +10,7 @@ jest.mock('@/lib/gsap', function() {
 })
 
 function TestCase() {
-  var ref = require('../usePageEntry').usePageEntry()
+  const ref = require('../usePageEntry').usePageEntry()
   return React.createElement('div', { ref: ref, 'data-testid': 'container' },
     React.createElement('div', { 'data-testid': 'child' }, 'A'),
     React.createElement('div', { 'data-testid': 'child2' }, 'B'),
@@ -23,7 +23,7 @@ describe('usePageEntry', function() {
       return { matches: true, addEventListener: jest.fn(), removeEventListener: jest.fn() }
     })
     render(React.createElement(TestCase))
-    var children = document.querySelectorAll('[data-testid^="child"]')
+    const children = document.querySelectorAll('[data-testid^="child"]')
     expect(children.length).toBe(2)
     children.forEach(function(child) {
       expect((child as HTMLElement).style.opacity).toBe('1')
@@ -32,7 +32,7 @@ describe('usePageEntry', function() {
 
   it('handles null container ref gracefully', function() {
     function NullCase() {
-      var ref = require('../usePageEntry').usePageEntry()
+      const ref = require('../usePageEntry').usePageEntry()
       ref.current = null
       return React.createElement('div', { ref: ref })
     }
@@ -40,7 +40,7 @@ describe('usePageEntry', function() {
   })
 
   it('returns a ref object', function() {
-    var result = render(React.createElement(TestCase))
+    const result = render(React.createElement(TestCase))
     expect(result.container.querySelector('[data-testid="container"]')).toBeInTheDocument()
   })
 
@@ -54,7 +54,7 @@ describe('usePageEntry', function() {
       return { matches: true, add: jest.fn(), remove: jest.fn() }
     })
     render(React.createElement(TestCase))
-    var children = document.querySelectorAll('[data-testid^="child"]')
+    const children = document.querySelectorAll('[data-testid^="child"]')
     children.forEach(function(child) {
       expect((child as HTMLElement).style.opacity).toBe('1')
       expect((child as HTMLElement).style.transform).toBe('translateY(0)')
@@ -67,7 +67,7 @@ describe('usePageEntry', function() {
       return { matches: false, add: jest.fn(), remove: jest.fn() }
     })
     render(React.createElement(TestCase))
-    var children = document.querySelectorAll('[data-testid^="child"]')
+    const children = document.querySelectorAll('[data-testid^="child"]')
     children.forEach(function(child) {
       expect((child as HTMLElement).style.opacity).toBe('0')
       expect((child as HTMLElement).style.transform).toBe('translateY(16px)')

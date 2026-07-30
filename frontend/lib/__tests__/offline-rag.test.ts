@@ -13,73 +13,73 @@ describe('offline-rag — searchLocalLawIndex', function() {
   });
 
   it('should match laws by tag keyword', async function() {
-    var promise = searchLocalLawIndex('helmet');
+    const promise = searchLocalLawIndex('helmet');
     jest.advanceTimersByTime(600);
-    var results = await promise;
+    const results = await promise;
     expect(results).toHaveLength(1);
     expect(results[0].id).toBe('sec-194d');
   });
 
   it('should match laws by tag keyword among multiple words', async function() {
-    var promise = searchLocalLawIndex('pothole danger');
+    const promise = searchLocalLawIndex('pothole danger');
     jest.advanceTimersByTime(600);
-    var results = await promise;
+    const results = await promise;
     expect(results).toHaveLength(1);
     expect(results[0].id).toBe('sec-188');
   });
 
   it('should match laws by text content', async function() {
-    var promise = searchLocalLawIndex('immediate medical attention');
+    const promise = searchLocalLawIndex('immediate medical attention');
     jest.advanceTimersByTime(600);
-    var results = await promise;
+    const results = await promise;
     expect(results).toHaveLength(1);
     expect(results[0].id).toBe('sec-134');
   });
 
   it('should be case-insensitive', async function() {
-    var promise = searchLocalLawIndex('HELMET');
+    const promise = searchLocalLawIndex('HELMET');
     jest.advanceTimersByTime(600);
-    var results = await promise;
+    const results = await promise;
     expect(results).toHaveLength(1);
     expect(results[0].id).toBe('sec-194d');
   });
 
   it('should return empty array for no match', async function() {
-    var promise = searchLocalLawIndex('zzzznotfound');
+    const promise = searchLocalLawIndex('zzzznotfound');
     jest.advanceTimersByTime(600);
-    var results = await promise;
+    const results = await promise;
     expect(results).toHaveLength(0);
   });
 
   it('should return all laws for empty query (text match on empty string)', async function() {
-    var promise = searchLocalLawIndex('');
+    const promise = searchLocalLawIndex('');
     jest.advanceTimersByTime(600);
-    var results = await promise;
+    const results = await promise;
     expect(results).toHaveLength(3);
   });
 
   it('should return laws matching text even without tag match', async function() {
-    var promise = searchLocalLawIndex('fine');
+    const promise = searchLocalLawIndex('fine');
     jest.advanceTimersByTime(600);
-    var results = await promise;
+    const results = await promise;
     expect(results).toHaveLength(1);
     expect(results[0].id).toBe('sec-194d');
   });
 
   it('should return multiple matches when query covers multiple docs', async function() {
-    var promise = searchLocalLawIndex('neglect');
+    const promise = searchLocalLawIndex('neglect');
     jest.advanceTimersByTime(600);
-    var results = await promise;
+    const results = await promise;
     expect(results).toHaveLength(1);
     expect(results[0].id).toBe('sec-188');
   });
 
   it('should return LawDoc objects with the correct shape', async function() {
-    var promise = searchLocalLawIndex('helmet');
+    const promise = searchLocalLawIndex('helmet');
     jest.advanceTimersByTime(600);
-    var results = await promise;
+    const results = await promise;
     expect(results.length).toBeGreaterThan(0);
-    var doc = results[0];
+    const doc = results[0];
     expect(doc).toHaveProperty('id');
     expect(doc).toHaveProperty('source');
     expect(doc).toHaveProperty('text');

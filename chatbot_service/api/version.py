@@ -2,6 +2,7 @@
 # Copyright (c) 2026 SafeVixAI Team
 
 from fastapi import APIRouter
+
 from config import get_settings
 
 router = APIRouter(prefix="/api/v1", tags=["version"])

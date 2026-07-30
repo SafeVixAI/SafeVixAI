@@ -1,7 +1,7 @@
 jest.mock('@/components/ui/TerminalHeader', function() { return { TerminalHeader: function() { return null } } })
 jest.mock('@/components/ui/SurfaceCard', function() { return { SurfaceCard: function({ children }) { return children } } })
 jest.mock('@/lib/api', function() { return { client: { get: jest.fn().mockResolvedValue({ data: {} }), post: jest.fn().mockResolvedValue({ data: {} }) } } })
-var mockRefValue = ''
+let mockRefValue = ''
 jest.mock('next/navigation', function() {
   return { useRouter: function() { return { push: jest.fn(), back: jest.fn() } }, useSearchParams: function() { return { get: function(key) { return key === 'ref' ? mockRefValue : null } } }, useParams: function() { return {} } }
 })
@@ -14,7 +14,7 @@ import React from 'react'
 import { client } from '@/lib/api'
 import TrackPage from '../app/report/track/page'
 
-var mockComplaint = {
+const mockComplaint = {
   uuid: 'abc-123-def',
   issue_type: 'Pothole',
   severity: 3,
@@ -33,7 +33,7 @@ var mockComplaint = {
   authority_name: 'GCC Roads',
 }
 
-var mockTimeline = [
+const mockTimeline = [
   { id: 1, event_type: 'submitted', actor_role: 'citizen', notes: 'Report submitted', created_at: '2026-06-01T10:00:00Z' },
   { id: 2, event_type: 'acknowledged', actor_role: 'authority', notes: 'Issue acknowledged', created_at: '2026-06-02T10:00:00Z' },
 ]
@@ -51,31 +51,31 @@ describe('TrackPage', function() {
   })
 
   it('renders helper instruction text', function() {
-    var { container } = render(React.createElement(TrackPage))
+    const { container } = render(React.createElement(TrackPage))
     expect(container).toBeTruthy()
     expect(container.textContent).toContain('Complaint Tracker')
   })
 
   it('renders search input for tracking', function() {
-    var { container } = render(React.createElement(TrackPage))
-    var input = container.querySelector('input')
+    const { container } = render(React.createElement(TrackPage))
+    const input = container.querySelector('input')
     expect(input).toBeTruthy()
   })
 
   it('renders track/status display elements', function() {
-    var { container } = render(React.createElement(TrackPage))
+    const { container } = render(React.createElement(TrackPage))
     expect(container.querySelector('a')).toBeTruthy()
   })
 
   it('renders anchor links for navigation', function() {
-    var { container } = render(React.createElement(TrackPage))
-    var links = container.querySelectorAll('a')
+    const { container } = render(React.createElement(TrackPage))
+    const links = container.querySelectorAll('a')
     expect(links.length).toBeGreaterThan(0)
   })
 
   it('shows loading state when submitting', function() {
     client.get.mockImplementation(function() { return new Promise(function() {}) })
-    var { container } = render(React.createElement(TrackPage))
+    const { container } = render(React.createElement(TrackPage))
     fireEvent.change(container.querySelector('input'), { target: { value: 'test-uuid' } })
     fireEvent.submit(container.querySelector('form'))
     expect(screen.getByText('Uplinking...')).toBeTruthy()
@@ -84,7 +84,7 @@ describe('TrackPage', function() {
 
   it('displays error message on fetch failure', async function() {
     client.get.mockRejectedValueOnce(new Error('Network failure'))
-    var { container } = render(React.createElement(TrackPage))
+    const { container } = render(React.createElement(TrackPage))
     fireEvent.change(container.querySelector('input'), { target: { value: 'bad-uuid' } })
     fireEvent.submit(container.querySelector('form'))
     await waitFor(function() { expect(screen.getByText('Network failure')).toBeTruthy() })
@@ -92,7 +92,7 @@ describe('TrackPage', function() {
 
   it('displays API detail error on fetch failure', async function() {
     client.get.mockRejectedValueOnce({ response: { data: { detail: 'Complaint not found' } } })
-    var { container } = render(React.createElement(TrackPage))
+    const { container } = render(React.createElement(TrackPage))
     fireEvent.change(container.querySelector('input'), { target: { value: 'missing-uuid' } })
     fireEvent.submit(container.querySelector('form'))
     await waitFor(function() { expect(screen.getByText('Complaint not found')).toBeTruthy() })
@@ -176,7 +176,7 @@ describe('TrackPage', function() {
   })
 
   it('shows SLA breached for past deadline', async function() {
-    var expired = JSON.parse(JSON.stringify(mockComplaint))
+    const expired = JSON.parse(JSON.stringify(mockComplaint))
     expired.sla_deadline = new Date(Date.now() - 3600000).toISOString()
     client.get.mockResolvedValueOnce({ data: expired })
     client.get.mockResolvedValueOnce({ data: { timeline: mockTimeline } })
@@ -187,7 +187,7 @@ describe('TrackPage', function() {
   })
 
   it('shows resolved/met SLA for resolved or rejected complaint', async function() {
-    var resolved = JSON.parse(JSON.stringify(mockComplaint))
+    const resolved = JSON.parse(JSON.stringify(mockComplaint))
     resolved.status = 'resolved'
     client.get.mockResolvedValueOnce({ data: resolved })
     client.get.mockResolvedValueOnce({ data: { timeline: mockTimeline } })
@@ -200,7 +200,7 @@ describe('TrackPage', function() {
   it('renders before photo when URL exists', async function() {
     client.get.mockResolvedValueOnce({ data: mockComplaint })
     client.get.mockResolvedValueOnce({ data: { timeline: mockTimeline } })
-    var { container } = render(React.createElement(TrackPage))
+    const { container } = render(React.createElement(TrackPage))
     fireEvent.change(screen.getByLabelText(/Reference ID/i), { target: { value: 'abc-123-def' } })
     fireEvent.submit(document.querySelector('form'))
     await waitFor(function() {
@@ -209,7 +209,7 @@ describe('TrackPage', function() {
   })
 
   it('renders before photo placeholder when URL is null', async function() {
-    var noPhoto = JSON.parse(JSON.stringify(mockComplaint))
+    const noPhoto = JSON.parse(JSON.stringify(mockComplaint))
     noPhoto.before_photo_url = null
     client.get.mockResolvedValueOnce({ data: noPhoto })
     client.get.mockResolvedValueOnce({ data: { timeline: mockTimeline } })
@@ -220,7 +220,7 @@ describe('TrackPage', function() {
   })
 
   it('renders after photo placeholder when URL is null', async function() {
-    var noPhoto = JSON.parse(JSON.stringify(mockComplaint))
+    const noPhoto = JSON.parse(JSON.stringify(mockComplaint))
     noPhoto.after_photo_url = null
     client.get.mockResolvedValueOnce({ data: noPhoto })
     client.get.mockResolvedValueOnce({ data: { timeline: mockTimeline } })
@@ -233,7 +233,7 @@ describe('TrackPage', function() {
   it('renders after photo when URL exists', async function() {
     client.get.mockResolvedValueOnce({ data: mockComplaint })
     client.get.mockResolvedValueOnce({ data: { timeline: mockTimeline } })
-    var { container } = render(React.createElement(TrackPage))
+    const { container } = render(React.createElement(TrackPage))
     fireEvent.change(screen.getByLabelText(/Reference ID/i), { target: { value: 'abc-123-def' } })
     fireEvent.submit(document.querySelector('form'))
     await waitFor(function() {
@@ -276,7 +276,7 @@ describe('TrackPage', function() {
   })
 
   it('disables confirm button on resolved complaints', async function() {
-    var resolved = JSON.parse(JSON.stringify(mockComplaint))
+    const resolved = JSON.parse(JSON.stringify(mockComplaint))
     resolved.status = 'resolved'
     client.get.mockResolvedValueOnce({ data: resolved })
     client.get.mockResolvedValueOnce({ data: { timeline: mockTimeline } })

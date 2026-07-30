@@ -9,19 +9,16 @@ import hashlib
 import sys
 from pathlib import Path
 
-
 ROOT_DIR = Path(__file__).resolve().parents[1]
 BACKEND_DIR = ROOT_DIR / 'backend'
 
 if str(BACKEND_DIR) not in sys.path:
     sys.path.insert(0, str(BACKEND_DIR))
 
-from geoalchemy2.elements import WKTElement
-from sqlalchemy.dialects.postgresql import insert
-
 from core.database import AsyncSessionLocal
+from geoalchemy2.elements import WKTElement
 from models.emergency import EmergencyService
-
+from sqlalchemy.dialects.postgresql import insert
 
 DEFAULT_CSV = ROOT_DIR / 'chatbot_service' / 'data' / 'hospitals' / 'hospital_directory.csv'
 STATE_CODES = {

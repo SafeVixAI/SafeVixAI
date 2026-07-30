@@ -1,7 +1,7 @@
 jest.mock('maplibre-gl', function() {
-  var fn = jest.fn;
-  var sharedMap: Record<string, any> = {};
-  var api = {
+  const fn = jest.fn;
+  const sharedMap: Record<string, any> = {};
+  const api = {
     __mapInstance: sharedMap,
     Map: fn(function() { return sharedMap }),
     NavigationControl: fn(),
@@ -12,9 +12,9 @@ jest.mock('maplibre-gl', function() {
   return { __esModule: true, default: api, ...api };
 });
 
-var storeState = { showTraffic: false, showSafeSpaces: false, showHazardHeatmap: false, setShowSafeSpaces: function() {} };
+const storeState = { showTraffic: false, showSafeSpaces: false, showHazardHeatmap: false, setShowSafeSpaces: function() {} };
 jest.mock('@/lib/store', function() {
-  var fn: any = function(sel?: any) { return typeof sel === 'function' ? sel(storeState) : storeState; };
+  const fn: any = function(sel?: any) { return typeof sel === 'function' ? sel(storeState) : storeState; };
   fn.getState = function() { return storeState; };
   return {
     useAppStore: fn,
@@ -58,7 +58,7 @@ import { MapLayers } from '../MapLayers';
 function getMap() { return (require('maplibre-gl') as any).Map(); }
 
 function setupMap() {
-  var map = getMap();
+  const map = getMap();
   map.on = jest.fn();
   map.once = jest.fn();
   map.off = jest.fn();
@@ -71,7 +71,7 @@ function setupMap() {
   map.removeLayer = jest.fn();
   map.setLayoutProperty = jest.fn();
   map.easeTo = jest.fn();
-  var canvasStyle: Record<string, string> = {};
+  const canvasStyle: Record<string, string> = {};
   map.getCanvas = jest.fn(function() { return { style: canvasStyle } });
   map.getCenter = jest.fn(function() { return { lat: 13, lng: 80 } });
   map.getZoom = jest.fn(function() { return 12 });
@@ -98,13 +98,13 @@ describe('MapLayers', function() {
   });
 
   it('renders null', function() {
-    var { container } = renderLayers();
+    const { container } = renderLayers();
     expect(container.innerHTML).toBe('');
   });
 
   describe('accuracy overlay', function() {
     it('removes accuracy layers when no accuracy provided', function() {
-      var map = setupMap();
+      const map = setupMap();
       map.getLayer.mockReturnValue({});
       map.getSource.mockReturnValue({ setData: jest.fn() });
       render(React.createElement(MapLayers, {
@@ -115,7 +115,7 @@ describe('MapLayers', function() {
     });
 
     it('adds accuracy layers when accuracy is provided', function() {
-      var map = setupMap();
+      const map = setupMap();
       map.getLayer.mockReturnValue(undefined);
       map.getSource.mockImplementation(function(id: string) {
         if (id === 'svai-current-location-accuracy') return undefined;
@@ -132,7 +132,7 @@ describe('MapLayers', function() {
 
   describe('facility layers', function() {
     it('adds facility source with clustering when no source exists', function() {
-      var map = setupMap();
+      const map = setupMap();
       map.getSource.mockReturnValue(undefined);
       map.getLayer.mockReturnValue(undefined);
       render(React.createElement(MapLayers, {
@@ -146,17 +146,17 @@ describe('MapLayers', function() {
   describe('traffic layer', function() {
     it('toggles traffic layer per showTraffic state', function() {
       renderLayers();
-      var traffic = require('@/lib/traffic-layer');
+      const traffic = require('@/lib/traffic-layer');
       expect(traffic.toggleTrafficLayer).toHaveBeenCalled();
     });
   });
 
   describe('issue layers with issues', function() {
     it('renders without crashing when issues are provided', function() {
-      var map = setupMap();
+      const map = setupMap();
       map.getSource.mockReturnValue(undefined);
       map.getLayer.mockReturnValue(undefined);
-      var { container } = render(React.createElement(MapLayers, {
+      const { container } = render(React.createElement(MapLayers, {
         map, styleRevision: 0,
         currentLocation: null,
         facilities: [],
@@ -168,10 +168,10 @@ describe('MapLayers', function() {
 
   describe('style revision change', function() {
     it('re-renders when styleRevision increments', function() {
-      var map = setupMap();
+      const map = setupMap();
       map.getSource.mockReturnValue(undefined);
       map.getLayer.mockReturnValue(undefined);
-      var { rerender, container } = render(React.createElement(MapLayers, {
+      const { rerender, container } = render(React.createElement(MapLayers, {
         map, styleRevision: 0,
         currentLocation: {},
         facilities: [],
@@ -189,7 +189,7 @@ describe('MapLayers', function() {
 
   describe('style not loaded', function() {
     it('calls map.once(load) when style is not loaded', function() {
-      var map = setupMap();
+      const map = setupMap();
       map.isStyleLoaded = jest.fn(function() { return false });
       map.once = jest.fn();
       render(React.createElement(MapLayers, {
@@ -202,7 +202,7 @@ describe('MapLayers', function() {
   describe('heatmap layer', function() {
     it('adds heatmap source and layer when showHazardHeatmap is true with issues', function() {
       storeState.showHazardHeatmap = true;
-      var map = setupMap();
+      const map = setupMap();
       map.getSource.mockReturnValue(undefined);
       map.getLayer.mockReturnValue(undefined);
       render(React.createElement(MapLayers, {
@@ -214,7 +214,7 @@ describe('MapLayers', function() {
 
     it('removes heatmap when showHazardHeatmap turns off', function() {
       storeState.showHazardHeatmap = false;
-      var map = setupMap();
+      const map = setupMap();
       map.getSource.mockReturnValue({ setData: jest.fn() });
       map.getLayer.mockReturnValue({});
       render(React.createElement(MapLayers, {
@@ -230,13 +230,13 @@ describe('MapLayers', function() {
       storeState.showSafeSpaces = true;
       storeState.showHazardHeatmap = false;
       storeState.showTraffic = false;
-      var map = setupMap();
+      const map = setupMap();
       map.getSource.mockReturnValue(undefined);
       map.getLayer.mockReturnValue(undefined);
       render(React.createElement(MapLayers, {
         map, styleRevision: 0, facilities: [], currentLocation: { lat: 13.0, lon: 80.0, accuracy: 50 },
       }));
-      var safeSpaces = require('@/lib/safe-spaces-layer');
+      const safeSpaces = require('@/lib/safe-spaces-layer');
       expect(safeSpaces.addSafeSpacesLayer).toHaveBeenCalled();
     });
   });
@@ -244,20 +244,20 @@ describe('MapLayers', function() {
   describe('traffic layer', function() {
     it('adds traffic layer when showTraffic is true', function() {
       storeState.showTraffic = true;
-      var map = setupMap();
+      const map = setupMap();
       map.getSource.mockReturnValue(undefined);
       map.getLayer = jest.fn().mockReturnValue(undefined);
       render(React.createElement(MapLayers, {
         map, styleRevision: 0, facilities: [], currentLocation: null,
       }));
-      var traffic = require('@/lib/traffic-layer');
+      const traffic = require('@/lib/traffic-layer');
       expect(traffic.addTrafficLayer).toHaveBeenCalled();
     });
   });
 
   describe('cluster click handler', function() {
     it('expands cluster on click', function() {
-      var map = setupMap();
+      const map = setupMap();
       map.getSource = jest.fn(function() { return {
         getClusterExpansionZoom: jest.fn(function(id, cb) { cb(null, 15); }),
         setData: jest.fn(),
@@ -266,9 +266,9 @@ describe('MapLayers', function() {
       render(React.createElement(MapLayers, {
         map, styleRevision: 0, facilities: [{ id: 'f1', name: 'Hosp', type: 'hospital', coords: [13.0, 80.0], accentColor: '#00c896' }], currentLocation: null,
       }));
-      var clickCall = map.on.mock.calls.find(function(c) { return c[0] === 'click' && c[1] === 'svai-facility-clusters' });
+      const clickCall = map.on.mock.calls.find(function(c) { return c[0] === 'click' && c[1] === 'svai-facility-clusters' });
       expect(clickCall).toBeDefined();
-      var handler = clickCall[2];
+      const handler = clickCall[2];
       handler({ features: [{ properties: { cluster_id: 1 }, geometry: { type: 'Point', coordinates: [80.0, 13.0] } }] });
       expect(map.easeTo).toHaveBeenCalled();
     });
@@ -276,17 +276,17 @@ describe('MapLayers', function() {
 
   describe('facility click handler', function() {
     it('opens popup on facility click', function() {
-      var popup = { setLngLat: jest.fn(function() { return this }), setDOMContent: jest.fn(function() { return this }), addTo: jest.fn() };
+      const popup = { setLngLat: jest.fn(function() { return this }), setDOMContent: jest.fn(function() { return this }), addTo: jest.fn() };
       (require('maplibre-gl').default as any).Popup = jest.fn(function() { return popup });
-      var map = setupMap();
+      const map = setupMap();
       map.getSource = jest.fn(function() { return { getClusterExpansionZoom: jest.fn(), setData: jest.fn() }; });
       map.getLayer.mockReturnValue(undefined);
       render(React.createElement(MapLayers, {
         map, styleRevision: 0, facilities: [{ id: 'f1', name: 'Hosp', type: 'hospital', coords: [13.0, 80.0], accentColor: '#00c896' }], currentLocation: null,
       }));
-      var clickCall = map.on.mock.calls.find(function(c) { return c[0] === 'click' && c[1] === 'svai-facility-points' });
+      const clickCall = map.on.mock.calls.find(function(c) { return c[0] === 'click' && c[1] === 'svai-facility-points' });
       expect(clickCall).toBeDefined();
-      var handler = clickCall[2];
+      const handler = clickCall[2];
       handler({ features: [{ properties: { name: 'City Hospital', type: 'hospital', distance: '0.5 km' }, geometry: { type: 'Point', coordinates: [80.0, 13.0] } }] });
       expect(popup.setLngLat).toHaveBeenCalled();
       expect(popup.addTo).toHaveBeenCalled();
@@ -295,26 +295,26 @@ describe('MapLayers', function() {
 
   describe('pointer handlers', function() {
     it('sets cursor on pointer enter', function() {
-      var map = setupMap();
+      const map = setupMap();
       map.getSource = jest.fn(function() { return { setData: jest.fn() }; });
       map.getLayer.mockReturnValue(undefined);
       render(React.createElement(MapLayers, {
         map, styleRevision: 0, facilities: [{ id: 'f1', name: 'Hosp', type: 'hospital', coords: [13.0, 80.0], accentColor: '#00c896' }], currentLocation: null,
       }));
-      var enterCall = map.on.mock.calls.find(function(c) { return c[0] === 'mouseenter' && c[1] === 'svai-facility-clusters' });
+      const enterCall = map.on.mock.calls.find(function(c) { return c[0] === 'mouseenter' && c[1] === 'svai-facility-clusters' });
       expect(enterCall).toBeDefined();
       enterCall[2]();
       expect(map.getCanvas().style.cursor).toBe('pointer');
     });
 
     it('clears cursor on pointer leave', function() {
-      var map = setupMap();
+      const map = setupMap();
       map.getSource = jest.fn(function() { return { setData: jest.fn() }; });
       map.getLayer.mockReturnValue(undefined);
       render(React.createElement(MapLayers, {
         map, styleRevision: 0, facilities: [{ id: 'f1', name: 'Hosp', type: 'hospital', coords: [13.0, 80.0], accentColor: '#00c896' }], currentLocation: null,
       }));
-      var leaveCall = map.on.mock.calls.find(function(c) { return c[0] === 'mouseleave' && c[1] === 'svai-facility-clusters' });
+      const leaveCall = map.on.mock.calls.find(function(c) { return c[0] === 'mouseleave' && c[1] === 'svai-facility-clusters' });
       expect(leaveCall).toBeDefined();
       leaveCall[2]();
       expect(map.getCanvas().style.cursor).toBe('');
@@ -324,9 +324,9 @@ describe('MapLayers', function() {
   describe('safe spaces error', function() {
     it('logs error and disables safe spaces on failure', function() {
       storeState.showSafeSpaces = true;
-      var safeSpaces = require('@/lib/safe-spaces-layer');
+      const safeSpaces = require('@/lib/safe-spaces-layer');
       safeSpaces.addSafeSpacesLayer.mockRejectedValue(new Error('network fail'));
-      var map = setupMap();
+      const map = setupMap();
       map.getSource.mockReturnValue(undefined);
       map.getLayer.mockReturnValue(undefined);
       render(React.createElement(MapLayers, {
@@ -334,7 +334,7 @@ describe('MapLayers', function() {
       }));
       // Wait for promise rejection
       return new Promise(function(r) { setTimeout(r, 10) }).then(function() {
-        var logger = require('@/lib/client-logger');
+        const logger = require('@/lib/client-logger');
         expect(logger.logClientError).toHaveBeenCalled();
       });
     });
@@ -346,10 +346,10 @@ describe('MapLayers', function() {
     });
 
     it('toggles safe spaces visibility when showSafeSpaces changes', function() {
-      var map = setupMap();
+      const map = setupMap();
       map.getSource = jest.fn(function() { return { setData: jest.fn() }; });
       map.getLayer.mockReturnValue({});  // layers already exist
-      var { rerender } = render(React.createElement(MapLayers, {
+      const { rerender } = render(React.createElement(MapLayers, {
         map, styleRevision: 0, facilities: [], currentLocation: { lat: 13.0, lon: 80.0, accuracy: 50 },
       }));
       expect(map.setLayoutProperty).toHaveBeenCalled();
@@ -364,18 +364,18 @@ describe('MapLayers', function() {
 
   describe('facility handlers with style not loaded', function() {
     it('binds handlers via map.once(load) when style not loaded', function() {
-      var map = setupMap();
+      const map = setupMap();
       map.isStyleLoaded = jest.fn(function() { return false });
       map.getSource = jest.fn(function() { return { setData: jest.fn() }; });
       map.getLayer.mockReturnValue(undefined);
-      var { rerender } = render(React.createElement(MapLayers, {
+      const { rerender } = render(React.createElement(MapLayers, {
         map, styleRevision: 0, facilities: [{ id: 'f1', name: 'Hosp', type: 'hospital', coords: [13.0, 80.0], accentColor: '#00c896' }], currentLocation: null,
       }));
       // Effect deferred to once('load')
       expect(map.once).toHaveBeenCalledWith('load', expect.any(Function));
       // Now trigger the load callback and re-render with style loaded
       map.isStyleLoaded = jest.fn(function() { return true });
-      var loadCb = map.once.mock.calls.find(function(c) { return c[0] === 'load'; });
+      const loadCb = map.once.mock.calls.find(function(c) { return c[0] === 'load'; });
       if (loadCb) { loadCb[1](); }
       rerender(React.createElement(MapLayers, {
         map, styleRevision: 1, facilities: [{ id: 'f1', name: 'Hosp', type: 'hospital', coords: [13.0, 80.0], accentColor: '#00c896' }], currentLocation: null,

@@ -5,21 +5,21 @@ jest.mock('@/lib/sounds', function() { return { sounds: { play: jest.fn(), sev5A
 jest.mock('next/dynamic', function() { return function() { return function() { return null } } })
 jest.mock('lucide-react', function() { return new Proxy({}, { get: function() { return function() { return null } } }) })
 
-var React = require('react')
-var { render, screen: rtlScreen, fireEvent, waitFor } = require('@testing-library/react')
-var { client } = require('@/lib/api')
-var CommandCenterPage = require('../app/command-center/page').default
+const React = require('react')
+const { render, screen: rtlScreen, fireEvent, waitFor } = require('@testing-library/react')
+const { client } = require('@/lib/api')
+const CommandCenterPage = require('../app/command-center/page').default
 
-var NOW = Date.now()
-var sampleKpis = { active_complaints: 12, resolved_complaints: 45, total_complaints: 60, sla_breaches: 3, active_field_officers: 8, overall_resolution_rate: 75 }
-var sampleCategories = { roads: 6, traffic: 4, streetlight: 2 }
-var sampleComplaints = [
+const NOW = Date.now()
+const sampleKpis = { active_complaints: 12, resolved_complaints: 45, total_complaints: 60, sla_breaches: 3, active_field_officers: 8, overall_resolution_rate: 75 }
+const sampleCategories = { roads: 6, traffic: 4, streetlight: 2 }
+const sampleComplaints = [
   { uuid: 'aaa', complaint_ref: 'CC-001', issue_type: 'pothole', severity: 5, description: 'Deep pothole', location_address: 'Anna Salai', status: 'open', created_at: new Date(NOW - 300000).toISOString(), category: 'roads', ward_name: 'Ward 10', assigned_officer_id: null, sla_deadline: null },
   { uuid: 'bbb', complaint_ref: 'CC-002', issue_type: 'streetlight', severity: 3, description: 'Flickering light', location_address: 'Mount Road', status: 'in_progress', created_at: new Date(NOW - 7200000).toISOString(), category: 'streetlight', ward_name: 'Ward 5', assigned_officer_id: 'off1', sla_deadline: new Date(NOW + 86400000).toISOString() },
 ]
-var sampleOfficers = [{ id: 'off1', name: 'Rajesh', department: 'Roads', role: 'inspector', is_active: true, ward_id: 'w1', last_checkin: new Date().toISOString() }]
-var sampleWards = [{ ward_id: 'w1', ward_name: 'Ward 10', zone_name: 'North', open_issues: 5, resolved_issues: 20, resolution_rate: 80, sla_breach_count: 1 }]
-var sampleBreaches = [{ uuid: 'breach1', complaint_ref: 'CC-003', issue_type: 'pothole', severity: 5, description: 'Hazardous', location_address: 'KK Nagar', status: 'open', created_at: new Date().toISOString(), category: 'roads', ward_name: 'Ward 3' }]
+const sampleOfficers = [{ id: 'off1', name: 'Rajesh', department: 'Roads', role: 'inspector', is_active: true, ward_id: 'w1', last_checkin: new Date().toISOString() }]
+const sampleWards = [{ ward_id: 'w1', ward_name: 'Ward 10', zone_name: 'North', open_issues: 5, resolved_issues: 20, resolution_rate: 80, sla_breach_count: 1 }]
+const sampleBreaches = [{ uuid: 'breach1', complaint_ref: 'CC-003', issue_type: 'pothole', severity: 5, description: 'Hazardous', location_address: 'KK Nagar', status: 'open', created_at: new Date().toISOString(), category: 'roads', ward_name: 'Ward 3' }]
 
 function mockSuccess() {
   client.get.mockImplementation(function(url) {
@@ -220,7 +220,7 @@ describe('CommandCenterPage', function() {
   })
 
   it('timeAgo returns Just now for very recent', async function() {
-    var recentDate = new Date(NOW - 10000).toISOString()
+    const recentDate = new Date(NOW - 10000).toISOString()
     client.get.mockImplementation(function(url) {
       if (url === '/api/v1/admin/dashboard') return Promise.resolve({ data: { kpis: sampleKpis, category_breakdown: sampleCategories } })
       if (url === '/api/v1/admin/complaints') return Promise.resolve({ data: { issues: [{ uuid: 'time1', complaint_ref: 'CC-T1', issue_type: 'pothole', severity: 1, description: 't', location_address: 'l', status: 'open', created_at: recentDate, category: 'roads', ward_name: 'w' }] } })
@@ -234,7 +234,7 @@ describe('CommandCenterPage', function() {
   })
 
   it('shows sev5 alert sound on severity 5 incident', async function() {
-    var soundsMock = require('@/lib/sounds').sounds
+    const soundsMock = require('@/lib/sounds').sounds
     client.get.mockImplementation(function(url) {
       if (url === '/api/v1/admin/complaints') return Promise.resolve({ data: { issues: sampleComplaints } })
       if (url === '/api/v1/admin/dashboard') return Promise.resolve({ data: { kpis: sampleKpis, category_breakdown: sampleCategories } })

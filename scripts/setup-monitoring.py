@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2026 SafeVixAI Team
-"""
-setup-monitoring.py — Generate monitoring config and setup instructions.
+"""setup-monitoring.py — Generate monitoring config and setup instructions.
 
 Produces .env.monitoring with recommended OTEL / Sentry / UptimeRobot config,
 and prints step-by-step guides for each service.
@@ -10,7 +9,6 @@ and prints step-by-step guides for each service.
 from __future__ import annotations
 
 import os
-import sys
 from pathlib import Path
 
 

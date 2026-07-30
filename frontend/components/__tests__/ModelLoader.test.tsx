@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 SafeVixAI Team
 
-var mockState = { aiMode: 'loading', modelLoadProgress: 42 }
+let mockState = { aiMode: 'loading', modelLoadProgress: 42 }
 
 jest.mock('@/lib/store', function() {
   return {
@@ -30,14 +30,14 @@ describe('ModelLoader', function() {
 
   it('does not render when aiMode is not loading', function() {
     mockState = { aiMode: 'idle', modelLoadProgress: 0 }
-    var { container } = render(React.createElement(ModelLoader))
+    const { container } = render(React.createElement(ModelLoader))
     expect(container.innerHTML).toBe('')
     mockState = { aiMode: 'loading', modelLoadProgress: 42 }
   })
 
   it('renders progress bar with correct width', function() {
     render(React.createElement(ModelLoader))
-    var progressText = screen.getByText('42%')
+    const progressText = screen.getByText('42%')
     expect(progressText).toBeTruthy()
   })
 })

@@ -5,7 +5,7 @@ import React from 'react';
 import { render, screen, fireEvent, act, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
-var mockOnResult = jest.fn();
+const mockOnResult = jest.fn();
 
 jest.mock('../../lib/languages', () => ({
   getLanguageByCode: jest.fn((code: string) => {
@@ -18,8 +18,8 @@ jest.mock('../../lib/client-logger', () => ({
   logClientWarning: jest.fn(),
 }));
 
-var mockRecognitionInstance: Record<string, unknown>;
-var recognitionConstructor: jest.Mock;
+let mockRecognitionInstance: Record<string, unknown>;
+let recognitionConstructor: jest.Mock;
 
 beforeEach(function() {
   mockOnResult.mockClear();
@@ -45,7 +45,7 @@ beforeEach(function() {
 });
 
 function renderVoiceInput(props: Record<string, unknown> = {}) {
-  var { VoiceInput } = require('../VoiceInput');
+  const { VoiceInput } = require('../VoiceInput');
   return render(<VoiceInput onResult={mockOnResult} {...props} />);
 }
 
@@ -69,7 +69,7 @@ describe('VoiceInput', function() {
 
   it('shows loading state while starting recognition', function() {
     renderVoiceInput();
-    var button = screen.getByRole('button', { name: /start voice input/i });
+    const button = screen.getByRole('button', { name: /start voice input/i });
     fireEvent.click(button);
     expect(screen.getByRole('button', { name: /start voice input/i })).toBeDisabled();
   });
@@ -93,7 +93,7 @@ describe('VoiceInput', function() {
   });
 
   it('cleans up recognition on unmount', function() {
-    var { unmount } = renderVoiceInput();
+    const { unmount } = renderVoiceInput();
     unmount();
     expect(mockRecognitionInstance.abort).toHaveBeenCalledTimes(1);
   });

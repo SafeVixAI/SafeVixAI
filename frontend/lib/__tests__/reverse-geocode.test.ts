@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 SafeVixAI Team
-var mockFetch = jest.fn()
+const mockFetch = jest.fn()
 global.fetch = mockFetch
 
 describe('reverse-geocode', function () {
@@ -10,8 +10,8 @@ describe('reverse-geocode', function () {
 
   it('getAddressFromGPS returns parsed address on success', async function () {
     mockFetch.mockResolvedValueOnce({ ok: true, json: async function () { return { locality: 'Adyar', city: 'Chennai', principalSubdivision: 'Tamil Nadu', countryName: 'India' } } })
-    var mod = await import('../reverse-geocode')
-    var result = await mod.getAddressFromGPS(13.0, 80.2)
+    const mod = await import('../reverse-geocode')
+    const result = await mod.getAddressFromGPS(13.0, 80.2)
     expect(result).not.toBeNull()
     expect(result!.locality).toBe('Adyar')
     expect(result!.city).toBe('Chennai')
@@ -22,30 +22,30 @@ describe('reverse-geocode', function () {
 
   it('getAddressFromGPS returns null on non-ok response', async function () {
     mockFetch.mockResolvedValueOnce({ ok: false })
-    var mod = await import('../reverse-geocode')
-    var result = await mod.getAddressFromGPS(13.0, 80.2)
+    const mod = await import('../reverse-geocode')
+    const result = await mod.getAddressFromGPS(13.0, 80.2)
     expect(result).toBeNull()
   })
 
   it('getAddressFromGPS returns null on fetch error', async function () {
     mockFetch.mockRejectedValueOnce(new Error('network'))
-    var mod = await import('../reverse-geocode')
-    var result = await mod.getAddressFromGPS(13.0, 80.2)
+    const mod = await import('../reverse-geocode')
+    const result = await mod.getAddressFromGPS(13.0, 80.2)
     expect(result).toBeNull()
   })
 
   it('getAddressFromGPS handles missing locality gracefully', async function () {
     mockFetch.mockResolvedValueOnce({ ok: true, json: async function () { return { city: 'Chennai', principalSubdivision: 'Tamil Nadu', countryName: 'India' } } })
-    var mod = await import('../reverse-geocode')
-    var result = await mod.getAddressFromGPS(13.0, 80.2)
+    const mod = await import('../reverse-geocode')
+    const result = await mod.getAddressFromGPS(13.0, 80.2)
     expect(result!.locality).toBe('')
     expect(result!.displayAddress).toBe('Tamil Nadu')
   })
 
   it('getAddressFromGPS shows Unknown Location when no parts', async function () {
     mockFetch.mockResolvedValueOnce({ ok: true, json: async function () { return { countryName: 'India' } } })
-    var mod = await import('../reverse-geocode')
-    var result = await mod.getAddressFromGPS(13.0, 80.2)
+    const mod = await import('../reverse-geocode')
+    const result = await mod.getAddressFromGPS(13.0, 80.2)
     expect(result!.displayAddress).toBe('Unknown Location')
   })
 })

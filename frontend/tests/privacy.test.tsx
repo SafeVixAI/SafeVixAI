@@ -3,9 +3,9 @@ jest.mock('@/components/ui/SurfaceCard', function() { return { SurfaceCard: func
 jest.mock('@/components/dashboard/SystemHeader', function() { return function() { return null } })
 jest.mock('lucide-react', function() { return new Proxy({}, { get: function() { return function() { return null } } }) })
 
-var React = require('react')
-var { render, screen: rtlScreen } = require('@testing-library/react')
-var Page = require('../app/privacy/page').default
+const React = require('react')
+const { render, screen: rtlScreen } = require('@testing-library/react')
+const Page = require('../app/privacy/page').default
 
 describe('PrivacyPolicyPage', function() {
   it('renders Privacy Policy heading', function() {

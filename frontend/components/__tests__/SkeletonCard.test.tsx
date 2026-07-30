@@ -6,12 +6,12 @@ import SkeletonCard from '../dashboard/SkeletonCard'
 
 describe('SkeletonCard', function () {
   it('renders skeleton structure', function () {
-    var container = render(React.createElement(SkeletonCard, null))
+    const container = render(React.createElement(SkeletonCard, null))
     expect(container.container.querySelector('.animate-pulse')).toBeInTheDocument()
   })
 
   it('applies custom className', function () {
-    var container = render(React.createElement(SkeletonCard, { className: 'custom-class' }))
+    const container = render(React.createElement(SkeletonCard, { className: 'custom-class' }))
     expect(container.container.querySelector('.custom-class')).toBeInTheDocument()
   })
 })

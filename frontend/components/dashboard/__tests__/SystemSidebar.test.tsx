@@ -13,7 +13,7 @@ jest.mock('react-i18next', function () {
   }
 })
 
-var mockStoreState = { isSystemSidebarOpen: true, setSystemSidebarOpen: jest.fn() }
+const mockStoreState = { isSystemSidebarOpen: true, setSystemSidebarOpen: jest.fn() }
 jest.mock('@/lib/store', function () {
   return {
     useAppStore: jest.fn(function (sel: Function) { return sel(mockStoreState) }),
@@ -33,7 +33,7 @@ describe('SystemSidebar', function () {
 
   it('renders null when closed', function () {
     mockStoreState.isSystemSidebarOpen = false
-    var container = render(React.createElement(SystemSidebar))
+    const container = render(React.createElement(SystemSidebar))
     expect(container.container.querySelector('[role="dialog"]')).toBeNull()
   })
 
@@ -70,7 +70,7 @@ describe('SystemSidebar', function () {
 
   it('closes on backdrop click', function () {
     render(React.createElement(SystemSidebar))
-    var backdrop = document.querySelector('.fixed.inset-0')
+    const backdrop = document.querySelector('.fixed.inset-0')
     if (backdrop) fireEvent.click(backdrop)
     expect(mockStoreState.setSystemSidebarOpen).toHaveBeenCalledWith(false)
   })
@@ -78,27 +78,27 @@ describe('SystemSidebar', function () {
   it('highlights active nav item', function () {
     require('next/navigation').usePathname.mockReturnValue('/assistant')
     render(React.createElement(SystemSidebar))
-    var links = screen.getAllByRole('link')
-    var assistantLink = links.find(function (l) { return l.getAttribute('href') === '/assistant' })
+    const links = screen.getAllByRole('link')
+    const assistantLink = links.find(function (l) { return l.getAttribute('href') === '/assistant' })
     expect(assistantLink).toBeDefined()
   })
 
   it('renders SOS button linking to /sos', function () {
     render(React.createElement(SystemSidebar))
-    var sosLink = screen.getByText('System SOS').closest('a')
+    const sosLink = screen.getByText('System SOS').closest('a')
     expect(sosLink).toHaveAttribute('href', '/sos')
   })
 
   it('renders quick dial tel: links', function () {
     render(React.createElement(SystemSidebar))
-    var dials = screen.getAllByRole('link').filter(function (l) { return l.getAttribute('href')?.startsWith('tel:') })
+    const dials = screen.getAllByRole('link').filter(function (l) { return l.getAttribute('href')?.startsWith('tel:') })
     expect(dials.length).toBeGreaterThanOrEqual(3)
     expect(dials[0]).toHaveAttribute('href', 'tel:112')
   })
 
   it('removes Escape listener on cleanup', function () {
-    var removeSpy = jest.spyOn(window, 'removeEventListener')
-    var comp = render(React.createElement(SystemSidebar))
+    const removeSpy = jest.spyOn(window, 'removeEventListener')
+    const comp = render(React.createElement(SystemSidebar))
     comp.unmount()
     expect(removeSpy).toHaveBeenCalledWith('keydown', expect.any(Function))
     removeSpy.mockRestore()

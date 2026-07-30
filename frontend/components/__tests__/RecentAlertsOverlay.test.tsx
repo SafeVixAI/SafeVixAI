@@ -5,7 +5,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
-var mockState: any = {
+const mockState: any = {
   isDesktopSidebarCollapsed: false,
   nearbyRoadIssues: [],
 };
@@ -20,7 +20,7 @@ describe('RecentAlertsOverlay', function() {
   });
 
   it('shows no alerts indicator when list is empty', async function() {
-    var RecentAlertsOverlay = (await import('../dashboard/RecentAlertsOverlay')).default;
+    const RecentAlertsOverlay = (await import('../dashboard/RecentAlertsOverlay')).default;
     render(<RecentAlertsOverlay />);
     expect(screen.getByText('No active alerts nearby')).toBeInTheDocument();
   });
@@ -38,7 +38,7 @@ describe('RecentAlertsOverlay', function() {
         createdAt: '2026-05-25T00:00:00Z',
       },
     ];
-    var RecentAlertsOverlay = (await import('../dashboard/RecentAlertsOverlay')).default;
+    const RecentAlertsOverlay = (await import('../dashboard/RecentAlertsOverlay')).default;
     render(<RecentAlertsOverlay />);
     expect(screen.getByText('1 active alerts nearby')).toBeInTheDocument();
   });
@@ -56,7 +56,7 @@ describe('RecentAlertsOverlay', function() {
         createdAt: '2026-05-25T00:00:00Z',
       },
     ];
-    var RecentAlertsOverlay = (await import('../dashboard/RecentAlertsOverlay')).default;
+    const RecentAlertsOverlay = (await import('../dashboard/RecentAlertsOverlay')).default;
     render(<RecentAlertsOverlay />);
     expect(screen.getByText('Pothole')).toBeInTheDocument();
   });
@@ -68,7 +68,7 @@ describe('RecentAlertsOverlay', function() {
       { uuid: '3', issueType: 'flood', severity: 4, lat: 0, lon: 0, distance: 50, status: 'open', createdAt: '' },
       { uuid: '4', issueType: 'accident', severity: 5, lat: 0, lon: 0, distance: 50, status: 'open', createdAt: '' },
     ];
-    var RecentAlertsOverlay = (await import('../dashboard/RecentAlertsOverlay')).default;
+    const RecentAlertsOverlay = (await import('../dashboard/RecentAlertsOverlay')).default;
     render(<RecentAlertsOverlay />);
     expect(screen.getByText('4 active alerts nearby')).toBeInTheDocument();
     expect(screen.getByText('Pothole')).toBeInTheDocument();
@@ -90,9 +90,9 @@ describe('RecentAlertsOverlay', function() {
         createdAt: '2026-05-25T00:00:00Z',
       },
     ];
-    var RecentAlertsOverlay = (await import('../dashboard/RecentAlertsOverlay')).default;
-    var { container } = render(<RecentAlertsOverlay />);
-    var alertItems = container.querySelectorAll('.snap-center');
+    const RecentAlertsOverlay = (await import('../dashboard/RecentAlertsOverlay')).default;
+    const { container } = render(<RecentAlertsOverlay />);
+    const alertItems = container.querySelectorAll('.snap-center');
     expect(alertItems.length).toBe(1);
   });
 });

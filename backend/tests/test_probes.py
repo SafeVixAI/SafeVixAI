@@ -1,8 +1,9 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2026 SafeVixAI Team
 
+from unittest.mock import patch
+
 import pytest
-from unittest.mock import AsyncMock, patch
 
 
 @pytest.fixture
@@ -86,6 +87,7 @@ class TestStartupProbe:
 
     def test_startupz_before_startup(self):
         import importlib
+
         import api.v1.probes as probes_mod
         importlib.reload(probes_mod)
         probes_mod._startup_complete = False
@@ -98,7 +100,6 @@ class TestStartupProbe:
             assert resp.json()["status"] == "starting"
 
     def test_startupz_transitions_to_started(self, client):
-        from api.v1.probes import set_startup_complete, _startup_complete
         # _startup_complete is already True here because app fixture calls set_startup_complete
         resp = client.get("/startupz")
         assert resp.status_code == 200

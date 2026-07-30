@@ -117,7 +117,7 @@ def main():
         f"commit: {current_commit}",
         "---",
         "",
-        f"# API Changelog",
+        "# API Changelog",
         "",
         f"Auto-generated from OpenAPI spec diff at `{current_commit}`.",
         "Changes are detected by comparing the current spec against the `origin/main` branch.\n",

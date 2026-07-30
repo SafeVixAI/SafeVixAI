@@ -16,48 +16,48 @@ beforeEach(function() {
 })
 
 function TestCase({ onCrash, enabled }: { onCrash?: (f: number) => void; enabled?: boolean }) {
-  var hook = require('../useCrashDetection').useCrashDetection
-  var result = hook({ onCrashDetected: onCrash || jest.fn(), enabled: enabled })
+  const hook = require('../useCrashDetection').useCrashDetection
+  const result = hook({ onCrashDetected: onCrash || jest.fn(), enabled: enabled })
   return React.createElement('div', { 'data-simulate': typeof result.simulateCrash })
 }
 
 describe('useCrashDetection', function() {
   it('starts crash detection when enabled', function() {
-    var crash = require('@/lib/crash-detection')
+    const crash = require('@/lib/crash-detection')
     render(React.createElement(TestCase, { enabled: true }))
     expect(crash.startCrashDetection).toHaveBeenCalled()
   })
 
   it('does not start crash detection when disabled', function() {
-    var crash = require('@/lib/crash-detection')
+    const crash = require('@/lib/crash-detection')
     render(React.createElement(TestCase, { enabled: false }))
     expect(crash.startCrashDetection).not.toHaveBeenCalled()
   })
 
   it('stops crash detection on unmount', function() {
-    var comp = render(React.createElement(TestCase, { enabled: true }))
-    var crash = require('@/lib/crash-detection')
+    const comp = render(React.createElement(TestCase, { enabled: true }))
+    const crash = require('@/lib/crash-detection')
     comp.unmount()
     expect(crash.stopCrashDetection).toHaveBeenCalled()
   })
 
   it('passes stable callback to startCrashDetection', function() {
     render(React.createElement(TestCase, { enabled: true }))
-    var crash = require('@/lib/crash-detection')
+    const crash = require('@/lib/crash-detection')
     expect(crash.startCrashDetection.mock.calls[0][0]).toEqual(expect.any(Function))
   })
 
   it('exposes simulateCrash function', function() {
-    var el = render(React.createElement(TestCase, { enabled: true }))
-    var div = el.container.querySelector('[data-simulate]')
+    const el = render(React.createElement(TestCase, { enabled: true }))
+    const div = el.container.querySelector('[data-simulate]')
     expect(div?.getAttribute('data-simulate')).toBe('function')
   })
 
   it('calls onCrashDetected callback when stableCallback is invoked', function() {
-    var onCrash = jest.fn()
+    const onCrash = jest.fn()
     render(React.createElement(TestCase, { onCrash: onCrash, enabled: true }))
-    var crash = require('@/lib/crash-detection')
-    var callback = crash.startCrashDetection.mock.calls[0][0]
+    const crash = require('@/lib/crash-detection')
+    const callback = crash.startCrashDetection.mock.calls[0][0]
     callback(9.8)
     expect(onCrash).toHaveBeenCalledWith(9.8)
   })

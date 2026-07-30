@@ -56,7 +56,7 @@ describe('ChallanCalculator', function() {
       </select>
     );
 
-    var select = screen.getByTestId('violation-select');
+    const select = screen.getByTestId('violation-select');
     fireEvent.change(select, { target: { value: 'helmet' } });
 
     expect(select).toHaveValue('helmet');
@@ -70,7 +70,7 @@ describe('ChallanCalculator', function() {
       </select>
     );
 
-    var select = screen.getByTestId('state-select');
+    const select = screen.getByTestId('state-select');
     fireEvent.change(select, { target: { value: 'MH' } });
 
     expect(select).toHaveValue('MH');
@@ -118,7 +118,7 @@ describe('ChallanCalculator', function() {
       </div>
     );
 
-    var checkbox = screen.getByTestId('repeat-toggle');
+    const checkbox = screen.getByTestId('repeat-toggle');
     expect(checkbox).not.toBeChecked();
 
     fireEvent.click(checkbox);

@@ -1,12 +1,12 @@
 jest.mock('@gsap/react', function() { return { useGSAP: jest.fn() } })
-var mockPush = jest.fn()
+const mockPush = jest.fn()
 jest.mock('next/navigation', function() { return { useRouter: function() { return { push: mockPush } }, usePathname: function() { return '/' }, useSearchParams: function() { return new URLSearchParams() } } })
 
 import { render, screen, fireEvent } from '@testing-library/react'
 import React from 'react'
 import FloatingSidebarControls from '../dashboard/FloatingSidebarControls'
 
-var mockStore: Record<string, any> = {
+const mockStore: Record<string, any> = {
   drivingScore: 78,
   showHazardHeatmap: false,
   showSatellite: false,
@@ -126,7 +126,7 @@ describe('FloatingSidebarControls', function() {
   })
 
   it('dispatches custom event on relocate click', function() {
-    var dispatchSpy = jest.fn()
+    const dispatchSpy = jest.fn()
     window.dispatchEvent = dispatchSpy
     jest.useFakeTimers()
     render(React.createElement(FloatingSidebarControls))
@@ -138,13 +138,13 @@ describe('FloatingSidebarControls', function() {
 
   it('shows emergency protocols link', function() {
     render(React.createElement(FloatingSidebarControls))
-    var emergencyBtn = screen.getByLabelText(/Open emergency protocols/)
+    const emergencyBtn = screen.getByLabelText(/Open emergency protocols/)
     expect(emergencyBtn.closest('a')).toHaveAttribute('href', '/emergency')
   })
 
   it('renders SOS button with correct styling', function() {
     render(React.createElement(FloatingSidebarControls))
-    var sosBtn = screen.getByText('SOS').closest('button')
+    const sosBtn = screen.getByText('SOS').closest('button')
     expect(sosBtn).toBeInTheDocument()
     expect(sosBtn?.className).toContain('sos-rings')
   })
@@ -179,19 +179,19 @@ describe('FloatingSidebarControls', function() {
 
   it('navigates to SOS page on emergency button click', function() {
     render(React.createElement(FloatingSidebarControls))
-    var sosBtn = screen.getByText('SOS').closest('button')
+    const sosBtn = screen.getByText('SOS').closest('button')
     fireEvent.click(sosBtn!)
     expect(mockPush).toHaveBeenCalledWith('/sos')
   })
 
   it('shows scanning overlay after relocate click', function() {
     jest.useFakeTimers()
-    var dispatchSpy = jest.fn()
+    const dispatchSpy = jest.fn()
     window.dispatchEvent = dispatchSpy
     render(React.createElement(FloatingSidebarControls))
     fireEvent.click(screen.getByLabelText(/Re-center map/))
     jest.advanceTimersByTime(50)
-    var sosBtn = screen.getByText('SOS').closest('button')
+    const sosBtn = screen.getByText('SOS').closest('button')
     expect(sosBtn?.innerHTML).toContain('blur-xl')
     jest.advanceTimersByTime(2000)
     jest.useRealTimers()

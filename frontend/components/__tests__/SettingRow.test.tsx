@@ -39,25 +39,25 @@ describe('SettingRow', function() {
   });
 
   it('renders as div when no onClick provided', function() {
-    var { container } = render(<SettingRow title="Speed Alert" />);
+    const { container } = render(<SettingRow title="Speed Alert" />);
     expect(container.firstChild?.nodeName).toBe('DIV');
   });
 
   it('renders as button when onClick provided', function() {
-    var handleClick = jest.fn();
-    var { container } = render(<SettingRow title="Speed Alert" onClick={handleClick} />);
+    const handleClick = jest.fn();
+    const { container } = render(<SettingRow title="Speed Alert" onClick={handleClick} />);
     expect(container.firstChild?.nodeName).toBe('BUTTON');
   });
 
   it('calls onClick when clicked and onClick provided', function() {
-    var handleClick = jest.fn();
+    const handleClick = jest.fn();
     render(<SettingRow title="Speed Alert" onClick={handleClick} />);
     fireEvent.click(screen.getByText('Speed Alert'));
     expect(handleClick).toHaveBeenCalledTimes(1);
   });
 
   it('applies border-b class for separation', function() {
-    var { container } = render(<SettingRow title="Speed Alert" />);
+    const { container } = render(<SettingRow title="Speed Alert" />);
     expect(container.firstChild).toHaveClass('border-b');
   });
 });

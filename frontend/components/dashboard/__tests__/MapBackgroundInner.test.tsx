@@ -1,7 +1,7 @@
 jest.mock('@/components/maps/MapLibreCanvas', function() {
   return {
     MapLibreCanvas: function MockMapLibreCanvas(_props: any) {
-      var React = require('react')
+      const React = require('react')
       return React.createElement('div', { 'data-testid': 'maplibre-canvas' })
     },
     MapLibreFacility: {},
@@ -9,7 +9,7 @@ jest.mock('@/components/maps/MapLibreCanvas', function() {
   }
 })
 
-var mockAppState = {
+const mockAppState = {
   gpsLocation: null as any,
   mapSearchTarget: null as any,
   nearbyServices: [] as any[],
@@ -17,7 +17,7 @@ var mockAppState = {
 }
 
 jest.mock('@/lib/store', function() {
-  var actual = jest.requireActual('@/lib/store')
+  const actual = jest.requireActual('@/lib/store')
   return {
     ...actual,
     useAppStore: function(selector: any) {
@@ -39,7 +39,7 @@ describe('MapBackgroundInner', function() {
   })
 
   it('renders map container and MapLibreCanvas', function() {
-    var { container } = render(React.createElement(MapBackgroundInner))
+    const { container } = render(React.createElement(MapBackgroundInner))
     expect(container.querySelector('.absolute.inset-0')).toBeTruthy()
     expect(screen.getByTestId('maplibre-canvas')).toBeInTheDocument()
   })
@@ -79,7 +79,7 @@ describe('MapBackgroundInner', function() {
       { uuid: 'i1', issueType: 'Flooding', severity: 4, lat: 13.05, lon: 80.25, distance: 800, status: 'reported', description: 'Water logging', createdAt: Date.now() },
       { uuid: 'i2', issueType: 'Traffic Jam', severity: 2, lat: 13.08, lon: 80.28, distance: 200, status: 'confirmed', roadName: 'Main Rd', createdAt: Date.now() },
     ]
-    var { container } = render(React.createElement(MapBackgroundInner))
+    const { container } = render(React.createElement(MapBackgroundInner))
     expect(container.querySelector('.absolute.inset-0')).toBeTruthy()
   })
 

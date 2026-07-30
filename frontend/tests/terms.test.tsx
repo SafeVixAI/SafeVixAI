@@ -3,9 +3,9 @@ jest.mock('@/components/ui/SurfaceCard', function() { return { SurfaceCard: func
 jest.mock('@/components/dashboard/SystemHeader', function() { return function() { return null } })
 jest.mock('lucide-react', function() { return new Proxy({}, { get: function() { return function() { return null } } }) })
 
-var React = require('react')
-var { render, screen: rtlScreen } = require('@testing-library/react')
-var Page = require('../app/terms/page').default
+const React = require('react')
+const { render, screen: rtlScreen } = require('@testing-library/react')
+const Page = require('../app/terms/page').default
 
 describe('TermsOfServicePage', function() {
   it('renders Terms of Service heading', function() {

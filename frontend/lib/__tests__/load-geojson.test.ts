@@ -23,7 +23,7 @@ if (typeof globalThis.Response === 'undefined') {
 
 import { loadGeoJSON } from '../load-geojson';
 
-var mockValidGeoJSON: Record<string, unknown>;
+let mockValidGeoJSON: Record<string, unknown>;
 
 function createMockResponse(data: unknown, overrides?: Record<string, unknown>): Response {
   return {
@@ -56,7 +56,7 @@ describe('loadGeoJSON', function() {
       createMockResponse(mockValidGeoJSON)
     );
 
-    var result = await loadGeoJSON('https://example.com/data.geojson');
+    const result = await loadGeoJSON('https://example.com/data.geojson');
 
     expect(result).toEqual(mockValidGeoJSON);
     expect(globalThis.fetch).toHaveBeenCalledTimes(1);
@@ -66,7 +66,7 @@ describe('loadGeoJSON', function() {
   it('loads valid GeoJSON via gzip decompression', async function() {
     (globalThis as Record<string, unknown>).DecompressionStream = jest.fn();
 
-    var gzBody = {
+    const gzBody = {
       pipeThrough: jest.fn().mockReturnValue(JSON.stringify(mockValidGeoJSON)),
     };
 
@@ -80,7 +80,7 @@ describe('loadGeoJSON', function() {
       return Promise.resolve(createMockResponse(mockValidGeoJSON));
     });
 
-    var result = await loadGeoJSON('https://example.com/data.geojson');
+    const result = await loadGeoJSON('https://example.com/data.geojson');
 
     expect(result).toEqual(mockValidGeoJSON);
     expect(globalThis.fetch).toHaveBeenCalledWith('https://example.com/data.geojson.gz');
@@ -97,7 +97,7 @@ describe('loadGeoJSON', function() {
       return Promise.resolve(createMockResponse(mockValidGeoJSON));
     });
 
-    var result = await loadGeoJSON('https://example.com/data.geojson');
+    const result = await loadGeoJSON('https://example.com/data.geojson');
 
     expect(result).toEqual(mockValidGeoJSON);
     expect(globalThis.fetch).toHaveBeenCalledWith('https://example.com/data.geojson.gz');
@@ -114,7 +114,7 @@ describe('loadGeoJSON', function() {
       return Promise.resolve(createMockResponse(mockValidGeoJSON));
     });
 
-    var result = await loadGeoJSON('https://example.com/data.geojson');
+    const result = await loadGeoJSON('https://example.com/data.geojson');
 
     expect(result).toEqual(mockValidGeoJSON);
     expect(globalThis.fetch).toHaveBeenCalledWith('https://example.com/data.geojson.gz');
@@ -144,7 +144,7 @@ describe('loadGeoJSON', function() {
       createMockResponse(mockValidGeoJSON)
     );
 
-    var result = await loadGeoJSON('https://example.com/data.geojson?token=abc&v=2');
+    const result = await loadGeoJSON('https://example.com/data.geojson?token=abc&v=2');
 
     expect(result).toEqual(mockValidGeoJSON);
     expect(globalThis.fetch).toHaveBeenCalledWith('https://example.com/data.geojson?token=abc&v=2');

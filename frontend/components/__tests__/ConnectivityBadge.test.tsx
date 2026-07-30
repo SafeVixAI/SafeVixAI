@@ -5,7 +5,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
-var mockUseAppStore = jest.fn();
+const mockUseAppStore = jest.fn();
 
 jest.mock('@/lib/store', () => ({
   useAppStore: (selector: any) => mockUseAppStore(selector),
@@ -62,37 +62,37 @@ describe('ConnectivityBadge', function() {
 
   it('applies correct color class for online', function() {
     mockUseAppStore.mockReturnValue('online');
-    var { container } = render(<ConnectivityBadge />);
+    const { container } = render(<ConnectivityBadge />);
     expect(container.firstChild).toHaveClass('sv-conn-online');
   });
 
   it('applies correct color class for cached', function() {
     mockUseAppStore.mockReturnValue('cached');
-    var { container } = render(<ConnectivityBadge />);
+    const { container } = render(<ConnectivityBadge />);
     expect(container.firstChild).toHaveClass('sv-conn-cached');
   });
 
   it('applies correct color class for offline', function() {
     mockUseAppStore.mockReturnValue('offline');
-    var { container } = render(<ConnectivityBadge />);
+    const { container } = render(<ConnectivityBadge />);
     expect(container.firstChild).toHaveClass('sv-conn-offline');
   });
 
   it('applies correct color class for ai-offline', function() {
     mockUseAppStore.mockReturnValue('ai-offline');
-    var { container } = render(<ConnectivityBadge />);
+    const { container } = render(<ConnectivityBadge />);
     expect(container.firstChild).toHaveClass('sv-conn-ai');
   });
 
   it('applies custom className', function() {
     mockUseAppStore.mockReturnValue('online');
-    var { container } = render(<ConnectivityBadge className="my-class" />);
+    const { container } = render(<ConnectivityBadge className="my-class" />);
     expect(container.firstChild).toHaveClass('my-class');
   });
 
   it('has sv-conn-badge class', function() {
     mockUseAppStore.mockReturnValue('online');
-    var { container } = render(<ConnectivityBadge />);
+    const { container } = render(<ConnectivityBadge />);
     expect(container.firstChild).toHaveClass('sv-conn-badge');
   });
 });

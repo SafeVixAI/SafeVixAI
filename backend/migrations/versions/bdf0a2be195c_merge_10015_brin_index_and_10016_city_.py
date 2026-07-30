@@ -5,8 +5,6 @@ Revises: 10015_brin_index_created_at, 10016_city_centers
 Create Date: 2026-07-26 21:36:59.686584
 
 """
-from alembic import op
-import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.

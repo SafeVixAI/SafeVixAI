@@ -30,15 +30,11 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
     }))
   );
   const [checking, setChecking] = useState(true);
+  const [skipAuth, setSkipAuth] = useState(false);
 
-  const skipAuth = process.env.NODE_ENV !== 'production' &&
-    /* istanbul ignore next */
-typeof window !== 'undefined' &&
-    window.localStorage.getItem('__E2E_SKIP_AUTH__') === 'true';
-  const [isPublic, setIsPublic] = useState(false);
-
-  useEffect(() => {
-    if (!nextPathname) return;
+  // Initialize synchronously to avoid hydration mismatches
+  const isPublic = React.useMemo(() => {
+    if (!nextPathname) return false;
     const pathParts = nextPathname.split('/');
     const SUPPORTED_LOCALES = [
       'en', 'hi', 'ta', 'te', 'kn', 'ml', 'mr', 'gu', 'bn', 'pa', 'ur',
@@ -49,8 +45,14 @@ typeof window !== 'undefined' &&
       ? '/' + pathParts.slice(2).join('/')
       : nextPathname;
 
-    setIsPublic(isPublicRoute(cleanPathname));
+    return isPublicRoute(cleanPathname);
   }, [nextPathname]);
+
+  useEffect(() => {
+    if (process.env.NODE_ENV !== 'production' && window.localStorage.getItem('__E2E_SKIP_AUTH__') === 'true') {
+      setSkipAuth(true);
+    }
+  }, []);
 
   useEffect(() => {
     if (skipAuth || isPublic) return;

@@ -1,16 +1,16 @@
 jest.mock('@gsap/react', function() { return { useGSAP: jest.fn() } })
 jest.mock('@/lib/gsap', function() { return { gsap: { fromTo: jest.fn(), to: jest.fn(), set: jest.fn() } } })
 jest.mock('../../hooks/useLandingGSAP', function() {
-  var React = require('react')
+  const React = require('react')
   return {
     useScrollReveal: function() { return React.useRef(null) },
     useCountUp: function() { return React.useRef(null) },
   }
 })
 
-var React = require('react')
-var { render, screen: rtlScreen } = require('@testing-library/react')
-var NationalNetwork = require('../NationalNetwork').default
+const React = require('react')
+const { render, screen: rtlScreen } = require('@testing-library/react')
+const NationalNetwork = require('../NationalNetwork').default
 
 describe('NationalNetwork', function() {
   it('renders the section overline', function() {
@@ -30,7 +30,7 @@ describe('NationalNetwork', function() {
 
   it('renders the India SVG map with aria-label', function() {
     render(React.createElement(NationalNetwork))
-    var map = rtlScreen.getByRole('img')
+    const map = rtlScreen.getByRole('img')
     expect(map.getAttribute('aria-label')).toContain('National network map')
   })
 

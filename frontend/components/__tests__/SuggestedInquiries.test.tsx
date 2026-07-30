@@ -20,7 +20,7 @@ describe('SuggestedInquiries', function() {
   })
 
   it('calls onSelect when button clicked', function() {
-    var onSelect = jest.fn()
+    const onSelect = jest.fn()
     render(React.createElement(SuggestedInquiries, { onSelect: onSelect }))
     fireEvent.click(screen.getByText(/\baccident/))
     expect(onSelect).toHaveBeenCalled()

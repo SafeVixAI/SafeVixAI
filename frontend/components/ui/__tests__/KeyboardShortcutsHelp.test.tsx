@@ -1,9 +1,9 @@
 jest.mock('@gsap/react', function() { return { useGSAP: jest.fn() } })
 jest.mock('@/lib/gsap', function() { return { gsap: { fromTo: jest.fn() } } })
 
-var React = require('react')
-var { render, screen: rtlScreen, fireEvent } = require('@testing-library/react')
-var { KeyboardShortcutsHelp } = require('../KeyboardShortcutsHelp')
+const React = require('react')
+const { render, screen: rtlScreen, fireEvent } = require('@testing-library/react')
+const { KeyboardShortcutsHelp } = require('../KeyboardShortcutsHelp')
 
 describe('KeyboardShortcutsHelp', function() {
   beforeEach(function() {
@@ -15,7 +15,7 @@ describe('KeyboardShortcutsHelp', function() {
   })
 
   it('returns null when closed', function() {
-    var { container } = render(React.createElement(KeyboardShortcutsHelp))
+    const { container } = render(React.createElement(KeyboardShortcutsHelp))
     expect(container.innerHTML).toBe('')
   })
 
@@ -56,7 +56,7 @@ describe('KeyboardShortcutsHelp', function() {
     render(React.createElement(KeyboardShortcutsHelp))
     fireEvent.keyDown(document, { key: '?' })
     expect(rtlScreen.getByText('Keyboard Shortcuts')).toBeTruthy()
-    var overlay = document.querySelector('[role="dialog"]')
+    const overlay = document.querySelector('[role="dialog"]')
     fireEvent.click(overlay)
     expect(rtlScreen.queryByText('Keyboard Shortcuts')).toBeNull()
   })
@@ -66,7 +66,7 @@ describe('KeyboardShortcutsHelp', function() {
       React.createElement('input', { 'data-testid': 'input' }),
       React.createElement(KeyboardShortcutsHelp)
     ))
-    var input = document.querySelector('input')
+    const input = document.querySelector('input')
     fireEvent.keyDown(input, { key: '?' })
     expect(rtlScreen.queryByText('Keyboard Shortcuts')).toBeNull()
   })

@@ -2,7 +2,7 @@
 // Copyright (c) 2026 SafeVixAI Team
 
 describe('Auth Security — Critical Tests', function() {
-  var mockTokens = [
+  const mockTokens = [
     'mock-jwt-token-for-hackathon',
     'mock-jwt-token',
     'fake-token',
@@ -10,12 +10,12 @@ describe('Auth Security — Critical Tests', function() {
   ];
 
   it.each(mockTokens)('should reject static token: %s', (token) => {
-    var isRejected = mockTokens.includes(token);
+    const isRejected = mockTokens.includes(token);
     expect(isRejected).toBe(true);
   });
 
   it('CSRF token cookie should be set with httpOnly=false (for JS access)', function() {
-    var cookie = 'csrf_token=abc123; path=/; samesite=lax';
+    const cookie = 'csrf_token=abc123; path=/; samesite=lax';
     expect(cookie).toMatch(/csrf_token=/);
     expect(cookie).toMatch(/samesite=lax/);
   });
@@ -25,7 +25,7 @@ describe('Auth Security — Critical Tests', function() {
   });
 
   it('chatbot service should require CHATBOT_INTERNAL_API_KEY in production', function() {
-    var env = process.env.NODE_ENV || 'development';
+    const env = process.env.NODE_ENV || 'development';
     if (env === 'production') {
       expect(process.env.CHATBOT_INTERNAL_API_KEY || process.env.NEXT_PUBLIC_CHATBOT_INTERNAL_API_KEY).toBeDefined();
     } else {

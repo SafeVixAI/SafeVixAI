@@ -28,7 +28,7 @@ describe('EmergencyCTA', function() {
   });
 
   it('calls onClick when clicked', function() {
-    var handleClick = jest.fn();
+    const handleClick = jest.fn();
     render(<EmergencyCTA title="Call Now" onClick={handleClick} />);
     fireEvent.click(screen.getByText('Call Now'));
     expect(handleClick).toHaveBeenCalledTimes(1);
@@ -36,18 +36,18 @@ describe('EmergencyCTA', function() {
 
   it('renders as a button element', function() {
     render(<EmergencyCTA title="SOS" />);
-    var btn = screen.getByRole('button', { name: /SOS/ });
+    const btn = screen.getByRole('button', { name: /SOS/ });
     expect(btn).toBeInTheDocument();
     expect(btn.tagName).toBe('BUTTON');
   });
 
   it('has emergency background', function() {
-    var { container } = render(<EmergencyCTA title="SOS" />);
+    const { container } = render(<EmergencyCTA title="SOS" />);
     expect(container.firstChild).toHaveClass('bg-emergency');
   });
 
   it('applies custom className', function() {
-    var { container } = render(<EmergencyCTA title="SOS" className="my-class" />);
+    const { container } = render(<EmergencyCTA title="SOS" className="my-class" />);
     expect(container.firstChild).toHaveClass('my-class');
   });
 

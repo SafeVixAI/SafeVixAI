@@ -20,7 +20,7 @@ jest.mock('@/lib/location-utils', function() { return { formatAccuracyLabel: fun
 jest.mock('@/hooks/useSwipe', function() { return { useSwipe: function() { return { onTouchStart: function() {}, onTouchEnd: function() {} } } } })
 jest.mock('@/lib/store', function() { return { useSetGpsLocation: function() { return function() {} } } })
 jest.mock('@/lib/analytics', function() { return { track: jest.fn() } })
-jest.mock('next/link', function() { return function({ children, ...rest }) { var React = require('react'); return React.createElement('a', rest, children) } })
+jest.mock('next/link', function() { return function({ children, ...rest }) { const React = require('react'); return React.createElement('a', rest, children) } })
 jest.mock('next/image', function() { return function(props) { return null } })
 jest.mock('react-i18next', function() { return { useTranslation: function() { return { t: function(k, fb) { return typeof fb === 'string' ? fb : k } } } } })
 jest.mock('lucide-react', function() { return new Proxy({}, { get: function() { return function() { return null } } }) })
@@ -31,22 +31,22 @@ import ReportPage from '../app/report/page'
 
 describe('ReportPage', function() {
   it('renders without error', function() {
-    var { container } = render(React.createElement(ReportPage))
+    const { container } = render(React.createElement(ReportPage))
     expect(container).toBeTruthy()
   })
 
   it('renders heading section', function() {
-    var { container } = render(React.createElement(ReportPage))
+    const { container } = render(React.createElement(ReportPage))
     expect(container.querySelector('main')).toBeTruthy()
   })
 
   it('renders with page wrapper ref', function() {
-    var { container } = render(React.createElement(ReportPage))
+    const { container } = render(React.createElement(ReportPage))
     expect(container.querySelector('[class*="sv-page"]')).toBeTruthy()
   })
 
   it('renders ambient glow effects', function() {
-    var { container } = render(React.createElement(ReportPage))
+    const { container } = render(React.createElement(ReportPage))
     expect(container.querySelector('[class*="blur-"]')).toBeTruthy()
   })
 })

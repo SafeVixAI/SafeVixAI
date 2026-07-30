@@ -10,8 +10,8 @@ from datetime import UTC, datetime
 from typing import Any
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Query, WebSocket, WebSocketDisconnect, status
-from sqlalchemy import delete, desc, func, select, update
+from fastapi import APIRouter, Depends, HTTPException, Query, WebSocket
+from sqlalchemy import delete, desc, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.database import get_db
@@ -22,14 +22,11 @@ from models.notification import (
     NotificationCategory,
     NotificationChannel,
     NotificationDigest,
-    NotificationEvent,
     NotificationPreference,
     NotificationPriority,
     NotificationStatus,
-    NotificationTemplate,
     WebhookEndpoint,
 )
-from models.schemas import ErrorResponse
 from services.notification_service import NotificationService
 
 logger = logging.getLogger(__name__)

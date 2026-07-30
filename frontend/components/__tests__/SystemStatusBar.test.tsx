@@ -42,7 +42,7 @@ describe('SystemStatusBar', function() {
       .mockResolvedValueOnce({ ok: false })
       .mockResolvedValueOnce({ ok: true });
     render(<SystemStatusBar />);
-    var statusEl = await screen.findByRole('status');
+    const statusEl = await screen.findByRole('status');
     expect(statusEl).toBeInTheDocument();
   });
 

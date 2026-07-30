@@ -5,7 +5,7 @@ import { render, screen } from '@testing-library/react'
 import React from 'react'
 import { LeadershipCard } from '../guide/LeadershipCard'
 
-var mockMunicipality = {
+const mockMunicipality = {
   mayorName: 'John Doe',
   commissionerName: 'Jane Smith',
   commissionerPhone: '1234567890',
@@ -28,7 +28,7 @@ describe('LeadershipCard', function() {
 
   it('renders phone link when available', function() {
     render(React.createElement(LeadershipCard, { municipality: mockMunicipality as any }))
-    var phoneLink = screen.getByText('1234567890').closest('a')
+    const phoneLink = screen.getByText('1234567890').closest('a')
     expect(phoneLink?.getAttribute('href')).toBe('tel:1234567890')
   })
 
@@ -54,7 +54,7 @@ describe('LeadershipCard', function() {
   })
 
   it('renders User icon when name is null', function() {
-    var { container } = render(React.createElement(LeadershipCard, { municipality: { mayorName: null, commissionerName: null } as any }))
+    const { container } = render(React.createElement(LeadershipCard, { municipality: { mayorName: null, commissionerName: null } as any }))
     // Should render lucide User icon (SVG) instead of initials text
     expect(container.querySelector('svg')).toBeTruthy()
   })

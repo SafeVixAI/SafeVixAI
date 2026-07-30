@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2026 SafeVixAI Team
-"""
-SafeVixAI Alert Service — Email notifications for application-level failures.
+"""SafeVixAI Alert Service — Email notifications for application-level failures.
 
 Sends alert emails when critical external services fail:
   - All LLM providers exhausted
@@ -34,7 +33,6 @@ import time
 from collections import defaultdict
 from datetime import datetime
 from email.mime.text import MIMEText
-from typing import Optional
 
 logger = logging.getLogger("safevixai.alerts")
 
@@ -286,7 +284,7 @@ Configure: ALERT_EMAIL + ALERT_EMAIL_PASSWORD in .env
 
 
 # ── Singleton ───────────────────────────────────────────────────────────────
-_instance: Optional[AlertService] = None
+_instance: AlertService | None = None
 
 
 def get_alert_service() -> AlertService:

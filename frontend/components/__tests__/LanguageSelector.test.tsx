@@ -5,9 +5,9 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
-var mockPush = jest.fn();
-var mockSetUserProfile = jest.fn();
-var mockStore = {
+const mockPush = jest.fn();
+const mockSetUserProfile = jest.fn();
+const mockStore = {
   userProfile: { preferredLanguage: 'en' },
   setUserProfile: mockSetUserProfile,
 };
@@ -46,21 +46,21 @@ describe('LanguageSelector', function() {
 
   it('highlights current language', function() {
     render(<LanguageSelector />);
-    var select = screen.getByLabelText('Select preferred language') as HTMLSelectElement;
+    const select = screen.getByLabelText('Select preferred language') as HTMLSelectElement;
     expect(select.value).toBe('en');
   });
 
   it('calls onChangeLanguage when selecting a language', function() {
-    var handleChange = jest.fn();
+    const handleChange = jest.fn();
     render(<LanguageSelector onChangeLanguage={handleChange} />);
-    var select = screen.getByLabelText('Select preferred language');
+    const select = screen.getByLabelText('Select preferred language');
     fireEvent.change(select, { target: { value: 'hi' } });
     expect(handleChange).toHaveBeenCalledWith('hi');
   });
 
   it('updates store when language changes', function() {
     render(<LanguageSelector />);
-    var select = screen.getByLabelText('Select preferred language');
+    const select = screen.getByLabelText('Select preferred language');
     fireEvent.change(select, { target: { value: 'ta' } });
     expect(mockSetUserProfile).toHaveBeenCalledWith({ preferredLanguage: 'ta' });
   });
@@ -71,7 +71,7 @@ describe('LanguageSelector', function() {
   });
 
   it('applies custom className', function() {
-    var { container } = render(<LanguageSelector className="my-class" />);
+    const { container } = render(<LanguageSelector className="my-class" />);
     expect(container.firstChild).toHaveClass('my-class');
   });
 
@@ -99,7 +99,7 @@ describe('LanguageSelector', function() {
   it('falls back to en when preferredLanguage is empty', function() {
     mockStore.userProfile.preferredLanguage = '';
     render(<LanguageSelector />);
-    var select = screen.getByLabelText('Select preferred language') as HTMLSelectElement;
+    const select = screen.getByLabelText('Select preferred language') as HTMLSelectElement;
     expect(select.value).toBe('en');
     mockStore.userProfile.preferredLanguage = 'en';
   });

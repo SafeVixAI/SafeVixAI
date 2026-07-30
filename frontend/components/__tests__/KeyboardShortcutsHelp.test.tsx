@@ -14,7 +14,7 @@ import { KeyboardShortcutsHelp } from '../ui/KeyboardShortcutsHelp'
 
 describe('KeyboardShortcutsHelp', function() {
   it('is not visible initially', function() {
-    var { container } = render(React.createElement(KeyboardShortcutsHelp))
+    const { container } = render(React.createElement(KeyboardShortcutsHelp))
     expect(container.innerHTML).toBe('')
   })
 
@@ -36,7 +36,7 @@ describe('KeyboardShortcutsHelp', function() {
 
   it('does not open when ? is pressed in an input', function() {
     render(React.createElement(KeyboardShortcutsHelp))
-    var input = document.createElement('input')
+    const input = document.createElement('input')
     fireEvent.keyDown(input, { key: '?' })
     expect(screen.queryByText('Keyboard Shortcuts')).toBeNull()
   })

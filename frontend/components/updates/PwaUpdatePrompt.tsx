@@ -8,7 +8,7 @@ import { Download, X, RotateCcw } from 'lucide-react';
 import { useServiceWorkerUpdate } from '@/hooks/useServiceWorkerUpdate';
 
 export default function PwaUpdatePrompt() {
-  var { updateAvailable, applyUpdate, dismissUpdate } = useServiceWorkerUpdate();
+  const { updateAvailable, applyUpdate, dismissUpdate } = useServiceWorkerUpdate();
 
   if (!updateAvailable) return null;
 

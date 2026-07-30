@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 SafeVixAI Team
 
-var mockState: any = {
+let mockState: any = {
   gpsLocation: { lat: 13.0827, lon: 80.2707 },
   nearbyServices: [{ id: '1', name: 'Hospital', lat: 13.08, lon: 80.27, distance: 0.5 }],
   nearbyRoadIssues: [{ id: 'i1', issueType: 'pothole', roadName: 'Main St', distance: 250, severity: 'high' }],
@@ -53,7 +53,7 @@ describe('RightSidebar', function() {
   it('toggles panel via mobile handle', function() {
     mockState = { gpsLocation: { lat: 13.0827, lon: 80.2707 }, nearbyServices: [{ id: '1', name: 'Hospital' }], nearbyRoadIssues: [{ id: 'i1', issueType: 'pothole', roadName: 'Main St', distance: 250, severity: 'high' }], serviceSearchMeta: { total: 1 }, connectivity: 'online' }
     render(React.createElement(RightSidebar))
-    var toggles = screen.getAllByLabelText('Collapse panel')
+    const toggles = screen.getAllByLabelText('Collapse panel')
     fireEvent.click(toggles[0])
     expect(screen.getAllByLabelText('Expand panel').length).toBeGreaterThanOrEqual(1)
   })

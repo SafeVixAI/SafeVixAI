@@ -14,7 +14,7 @@ jest.mock('sonner', () => ({
 }));
 
 // Mock useRef so the component gets a valid video element for camera setup
-var mockVideoElement = document.createElement('video');
+const mockVideoElement = document.createElement('video');
 jest.mock('react', () => {
   const actual = jest.requireActual('react');
   return {
@@ -23,9 +23,9 @@ jest.mock('react', () => {
   };
 });
 
-var mockTrack = { stop: jest.fn() };
-var mockStream = { getTracks: () => [mockTrack] };
-var getUserMediaMock: jest.Mock;
+const mockTrack = { stop: jest.fn() };
+const mockStream = { getTracks: () => [mockTrack] };
+let getUserMediaMock: jest.Mock;
 
 beforeEach(function() {
   jest.clearAllMocks();
@@ -40,7 +40,7 @@ beforeEach(function() {
 });
 
 function renderPotholeDetector() {
-  var PotholeDetector = require('../PotholeDetector').default;
+  const PotholeDetector = require('../PotholeDetector').default;
   return render(<PotholeDetector />);
 }
 
@@ -76,7 +76,7 @@ describe('PotholeDetector', function() {
   });
 
   it('stops camera tracks on unmount', async function() {
-    var { unmount } = renderPotholeDetector();
+    const { unmount } = renderPotholeDetector();
     await waitFor(() => {
       expect(screen.getByRole('button', { name: /initiate ai scan/i })).toBeEnabled();
     });
@@ -87,9 +87,9 @@ describe('PotholeDetector', function() {
   it('scan shows processing state and completes with error fallback', async function() {
     jest.useFakeTimers()
     // Mock getContext to return null, triggering error path
-    var origCreateElement = document.createElement.bind(document)
-    var createElementSpy = jest.fn(function(tag: string) {
-      var el = origCreateElement(tag)
+    const origCreateElement = document.createElement.bind(document)
+    const createElementSpy = jest.fn(function(tag: string) {
+      const el = origCreateElement(tag)
       if (tag === 'canvas') {
         jest.spyOn(el, 'getContext').mockReturnValue(null)
       }
@@ -116,11 +116,11 @@ describe('PotholeDetector', function() {
 
   it('scan completes with no anomaly when no edge pixels', async function() {
     jest.useFakeTimers()
-    var origCreateElement = document.createElement.bind(document)
-    var createElementSpy = jest.fn(function(tag: string) {
-      var el = origCreateElement(tag)
+    const origCreateElement = document.createElement.bind(document)
+    const createElementSpy = jest.fn(function(tag: string) {
+      const el = origCreateElement(tag)
       if (tag === 'canvas') {
-        var mockCtx = {
+        const mockCtx = {
           drawImage: jest.fn(),
           getImageData: jest.fn(function() {
             return { data: new Uint8ClampedArray(160 * 120 * 4), width: 160, height: 120 }
@@ -143,7 +143,7 @@ describe('PotholeDetector', function() {
 
     act(function () { jest.advanceTimersByTime(2000) })
 
-    var toast = require('sonner').toast
+    const toast = require('sonner').toast
     expect(toast.success).toHaveBeenCalledWith(
       expect.stringContaining('No high-contrast')
     )

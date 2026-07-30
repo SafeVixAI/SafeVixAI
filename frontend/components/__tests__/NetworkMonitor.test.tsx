@@ -5,8 +5,8 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
-var mockSetConnectivity = jest.fn();
-var mockUseAppStore = jest.fn();
+const mockSetConnectivity = jest.fn();
+const mockUseAppStore = jest.fn();
 
 jest.mock('@/lib/store', () => ({
   useAppStore: (selector: any) => mockUseAppStore(selector),
@@ -37,7 +37,7 @@ describe('NetworkMonitor', function() {
   });
 
   it('listens for online event on window', function() {
-    var addEventListenerSpy = jest.spyOn(window, 'addEventListener');
+    const addEventListenerSpy = jest.spyOn(window, 'addEventListener');
     Object.defineProperty(navigator, 'onLine', { configurable: true, value: true });
     render(<NetworkMonitor />);
     expect(addEventListenerSpy).toHaveBeenCalledWith('online', expect.any(Function));
@@ -46,9 +46,9 @@ describe('NetworkMonitor', function() {
   });
 
   it('cleans up event listeners on unmount', function() {
-    var removeEventListenerSpy = jest.spyOn(window, 'removeEventListener');
+    const removeEventListenerSpy = jest.spyOn(window, 'removeEventListener');
     Object.defineProperty(navigator, 'onLine', { configurable: true, value: true });
-    var { unmount } = render(<NetworkMonitor />);
+    const { unmount } = render(<NetworkMonitor />);
     unmount();
     expect(removeEventListenerSpy).toHaveBeenCalledWith('online', expect.any(Function));
     expect(removeEventListenerSpy).toHaveBeenCalledWith('offline', expect.any(Function));

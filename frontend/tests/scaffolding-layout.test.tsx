@@ -32,7 +32,7 @@ import TermsLayout from '@/app/terms/layout'
 import TrackSessionIdLayout from '@/app/track/[session_id]/layout'
 import TrackingLayout from '@/app/tracking/layout'
 
-var testContent = React.createElement('span', null, 'test child')
+const testContent = React.createElement('span', null, 'test child')
 
 function R(Layout) { render(React.createElement(Layout, null, testContent)) }
 

@@ -54,7 +54,7 @@ def cmd_version(json_output: bool) -> None:
     if json_output:
         print(json.dumps(result, indent=2, default=str))
         return
-    print(f"SafeVixAI Update Manager")
+    print("SafeVixAI Update Manager")
     print(f"Current version: v{result['current_version']}")
     if result.get("update_available"):
         print(f"Update available: v{result['latest_version']} (channel: {result['channel']})")

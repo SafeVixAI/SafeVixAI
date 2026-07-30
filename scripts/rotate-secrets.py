@@ -20,8 +20,7 @@ import string
 import subprocess
 import sys
 import tempfile
-from datetime import datetime, timezone
-
+from datetime import UTC, datetime
 
 SECRETS_MANIFEST = {
     "backend": {
@@ -48,7 +47,7 @@ def generate_secret(length: int, secret_type: str) -> str:
     if secret_type == "alphanumeric":
         alphabet = string.ascii_letters + string.digits
         return "".join(secrets.choice(alphabet) for _ in range(length))
-    elif secret_type == "complex":
+    if secret_type == "complex":
         alphabet = string.ascii_letters + string.digits + "!@#$%^&*()-_=+"
         return "".join(secrets.choice(alphabet) for _ in range(length))
     return secrets.token_urlsafe(length)
@@ -68,7 +67,7 @@ def rotate_local_env(service: str, key: str, new_value: str) -> bool:
         print(f"  ⚠ {env_path} not found, skipping")
         return False
 
-    with open(env_path, "r") as f:
+    with open(env_path) as f:
         lines = f.readlines()
 
     found = False
@@ -155,7 +154,7 @@ def main():
     services = [args.service] if args.service else list(SECRETS_MANIFEST.keys())
 
     rotation_log = {
-        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "timestamp": datetime.now(UTC).isoformat(),
         "rotations": [],
     }
 

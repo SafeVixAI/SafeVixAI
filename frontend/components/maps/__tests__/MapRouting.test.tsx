@@ -1,7 +1,7 @@
 jest.mock('maplibre-gl', function() {
-  var fn = jest.fn;
-  var sharedMap: Record<string, any> = {};
-  var api = {
+  const fn = jest.fn;
+  const sharedMap: Record<string, any> = {};
+  const api = {
     __mapInstance: sharedMap,
     Map: fn(function() { return sharedMap }),
     NavigationControl: fn(),
@@ -28,7 +28,7 @@ import maplibregl from 'maplibre-gl';
 import { MapRouting } from '../MapRouting';
 
 function freshMap() {
-  var map = (maplibregl as any).Map();
+  const map = (maplibregl as any).Map();
   map.on = jest.fn();
   map.once = jest.fn();
   map.off = jest.fn();
@@ -45,7 +45,7 @@ function freshMap() {
   return map;
 }
 
-var PATH = [{ lat: 13.0, lon: 80.0 }, { lat: 13.1, lon: 80.1 }];
+const PATH = [{ lat: 13.0, lon: 80.0 }, { lat: 13.1, lon: 80.1 }];
 
 function renderRouting(props: Record<string, any> = {}) {
   return render(React.createElement(MapRouting, Object.assign({
@@ -62,12 +62,12 @@ describe('MapRouting', function() {
   beforeEach(function() { jest.clearAllMocks(); });
 
   it('renders null', function() {
-    var { container } = renderRouting();
+    const { container } = renderRouting();
     expect(container.innerHTML).toBe('');
   });
 
   it('adds route layers when route has path', function() {
-    var map = freshMap();
+    const map = freshMap();
     map.getSource.mockReturnValue(undefined);
     map.getLayer.mockReturnValue(undefined);
     render(React.createElement(MapRouting, {
@@ -78,7 +78,7 @@ describe('MapRouting', function() {
   });
 
   it('removes route layers when route has no path', function() {
-    var map = freshMap();
+    const map = freshMap();
     map.getSource.mockReturnValue({});
     map.getLayer.mockReturnValue({});
     render(React.createElement(MapRouting, {
@@ -89,8 +89,8 @@ describe('MapRouting', function() {
   });
 
   it('updates existing route source via setData', function() {
-    var setData = jest.fn();
-    var map = freshMap();
+    const setData = jest.fn();
+    const map = freshMap();
     map.getSource.mockReturnValue({ setData });
     map.getLayer.mockReturnValue({});
     render(React.createElement(MapRouting, {
@@ -100,7 +100,7 @@ describe('MapRouting', function() {
   });
 
   it('calls easeTo for center mode', function() {
-    var map = freshMap();
+    const map = freshMap();
     render(React.createElement(MapRouting, {
       map, route: null, center: [13.0, 80.0] as [number, number], zoom: 14, styleRevision: 0,
     }));
@@ -108,7 +108,7 @@ describe('MapRouting', function() {
   });
 
   it('calls fitBounds for fit viewportMode', function() {
-    var map = freshMap();
+    const map = freshMap();
     map.isStyleLoaded.mockReturnValue(true);
     render(React.createElement(MapRouting, {
       map, route: { path: PATH, routeId: 'r1' }, center: [13.0, 80.0] as [number, number], zoom: 13, styleRevision: 0, viewportMode: 'fit',
@@ -117,7 +117,7 @@ describe('MapRouting', function() {
   });
 
   it('calls fitBounds when route has path', function() {
-    var map = freshMap();
+    const map = freshMap();
     map.isStyleLoaded.mockReturnValue(true);
     render(React.createElement(MapRouting, {
       map, route: { path: PATH, routeId: 'r1' }, center: [13.0, 80.0] as [number, number], zoom: 13, styleRevision: 0,
@@ -126,11 +126,11 @@ describe('MapRouting', function() {
   });
 
   it('adds alternative route layers when alternativeRoutes provided', function() {
-    var map = freshMap();
+    const map = freshMap();
     map.getSource.mockReturnValue(undefined);
     map.getLayer.mockReturnValue(undefined);
     map.isStyleLoaded.mockReturnValue(true);
-    var altRoutes = [{ path: [{ lat: 13.05, lon: 80.05 }, { lat: 13.15, lon: 80.15 }], routeId: 'alt1' }];
+    const altRoutes = [{ path: [{ lat: 13.05, lon: 80.05 }, { lat: 13.15, lon: 80.15 }], routeId: 'alt1' }];
     render(React.createElement(MapRouting, {
       map, route: { path: PATH, routeId: 'r1' }, alternativeRoutes: altRoutes, center: [13.0, 80.0] as [number, number], zoom: 13, styleRevision: 0,
     }));
@@ -140,7 +140,7 @@ describe('MapRouting', function() {
   });
 
   it('waits for style load before syncing when style not loaded', function() {
-    var map = freshMap();
+    const map = freshMap();
     map.isStyleLoaded.mockReturnValue(false);
     render(React.createElement(MapRouting, {
       map, route: { path: PATH, routeId: 'r1' }, center: [13.0, 80.0] as [number, number], zoom: 13, styleRevision: 0,
@@ -149,12 +149,12 @@ describe('MapRouting', function() {
   });
 
   it('includes currentLocation and facilities in viewport bounds', function() {
-    var map = freshMap();
+    const map = freshMap();
     map.getSource.mockReturnValue({ setData: jest.fn() });
     map.getLayer.mockReturnValue({});
     map.isStyleLoaded.mockReturnValue(true);
-    var currentLocation = { lat: 13.01, lon: 80.01, accuracy: 50 };
-    var facilities = [{ id: 'f1', name: 'Hosp', type: 'hospital', coords: [13.02, 80.02] as [number, number], accentColor: 'red', distance: '1km' }];
+    const currentLocation = { lat: 13.01, lon: 80.01, accuracy: 50 };
+    const facilities = [{ id: 'f1', name: 'Hosp', type: 'hospital', coords: [13.02, 80.02] as [number, number], accentColor: 'red', distance: '1km' }];
     render(React.createElement(MapRouting, {
       map, route: { path: PATH, routeId: 'r1' }, currentLocation: currentLocation as any, facilities: facilities, center: [13.0, 80.0] as [number, number], zoom: 13, styleRevision: 0,
     }));
@@ -162,7 +162,7 @@ describe('MapRouting', function() {
   });
 
   it('does not re-add layers if they already exist (guard)', function() {
-    var map = freshMap();
+    const map = freshMap();
     map.getSource.mockReturnValue(undefined);
     // Simulate all layers already existing
     map.getLayer.mockReturnValue(true);

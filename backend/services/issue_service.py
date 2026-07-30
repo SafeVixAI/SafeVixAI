@@ -13,7 +13,6 @@ from typing import Any
 
 from sqlalchemy import and_, func, or_, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
 
 from core.config import get_settings
 from core.metrics import issue_reports_total, issue_sla_breaches_total
@@ -24,9 +23,8 @@ from models.schemas_issues import (
     IssueDetail,
     IssueListItem,
     IssueListResponse,
-    IssueSeverity,
-    IssueStatus,
     IssueStatsResponse,
+    IssueStatus,
     TimelineEvent,
     UpdateIssueRequest,
 )
@@ -209,7 +207,7 @@ class IssueService:
         if is_spam is not None:
             query = query.where(IssueReport.is_spam == is_spam)
         else:
-            query = query.where(IssueReport.is_spam == False)
+            query = query.where(not IssueReport.is_spam)
         if search:
             search_filter = or_(
                 IssueReport.title.ilike(f'%{search}%'),
@@ -278,7 +276,7 @@ class IssueService:
         resolved_count = resolved_result.scalar() or 0
 
         spam_result = await db.execute(
-            select(func.count()).where(IssueReport.is_spam == True),
+            select(func.count()).where(IssueReport.is_spam),
         )
         spam_count = spam_result.scalar() or 0
 
@@ -488,7 +486,7 @@ class IssueService:
                 and_(
                     IssueReport.uuid != uuid.UUID(issue_uuid),
                     IssueReport.status.notin_(['spam', 'duplicate']),
-                    IssueReport.is_spam == False,
+                    not IssueReport.is_spam,
                     IssueReport.issue_type == source.issue_type,
                 ),
             ),

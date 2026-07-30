@@ -4,10 +4,10 @@
 jest.mock('axios', () => ({
   __esModule: true,
   default: (() => {
-    var post = jest.fn();
-    var get = jest.fn();
-    var requestUse = jest.fn();
-    var responseUse = jest.fn();
+    const post = jest.fn();
+    const get = jest.fn();
+    const requestUse = jest.fn();
+    const responseUse = jest.fn();
     return {
       __post: post,
       __get: get,
@@ -38,7 +38,7 @@ jest.mock('../../lib/reverse-geocode', () => ({
 
 import { triggerSos } from '../../lib/api';
 
-var axiosMock = jest.requireMock('axios').default;
+const axiosMock = jest.requireMock('axios').default;
 
 describe('SOS API helper', function() {
   beforeEach(function() {
@@ -58,7 +58,7 @@ describe('SOS API helper', function() {
       },
     });
 
-    var response = await triggerSos({ lat: 13.0827, lon: 80.2707 });
+    const response = await triggerSos({ lat: 13.0827, lon: 80.2707 });
 
     expect(axiosMock.__post).toHaveBeenCalledWith('/api/v1/emergency/sos', null, {
       params: { lat: 13.0827, lon: 80.2707 },

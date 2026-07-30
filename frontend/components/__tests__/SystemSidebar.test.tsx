@@ -5,12 +5,12 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
-var mockUsePathname = jest.fn();
+const mockUsePathname = jest.fn();
 jest.mock('next/navigation', () => ({
   usePathname: () => mockUsePathname(),
 }));
 
-var mockSetSystemSidebarOpen = jest.fn();
+const mockSetSystemSidebarOpen = jest.fn();
 jest.mock('@/lib/store', () => ({
   useAppStore: (selector: any) => {
     const state = {
@@ -28,15 +28,15 @@ describe('SystemSidebar', function() {
   });
 
   it('renders when isSystemSidebarOpen is true', async function() {
-    var SystemSidebar = (await import('../dashboard/SystemSidebar')).default;
+    const SystemSidebar = (await import('../dashboard/SystemSidebar')).default;
     render(<SystemSidebar />);
     expect(screen.getByRole('dialog')).toBeInTheDocument();
   });
 
   it('renders all main navigation items', async function() {
-    var SystemSidebar = (await import('../dashboard/SystemSidebar')).default;
+    const SystemSidebar = (await import('../dashboard/SystemSidebar')).default;
     render(<SystemSidebar />);
-    var navLabels = ['Map', 'AI Assistant', 'Locator', 'Tracking', 'First Aid', 'Report Road Issue', 'Challan Calculator', 'Profile', 'Settings'];
+    const navLabels = ['Map', 'AI Assistant', 'Locator', 'Tracking', 'First Aid', 'Report Road Issue', 'Challan Calculator', 'Profile', 'Settings'];
     for (const label of navLabels) {
       expect(screen.getByText(label)).toBeInTheDocument();
     }
@@ -45,29 +45,29 @@ describe('SystemSidebar', function() {
 
   it('highlights active link based on pathname', async function() {
     mockUsePathname.mockReturnValue('/assistant');
-    var SystemSidebar = (await import('../dashboard/SystemSidebar')).default;
+    const SystemSidebar = (await import('../dashboard/SystemSidebar')).default;
     render(<SystemSidebar />);
-    var links = screen.getAllByRole('link');
-    var activeLink = links.find(
+    const links = screen.getAllByRole('link');
+    const activeLink = links.find(
       (link) => link.getAttribute('href') === '/assistant'
     );
     expect(activeLink).toBeInTheDocument();
   });
 
   it('shows SafeVixAI branding in sidebar', async function() {
-    var SystemSidebar = (await import('../dashboard/SystemSidebar')).default;
+    const SystemSidebar = (await import('../dashboard/SystemSidebar')).default;
     render(<SystemSidebar />);
     expect(screen.getByText('SafeVixAI')).toBeInTheDocument();
   });
 
   it('shows Protocol Active status', async function() {
-    var SystemSidebar = (await import('../dashboard/SystemSidebar')).default;
+    const SystemSidebar = (await import('../dashboard/SystemSidebar')).default;
     render(<SystemSidebar />);
     expect(screen.getByText('Protocol Active')).toBeInTheDocument();
   });
 
   it('renders emergency quick dial numbers', async function() {
-    var SystemSidebar = (await import('../dashboard/SystemSidebar')).default;
+    const SystemSidebar = (await import('../dashboard/SystemSidebar')).default;
     render(<SystemSidebar />);
     expect(screen.getByText('112')).toBeInTheDocument();
     expect(screen.getByText('102')).toBeInTheDocument();
@@ -76,34 +76,34 @@ describe('SystemSidebar', function() {
   });
 
   it('renders System SOS link', async function() {
-    var SystemSidebar = (await import('../dashboard/SystemSidebar')).default;
+    const SystemSidebar = (await import('../dashboard/SystemSidebar')).default;
     render(<SystemSidebar />);
     expect(screen.getByText('System SOS')).toBeInTheDocument();
   });
 
   it('closes sidebar when close button is clicked', async function() {
-    var SystemSidebar = (await import('../dashboard/SystemSidebar')).default;
+    const SystemSidebar = (await import('../dashboard/SystemSidebar')).default;
     render(<SystemSidebar />);
     fireEvent.click(screen.getByLabelText('Close Sidebar'));
     expect(mockSetSystemSidebarOpen).toHaveBeenCalledWith(false);
   });
 
   it('closes sidebar when backdrop is clicked', async function() {
-    var SystemSidebar = (await import('../dashboard/SystemSidebar')).default;
+    const SystemSidebar = (await import('../dashboard/SystemSidebar')).default;
     render(<SystemSidebar />);
-    var backdrop = document.querySelector('.fixed.inset-0');
+    const backdrop = document.querySelector('.fixed.inset-0');
     if (backdrop) fireEvent.click(backdrop);
     expect(mockSetSystemSidebarOpen).toHaveBeenCalledWith(false);
   });
 
   it('renders Operations Console section heading', async function() {
-    var SystemSidebar = (await import('../dashboard/SystemSidebar')).default;
+    const SystemSidebar = (await import('../dashboard/SystemSidebar')).default;
     render(<SystemSidebar />);
     expect(screen.getByText('Operations Console')).toBeInTheDocument();
   });
 
   it('renders Emergency Quick Dial heading', async function() {
-    var SystemSidebar = (await import('../dashboard/SystemSidebar')).default;
+    const SystemSidebar = (await import('../dashboard/SystemSidebar')).default;
     render(<SystemSidebar />);
     expect(screen.getByText('Emergency Quick Dial')).toBeInTheDocument();
   });

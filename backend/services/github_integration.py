@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import hmac
-import json
 import logging
 from typing import Any
 
@@ -249,7 +248,7 @@ class GitHubIntegration:
         if not self._enabled:
             return
         existing = await self.get_labels()
-        existing_names = {l['name'] for l in existing}
+        existing_names = {lbl['name'] for lbl in existing}
 
         async with httpx.AsyncClient(timeout=15.0) as client:
             for label in labels:

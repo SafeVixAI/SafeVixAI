@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2026 SafeVixAI Team
-from pathlib import Path
-import json
 import csv
+import json
+from pathlib import Path
 
 ROOT = Path(".")
 DATA = ROOT / "chatbot_service/data"

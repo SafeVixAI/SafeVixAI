@@ -5,7 +5,7 @@ import React from 'react'
 
 describe('ReportProgressBar', function () {
   it('renders all step labels', async function () {
-    var _a = await import('../report/ReportProgressBar')
+    const _a = await import('../report/ReportProgressBar')
     render(React.createElement(_a.ReportProgressBar, { currentStep: 0 }))
     expect(screen.getByText('Category')).toBeInTheDocument()
     expect(screen.getByText('Location')).toBeInTheDocument()
@@ -15,14 +15,14 @@ describe('ReportProgressBar', function () {
   })
 
   it('shows check marks for completed steps', async function () {
-    var _a = await import('../report/ReportProgressBar')
-    var container = render(React.createElement(_a.ReportProgressBar, { currentStep: 3 }))
-    var checkIcons = container.container.querySelectorAll('svg')
+    const _a = await import('../report/ReportProgressBar')
+    const container = render(React.createElement(_a.ReportProgressBar, { currentStep: 3 }))
+    const checkIcons = container.container.querySelectorAll('svg')
     expect(checkIcons.length).toBeGreaterThan(0)
   })
 
   it('highlights current step', async function () {
-    var _a = await import('../report/ReportProgressBar')
+    const _a = await import('../report/ReportProgressBar')
     render(React.createElement(_a.ReportProgressBar, { currentStep: 2 }))
     expect(screen.getByText('Details')).toBeInTheDocument()
   })

@@ -33,7 +33,7 @@ export function useServiceWorkerUpdate(): SWUpdateHook {
       }
       if (reg) {
         reg.addEventListener('updatefound', function () {
-          var newWorker = reg.installing;
+          const newWorker = reg.installing;
           if (newWorker) {
             newWorker.addEventListener('statechange', function () {
               if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
@@ -50,7 +50,7 @@ export function useServiceWorkerUpdate(): SWUpdateHook {
     };
   }, []);
 
-  var applyUpdate = useCallback(function () {
+  const applyUpdate = useCallback(function () {
     if (waitingSw) {
       waitingSw.postMessage({ action: 'SKIP_WAITING' });
       navigator.serviceWorker.addEventListener('controllerchange', function () {
@@ -59,7 +59,7 @@ export function useServiceWorkerUpdate(): SWUpdateHook {
     }
   }, [waitingSw]);
 
-  var dismissUpdate = useCallback(function () {
+  const dismissUpdate = useCallback(function () {
     setDismissed(true);
     try {
       localStorage.setItem('pwa_update_dismissed', Date.now().toString());
@@ -70,7 +70,7 @@ export function useServiceWorkerUpdate(): SWUpdateHook {
 
   useEffect(function () {
     try {
-      var t = localStorage.getItem('pwa_update_dismissed');
+      const t = localStorage.getItem('pwa_update_dismissed');
       if (t) {
         if (Date.now() - parseInt(t, 10) < 86400000) {
           setDismissed(true);

@@ -3,7 +3,6 @@
 
 from __future__ import annotations
 
-import json
 import logging
 from typing import Any
 
@@ -68,7 +67,7 @@ class IssueNotificationService:
             },
         ]
         if issue.get('labels'):
-            labels = ' '.join(f'`{l}`' for l in issue['labels'])
+            labels = ' '.join(f'`{lbl}`' for lbl in issue['labels'])
             blocks.append({'type': 'context', 'elements': [{'type': 'mrkdwn', 'text': f'Labels: {labels}'}]})
 
         payload = {
@@ -107,7 +106,7 @@ class IssueNotificationService:
             'timestamp': issue.get('created_at', ''),
         })
 
-    async def _send_email(self, issue: dict[str, Any]) -> bool:
+    async def _send_email(self, _issue: dict[str, Any]) -> bool:
         logger.info('Email notification configured — would send to %s', self.email_config.get('to'))
         return True
 

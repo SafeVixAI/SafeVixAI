@@ -28,7 +28,7 @@ describe('routes', function() {
     });
 
     it('every route has valid navGroup', function() {
-      var validGroups = ['main', 'emergency', 'admin', 'auth'];
+      const validGroups = ['main', 'emergency', 'admin', 'auth'];
       ROUTES.forEach(function(r: RouteConfig) {
         expect(validGroups).toContain(r.navGroup);
       });
@@ -48,7 +48,7 @@ describe('routes', function() {
     });
 
     it('admin group has requiredPermissions', function() {
-      var adminRoutes = ROUTES.filter(function(r: RouteConfig) { return r.navGroup === 'admin'; });
+      const adminRoutes = ROUTES.filter(function(r: RouteConfig) { return r.navGroup === 'admin'; });
       adminRoutes.forEach(function(r: RouteConfig) {
         expect(Array.isArray(r.requiredPermissions)).toBe(true);
         expect(r.requiredPermissions!.length).toBeGreaterThan(0);
@@ -56,45 +56,45 @@ describe('routes', function() {
     });
 
     it('auth group routes do not require auth', function() {
-      var authRoutes = ROUTES.filter(function(r: RouteConfig) { return r.navGroup === 'auth'; });
+      const authRoutes = ROUTES.filter(function(r: RouteConfig) { return r.navGroup === 'auth'; });
       authRoutes.forEach(function(r: RouteConfig) {
         expect(r.requiresAuth).toBe(false);
       });
     });
 
     it('path values are unique', function() {
-      var paths = ROUTES.map(function(r: RouteConfig) { return r.path; });
-      var unique = new Set(paths);
+      const paths = ROUTES.map(function(r: RouteConfig) { return r.path; });
+      const unique = new Set(paths);
       expect(unique.size).toBe(paths.length);
     });
   });
 
   describe('getRouteConfig', function() {
     it('returns config for exact path match', function() {
-      var config = getRouteConfig('/assistant');
+      const config = getRouteConfig('/assistant');
       expect(config).toBeDefined();
       expect(config!.title).toBe('AI Assistant');
     });
 
     it('returns config for root path', function() {
-      var config = getRouteConfig('/');
+      const config = getRouteConfig('/');
       expect(config).toBeDefined();
       expect(config!.title).toBe('Dashboard');
     });
 
     it('matches parent route when path has sub-path', function() {
-      var config = getRouteConfig('/guide/some-page');
+      const config = getRouteConfig('/guide/some-page');
       expect(config).toBeDefined();
       expect(config!.path).toBe('/guide');
     });
 
     it('returns undefined for unknown path', function() {
-      var config = getRouteConfig('/nonexistent');
+      const config = getRouteConfig('/nonexistent');
       expect(config).toBeUndefined();
     });
 
     it('returns undefined when no route prefix matches', function() {
-      var config = getRouteConfig('/emergency-card/user123');
+      const config = getRouteConfig('/emergency-card/user123');
       expect(config).toBeUndefined();
     });
   });
@@ -118,52 +118,52 @@ describe('routes', function() {
   });
 
   describe('getNavRoutes', function() {
-    var navRoutes = ROUTES.filter(function(r: RouteConfig) { return r.showInNav; });
-    var navCount = navRoutes.length;
+    const navRoutes = ROUTES.filter(function(r: RouteConfig) { return r.showInNav; });
+    const navCount = navRoutes.length;
 
     it('returns all visible nav routes when no group specified', function() {
-      var result = getNavRoutes();
+      const result = getNavRoutes();
       expect(result.length).toBe(navCount);
     });
 
     it('filters by group: main', function() {
-      var result = getNavRoutes('main');
-      var expected = navRoutes.filter(function(r: RouteConfig) { return r.navGroup === 'main'; });
+      const result = getNavRoutes('main');
+      const expected = navRoutes.filter(function(r: RouteConfig) { return r.navGroup === 'main'; });
       expect(result).toEqual(expected);
     });
 
     it('filters by group: emergency', function() {
-      var result = getNavRoutes('emergency');
-      var expected = navRoutes.filter(function(r: RouteConfig) { return r.navGroup === 'emergency'; });
+      const result = getNavRoutes('emergency');
+      const expected = navRoutes.filter(function(r: RouteConfig) { return r.navGroup === 'emergency'; });
       expect(result).toEqual(expected);
     });
 
     it('filters by group: admin', function() {
-      var result = getNavRoutes('admin');
-      var expected = navRoutes.filter(function(r: RouteConfig) { return r.navGroup === 'admin'; });
+      const result = getNavRoutes('admin');
+      const expected = navRoutes.filter(function(r: RouteConfig) { return r.navGroup === 'admin'; });
       expect(result).toEqual(expected);
     });
 
     it('filters by group: auth', function() {
-      var result = getNavRoutes('auth');
-      var expected = navRoutes.filter(function(r: RouteConfig) { return r.navGroup === 'auth'; });
+      const result = getNavRoutes('auth');
+      const expected = navRoutes.filter(function(r: RouteConfig) { return r.navGroup === 'auth'; });
       expect(result).toEqual(expected);
     });
 
     it('showInNav is false for auth group routes', function() {
-      var authInNav = ROUTES.filter(function(r: RouteConfig) { return r.navGroup === 'auth' && r.showInNav; });
+      const authInNav = ROUTES.filter(function(r: RouteConfig) { return r.navGroup === 'auth' && r.showInNav; });
       expect(authInNav.length).toBe(0);
     });
 
     it('emergency routes are in nav', function() {
-      var emergencyNav = ROUTES.filter(function(r: RouteConfig) { return r.navGroup === 'emergency' && r.showInNav; });
+      const emergencyNav = ROUTES.filter(function(r: RouteConfig) { return r.navGroup === 'emergency' && r.showInNav; });
       expect(emergencyNav.length).toBeGreaterThan(0);
     });
   });
 
   describe('SOS_HIDDEN_ROUTES', function() {
     it('contains paths where showGlobalSOS is false', function() {
-      var expected = ROUTES.filter(function(r: RouteConfig) { return !r.showGlobalSOS; }).map(function(r: RouteConfig) { return r.path; });
+      const expected = ROUTES.filter(function(r: RouteConfig) { return !r.showGlobalSOS; }).map(function(r: RouteConfig) { return r.path; });
       expect(SOS_HIDDEN_ROUTES).toEqual(expected);
     });
 

@@ -1,7 +1,7 @@
 describe('rum', function () {
-  var originalEnv
-  var originalPerfObserver
-  var originalWindow
+  let originalEnv
+  let originalPerfObserver
+  let originalWindow
 
   beforeEach(function () {
     originalEnv = process.env.NODE_ENV
@@ -19,28 +19,28 @@ describe('rum', function () {
 
   it('does nothing on server side', async function () {
     delete global.window
-    var mod = await import('../rum')
+    const mod = await import('../rum')
     expect(function () { mod.initRUM() }).not.toThrow()
   })
 
   it('creates observers for LCP, FID, CLS', async function () {
-    var mod = await import('../rum')
+    const mod = await import('../rum')
     mod.initRUM()
     expect(global.PerformanceObserver).toHaveBeenCalled()
   })
 
   it('logs metrics in dev mode', async function () {
     process.env.NODE_ENV = 'development'
-    var consoleSpy = jest.spyOn(console, 'log').mockImplementation()
+    const consoleSpy = jest.spyOn(console, 'log').mockImplementation()
     global.PerformanceObserver = jest.fn(function (cb) {
       return {
         observe: function () {
-          var list = { getEntries: function () { return [{ startTime: 100 }] } }
+          const list = { getEntries: function () { return [{ startTime: 100 }] } }
           cb(list)
         }
       }
     })
-    var mod = await import('../rum')
+    const mod = await import('../rum')
     mod.initRUM()
     expect(consoleSpy).toHaveBeenCalled()
     consoleSpy.mockRestore()
@@ -48,7 +48,7 @@ describe('rum', function () {
 
   it('handles errors gracefully when PerformanceObserver throws', async function () {
     global.PerformanceObserver = jest.fn(function () { throw new Error('no perf') })
-    var mod = await import('../rum')
+    const mod = await import('../rum')
     expect(function () { mod.initRUM() }).not.toThrow()
   })
 
@@ -57,9 +57,9 @@ describe('rum', function () {
       if (type === 'navigation') return [{ responseStart: 200, requestStart: 100, domContentLoadedEventEnd: 500, fetchStart: 50, loadEventEnd: 800 }]
       return []
     })
-    var consoleSpy = jest.spyOn(console, 'log').mockImplementation()
+    const consoleSpy = jest.spyOn(console, 'log').mockImplementation()
     process.env.NODE_ENV = 'development'
-    var mod = await import('../rum')
+    const mod = await import('../rum')
     mod.initRUM()
     expect(consoleSpy).toHaveBeenCalledWith('[RUM] TTFB: 100.00ms')
     expect(consoleSpy).toHaveBeenCalledWith('[RUM] DOM_LOAD: 450.00ms')
@@ -68,16 +68,16 @@ describe('rum', function () {
   })
 
   it('calls observers in test mode but does not log', async function () {
-    var consoleSpy = jest.spyOn(console, 'log').mockImplementation()
+    const consoleSpy = jest.spyOn(console, 'log').mockImplementation()
     global.PerformanceObserver = jest.fn(function (cb) {
       return {
         observe: function () {
-          var list = { getEntries: function () { return [{ startTime: 42 }] } }
+          const list = { getEntries: function () { return [{ startTime: 42 }] } }
           cb(list)
         }
       }
     })
-    var mod = await import('../rum')
+    const mod = await import('../rum')
     mod.initRUM()
     expect(consoleSpy).not.toHaveBeenCalled()
     consoleSpy.mockRestore()
@@ -85,8 +85,8 @@ describe('rum', function () {
 
   it('does not log in production', async function () {
     process.env.NODE_ENV = 'production'
-    var consoleSpy = jest.spyOn(console, 'log').mockImplementation()
-    var mod = await import('../rum')
+    const consoleSpy = jest.spyOn(console, 'log').mockImplementation()
+    const mod = await import('../rum')
     mod.initRUM()
     expect(consoleSpy).not.toHaveBeenCalled()
     consoleSpy.mockRestore()
@@ -94,13 +94,13 @@ describe('rum', function () {
 
   it('skips CLS entry when hadRecentInput is true', async function () {
     process.env.NODE_ENV = 'development'
-    var consoleSpy = jest.spyOn(console, 'log').mockImplementation()
-    var capturedCb
+    const consoleSpy = jest.spyOn(console, 'log').mockImplementation()
+    let capturedCb
     global.PerformanceObserver = jest.fn(function (cb) {
       capturedCb = cb
       return { observe: jest.fn() }
     })
-    var mod = await import('../rum')
+    const mod = await import('../rum')
     mod.initRUM()
     capturedCb({ getEntries: function () { return [{ hadRecentInput: true, value: 0.5 }] } })
     expect(consoleSpy).not.toHaveBeenCalledWith('[RUM] CLS: 0.50ms')
@@ -109,13 +109,13 @@ describe('rum', function () {
 
   it('reports CLS when hadRecentInput is false', async function () {
     process.env.NODE_ENV = 'development'
-    var consoleSpy = jest.spyOn(console, 'log').mockImplementation()
-    var capturedCb
+    const consoleSpy = jest.spyOn(console, 'log').mockImplementation()
+    let capturedCb
     global.PerformanceObserver = jest.fn(function (cb) {
       capturedCb = cb
       return { observe: jest.fn() }
     })
-    var mod = await import('../rum')
+    const mod = await import('../rum')
     mod.initRUM()
     capturedCb({ getEntries: function () { return [{ hadRecentInput: false, value: 0.3 }] } })
     expect(consoleSpy).toHaveBeenCalledWith('[RUM] CLS: 0.30ms')

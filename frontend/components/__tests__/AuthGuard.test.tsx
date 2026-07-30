@@ -20,7 +20,7 @@ import React from 'react'
 import { AuthGuard } from '../auth/AuthGuard'
 import { useAppStore } from '@/lib/store'
 
-var pushMock = jest.fn()
+const pushMock = jest.fn()
 jest.mock('next/navigation', function() {
   return { useRouter: function() { return { push: pushMock, replace: pushMock } }, usePathname: function() { return '/assistant' }, useSearchParams: function() { return new URLSearchParams() } }
 })
@@ -59,7 +59,7 @@ describe('AuthGuard', function() {
   })
 
   it('restores session from supabase when not authenticated', async function() {
-    var supabase = require('@/lib/supabase-auth')
+    const supabase = require('@/lib/supabase-auth')
     supabase.getSupabaseBrowserClient.mockReturnValueOnce({
       auth: {
         getSession: jest.fn(function() { return Promise.resolve({ data: { session: { user: { user_metadata: { name: 'SessionUser', role: 'officer' }, email: 'op@test.com' }, access_token: 'tok-123' } }, error: null }) }),
@@ -76,7 +76,7 @@ describe('AuthGuard', function() {
   })
 
   it('shows Access Denied when route not accessible', async function() {
-    var roles = require('@/lib/auth/roles')
+    const roles = require('@/lib/auth/roles')
     roles.canAccessRoute = jest.fn(function() { return false })
     useAppStore.setState({ isAuthenticated: true, operatorName: 'TestOp', authRole: 'citizen' })
     render(React.createElement(AuthGuard, null, React.createElement('div', null, 'Hello')))
@@ -86,9 +86,9 @@ describe('AuthGuard', function() {
   })
 
   it('restores session via supabase with token', async function() {
-    var roles = require('@/lib/auth/roles')
+    const roles = require('@/lib/auth/roles')
     roles.canAccessRoute = jest.fn(function() { return true })
-    var supabase = require('@/lib/supabase-auth')
+    const supabase = require('@/lib/supabase-auth')
     supabase.getSupabaseBrowserClient.mockReturnValueOnce({
       auth: {
         getSession: jest.fn(function() { return Promise.resolve({ data: { session: { user: { user_metadata: { name: 'SessionUser', role: 'officer' }, email: 'op@test.com' }, access_token: 'tok-456' } }, error: null }) }),
@@ -100,7 +100,7 @@ describe('AuthGuard', function() {
   })
 
   it('renders children when isPublic route', function() {
-    var roles = require('@/lib/auth/roles')
+    const roles = require('@/lib/auth/roles')
     roles.isPublicRoute = jest.fn(function() { return true })
     render(React.createElement(AuthGuard, null, React.createElement('div', { 'data-testid': 'child' }, 'Hello')))
     expect(screen.getByTestId('child')).toBeTruthy()

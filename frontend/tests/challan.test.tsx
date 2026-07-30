@@ -4,7 +4,7 @@ jest.mock('@/lib/gsap', function() { return { gsap: { from: jest.fn(), to: jest.
 jest.mock('@/components/dashboard/TopSearch', function() { return function() { return null } })
 jest.mock('@/components/dashboard/SystemHeader', function() { return function() { return null } })
 jest.mock('@/lib/store', function() {
-  var state = {
+  const state = {
     challanState: { violation: '183', vehicle: '4W', jurisdiction: 'Tamil Nadu (TN)', isRepeat: false },
     setChallanState: jest.fn(),
     garageVehicles: [],
@@ -25,13 +25,13 @@ jest.mock('@/hooks/useSwipe', function() { return { useSwipe: function() { retur
 jest.mock('react-i18next', function() { return { useTranslation: function() { return { t: function(k, fb) { return typeof fb === 'string' ? fb : k } } } } })
 jest.mock('lucide-react', function() { return new Proxy({}, { get: function() { return function() { return null } } }) })
 
-var React = require('react')
-var { render, screen: rtlScreen, fireEvent, act } = require('@testing-library/react')
-var ChallanPage = require('../app/challan/page').default
+const React = require('react')
+const { render, screen: rtlScreen, fireEvent, act } = require('@testing-library/react')
+const ChallanPage = require('../app/challan/page').default
 
 describe('Challan Page', function() {
   it('renders Estimation Terminal heading', function() {
-    var { getByText } = render(React.createElement(ChallanPage))
+    const { getByText } = render(React.createElement(ChallanPage))
     expect(getByText('Estimation Terminal')).toBeTruthy()
   })
 
@@ -58,7 +58,7 @@ describe('Challan Page', function() {
   })
 
   it('renders Garage section indicator', function() {
-    var { container } = render(React.createElement(ChallanPage))
+    const { container } = render(React.createElement(ChallanPage))
     expect(container.textContent).toContain('Garage')
   })
 

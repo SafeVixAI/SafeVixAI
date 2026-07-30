@@ -22,7 +22,7 @@ describe('AuthorityCard', function() {
   })
 
   it('renders card container', function() {
-    var { container } = render(React.createElement(AuthorityCard))
+    const { container } = render(React.createElement(AuthorityCard))
     expect(container.querySelector('.card-glass')).toBeTruthy()
   })
 })

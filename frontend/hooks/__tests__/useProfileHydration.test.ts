@@ -6,7 +6,7 @@ jest.mock('@/lib/profile-storage', function() {
 }, { virtual: false })
 
 jest.mock('@/lib/store', function() {
-  var mState = { setUserProfile: jest.fn(), setProfileHydrated: jest.fn() }
+  const mState = { setUserProfile: jest.fn(), setProfileHydrated: jest.fn() }
   return {
     useAppStore: { getState: jest.fn(function() { return mState }) },
   }
@@ -15,8 +15,8 @@ jest.mock('@/lib/store', function() {
 import { render, waitFor } from '@testing-library/react'
 import React from 'react'
 
-var profileStorageMod: any
-var storeMod: any
+let profileStorageMod: any
+let storeMod: any
 
 beforeEach(function() {
   jest.clearAllMocks()
@@ -41,7 +41,7 @@ describe('useProfileHydration', function() {
   })
 
   it('sets profile when IndexedDB has data', async function() {
-    var mockProfile = { name: 'Test User', bloodGroup: 'O+' }
+    const mockProfile = { name: 'Test User', bloodGroup: 'O+' }
     profileStorageMod.loadUserProfileFromIndexedDB.mockResolvedValue(mockProfile)
     render(React.createElement(TestCase))
     await waitFor(function() {
@@ -68,7 +68,7 @@ describe('useProfileHydration', function() {
     profileStorageMod.loadUserProfileFromIndexedDB.mockImplementation(function() {
       return new Promise(function(resolve) { setTimeout(function() { resolve({ name: 'Late' } as any) }, 100) })
     })
-    var comp = render(React.createElement(TestCase))
+    const comp = render(React.createElement(TestCase))
     comp.unmount()
     await new Promise(function(r) { return setTimeout(r, 150) })
     expect(storeMod.useAppStore.getState().setUserProfile).not.toHaveBeenCalled()

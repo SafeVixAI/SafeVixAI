@@ -124,11 +124,11 @@ describe('MapLibreCanvas', function() {
   });
 
   it('removes the map on unmount without owning GPS tracking', async function() {
-    var { unmount } = render(
+    const { unmount } = render(
       <MapLibreCanvas center={[13.0827, 80.2707]} currentLocation={null} />
     );
 
-    var maplibreMock = maplibregl as typeof maplibregl & {
+    const maplibreMock = maplibregl as typeof maplibregl & {
       __mapRemove: jest.Mock;
       Map: jest.Mock;
     };
@@ -141,11 +141,11 @@ describe('MapLibreCanvas', function() {
   });
 
   it('keeps the same map instance when the center changes', async function() {
-    var { rerender } = render(
+    const { rerender } = render(
       <MapLibreCanvas center={[13.0827, 80.2707]} currentLocation={null} />
     );
 
-    var maplibreMock = maplibregl as typeof maplibregl & {
+    const maplibreMock = maplibregl as typeof maplibregl & {
       __mapInstance: { easeTo: jest.Mock };
       Map: jest.Mock;
     };
@@ -159,11 +159,11 @@ describe('MapLibreCanvas', function() {
   });
 
   it('keeps the same map instance when facilities update', async function() {
-    var { rerender } = render(
+    const { rerender } = render(
       <MapLibreCanvas center={[13.0827, 80.2707]} currentLocation={null} facilities={[]} />
     );
 
-    var maplibreMock = maplibregl as typeof maplibregl & {
+    const maplibreMock = maplibregl as typeof maplibregl & {
       Map: jest.Mock;
     };
 
@@ -189,12 +189,12 @@ describe('MapLibreCanvas', function() {
   });
 
   it('toggles traffic without recreating the map', async function() {
-    var { rerender } = render(<MapLibreCanvas center={[13.0827, 80.2707]} currentLocation={null} />);
+    const { rerender } = render(<MapLibreCanvas center={[13.0827, 80.2707]} currentLocation={null} />);
 
-    var maplibreMock = maplibregl as typeof maplibregl & {
+    const maplibreMock = maplibregl as typeof maplibregl & {
       Map: jest.Mock;
     };
-    var toggleTrafficLayerMock = toggleTrafficLayer as jest.Mock;
+    const toggleTrafficLayerMock = toggleTrafficLayer as jest.Mock;
 
     await act(async () => {
       useAppStore.setState({ showTraffic: true });

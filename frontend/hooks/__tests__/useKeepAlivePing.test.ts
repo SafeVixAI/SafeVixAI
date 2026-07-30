@@ -35,7 +35,7 @@ describe('useKeepAlivePing', function() {
   it('pings again when visibility changes to visible', async function() {
     render(React.createElement(TestCase))
     await act(async function() {})
-    var callCount = (global.fetch as jest.Mock).mock.calls.length
+    const callCount = (global.fetch as jest.Mock).mock.calls.length
     Object.defineProperty(document, 'visibilityState', { value: 'visible', configurable: true })
     document.dispatchEvent(new Event('visibilitychange'))
     expect((global.fetch as jest.Mock).mock.calls.length).toBeGreaterThan(callCount)
@@ -44,16 +44,16 @@ describe('useKeepAlivePing', function() {
   it('does not ping when visibility changes to hidden', async function() {
     render(React.createElement(TestCase))
     await act(async function() {})
-    var callCount = (global.fetch as jest.Mock).mock.calls.length
+    const callCount = (global.fetch as jest.Mock).mock.calls.length
     Object.defineProperty(document, 'visibilityState', { value: 'hidden', configurable: true })
     document.dispatchEvent(new Event('visibilitychange'))
     expect((global.fetch as jest.Mock).mock.calls.length).toBe(callCount)
   })
 
   it('cleans up on unmount', async function() {
-    var comp = render(React.createElement(TestCase))
+    const comp = render(React.createElement(TestCase))
     await act(async function() {})
-    var clearIntervalSpy = jest.spyOn(globalThis, 'clearInterval')
+    const clearIntervalSpy = jest.spyOn(globalThis, 'clearInterval')
     comp.unmount()
     expect(clearIntervalSpy).toHaveBeenCalled()
     clearIntervalSpy.mockRestore()

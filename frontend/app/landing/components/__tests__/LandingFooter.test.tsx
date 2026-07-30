@@ -1,8 +1,8 @@
-jest.mock('next/link', function() { return function({ children, href }) { var React = require('react'); return React.createElement('a', { href: href }, children) } })
+jest.mock('next/link', function() { return function({ children, href }) { const React = require('react'); return React.createElement('a', { href: href }, children) } })
 
-var React = require('react')
-var { render, screen: rtlScreen } = require('@testing-library/react')
-var LandingFooter = require('../LandingFooter').default
+const React = require('react')
+const { render, screen: rtlScreen } = require('@testing-library/react')
+const LandingFooter = require('../LandingFooter').default
 
 describe('LandingFooter', function() {
   it('renders brand name', function() {

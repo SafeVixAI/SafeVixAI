@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2026 SafeVixAI Team
-"""
-extract_morth2022_tables.py
+"""extract_morth2022_tables.py
 ===========================
 Extracts tabular accident data from the raw MoRTH 2022 PDF reports that were
 downloaded into chatbot_service/data/accidents/morth_2022/.

@@ -6,7 +6,6 @@
 from __future__ import annotations
 
 import logging
-from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import StreamingResponse
@@ -14,14 +13,11 @@ from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.database import get_db
-from core.limiter import limiter
 from models.update_management import ReleaseChannel, UpdateStatus
 from schemas.update_management import (
-    ChecksumVerifyResponse,
     DownloadProgressEvent,
     OfflineBundleResponse,
     RestartActionResponse,
-    SchedulerStatusResponse,
     SignatureVerifyResponse,
     UpdateActionResponse,
     UpdateCheckResponse,
@@ -69,7 +65,7 @@ async def check_for_updates(
 
 @router.get("/releases", response_model=list[UpdateReleaseSummary])
 async def list_releases(
-    channel: Optional[ReleaseChannel] = Query(None, description="Filter by channel"),
+    channel: ReleaseChannel | None = Query(None, description="Filter by channel"),
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
     db: AsyncSession = Depends(get_db),
@@ -156,7 +152,7 @@ async def install_release(
 
 @router.post("/rollback", response_model=UpdateActionResponse)
 async def rollback_update(
-    version: Optional[str] = Query(None, description="Target version to rollback to"),
+    version: str | None = Query(None, description="Target version to rollback to"),
     db: AsyncSession = Depends(get_db),
     service: UpdateService = Depends(get_update_service),
 ) -> UpdateActionResponse:
@@ -308,7 +304,6 @@ async def download_progress_sse(
 ) -> StreamingResponse:
     """SSE stream for download progress of a release."""
     import asyncio
-    import json
 
     release = await service.get_release(db, version)
     if not release:

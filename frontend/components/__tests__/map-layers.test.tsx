@@ -29,12 +29,12 @@ describe('MapLayers', function() {
       </div>
     );
 
-    var heatmap = screen.getByTestId('heatmap-layer');
+    const heatmap = screen.getByTestId('heatmap-layer');
     expect(heatmap).toBeTruthy();
   });
 
   it('renders emergency service markers', function() {
-    var services = [
+    const services = [
       { id: '1', name: 'City Hospital', lat: 13.0827, lon: 80.2707, category: 'hospital' },
       { id: '2', name: 'Police Station', lat: 13.0850, lon: 80.2730, category: 'police' },
     ];
@@ -54,7 +54,7 @@ describe('MapLayers', function() {
   });
 
   it('renders road issue markers', function() {
-    var issues = [
+    const issues = [
       { id: '1', issueType: 'pothole', lat: 13.0827, lon: 80.2707, severity: 3 },
       { id: '2', issueType: 'flooding', lat: 13.0850, lon: 80.2730, severity: 4 },
     ];
@@ -84,12 +84,12 @@ describe('MapLayers', function() {
   });
 
   it('toggles heatmap visibility', function() {
-    var showHeatmap = true;
-    var toggle = () => {
+    let showHeatmap = true;
+    const toggle = () => {
       showHeatmap = !showHeatmap;
     };
 
-    var { rerender } = render(
+    const { rerender } = render(
       <div data-testid="map-container">
         {showHeatmap && <div data-testid="heatmap-layer" />}
         <button data-testid="toggle-heatmap" onClick={toggle}>
@@ -115,7 +115,7 @@ describe('MapLayers', function() {
   });
 
   it('displays map search results', function() {
-    var searchResults = [
+    const searchResults = [
       { id: '1', name: 'Chennai Central', lat: 13.0827, lon: 80.2707 },
     ];
 

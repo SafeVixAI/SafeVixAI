@@ -9,9 +9,9 @@ function createBeforeInstallPromptEvent() {
 }
 
 function createMockBeforeInstallPromptEvent() {
-  var userChoice = Promise.resolve({ outcome: 'accepted' as 'accepted' })
-  var promptFn = jest.fn()
-  var event = new Event('beforeinstallprompt', { cancelable: true })
+  const userChoice = Promise.resolve({ outcome: 'accepted' as const })
+  const promptFn = jest.fn()
+  const event = new Event('beforeinstallprompt', { cancelable: true })
   Object.defineProperties(event, {
     prompt: { value: promptFn, writable: true },
     userChoice: { value: userChoice, writable: true },
@@ -22,7 +22,7 @@ function createMockBeforeInstallPromptEvent() {
 describe('InstallPrompt', function () {
   beforeEach(function () {
     jest.clearAllMocks()
-    var swTarget = new EventTarget()
+    const swTarget = new EventTarget()
     Object.defineProperty(navigator, 'serviceWorker', {
       get: function() { return swTarget },
       configurable: true,
@@ -30,12 +30,12 @@ describe('InstallPrompt', function () {
   })
 
   it('returns null when not prompted', function () {
-    var container = render(React.createElement(InstallPrompt, null))
+    const container = render(React.createElement(InstallPrompt, null))
     expect(container.container.innerHTML).toBe('')
   })
 
   it('registers event listeners on mount', function () {
-    var addEventListener = jest.spyOn(window, 'addEventListener')
+    const addEventListener = jest.spyOn(window, 'addEventListener')
     render(React.createElement(InstallPrompt, null))
     expect(addEventListener).toHaveBeenCalledWith('beforeinstallprompt', expect.any(Function))
     expect(addEventListener).toHaveBeenCalledWith('appinstalled', expect.any(Function))
@@ -44,7 +44,7 @@ describe('InstallPrompt', function () {
 
   it('shows install banner after beforeinstallprompt event', function () {
     render(React.createElement(InstallPrompt, null))
-    var { event } = createMockBeforeInstallPromptEvent()
+    const { event } = createMockBeforeInstallPromptEvent()
     act(function () { window.dispatchEvent(event) })
     expect(screen.getByText(/Install SafeVixAI/i)).toBeTruthy()
     expect(screen.getByText(/offline access/i)).toBeTruthy()
@@ -53,7 +53,7 @@ describe('InstallPrompt', function () {
 
   it('calls prompt on Install button click', async function () {
     render(React.createElement(InstallPrompt, null))
-    var { event, promptFn } = createMockBeforeInstallPromptEvent()
+    const { event, promptFn } = createMockBeforeInstallPromptEvent()
     act(function () { window.dispatchEvent(event) })
     fireEvent.click(screen.getByRole('button', { name: 'Install' }))
     expect(promptFn).toHaveBeenCalledTimes(1)
@@ -61,15 +61,15 @@ describe('InstallPrompt', function () {
 
   it('prevents default on beforeinstallprompt', function () {
     render(React.createElement(InstallPrompt, null))
-    var event = createBeforeInstallPromptEvent()
-    var preventDefaultSpy = jest.spyOn(event, 'preventDefault')
+    const event = createBeforeInstallPromptEvent()
+    const preventDefaultSpy = jest.spyOn(event, 'preventDefault')
     window.dispatchEvent(event)
     expect(preventDefaultSpy).toHaveBeenCalled()
   })
 
   it('hides banner on dismiss button click', function () {
     render(React.createElement(InstallPrompt, null))
-    var { event } = createMockBeforeInstallPromptEvent()
+    const { event } = createMockBeforeInstallPromptEvent()
     act(function () { window.dispatchEvent(event) })
     expect(screen.getByText(/Install SafeVixAI/i)).toBeTruthy()
     fireEvent.click(screen.getByLabelText(/Dismiss/i))
@@ -77,9 +77,9 @@ describe('InstallPrompt', function () {
   })
 
   it('re-registers beforeinstallprompt listener with new dismissed value', function () {
-    var removeListener = jest.spyOn(window, 'removeEventListener')
+    const removeListener = jest.spyOn(window, 'removeEventListener')
     render(React.createElement(InstallPrompt, null))
-    var { event } = createMockBeforeInstallPromptEvent()
+    const { event } = createMockBeforeInstallPromptEvent()
     act(function () { window.dispatchEvent(event) })
     fireEvent.click(screen.getByLabelText(/Dismiss/i))
     expect(removeListener).toHaveBeenCalledWith('beforeinstallprompt', expect.any(Function))
@@ -87,10 +87,10 @@ describe('InstallPrompt', function () {
   })
 
   it('hides banner when appinstalled event fires', function () {
-    var toastSpy = { success: jest.fn() }
+    const toastSpy = { success: jest.fn() }
     jest.mock('sonner', function () { return { toast: toastSpy } })
     render(React.createElement(InstallPrompt, null))
-    var { event } = createMockBeforeInstallPromptEvent()
+    const { event } = createMockBeforeInstallPromptEvent()
     act(function () { window.dispatchEvent(event) })
     expect(screen.getByText(/Install SafeVixAI/i)).toBeTruthy()
     act(function () { window.dispatchEvent(new Event('appinstalled')) })
@@ -99,11 +99,11 @@ describe('InstallPrompt', function () {
 
   it('hides banner on service worker APP_INSTALLED message', function () {
     render(React.createElement(InstallPrompt, null))
-    var { event } = createMockBeforeInstallPromptEvent()
+    const { event } = createMockBeforeInstallPromptEvent()
     act(function () { window.dispatchEvent(event) })
     expect(screen.getByText(/Install SafeVixAI/i)).toBeTruthy()
     act(function () {
-      var msgEvent = new MessageEvent('message', { data: { type: 'APP_INSTALLED' } })
+      const msgEvent = new MessageEvent('message', { data: { type: 'APP_INSTALLED' } })
       navigator.serviceWorker?.dispatchEvent(msgEvent)
     })
     expect(screen.queryByText(/Install SafeVixAI/i)).toBeNull()

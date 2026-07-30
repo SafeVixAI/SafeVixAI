@@ -1,7 +1,7 @@
 jest.mock('@/lib/supabase-auth', function() {
-  var mGetSession = jest.fn().mockResolvedValue({ data: { session: null } })
-  var mUnsub = jest.fn()
-  var mOnAuth = jest.fn().mockReturnValue({ data: { subscription: { unsubscribe: mUnsub } } })
+  const mGetSession = jest.fn().mockResolvedValue({ data: { session: null } })
+  const mUnsub = jest.fn()
+  const mOnAuth = jest.fn().mockReturnValue({ data: { subscription: { unsubscribe: mUnsub } } })
   return {
     __mockGetSession: mGetSession,
     __mockUnsub: mUnsub,
@@ -10,7 +10,7 @@ jest.mock('@/lib/supabase-auth', function() {
 }, { virtual: false })
 
 jest.mock('@/lib/store', function() {
-  var mState = { clearAuth: jest.fn(), setAuth: jest.fn(), setUserProfile: jest.fn() }
+  const mState = { clearAuth: jest.fn(), setAuth: jest.fn(), setUserProfile: jest.fn() }
   return {
     __mockState: mState,
     useAppStore: { getState: jest.fn(function() { return mState }) },
@@ -20,8 +20,8 @@ jest.mock('@/lib/store', function() {
 import { render, waitFor } from '@testing-library/react'
 import React from 'react'
 
-var supabaseMod: any
-var storeMod: any
+let supabaseMod: any
+let storeMod: any
 
 beforeEach(function() {
   jest.clearAllMocks()
@@ -71,7 +71,7 @@ describe('useSupabaseSession', function() {
     supabaseMod.__mockGetSession.mockResolvedValue({
       data: { session: { access_token: 'tok', user: { email: 'a@b.com', user_metadata: {} } } },
     })
-    var comp = render(React.createElement(TestCase))
+    const comp = render(React.createElement(TestCase))
     comp.unmount()
     expect(supabaseMod.__mockUnsub).toHaveBeenCalled()
   })

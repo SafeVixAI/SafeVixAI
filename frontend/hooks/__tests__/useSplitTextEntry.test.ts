@@ -1,9 +1,9 @@
 jest.mock('@gsap/react', function() {
-  var React = require('react')
+  const React = require('react')
   return {
     useGSAP: function(cb: Function, opts: any) {
       React.useEffect(function() {
-        var cleanup = cb()
+        const cleanup = cb()
         return typeof cleanup === 'function' ? cleanup : undefined
       }, [])
     },
@@ -11,7 +11,7 @@ jest.mock('@gsap/react', function() {
 })
 
 jest.mock('@/lib/gsap', function() {
-  var mockGsap = {
+  const mockGsap = {
     fromTo: jest.fn().mockReturnValue({ kill: jest.fn() }),
     registerPlugin: jest.fn(),
   }
@@ -42,13 +42,13 @@ afterEach(function() {
 })
 
 function TestCase() {
-  var ref = require('../useSplitTextEntry').useSplitTextEntry()
+  const ref = require('../useSplitTextEntry').useSplitTextEntry()
   return React.createElement('h1', { ref, 'data-testid': 'heading' }, 'Hello World')
 }
 
 describe('useSplitTextEntry', function() {
   it('returns a heading ref object', function() {
-    var result = render(React.createElement(TestCase))
+    const result = render(React.createElement(TestCase))
     expect(result.container.querySelector('[data-testid="heading"]')).toBeInTheDocument()
   })
 
@@ -59,7 +59,7 @@ describe('useSplitTextEntry', function() {
 
   it('handles null container ref gracefully', function() {
     function NullCase() {
-      var ref = require('../useSplitTextEntry').useSplitTextEntry()
+      const ref = require('../useSplitTextEntry').useSplitTextEntry()
       ref.current = null
       return React.createElement('div', { ref })
     }
@@ -68,9 +68,9 @@ describe('useSplitTextEntry', function() {
 
   it('restores original HTML via fallback onComplete callback', function() {
     render(React.createElement(TestCase))
-    var gsapMock = require('@/lib/gsap').gsap
-    var lastFromTo = gsapMock.fromTo.mock.calls[gsapMock.fromTo.mock.calls.length - 1]
-    var config = lastFromTo[2]
+    const gsapMock = require('@/lib/gsap').gsap
+    const lastFromTo = gsapMock.fromTo.mock.calls[gsapMock.fromTo.mock.calls.length - 1]
+    const config = lastFromTo[2]
     config.onComplete()
     expect(rtlScreen.getByTestId('heading').innerHTML).toBe('Hello World')
   })

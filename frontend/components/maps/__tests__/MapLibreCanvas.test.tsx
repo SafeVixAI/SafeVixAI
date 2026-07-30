@@ -1,7 +1,7 @@
 jest.mock('maplibre-gl', function() {
-  var fn = jest.fn;
-  var mapInstance: Record<string, any> = { remove: fn() };
-  var api = {
+  const fn = jest.fn;
+  const mapInstance: Record<string, any> = { remove: fn() };
+  const api = {
     __mapInstance: mapInstance,
     Map: fn(function() { return mapInstance }),
     NavigationControl: fn(),
@@ -25,7 +25,7 @@ jest.mock('@/lib/traffic-layer', function() {
 });
 
 jest.mock('@/lib/store', function() {
-  var st = { showTraffic: false, showSatellite: false, setMapState: jest.fn(), mapStatus: 'loading', mapProvider: null, mapError: null };
+  const st = { showTraffic: false, showSatellite: false, setMapState: jest.fn(), mapStatus: 'loading', mapProvider: null, mapError: null };
   return {
     useAppStore: function(sel?: any) { return typeof sel === 'function' ? sel(st) : st; },
   };
@@ -41,7 +41,7 @@ import { MapLibreCanvas } from '../MapLibreCanvas';
 import maplibregl from 'maplibre-gl';
 
 function setupMap() {
-  var map = (maplibregl as any).Map();
+  const map = (maplibregl as any).Map();
   map.on = jest.fn();
   map.once = jest.fn();
   map.off = jest.fn();
@@ -74,7 +74,7 @@ describe('MapLibreCanvas', function() {
   });
 
   it('renders map container div with correct className', function() {
-    var { container } = render(React.createElement(MapLibreCanvas, {
+    const { container } = render(React.createElement(MapLibreCanvas, {
       center: [13.0827, 80.2707] as [number, number],
       zoom: 13,
     }));
@@ -89,7 +89,7 @@ describe('MapLibreCanvas', function() {
   });
 
   it('passes custom className prop', function() {
-    var { container } = render(React.createElement(MapLibreCanvas, {
+    const { container } = render(React.createElement(MapLibreCanvas, {
       center: [13.0827, 80.2707] as [number, number],
       className: 'custom-map-class',
     }));
@@ -118,7 +118,7 @@ describe('MapLibreCanvas', function() {
   });
 
   it('passes onMapReady callback to Map', function() {
-    var onReady = jest.fn();
+    const onReady = jest.fn();
     render(React.createElement(MapLibreCanvas, {
       center: [13.0827, 80.2707] as [number, number],
       onMapReady: onReady,
@@ -127,9 +127,9 @@ describe('MapLibreCanvas', function() {
   });
 
   it('renders with satellite style when showSatellite is true', function() {
-    var store = require('@/lib/store');
+    const store = require('@/lib/store');
     store.useAppStore = function(sel?: any) {
-      var st = { showTraffic: false, showSatellite: true, setMapState: jest.fn(), mapStatus: 'loading', mapProvider: null, mapError: null };
+      const st = { showTraffic: false, showSatellite: true, setMapState: jest.fn(), mapStatus: 'loading', mapProvider: null, mapError: null };
       return typeof sel === 'function' ? sel(st) : st;
     };
     render(React.createElement(MapLibreCanvas, {

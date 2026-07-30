@@ -10,10 +10,9 @@ import hashlib
 import logging
 import os
 from datetime import UTC, datetime
-from typing import Optional
 
 import httpx
-from sqlalchemy import func, select, update
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from models.update_management import (
@@ -84,7 +83,7 @@ class UpdateService:
     # ── Release Management ──
 
     async def list_releases(
-        self, db: AsyncSession, channel: Optional[ReleaseChannel] = None, limit: int = 20, offset: int = 0,
+        self, db: AsyncSession, channel: ReleaseChannel | None = None, limit: int = 20, offset: int = 0,
     ) -> list[UpdateReleaseSummary]:
         """List releases, optionally filtered by channel."""
         stmt = select(UpdateRelease).where(UpdateRelease.is_draft.is_(False))
@@ -101,7 +100,7 @@ class UpdateService:
             ) for r in releases
         ]
 
-    async def get_release(self, db: AsyncSession, version: str) -> Optional[UpdateReleaseResponse]:
+    async def get_release(self, db: AsyncSession, version: str) -> UpdateReleaseResponse | None:
         """Get a specific release by version string."""
         stmt = select(UpdateRelease).where(UpdateRelease.version == version)
         result = await db.execute(stmt)
@@ -112,7 +111,7 @@ class UpdateService:
 
     async def get_latest_release(
         self, db: AsyncSession, channel: ReleaseChannel = ReleaseChannel.STABLE,
-    ) -> Optional[UpdateReleaseSummary]:
+    ) -> UpdateReleaseSummary | None:
         """Get the latest non-draft release for the given channel."""
         stmt = (
             select(UpdateRelease)
@@ -286,7 +285,7 @@ class UpdateService:
 
     # ── Rollback ──
 
-    async def rollback(self, db: AsyncSession, version: Optional[str] = None) -> UpdateActionResponse:
+    async def rollback(self, db: AsyncSession, version: str | None = None) -> UpdateActionResponse:
         """Rollback to a previous version. Defaults to the installation's previous version."""
         if version:
             target_version = version
@@ -425,7 +424,7 @@ class UpdateService:
 
     # ── Offline Bundle ──
 
-    async def get_offline_bundle(self, db: AsyncSession, version: str) -> Optional[dict]:
+    async def get_offline_bundle(self, db: AsyncSession, version: str) -> dict | None:
         """Get offline update bundle info for a given version."""
         release = await self.get_release(db, version)
         if not release:
@@ -550,7 +549,6 @@ class UpdateService:
         return settings
 
     async def _get_release_or_raise(self, db: AsyncSession, version: str) -> UpdateRelease:
-        from sqlalchemy.exc import NoResultFound
         stmt = select(UpdateRelease).where(UpdateRelease.version == version)
         result = await db.execute(stmt)
         release = result.scalar_one_or_none()
@@ -559,7 +557,7 @@ class UpdateService:
             raise ValueError(msg)
         return release
 
-    async def _get_last_installation(self, db: AsyncSession) -> Optional[UpdateInstallation]:
+    async def _get_last_installation(self, db: AsyncSession) -> UpdateInstallation | None:
         stmt = (
             select(UpdateInstallation)
             .where(UpdateInstallation.status == UpdateStatus.INSTALLED)
@@ -608,7 +606,7 @@ class UpdateService:
         keywords = ["security", "cve", "vulnerability", "patch", "fix"]
         return any(kw in lower for kw in keywords)
 
-    def _parse_github_date(self, date_str: Optional[str]) -> Optional[datetime]:
+    def _parse_github_date(self, date_str: str | None) -> datetime | None:
         if not date_str:
             return None
         try:

@@ -2,11 +2,11 @@
 // Copyright (c) 2026 SafeVixAI Team
 
 jest.mock('@gsap/react', () => {
-  var cleanups = [] as Function[]
+  const cleanups = [] as Function[]
   return {
     __cleanups: cleanups,
     useGSAP: function(cb: Function, _opts: any) {
-      var cleanup = cb()
+      const cleanup = cb()
       if (typeof cleanup === 'function') cleanups.push(cleanup)
     },
   }
@@ -20,8 +20,8 @@ import { renderHook } from '@testing-library/react'
 
 describe('useGSAPAnimation', function() {
   it('calls the animation function with the ref element', function() {
-    var animation = jest.fn()
-    var ref = { current: document.createElement('div') }
+    const animation = jest.fn()
+    const ref = { current: document.createElement('div') }
     jest.useFakeTimers()
     renderHook(() => require('../useGSAPAnimation').useGSAPAnimation({ ref, animation }))
     jest.runAllTimers()
@@ -29,9 +29,9 @@ describe('useGSAPAnimation', function() {
   })
 
   it('calls ScrollTrigger.refresh after animation', function() {
-    var animation = jest.fn()
-    var ref = { current: document.createElement('div') }
-    var ScrollTrigger = require('@/lib/gsap').ScrollTrigger
+    const animation = jest.fn()
+    const ref = { current: document.createElement('div') }
+    const ScrollTrigger = require('@/lib/gsap').ScrollTrigger
     jest.useFakeTimers()
     renderHook(() => require('../useGSAPAnimation').useGSAPAnimation({ ref, animation }))
     jest.runAllTimers()
@@ -39,8 +39,8 @@ describe('useGSAPAnimation', function() {
   })
 
   it('does not call animation when ref.current is null', function() {
-    var animation = jest.fn()
-    var ref = { current: null }
+    const animation = jest.fn()
+    const ref = { current: null }
     jest.useFakeTimers()
     renderHook(() => require('../useGSAPAnimation').useGSAPAnimation({ ref, animation }))
     jest.runAllTimers()
@@ -48,8 +48,8 @@ describe('useGSAPAnimation', function() {
   })
 
   it('respects the delay parameter', function() {
-    var animation = jest.fn()
-    var ref = { current: document.createElement('div') }
+    const animation = jest.fn()
+    const ref = { current: document.createElement('div') }
     jest.useFakeTimers()
     renderHook(() => require('../useGSAPAnimation').useGSAPAnimation({ ref, animation, delay: 500 }))
     expect(animation).not.toHaveBeenCalled()

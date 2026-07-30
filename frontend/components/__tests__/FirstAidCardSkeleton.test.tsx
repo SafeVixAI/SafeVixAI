@@ -7,12 +7,12 @@ import FirstAidCardSkeleton from '../FirstAidCardSkeleton'
 
 describe('FirstAidCardSkeleton', function() {
   it('renders without crashing', function() {
-    var el = render(React.createElement(FirstAidCardSkeleton)).container
+    const el = render(React.createElement(FirstAidCardSkeleton)).container
     expect(el.querySelectorAll('.skeleton').length).toBeGreaterThanOrEqual(4)
   })
 
   it('renders all skeleton elements', function() {
-    var { container } = render(React.createElement(FirstAidCardSkeleton))
+    const { container } = render(React.createElement(FirstAidCardSkeleton))
     expect(container.querySelectorAll('.skeleton').length).toBe(6)
   })
 })

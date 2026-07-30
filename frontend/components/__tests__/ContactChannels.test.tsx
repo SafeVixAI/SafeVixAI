@@ -5,7 +5,7 @@ import { render, screen } from '@testing-library/react'
 import React from 'react'
 import { ContactChannels } from '../guide/ContactChannels'
 
-var mockMunicipality = {
+const mockMunicipality = {
   headquartersAddress: '123 Main St, Chennai',
   helplinePhone: '1800-123-4567',
   email: 'help@municipality.gov.in',
@@ -49,7 +49,7 @@ describe('ContactChannels', function() {
   })
 
   it('handles null/empty fields showing Not available', function() {
-    var partial = {
+    const partial = {
       headquartersAddress: null,
       helplinePhone: null,
       email: null,
@@ -59,13 +59,13 @@ describe('ContactChannels', function() {
       appName: null,
     }
     render(React.createElement(ContactChannels, { municipality: partial as any }))
-    var notAvailables = screen.getAllByText('Not available')
+    const notAvailables = screen.getAllByText('Not available')
     expect(notAvailables.length).toBeGreaterThanOrEqual(6)
     expect(screen.queryByRole('link')).toBeNull()
   })
 
   it('handles partial fields with some null', function() {
-    var partial = {
+    const partial = {
       headquartersAddress: 'Office',
       helplinePhone: null,
       email: 'test@test.com',
@@ -80,7 +80,7 @@ describe('ContactChannels', function() {
     expect(screen.getByText('File a Complaint')).toBeTruthy()
     expect(screen.getByText('App')).toBeTruthy()
     // Null fields show 'Not available'
-    var notAvail = screen.getAllByText('Not available')
+    const notAvail = screen.getAllByText('Not available')
     expect(notAvail.length).toBeGreaterThanOrEqual(1)
   })
 })

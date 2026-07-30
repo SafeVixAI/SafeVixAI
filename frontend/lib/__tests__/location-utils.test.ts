@@ -73,7 +73,7 @@ describe('location-utils', function() {
     });
 
     it('returns "Enable Location" when gpsError is set even with valid location', function() {
-      var loc = makeLocation({ city: 'Chennai' });
+      const loc = makeLocation({ city: 'Chennai' });
       expect(formatLocationLabel(loc, 'Timeout')).toBe('Enable Location');
     });
 
@@ -86,22 +86,22 @@ describe('location-utils', function() {
     });
 
     it('returns city and state for accurate location', function() {
-      var loc = makeLocation({ city: 'Chennai', state: 'Tamil Nadu', accuracy: 100 });
+      const loc = makeLocation({ city: 'Chennai', state: 'Tamil Nadu', accuracy: 100 });
       expect(formatLocationLabel(loc, null)).toBe('Chennai, Tamil Nadu');
     });
 
     it('returns city only when no state', function() {
-      var loc = makeLocation({ city: 'Chennai', accuracy: 100 });
+      const loc = makeLocation({ city: 'Chennai', accuracy: 100 });
       expect(formatLocationLabel(loc, null)).toBe('Chennai');
     });
 
     it('returns "Approx." prefix for approximate location with city', function() {
-      var loc = makeLocation({ city: 'Chennai', accuracy: 2500 });
+      const loc = makeLocation({ city: 'Chennai', accuracy: 2500 });
       expect(formatLocationLabel(loc, null)).toBe('Approx. Chennai');
     });
 
     it('falls back to displayName when no city', function() {
-      var loc = makeLocation({
+      const loc = makeLocation({
         displayName: 'Anna Nagar, Chennai',
         accuracy: 100,
         city: undefined,
@@ -110,7 +110,7 @@ describe('location-utils', function() {
     });
 
     it('falls back to lat/lon when no city or displayName', function() {
-      var loc = makeLocation({
+      const loc = makeLocation({
         accuracy: 100,
         city: undefined,
         displayName: undefined,
@@ -119,7 +119,7 @@ describe('location-utils', function() {
     });
 
     it('prefixes "Approx." for lat/lon fallback', function() {
-      var loc = makeLocation({
+      const loc = makeLocation({
         accuracy: 2500,
         city: undefined,
         displayName: undefined,
@@ -128,7 +128,7 @@ describe('location-utils', function() {
     });
 
     it('handles city with trailing comma', function() {
-      var loc = makeLocation({ city: 'Chennai,', state: '', accuracy: 100 });
+      const loc = makeLocation({ city: 'Chennai,', state: '', accuracy: 100 });
       expect(formatLocationLabel(loc, null)).toBe('Chennai');
     });
   });
@@ -147,7 +147,7 @@ describe('location-utils', function() {
     });
 
     it('returns accuracy info for approximate location', function() {
-      var loc = makeLocation({
+      const loc = makeLocation({
         accuracy: 2500,
         city: undefined,
         displayName: undefined,
@@ -158,7 +158,7 @@ describe('location-utils', function() {
     });
 
     it('falls back to lat/lon when accuracy is below threshold and no city', function() {
-      var loc = makeLocation({
+      const loc = makeLocation({
         accuracy: 0,
         city: undefined,
         displayName: undefined,
@@ -167,7 +167,7 @@ describe('location-utils', function() {
     });
 
     it('returns displayName for accurate location', function() {
-      var loc = makeLocation({
+      const loc = makeLocation({
         displayName: 'T. Nagar, Chennai',
         accuracy: 100,
         city: undefined,
@@ -176,7 +176,7 @@ describe('location-utils', function() {
     });
 
     it('returns city label for accurate location without displayName', function() {
-      var loc = makeLocation({
+      const loc = makeLocation({
         city: 'Chennai',
         state: 'Tamil Nadu',
         accuracy: 100,

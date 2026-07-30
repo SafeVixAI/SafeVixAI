@@ -13,7 +13,7 @@ afterEach(function() {
 })
 
 function TestCase({ active }: { active: boolean }) {
-  var ref = require('../useFocusTrap').useFocusTrap(active)
+  const ref = require('../useFocusTrap').useFocusTrap(active)
   return React.createElement('div', { ref, 'data-testid': 'trap' },
     React.createElement('button', { 'data-testid': 'first' }, 'First'),
     React.createElement('button', { 'data-testid': 'last' }, 'Last'),
@@ -28,9 +28,9 @@ describe('useFocusTrap', function() {
 
   it('wraps Tab from last to first element', function() {
     render(React.createElement(TestCase, { active: true }))
-    var last = screen.getByTestId('last')
+    const last = screen.getByTestId('last')
     last.focus()
-    var evt = new KeyboardEvent('keydown', { key: 'Tab', bubbles: true })
+    const evt = new KeyboardEvent('keydown', { key: 'Tab', bubbles: true })
     jest.spyOn(evt, 'preventDefault')
     act(() => { screen.getByTestId('trap').dispatchEvent(evt) })
     expect(evt.preventDefault).toHaveBeenCalled()
@@ -39,9 +39,9 @@ describe('useFocusTrap', function() {
 
   it('wraps Shift+Tab from first to last element', function() {
     render(React.createElement(TestCase, { active: true }))
-    var first = screen.getByTestId('first')
+    const first = screen.getByTestId('first')
     first.focus()
-    var evt = new KeyboardEvent('keydown', { key: 'Tab', shiftKey: true, bubbles: true })
+    const evt = new KeyboardEvent('keydown', { key: 'Tab', shiftKey: true, bubbles: true })
     jest.spyOn(evt, 'preventDefault')
     act(() => { screen.getByTestId('trap').dispatchEvent(evt) })
     expect(evt.preventDefault).toHaveBeenCalled()
@@ -50,7 +50,7 @@ describe('useFocusTrap', function() {
 
   it('does nothing on non-Tab keypress', function() {
     render(React.createElement(TestCase, { active: true }))
-    var evt = new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })
+    const evt = new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })
     jest.spyOn(evt, 'preventDefault')
     act(() => { screen.getByTestId('trap').dispatchEvent(evt) })
     expect(evt.preventDefault).not.toHaveBeenCalled()
@@ -62,12 +62,12 @@ describe('useFocusTrap', function() {
   })
 
   it('restores previous focus on unmount', function() {
-    var outside = document.createElement('button')
+    const outside = document.createElement('button')
     outside.id = 'outside'
     document.body.appendChild(outside)
     outside.focus()
     expect(document.activeElement).toBe(outside)
-    var { unmount } = render(React.createElement(TestCase, { active: true }))
+    const { unmount } = render(React.createElement(TestCase, { active: true }))
     unmount()
     expect(document.activeElement).toBe(outside)
   })

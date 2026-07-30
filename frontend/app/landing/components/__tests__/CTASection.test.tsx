@@ -1,8 +1,8 @@
 jest.mock('../../hooks/useLandingGSAP', function() { return { useScrollReveal: function() { return { current: null } } } })
 
-var React = require('react')
-var { render, screen: rtlScreen } = require('@testing-library/react')
-var CTASection = require('../CTASection').default
+const React = require('react')
+const { render, screen: rtlScreen } = require('@testing-library/react')
+const CTASection = require('../CTASection').default
 
 describe('CTASection', function() {
   it('renders heading text', function() {

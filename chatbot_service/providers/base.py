@@ -12,6 +12,7 @@ import unicodedata
 from dataclasses import dataclass, field
 
 import httpx
+from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
 
 logger = logging.getLogger(__name__)
 
@@ -381,6 +382,12 @@ class HttpProvider:
             self._client = httpx.AsyncClient(timeout=30.0)
         return self._client
 
+    @retry(
+        wait=wait_exponential(multiplier=1, min=1, max=10),
+        stop=stop_after_attempt(3),
+        retry=retry_if_exception_type((httpx.RequestError, ProviderUnavailableError)),
+        reraise=True
+    )
     async def stream(self, request: ProviderRequest):
         """Stream tokens via SSE. Yields token strings from the API delta stream.
 
@@ -434,6 +441,12 @@ class HttpProvider:
                     except json.JSONDecodeError:
                         logger.debug("Skipping malformed SSE chunk in stream: %.100s", data_str, exc_info=True)
 
+    @retry(
+        wait=wait_exponential(multiplier=1, min=1, max=10),
+        stop=stop_after_attempt(3),
+        retry=retry_if_exception_type((httpx.RequestError, ProviderUnavailableError)),
+        reraise=True
+    )
     async def generate(self, request: ProviderRequest) -> ProviderResult:
         request = _enforce_token_budget(request)
         if check_prompt_injection(request.message):

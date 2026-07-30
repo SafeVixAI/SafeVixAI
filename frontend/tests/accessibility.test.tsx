@@ -44,7 +44,7 @@ describe('Accessibility', function() {
       </div>
     );
 
-    var images = screen.getAllByRole('img');
+    const images = screen.getAllByRole('img');
     expect(images).toHaveLength(2);
     expect(screen.getByAltText('Hospital icon')).toBeTruthy();
     expect(screen.getByAltText('Police station icon')).toBeTruthy();
@@ -95,7 +95,7 @@ describe('Accessibility', function() {
       </div>
     );
 
-    var paragraphs = screen.getAllByText(/contrast text/);
+    const paragraphs = screen.getAllByText(/contrast text/);
     expect(paragraphs).toHaveLength(2);
   });
 
@@ -109,7 +109,7 @@ describe('Accessibility', function() {
       </div>
     );
 
-    var focusableElements = screen.getAllByRole('button');
+    const focusableElements = screen.getAllByRole('button');
     expect(focusableElements).toHaveLength(2);
   });
 
@@ -147,7 +147,7 @@ describe('Accessibility', function() {
       <button style={{ outline: '2px solid blue' }}>Focusable Button</button>
     );
 
-    var button = screen.getByText('Focusable Button');
+    const button = screen.getByText('Focusable Button');
     expect(button).toBeTruthy();
   });
 });

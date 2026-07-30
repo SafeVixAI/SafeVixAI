@@ -11,18 +11,18 @@ interface TestItem {
   age: number
 }
 
-var columns: Column<TestItem>[] = [
+const columns: Column<TestItem>[] = [
   { key: 'name', header: 'Name', sortable: true, filterable: true },
   { key: 'age', header: 'Age', sortable: true, align: 'right' },
 ]
 
-var data: TestItem[] = [
+const data: TestItem[] = [
   { id: 1, name: 'Alice', age: 30 },
   { id: 2, name: 'Bob', age: 25 },
   { id: 3, name: 'Charlie', age: 35 },
 ]
 
-var keyExtractor = function(item: TestItem) { return String(item.id) }
+const keyExtractor = function(item: TestItem) { return String(item.id) }
 
 describe('DataTable', function() {
   it('renders data rows', function() {
@@ -39,7 +39,7 @@ describe('DataTable', function() {
   })
 
   it('shows loading skeleton when loading', function() {
-    var { container } = render(React.createElement(DataTable, { columns: columns, data: data, keyExtractor: keyExtractor, loading: true }))
+    const { container } = render(React.createElement(DataTable, { columns: columns, data: data, keyExtractor: keyExtractor, loading: true }))
     expect(screen.getByRole('status')).toBeTruthy()
     expect(container.querySelector('.animate-pulse')).toBeTruthy()
   })
@@ -51,7 +51,7 @@ describe('DataTable', function() {
 
   it('sets aria-sort on sortable header click', function() {
     render(React.createElement(DataTable, { columns: columns, data: data, keyExtractor: keyExtractor }))
-    var nameHeader = screen.getByText('Name')
+    const nameHeader = screen.getByText('Name')
     expect(nameHeader.closest('th')?.getAttribute('aria-sort')).toBeFalsy()
     fireEvent.click(nameHeader)
     expect(nameHeader.closest('th')?.getAttribute('aria-sort')).toBe('ascending')
@@ -66,14 +66,14 @@ describe('DataTable', function() {
 
   it('filters data when typing in filter', function() {
     render(React.createElement(DataTable, { columns: columns, data: data, keyExtractor: keyExtractor }))
-    var input = screen.getByLabelText('Filter table') as HTMLInputElement
+    const input = screen.getByLabelText('Filter table') as HTMLInputElement
     fireEvent.change(input, { target: { value: 'Bob' } })
     expect(screen.getByText('Bob')).toBeTruthy()
     expect(screen.queryByText('Alice')).toBeNull()
   })
 
   it('shows pagination when data exceeds pageSize', function() {
-    var manyItems: TestItem[] = Array.from({ length: 25 }, function(_, i) {
+    const manyItems: TestItem[] = Array.from({ length: 25 }, function(_, i) {
       return { id: i, name: 'Item ' + i, age: 20 + i }
     })
     render(React.createElement(DataTable, { columns: columns, data: manyItems, keyExtractor: keyExtractor, pageSize: 10 }))
@@ -82,40 +82,40 @@ describe('DataTable', function() {
   })
 
   it('supports row selection', function() {
-    var selection = new Set<string>()
-    var onSelectionChange = jest.fn(function(keys: Set<string>) { selection = keys })
+    let selection = new Set<string>()
+    const onSelectionChange = jest.fn(function(keys: Set<string>) { selection = keys })
     render(React.createElement(DataTable, { columns: columns, data: data, keyExtractor: keyExtractor, selectable: true, selectedKeys: selection, onSelectionChange: onSelectionChange }))
-    var checkboxes = screen.getAllByRole('checkbox')
+    const checkboxes = screen.getAllByRole('checkbox')
     expect(checkboxes.length).toBe(4)
     fireEvent.click(checkboxes[1])
     expect(selection.size).toBe(1)
   })
 
   it('selects all when header checkbox clicked', function() {
-    var selection = new Set<string>()
-    var onSelectionChange = jest.fn(function(keys: Set<string>) { selection = keys })
+    let selection = new Set<string>()
+    const onSelectionChange = jest.fn(function(keys: Set<string>) { selection = keys })
     render(React.createElement(DataTable, { columns: columns, data: data, keyExtractor: keyExtractor, selectable: true, selectedKeys: selection, onSelectionChange: onSelectionChange }))
     fireEvent.click(screen.getByLabelText('Select all rows'))
     expect(selection.size).toBe(3)
   })
 
   it('deselects all when all rows already selected', function() {
-    var selection = new Set<string>(['1', '2', '3'])
-    var onSelectionChange = jest.fn(function(keys: Set<string>) { selection = keys })
+    let selection = new Set<string>(['1', '2', '3'])
+    const onSelectionChange = jest.fn(function(keys: Set<string>) { selection = keys })
     render(React.createElement(DataTable, { columns: columns, data: data, keyExtractor: keyExtractor, selectable: true, selectedKeys: selection, onSelectionChange: onSelectionChange }))
     fireEvent.click(screen.getByLabelText('Select all rows'))
     expect(selection.size).toBe(0)
   })
 
   it('calls onRowClick when row is clicked', function() {
-    var onRowClick = jest.fn()
+    const onRowClick = jest.fn()
     render(React.createElement(DataTable, { columns: columns, data: data, keyExtractor: keyExtractor, onRowClick: onRowClick }))
     fireEvent.click(screen.getByText('Alice'))
     expect(onRowClick).toHaveBeenCalledWith(data[0])
   })
 
   it('navigates pages with prev/next buttons', function() {
-    var manyItems: TestItem[] = Array.from({ length: 25 }, function(_, i) { return { id: i, name: 'Item ' + i, age: 20 + i } })
+    const manyItems: TestItem[] = Array.from({ length: 25 }, function(_, i) { return { id: i, name: 'Item ' + i, age: 20 + i } })
     render(React.createElement(DataTable, { columns: columns, data: manyItems, keyExtractor: keyExtractor, pageSize: 10 }))
     expect(screen.getByText('Item 0')).toBeTruthy()
     fireEvent.click(screen.getByLabelText('Next page'))
@@ -125,7 +125,7 @@ describe('DataTable', function() {
   })
 
   it('shows page number buttons when many pages', function() {
-    var manyItems: TestItem[] = Array.from({ length: 100 }, function(_, i) { return { id: i, name: 'Item ' + i, age: 20 + i } })
+    const manyItems: TestItem[] = Array.from({ length: 100 }, function(_, i) { return { id: i, name: 'Item ' + i, age: 20 + i } })
     render(React.createElement(DataTable, { columns: columns, data: manyItems, keyExtractor: keyExtractor, pageSize: 10 }))
     expect(screen.getByLabelText('Page 1')).toBeTruthy()
     expect(screen.getByLabelText('Page 2')).toBeTruthy()

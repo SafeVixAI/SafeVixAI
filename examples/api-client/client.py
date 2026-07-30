@@ -1,6 +1,7 @@
 """SafeVixAI Python API client example."""
-import httpx
 from typing import Any
+
+import httpx
 
 
 class SafeVixAIClient:

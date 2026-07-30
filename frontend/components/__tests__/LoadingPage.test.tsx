@@ -44,32 +44,32 @@ describe('LoadingPage', function() {
   });
 
   it('uses custom iconBg', function() {
-    var { container } = render(<LoadingPage variant="map" iconBg="bg-red-500" />);
-    var iconEls = container.querySelectorAll('.bg-red-500');
+    const { container } = render(<LoadingPage variant="map" iconBg="bg-red-500" />);
+    const iconEls = container.querySelectorAll('.bg-red-500');
     expect(iconEls.length).toBe(1);
   });
 
   it('defaults iconBg to bg-brand-dim', function() {
-    var { container } = render(<LoadingPage variant="map" />);
-    var iconEls = container.querySelectorAll('.bg-brand-dim');
+    const { container } = render(<LoadingPage variant="map" />);
+    const iconEls = container.querySelectorAll('.bg-brand-dim');
     expect(iconEls.length).toBe(1);
   });
 
   it('renders skeleton elements for default variant', function() {
-    var { container } = render(<LoadingPage />);
-    var skeletons = container.querySelectorAll('.animate-pulse');
+    const { container } = render(<LoadingPage />);
+    const skeletons = container.querySelectorAll('.animate-pulse');
     expect(skeletons.length).toBeGreaterThan(0);
   });
 
   it('renders skeleton elements for chat variant', function() {
-    var { container } = render(<LoadingPage variant="chat" />);
-    var skeletons = container.querySelectorAll('.animate-pulse');
+    const { container } = render(<LoadingPage variant="chat" />);
+    const skeletons = container.querySelectorAll('.animate-pulse');
     expect(skeletons.length).toBeGreaterThan(0);
   });
 
   it('renders skeleton elements for sos variant', function() {
-    var { container } = render(<LoadingPage variant="sos" />);
-    var skeletons = container.querySelectorAll('.animate-pulse');
+    const { container } = render(<LoadingPage variant="sos" />);
+    const skeletons = container.querySelectorAll('.animate-pulse');
     expect(skeletons.length).toBeGreaterThan(0);
   });
 });

@@ -6,15 +6,12 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from fastapi import APIRouter, Depends, File, HTTPException, Query, Request, UploadFile
-from sqlalchemy import select
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.database import get_db
 from core.limiter import limiter
-from core.rbac import Role, require_role
 from core.security import get_current_user_optional
-from models.issue_report import IssueReport
 from models.schemas_issues import (
     CreateIssueRequest,
     IssueDetail,

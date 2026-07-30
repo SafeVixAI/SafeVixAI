@@ -11,7 +11,7 @@ describe('EmptyStateUI', function () {
   })
 
   it('renders with description and action', function () {
-    var onClick = jest.fn()
+    const onClick = jest.fn()
     render(React.createElement(EmptyState, { title: 'Empty', description: 'Nothing here', action: { label: 'Retry', onClick: onClick } }))
     expect(screen.getByText('Nothing here')).toBeInTheDocument()
     fireEvent.click(screen.getByText('Retry'))
@@ -19,7 +19,7 @@ describe('EmptyStateUI', function () {
   })
 
   it('renders with custom className', function () {
-    var container = render(React.createElement(EmptyState, { title: 'Test', className: 'custom-class' }))
+    const container = render(React.createElement(EmptyState, { title: 'Test', className: 'custom-class' }))
     expect(container.container.querySelector('.custom-class')).toBeInTheDocument()
   })
 })

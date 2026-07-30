@@ -1,18 +1,18 @@
 jest.mock('../app/first-aid/FirstAidClient', function() { return { FirstAidClient: function() { return null } } })
 jest.mock('@/public/offline-data/first-aid.json', function() { return [] })
 
-var React = require('react')
-var { render, screen: rtlScreen } = require('@testing-library/react')
-var Page = require('../app/first-aid/page').default
+const React = require('react')
+const { render, screen: rtlScreen } = require('@testing-library/react')
+const Page = require('../app/first-aid/page').default
 
 describe('FirstAidPage', function() {
   it('renders without error', function() {
-    var { container } = render(React.createElement(Page))
+    const { container } = render(React.createElement(Page))
     expect(container).toBeTruthy()
   })
 
   it('has first aid JSON data loaded', function() {
-    var data = require('@/public/offline-data/first-aid.json')
+    const data = require('@/public/offline-data/first-aid.json')
     expect(Array.isArray(data)).toBe(true)
   })
 

@@ -18,7 +18,6 @@ import uuid
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from sqlalchemy import text as sql_text
 from sqlalchemy.sql.elements import TextClause
 
 from models.ward import Ward

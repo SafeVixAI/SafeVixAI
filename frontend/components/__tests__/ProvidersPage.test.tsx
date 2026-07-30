@@ -18,7 +18,7 @@ jest.mock('@/components/ui/TerminalHeader', function() {
 
 
 
-var mockApi = {
+const mockApi = {
   fetchBuiltinProviders: jest.fn(),
   fetchProviderConfigs: jest.fn(),
   createProviderConfig: jest.fn(),
@@ -32,8 +32,8 @@ jest.mock('@/lib/provider-api', function() {
   return mockApi;
 });
 
-var zustand = require('zustand');
-var testStore = zustand.create(function(set) {
+const zustand = require('zustand');
+const testStore = zustand.create(function(set) {
   return {
     isDarkMode: false,
     selectedProvider: null,
@@ -51,26 +51,26 @@ jest.mock('@/lib/store', function() {
   };
 });
 
-var ACTIVE = [
+const ACTIVE = [
   { id: '1', providerName: 'groq', displayName: 'My Groq', apiKeyMasked: 'gsk_****', isActive: true, priority: 0, isCustom: false, baseUrl: null, defaultModel: 'llama-3.1-8b-instant' },
 ];
 
-var WITH_INACTIVE = ACTIVE.concat([
+const WITH_INACTIVE = ACTIVE.concat([
   { id: '2', providerName: 'custom-ollama', displayName: 'Local Ollama', apiKeyMasked: '***', baseUrl: 'http://localhost:11434/v1/chat/completions', defaultModel: 'llama3.2', isActive: true, priority: 1, isCustom: true },
   { id: '3', providerName: 'gemini', displayName: 'My Gemini', apiKeyMasked: 'AI****', isActive: false, priority: 2, isCustom: false, baseUrl: null, defaultModel: 'gemini-2.0-flash' },
 ]);
 
-var BUILTIN_RESP = [
+const BUILTIN_RESP = [
   { name: 'groq', display: 'Groq', base_url: 'https://api.groq.com/openai/v1', models: ['llama-3.1-8b-instant'] },
   { name: 'openai', display: 'OpenAI', base_url: 'https://api.openai.com/v1', models: ['gpt-4o'] },
 ];
 
-var React = require('react');
-var rtl = require('@testing-library/react');
-var rtlScreen = rtl.screen;
-var waitFor = rtl.waitFor;
-var fireEvent = rtl.fireEvent;
-var ProvidersPage = require('@/app/providers/page').default;
+const React = require('react');
+const rtl = require('@testing-library/react');
+const rtlScreen = rtl.screen;
+const waitFor = rtl.waitFor;
+const fireEvent = rtl.fireEvent;
+const ProvidersPage = require('@/app/providers/page').default;
 
 function setupMocks(opts) {
   mockApi.fetchBuiltinProviders.mockResolvedValue(opts.builtins !== undefined ? opts.builtins : BUILTIN_RESP);
@@ -95,8 +95,8 @@ async function waitForLoad() {
 
 /** Find the "Sync to Chat" / "Synced" / "Failed" button and click it */
 function clickSyncBtn() {
-  var buttons = rtlScreen.getAllByRole('button');
-  var btn = buttons.find(function(b) {
+  const buttons = rtlScreen.getAllByRole('button');
+  const btn = buttons.find(function(b) {
     return b.textContent.includes('Sync') || b.textContent === 'Synced' || b.textContent === 'Failed';
   });
   if (btn) fireEvent.click(btn);
@@ -181,7 +181,7 @@ describe('ProvidersPage', function() {
       setupMocks({});
       renderPage();
       await waitFor(function() {
-        var customLabels = rtlScreen.getAllByText('Custom');
+        const customLabels = rtlScreen.getAllByText('Custom');
         expect(customLabels.length).toBeGreaterThanOrEqual(1);
       });
     });
@@ -300,7 +300,7 @@ describe('ProvidersPage', function() {
       renderPage();
       await waitForLoad();
       // Find the sync button (contains Sync text)
-      var syncBtn = rtlScreen.getAllByRole('button').find(function(b) { return b.textContent.includes('Sync'); });
+      const syncBtn = rtlScreen.getAllByRole('button').find(function(b) { return b.textContent.includes('Sync'); });
       expect(syncBtn).toBeTruthy();
       expect(syncBtn.hasAttribute('disabled')).toBe(false);
       fireEvent.click(syncBtn);
@@ -371,12 +371,12 @@ describe('ProvidersPage', function() {
       fireEvent.click(rtlScreen.getByText('Add Custom Provider'));
       expect(await rtlScreen.findByDisplayValue(/^custom-/)).toBeTruthy();
       // Fill required fields
-      var nameInput = rtlScreen.getByDisplayValue(/^custom-/);
+      const nameInput = rtlScreen.getByDisplayValue(/^custom-/);
       fireEvent.change(nameInput, { target: { value: 'my-provider' } });
-      var displayInput = rtlScreen.getByPlaceholderText('My Groq Key');
+      const displayInput = rtlScreen.getByPlaceholderText('My Groq Key');
       fireEvent.change(displayInput, { target: { value: 'My Provider' } });
       // "Add Provider" appears in both h3 title and save button — use getAllByText to click the button
-      var saveBtns = rtlScreen.getAllByText('Add Provider');
+      const saveBtns = rtlScreen.getAllByText('Add Provider');
       fireEvent.click(saveBtns[1]);
       await waitFor(function() {
         expect(mockApi.createProviderConfig).toHaveBeenCalled();
@@ -391,7 +391,7 @@ describe('ProvidersPage', function() {
       await waitFor(function() {
         expect(rtlScreen.queryByDisplayValue('llama3.2')).toBeTruthy();
       });
-      var modelInput = rtlScreen.getByDisplayValue('llama3.2');
+      const modelInput = rtlScreen.getByDisplayValue('llama3.2');
       fireEvent.change(modelInput, { target: { value: 'custom-model-v2' } });
       expect((modelInput as HTMLInputElement).value).toBe('custom-model-v2');
     });
@@ -404,7 +404,7 @@ describe('ProvidersPage', function() {
       await waitFor(function() {
         expect(rtlScreen.queryByDisplayValue('http://localhost:11434/v1/chat/completions')).toBeTruthy();
       });
-      var urlInput = rtlScreen.getByDisplayValue('http://localhost:11434/v1/chat/completions');
+      const urlInput = rtlScreen.getByDisplayValue('http://localhost:11434/v1/chat/completions');
       fireEvent.change(urlInput, { target: { value: 'https://custom.api.url/v1' } });
       expect((urlInput as HTMLInputElement).value).toBe('https://custom.api.url/v1');
     });
@@ -416,11 +416,11 @@ describe('ProvidersPage', function() {
       // Quick Add fills providerName and displayName
       fireEvent.click(rtlScreen.getByText('Quick Add (Ollama/LocalAI)'));
       expect(await rtlScreen.findByText('Cancel')).toBeTruthy();
-      var saveBtns = rtlScreen.getAllByText('Add Provider');
+      const saveBtns = rtlScreen.getAllByText('Add Provider');
       // Initially both fields filled — save not disabled
       expect(saveBtns[1].hasAttribute('disabled')).toBe(false);
       // Clear provider name
-      var nameInput = rtlScreen.getByDisplayValue(/^custom-/);
+      const nameInput = rtlScreen.getByDisplayValue(/^custom-/);
       fireEvent.change(nameInput, { target: { value: '' } });
       await waitFor(function() {
         expect(saveBtns[1].hasAttribute('disabled')).toBe(true);
@@ -439,8 +439,8 @@ describe('ProvidersPage', function() {
       renderPage();
       await waitForLoad();
       // Find the edit button inside the provider card.
-      var card = rtlScreen.getByText('My Groq').closest('.sv-card');
-      var editBtn = card.querySelector('button');
+      const card = rtlScreen.getByText('My Groq').closest('.sv-card');
+      const editBtn = card.querySelector('button');
       fireEvent.click(editBtn);
       await waitFor(function() {
         expect(rtlScreen.getByText('Edit Provider')).toBeTruthy();
@@ -474,7 +474,7 @@ describe('ProvidersPage', function() {
       setupMocks({});
       await openForm();
       // API key input starts empty
-      var testBtn = rtlScreen.getByText('Test Connection');
+      const testBtn = rtlScreen.getByText('Test Connection');
       expect(testBtn.hasAttribute('disabled')).toBe(true);
     });
 
@@ -508,7 +508,7 @@ describe('ProvidersPage', function() {
       setupMocks({ configs: ACTIVE });
       renderPage();
       await waitForLoad();
-      var trash = document.querySelector('.lucide-trash-2');
+      const trash = document.querySelector('.lucide-trash-2');
       expect(trash).toBeTruthy();
       fireEvent.click(trash!.parentElement!);
       expect(mockApi.deleteProviderConfig).toHaveBeenCalledWith('1');
@@ -519,7 +519,7 @@ describe('ProvidersPage', function() {
       setupMocks({ configs: ACTIVE });
       renderPage();
       await waitForLoad();
-      var trash = document.querySelector('.lucide-trash-2');
+      const trash = document.querySelector('.lucide-trash-2');
       fireEvent.click(trash);
       // Should not have called the API
       expect(mockApi.deleteProviderConfig).not.toHaveBeenCalled();
@@ -531,7 +531,7 @@ describe('ProvidersPage', function() {
       renderPage();
       await waitForLoad();
       mockApi.deleteProviderConfig.mockImplementation(function() { return Promise.reject(new Error('Delete failed')); });
-      var trash = document.querySelector('.lucide-trash-2');
+      const trash = document.querySelector('.lucide-trash-2');
       expect(trash).toBeTruthy();
       await rtl.act(async function() {
         fireEvent.click(trash!.parentElement!);
@@ -563,13 +563,13 @@ describe('ProvidersPage', function() {
       await waitFor(function() {
         expect(rtlScreen.getByText('Fallback Chain')).toBeTruthy();
       });
-      var items = document.querySelectorAll('[draggable="true"]');
+      const items = document.querySelectorAll('[draggable="true"]');
       expect(items.length).toBe(2);
       // Drag item 1 onto item 2
-      var dt = makeDataTransfer({});
+      const dt = makeDataTransfer({});
       fireEvent.dragStart(items[0], { dataTransfer: dt });
       dt.setData('text/plain', '1');
-      var dt2 = makeDataTransfer({ 'text/plain': '1' });
+      const dt2 = makeDataTransfer({ 'text/plain': '1' });
       fireEvent.drop(items[1], { dataTransfer: dt2, preventDefault: function() {} });
       await waitFor(function() {
         expect(mockApi.updateProviderConfig).toHaveBeenCalled();
@@ -584,9 +584,9 @@ describe('ProvidersPage', function() {
       await waitFor(function() {
         expect(rtlScreen.getByText('Fallback Chain')).toBeTruthy();
       });
-      var items = document.querySelectorAll('[draggable="true"]');
+      const items = document.querySelectorAll('[draggable="true"]');
       // Drag with non-existent ID
-      var dt = { getData: function() { return 'nonexistent-id'; }, setData: function() {} };
+      const dt = { getData: function() { return 'nonexistent-id'; }, setData: function() {} };
       fireEvent.drop(items[0], { dataTransfer: dt, preventDefault: function() {} });
       expect(mockApi.updateProviderConfig).not.toHaveBeenCalled();
     });
@@ -599,8 +599,8 @@ describe('ProvidersPage', function() {
       await waitFor(function() {
         expect(rtlScreen.getByText('Fallback Chain')).toBeTruthy();
       });
-      var items = document.querySelectorAll('[draggable="true"]');
-      var dt = makeDataTransfer({});
+      const items = document.querySelectorAll('[draggable="true"]');
+      const dt = makeDataTransfer({});
       fireEvent.dragStart(items[0], { dataTransfer: dt });
       dt.setData('text/plain', '1');
       fireEvent.drop(items[0], {
@@ -618,9 +618,9 @@ describe('ProvidersPage', function() {
       await waitFor(function() {
         expect(rtlScreen.getByText('Fallback Chain')).toBeTruthy();
       });
-      var items = document.querySelectorAll('[draggable="true"]');
+      const items = document.querySelectorAll('[draggable="true"]');
       expect(items.length).toBeGreaterThanOrEqual(2);
-      var dt = makeDataTransfer({});
+      const dt = makeDataTransfer({});
       fireEvent.dragStart(items[0], { dataTransfer: dt });
       items[0].classList.add('opacity-40');
       expect(items[0].classList.contains('opacity-40')).toBe(true);

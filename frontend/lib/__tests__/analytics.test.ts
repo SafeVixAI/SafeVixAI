@@ -4,21 +4,21 @@ describe('analytics', function () {
   beforeEach(function () { jest.resetModules() })
 
   it('exports initAnalyticsClient and track', async function () {
-    var mod = await import('../analytics')
+    const mod = await import('../analytics')
     expect(typeof mod.initAnalyticsClient).toBe('function')
     expect(typeof mod.track.sosActivated).toBe('function')
   })
 
   it('track.sosActivated calls safeCapture', async function () {
-    var mod = await import('../analytics')
-    var mockPh = { capture: jest.fn() }
+    const mod = await import('../analytics')
+    const mockPh = { capture: jest.fn() }
     mod.initAnalyticsClient(mockPh)
     mod.track.sosActivated('manual')
     expect(mockPh.capture).toHaveBeenCalledWith('sos_activated', { method: 'manual' })
   })
 
   it('does not throw when no client initialized', async function () {
-    var mod = await import('../analytics')
+    const mod = await import('../analytics')
     expect(function () { mod.track.crashDetected('high', 12.5) }).not.toThrow()
     expect(function () { mod.track.crashCancelled(3) }).not.toThrow()
     expect(function () { mod.track.hospitalFound(5, 10, 'trauma') }).not.toThrow()
@@ -37,8 +37,8 @@ describe('analytics', function () {
   })
 
   it('captures all event types when client set', async function () {
-    var mockPh = { capture: jest.fn() }
-    var mod = await import('../analytics')
+    const mockPh = { capture: jest.fn() }
+    const mod = await import('../analytics')
     mod.initAnalyticsClient(mockPh)
     mod.track.crashDetected('severe', 25)
     expect(mockPh.capture).toHaveBeenCalledWith('crash_detected', { severity: 'severe', g_force: 25 })
@@ -47,10 +47,10 @@ describe('analytics', function () {
   })
 
   it('pageLoadTiming captures data when performance.timing exists', async function () {
-    var mockPh = { capture: jest.fn() }
-    var mod = await import('../analytics')
+    const mockPh = { capture: jest.fn() }
+    const mod = await import('../analytics')
     mod.initAnalyticsClient(mockPh)
-    var timing = {
+    const timing = {
       navigationStart: 1000,
       fetchStart: 1000,
       domainLookupStart: 1000,
@@ -78,8 +78,8 @@ describe('analytics', function () {
   })
 
   it('pageLoadTiming returns early when navStart is 0', async function () {
-    var mockPh = { capture: jest.fn() }
-    var mod = await import('../analytics')
+    const mockPh = { capture: jest.fn() }
+    const mod = await import('../analytics')
     mod.initAnalyticsClient(mockPh)
     Object.defineProperty(window, 'performance', {
       configurable: true,
@@ -90,9 +90,9 @@ describe('analytics', function () {
   })
 
   it('pageLoadTiming does not throw when performance is undefined', async function () {
-    var oldPerf = window.performance
+    const oldPerf = window.performance
     delete (window as any).performance
-    var mod = await import('../analytics')
+    const mod = await import('../analytics')
     expect(function () { mod.track.pageLoadTiming() }).not.toThrow()
     ;(window as any).performance = oldPerf
   })

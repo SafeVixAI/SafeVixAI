@@ -1,15 +1,15 @@
 jest.mock('@gsap/react', function() { return { useGSAP: jest.fn() } })
 jest.mock('@/lib/gsap', function() { return { gsap: { fromTo: jest.fn(), to: jest.fn(), set: jest.fn() } } })
 jest.mock('../../hooks/useLandingGSAP', function() {
-  var React = require('react')
+  const React = require('react')
   return {
     useScrollReveal: function() { return React.useRef(null) },
   }
 })
 
-var React = require('react')
-var { render, screen: rtlScreen } = require('@testing-library/react')
-var CoreModules = require('../CoreModules').default
+const React = require('react')
+const { render, screen: rtlScreen } = require('@testing-library/react')
+const CoreModules = require('../CoreModules').default
 
 describe('CoreModules', function() {
   it('renders the section overline', function() {
@@ -65,7 +65,7 @@ describe('CoreModules', function() {
 
   it('renders Explore buttons for each module', function() {
     render(React.createElement(CoreModules))
-    var exploreButtons = rtlScreen.getAllByText('Explore')
+    const exploreButtons = rtlScreen.getAllByText('Explore')
     expect(exploreButtons.length).toBe(3)
   })
 

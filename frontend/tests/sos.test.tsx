@@ -3,7 +3,7 @@ jest.mock('@/lib/store', function() {
   return {
     useAppStore: Object.assign(
       function(sel) {
-        var state = { userProfile: { name: 'Test', bloodGroup: 'O+', emergencyContact: '+919999999999', vehicleNumber: 'TN01AB1234' }, soundsEnabled: true }
+        const state = { userProfile: { name: 'Test', bloodGroup: 'O+', emergencyContact: '+919999999999', vehicleNumber: 'TN01AB1234' }, soundsEnabled: true }
         return typeof sel === 'function' ? sel(state) : state
       },
       { getState: function() { return {} }, setState: jest.fn(), subscribe: jest.fn() }
@@ -25,13 +25,13 @@ jest.mock('@/lib/analytics', function() { return { track: { trackingShared: jest
 jest.mock('lucide-react', function() { return new Proxy({}, { get: function() { return function() { return null } } }) })
 
 import { render, screen, waitFor, fireEvent, act } from '@testing-library/react'
-var triggerSos = require('@/lib/api').triggerSos
-var enqueueSOS = require('@/lib/offline-sos-queue').enqueueSOS
-var startFamilyTracking = require('@/lib/live-tracking').startFamilyTracking
-var beginLocationBroadcast = require('@/lib/live-tracking').beginLocationBroadcast
-var notifyContactsViaWhatsApp = require('@/lib/live-tracking').notifyContactsViaWhatsApp
-var haptics = require('@/lib/haptics').haptics
-var sounds = require('@/lib/sounds').sounds
+const triggerSos = require('@/lib/api').triggerSos
+const enqueueSOS = require('@/lib/offline-sos-queue').enqueueSOS
+const startFamilyTracking = require('@/lib/live-tracking').startFamilyTracking
+const beginLocationBroadcast = require('@/lib/live-tracking').beginLocationBroadcast
+const notifyContactsViaWhatsApp = require('@/lib/live-tracking').notifyContactsViaWhatsApp
+const haptics = require('@/lib/haptics').haptics
+const sounds = require('@/lib/sounds').sounds
 import React from 'react'
 import Page from '../app/sos/page'
 
@@ -86,14 +86,14 @@ describe('SOSPage', function() {
 
   it('renders SMS Backup link with correct href', function() {
     render(React.createElement(Page))
-    var smsLink = screen.getByLabelText('Share location via SMS')
+    const smsLink = screen.getByLabelText('Share location via SMS')
     expect(smsLink).toBeTruthy()
     expect(smsLink.getAttribute('href')).toBe('sms:123')
   })
 
   it('renders WhatsApp button (disabled without GPS)', function() {
     render(React.createElement(Page))
-    var waBtn = screen.getByLabelText('Share location via WhatsApp (unavailable)')
+    const waBtn = screen.getByLabelText('Share location via WhatsApp (unavailable)')
     expect(waBtn).toBeTruthy()
   })
 
@@ -123,7 +123,7 @@ describe('SOSPage', function() {
   })
 
   describe('hold-to-activate interaction', function() {
-    var rafAllowed
+    let rafAllowed
 
     function setupGeo(lat, lon) {
       Object.defineProperty(navigator, 'geolocation', {

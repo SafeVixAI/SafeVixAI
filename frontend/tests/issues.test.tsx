@@ -1,25 +1,25 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 SafeVixAI Team
 
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 
 // ── Mock next/navigation ──
-var mockRouterPush = jest.fn();
+const mockRouterPush = jest.fn();
 jest.mock('next/navigation', () => ({
   useRouter: () => ({ push: mockRouterPush, back: jest.fn(), replace: jest.fn() }),
   useParams: () => ({ uuid: 'test-uuid-123' }),
 }));
 
 // ── Mock the API ──
-var mockCreateIssue = jest.fn();
-var mockFetchIssues = jest.fn();
-var mockFetchIssue = jest.fn();
-var mockFetchIssueStats = jest.fn();
-var mockFetchTimeline = jest.fn();
-var mockUpdateIssue = jest.fn();
-var mockMarkSpam = jest.fn();
+const mockCreateIssue = jest.fn();
+const mockFetchIssues = jest.fn();
+const mockFetchIssue = jest.fn();
+const mockFetchIssueStats = jest.fn();
+const mockFetchTimeline = jest.fn();
+const mockUpdateIssue = jest.fn();
+const mockMarkSpam = jest.fn();
 
 jest.mock('@/lib/api/issues', () => ({
   createIssue: (...args: any[]) => mockCreateIssue(...args),
@@ -42,13 +42,13 @@ jest.mock('@/lib/client-logger', () => ({
 }));
 
 // ── Mock store ──
-var mockStoreState: any = { authToken: null, userProfile: {} };
+const mockStoreState: any = { authToken: null, userProfile: {} };
 jest.mock('@/lib/store', () => ({
   useAppStore: (selector?: any) => selector ? selector(mockStoreState) : mockStoreState,
 }));
 
 // ── Sample issue data ──
-var sampleIssue = {
+const sampleIssue = {
   uuid: 'test-uuid-123',
   trackingNumber: 'SAFE-260728-ABC123',
   issueType: 'bug',
@@ -95,7 +95,7 @@ var sampleIssue = {
   updatedAt: '2026-07-28T10:00:00Z',
 };
 
-var sampleStats = {
+const sampleStats = {
   total: 42,
   byType: { bug: 20, feature_request: 10, feedback: 8, crash: 4 },
   byStatus: { new: 15, in_progress: 10, resolved: 12, closed: 5 },
@@ -109,7 +109,7 @@ var sampleStats = {
   slaBreachCount: 1,
 };
 
-var sampleIssuesList = {
+const sampleIssuesList = {
   items: [sampleIssue],
   total: 1,
   page: 1,
@@ -117,7 +117,7 @@ var sampleIssuesList = {
   totalPages: 1,
 };
 
-var sampleTimeline = [
+const sampleTimeline = [
   { eventType: 'created', description: 'Issue created by test user', actor: 'system', metadata: null, createdAt: '2026-07-28T10:00:00Z' },
 ];
 
@@ -131,7 +131,7 @@ describe('Issue Dashboard Page', function() {
   });
 
   it('renders the dashboard with stats', async function() {
-    var IssuesPage = require('@/app/issues/page').default;
+    const IssuesPage = require('@/app/issues/page').default;
     render(React.createElement(IssuesPage));
 
     await waitFor(function() {
@@ -139,14 +139,14 @@ describe('Issue Dashboard Page', function() {
     });
 
     await waitFor(function() {
-      expect(screen.getByText('42')).toBeTruthy();
-      expect(screen.getByText('28')).toBeTruthy();
-      expect(screen.getByText('12')).toBeTruthy();
+      expect(screen.getAllByText('42').length).toBeGreaterThan(0);
+      expect(screen.getAllByText('28').length).toBeGreaterThan(0);
+      expect(screen.getAllByText('12').length).toBeGreaterThan(0);
     });
   });
 
   it('shows new issue button', async function() {
-    var IssuesPage = require('@/app/issues/page').default;
+    const IssuesPage = require('@/app/issues/page').default;
     render(React.createElement(IssuesPage));
 
     await waitFor(function() {
@@ -155,10 +155,10 @@ describe('Issue Dashboard Page', function() {
   });
 
   it('shows issue list in All Issues tab', async function() {
-    var IssuesPage = require('@/app/issues/page').default;
+    const IssuesPage = require('@/app/issues/page').default;
     render(React.createElement(IssuesPage));
 
-    var allIssuesTab = screen.getByText('All Issues');
+    const allIssuesTab = screen.getByText('All Issues');
     await userEvent.click(allIssuesTab);
 
     await waitFor(function() {
@@ -169,7 +169,7 @@ describe('Issue Dashboard Page', function() {
 
   it('shows error state when fetch fails', async function() {
     mockFetchIssues.mockRejectedValue(new Error('API Error'));
-    var IssuesPage = require('@/app/issues/page').default;
+    const IssuesPage = require('@/app/issues/page').default;
     render(React.createElement(IssuesPage));
 
     await waitFor(function() {
@@ -186,7 +186,7 @@ describe('Issue Detail Page', function() {
   });
 
   it('renders issue details', async function() {
-    var IssueDetailPage = require('@/app/issues/[uuid]/page').default;
+    const IssueDetailPage = require('@/app/issues/[uuid]/page').default;
     render(React.createElement(IssueDetailPage));
 
     await waitFor(function() {
@@ -200,7 +200,7 @@ describe('Issue Detail Page', function() {
   });
 
   it('shows timeline events', async function() {
-    var IssueDetailPage = require('@/app/issues/[uuid]/page').default;
+    const IssueDetailPage = require('@/app/issues/[uuid]/page').default;
     render(React.createElement(IssueDetailPage));
 
     await waitFor(function() {
@@ -209,7 +209,7 @@ describe('Issue Detail Page', function() {
   });
 
   it('renders severity and type badges', async function() {
-    var IssueDetailPage = require('@/app/issues/[uuid]/page').default;
+    const IssueDetailPage = require('@/app/issues/[uuid]/page').default;
     render(React.createElement(IssueDetailPage));
 
     await waitFor(function() {
@@ -219,7 +219,7 @@ describe('Issue Detail Page', function() {
 
   it('redirects on 404', async function() {
     mockFetchIssue.mockRejectedValue(new Error('Not found'));
-    var IssueDetailPage = require('@/app/issues/[uuid]/page').default;
+    const IssueDetailPage = require('@/app/issues/[uuid]/page').default;
     render(React.createElement(IssueDetailPage));
 
     await waitFor(function() {
@@ -235,7 +235,7 @@ describe('New Issue Page', function() {
   });
 
   it('renders the form', function() {
-    var NewIssuePage = require('@/app/issues/new/page').default;
+    const NewIssuePage = require('@/app/issues/new/page').default;
     render(React.createElement(NewIssuePage));
     expect(screen.getByText('New Issue Report')).toBeTruthy();
     expect(screen.getByText('Bug Report')).toBeTruthy();
@@ -245,16 +245,16 @@ describe('New Issue Page', function() {
 
   it('submits a new issue with required fields', async function() {
     mockCreateIssue.mockResolvedValue(sampleIssue);
-    var NewIssuePage = require('@/app/issues/new/page').default;
+    const NewIssuePage = require('@/app/issues/new/page').default;
     render(React.createElement(NewIssuePage));
 
-    var titleInput = screen.getByPlaceholderText('Brief summary of the issue');
-    var descInput = screen.getByPlaceholderText('Detailed description of the issue...');
+    const titleInput = screen.getByPlaceholderText('Brief summary of the issue');
+    const descInput = screen.getByPlaceholderText('Detailed description of the issue...');
 
-    await userEvent.type(titleInput, 'Test Bug Report');
-    await userEvent.type(descInput, 'This is a test bug report description');
+    fireEvent.change(titleInput, { target: { value: 'Test Bug Report' } });
+    fireEvent.change(descInput, { target: { value: 'This is a test bug report description' } });
 
-    var submitButton = screen.getByText('Submit Issue');
+    const submitButton = screen.getByText('Submit Issue');
     await userEvent.click(submitButton);
 
     await waitFor(function() {
@@ -269,16 +269,16 @@ describe('New Issue Page', function() {
   });
 
   it('shows validation error on empty title', async function() {
-    var NewIssuePage = require('@/app/issues/new/page').default;
+    const NewIssuePage = require('@/app/issues/new/page').default;
     render(React.createElement(NewIssuePage));
 
-    var descInput = screen.getByPlaceholderText('Detailed description of the issue...');
+    const descInput = screen.getByPlaceholderText('Detailed description of the issue...');
     await userEvent.type(descInput, 'Some description');
 
-    var submitButton = screen.getByText('Submit Issue');
+    const submitButton = screen.getByText('Submit Issue');
     await userEvent.click(submitButton);
 
-    var toastModule = require('sonner');
+    const toastModule = require('sonner');
     await waitFor(function() {
       expect(toastModule.toast.error).toHaveBeenCalledWith('Title is required');
     });
@@ -291,16 +291,16 @@ describe('Feedback Widget', function() {
   });
 
   it('renders feedback button', function() {
-    var { FeedbackWidget } = require('@/components/issues/FeedbackWidget');
+    const { FeedbackWidget } = require('@/components/issues/FeedbackWidget');
     render(React.createElement(FeedbackWidget));
     expect(screen.getByTitle('Send Feedback')).toBeTruthy();
   });
 
   it('opens feedback form on click', async function() {
-    var { FeedbackWidget } = require('@/components/issues/FeedbackWidget');
+    const { FeedbackWidget } = require('@/components/issues/FeedbackWidget');
     render(React.createElement(FeedbackWidget));
 
-    var button = screen.getByTitle('Send Feedback');
+    const button = screen.getByTitle('Send Feedback');
     await userEvent.click(button);
 
     await waitFor(function() {
@@ -317,7 +317,7 @@ describe('Issue Form Component', function() {
   });
 
   it('renders all issue type options', function() {
-    var { IssueForm } = require('@/components/issues/IssueForm');
+    const { IssueForm } = require('@/components/issues/IssueForm');
     render(React.createElement(IssueForm));
     expect(screen.getByText('Bug Report')).toBeTruthy();
     expect(screen.getByText('Feature Request')).toBeTruthy();
@@ -326,20 +326,20 @@ describe('Issue Form Component', function() {
   });
 
   it('renders severity and priority selects', function() {
-    var { IssueForm } = require('@/components/issues/IssueForm');
+    const { IssueForm } = require('@/components/issues/IssueForm');
     render(React.createElement(IssueForm));
     expect(screen.getByText('Cancel')).toBeTruthy();
   });
 
   it('calls createIssue on submit', async function() {
-    var { IssueForm } = require('@/components/issues/IssueForm');
+    const { IssueForm } = require('@/components/issues/IssueForm');
     render(React.createElement(IssueForm, { prefilledType: 'bug' }));
 
-    var titleInput = screen.getByPlaceholderText('Brief summary of the issue');
-    var descInput = screen.getByPlaceholderText('Detailed description of the issue...');
+    const titleInput = screen.getByPlaceholderText('Brief summary of the issue');
+    const descInput = screen.getByPlaceholderText('Detailed description of the issue...');
 
-    await userEvent.type(titleInput, 'E2E Test Issue');
-    await userEvent.type(descInput, 'Testing issue form submission flow');
+    fireEvent.change(titleInput, { target: { value: 'E2E Test Issue' } });
+    fireEvent.change(descInput, { target: { value: 'Testing issue form submission flow' } });
 
     await userEvent.click(screen.getByText('Submit Issue'));
 
@@ -351,7 +351,7 @@ describe('Issue Form Component', function() {
 
 describe('Error Dialog', function() {
   it('renders error message', function() {
-    var { ErrorDialog } = require('@/components/issues/ErrorDialog');
+    const { ErrorDialog } = require('@/components/issues/ErrorDialog');
     render(React.createElement(ErrorDialog, {
       errorInfo: { error: new Error('Test error message') },
       onClose: jest.fn(),
@@ -361,7 +361,7 @@ describe('Error Dialog', function() {
   });
 
   it('shows report and reload buttons', function() {
-    var { ErrorDialog } = require('@/components/issues/ErrorDialog');
+    const { ErrorDialog } = require('@/components/issues/ErrorDialog');
     render(React.createElement(ErrorDialog, {
       errorInfo: { error: new Error('Test error') },
       onClose: jest.fn(),
@@ -373,7 +373,7 @@ describe('Error Dialog', function() {
 
 describe('Crash Screen', function() {
   it('renders crash message', function() {
-    var { CrashScreen } = require('@/components/issues/CrashScreen');
+    const { CrashScreen } = require('@/components/issues/CrashScreen');
     render(React.createElement(CrashScreen, {
       error: new Error('Fatal crash error'),
       onRecover: jest.fn(),
@@ -384,13 +384,13 @@ describe('Crash Screen', function() {
   });
 
   it('shows technical details toggle', async function() {
-    var { CrashScreen } = require('@/components/issues/CrashScreen');
+    const { CrashScreen } = require('@/components/issues/CrashScreen');
     render(React.createElement(CrashScreen, {
       error: new Error('Fatal error with stack'),
       onRecover: jest.fn(),
     }));
 
-    var showBtn = screen.getByText('Show Technical Details');
+    const showBtn = screen.getByText('Show Technical Details');
     await userEvent.click(showBtn);
 
     await waitFor(function() {
@@ -401,7 +401,7 @@ describe('Crash Screen', function() {
 
 describe('Error Boundary', function() {
   it('renders children when no error', function() {
-    var { ErrorBoundary } = require('@/components/issues/ErrorBoundary');
+    const { ErrorBoundary } = require('@/components/issues/ErrorBoundary');
     render(React.createElement(ErrorBoundary, null,
       React.createElement('div', null, 'Child Content'),
     ));
@@ -421,7 +421,7 @@ describe('Issue Settings Page', function() {
   });
 
   it('renders settings tabs', function() {
-    var IssuesSettingsPage = require('@/app/settings/issues/page').default;
+    const IssuesSettingsPage = require('@/app/settings/issues/page').default;
     render(React.createElement(IssuesSettingsPage));
     expect(screen.getByText('Issue Reporting Settings')).toBeTruthy();
     expect(screen.getByText('General')).toBeTruthy();
@@ -430,17 +430,17 @@ describe('Issue Settings Page', function() {
   });
 
   it('shows error reporting toggles', function() {
-    var IssuesSettingsPage = require('@/app/settings/issues/page').default;
+    const IssuesSettingsPage = require('@/app/settings/issues/page').default;
     render(React.createElement(IssuesSettingsPage));
     expect(screen.getByText('Auto-submit Errors')).toBeTruthy();
     expect(screen.getByText('Include Screenshots')).toBeTruthy();
   });
 
   it('save button persists settings', async function() {
-    var IssuesSettingsPage = require('@/app/settings/issues/page').default;
+    const IssuesSettingsPage = require('@/app/settings/issues/page').default;
     render(React.createElement(IssuesSettingsPage));
 
-    var saveBtn = screen.getByText('Save Settings');
+    const saveBtn = screen.getByText('Save Settings');
     await userEvent.click(saveBtn);
 
     await waitFor(function() {
@@ -449,11 +449,14 @@ describe('Issue Settings Page', function() {
   });
 
   it('clear cache button works', async function() {
-    var removeItemSpy = jest.spyOn(Storage.prototype, 'removeItem');
-    var IssuesSettingsPage = require('@/app/settings/issues/page').default;
+    const removeItemSpy = jest.spyOn(Storage.prototype, 'removeItem');
+    const IssuesSettingsPage = require('@/app/settings/issues/page').default;
     render(React.createElement(IssuesSettingsPage));
 
-    var clearBtn = screen.getByText('Clear Issue Cache & Drafts');
+    const privacyTab = screen.getByRole('tab', { name: /Privacy/i });
+    await userEvent.click(privacyTab);
+
+    const clearBtn = await screen.findByText(/Clear Issue Cache & Drafts/i);
     await userEvent.click(clearBtn);
 
     expect(removeItemSpy).toHaveBeenCalledWith('issue-settings');

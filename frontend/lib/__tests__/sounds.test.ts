@@ -4,14 +4,14 @@
 import { useAppStore } from '../store';
 import { sounds } from '../sounds';
 
-var mockOscillator: ReturnType<typeof createOscillatorObj>;
-var mockGainNode: ReturnType<typeof createGainObj>;
-var mockCreateOscillator: jest.Mock;
-var mockCreateGain: jest.Mock;
-var mockResume: jest.Mock;
-var mockAudioContextCtor: jest.Mock;
-var audioContextInstance: Record<string, any>;
-var mocksCreated = false;
+let mockOscillator: ReturnType<typeof createOscillatorObj>;
+let mockGainNode: ReturnType<typeof createGainObj>;
+let mockCreateOscillator: jest.Mock;
+let mockCreateGain: jest.Mock;
+let mockResume: jest.Mock;
+let mockAudioContextCtor: jest.Mock;
+let audioContextInstance: Record<string, any>;
+let mocksCreated = false;
 
 function createOscillatorObj() {
   return {
@@ -201,7 +201,7 @@ describe('AudioContext lifecycle', function () {
 
   it('reuses cached AudioContext on subsequent calls', function () {
     sounds.sosSent();
-    var callsAfterFirst = mockAudioContextCtor.mock.calls.length;
+    const callsAfterFirst = mockAudioContextCtor.mock.calls.length;
     sounds.error();
     expect(mockAudioContextCtor.mock.calls.length).toBe(callsAfterFirst);
   });

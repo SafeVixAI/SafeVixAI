@@ -17,7 +17,7 @@ describe('locator-utils', function() {
 
   describe('buildNavigationHref', function() {
     it('builds Google Maps URL with origin and destination', function() {
-      var url = buildNavigationHref([12.9716, 77.5946], [13.0827, 80.2707])
+      const url = buildNavigationHref([12.9716, 77.5946], [13.0827, 80.2707])
       expect(url).toContain('google.com/maps/dir/')
       expect(url).toContain('origin=12.9716%2C77.5946')
       expect(url).toContain('destination=13.0827%2C80.2707')
@@ -36,7 +36,7 @@ describe('locator-utils', function() {
   describe('haversineMeters', function() {
     it('returns 0 for same point', function() { expect(haversineMeters([13, 80], [13, 80])).toBe(0) })
     it('returns ~111km for 1 degree latitude', function() {
-      var dist = haversineMeters([0, 0], [1, 0])
+      const dist = haversineMeters([0, 0], [1, 0])
       expect(dist).toBeGreaterThan(110000)
       expect(dist).toBeLessThan(112000)
     })
@@ -46,60 +46,60 @@ describe('locator-utils', function() {
     it('returns Infinity for empty path', function() { expect(minimumRouteDeviationMeters({ path: [] }, [13, 80])).toBe(Number.POSITIVE_INFINITY) })
 
     it('returns minimum distance to any route point', function() {
-      var route = { path: [{ lat: 13.0, lon: 80.0 }, { lat: 13.1, lon: 80.1 }] }
-      var dist = minimumRouteDeviationMeters(route, [13.0, 80.0])
+      const route = { path: [{ lat: 13.0, lon: 80.0 }, { lat: 13.1, lon: 80.1 }] }
+      const dist = minimumRouteDeviationMeters(route, [13.0, 80.0])
       expect(dist).toBe(0)
     })
   })
 
   describe('mapService', function() {
-    var base = { id: 's1', name: 'Test', distance: 500, address: 'Addr', lat: 13, lon: 80, phone: '123', category: 'hospital' as const }
+    const base = { id: 's1', name: 'Test', distance: 500, address: 'Addr', lat: 13, lon: 80, phone: '123', category: 'hospital' as const }
 
     it('maps hospital category', function() {
-      var result = mapService(base)
+      const result = mapService(base)
       expect(result.type).toBe('Hospital')
       expect(result.accentColor).toBe('#ef4444')
       expect(result.filterType).toBe('Hospital')
     })
 
     it('maps ambulance category', function() {
-      var result = mapService({ ...base, category: 'ambulance' as const })
+      const result = mapService({ ...base, category: 'ambulance' as const })
       expect(result.type).toBe('Ambulance')
       expect(result.accentColor).toBe('#10b981')
     })
 
     it('maps police category', function() {
-      var result = mapService({ ...base, category: 'police' as const })
+      const result = mapService({ ...base, category: 'police' as const })
       expect(result.type).toBe('Police')
       expect(result.accentColor).toBe('#3b82f6')
     })
 
     it('maps fire category', function() {
-      var result = mapService({ ...base, category: 'fire' as const })
+      const result = mapService({ ...base, category: 'fire' as const })
       expect(result.type).toBe('Fire')
       expect(result.accentColor).toBe('#f97316')
     })
 
     it('maps towing category', function() {
-      var result = mapService({ ...base, category: 'towing' as const })
+      const result = mapService({ ...base, category: 'towing' as const })
       expect(result.type).toBe('Towing')
       expect(result.accentColor).toBe('#f59e0b')
     })
 
     it('maps pharmacy category', function() {
-      var result = mapService({ ...base, category: 'pharmacy' as const })
+      const result = mapService({ ...base, category: 'pharmacy' as const })
       expect(result.type).toBe('Pharmacy')
       expect(result.accentColor).toBe('#06b6d4')
     })
 
     it('maps unknown category to Mechanic', function() {
-      var result = mapService({ ...base, category: 'showroom' as any })
+      const result = mapService({ ...base, category: 'showroom' as any })
       expect(result.type).toBe('Mechanic')
       expect(result.accentColor).toBe('#8b5cf6')
     })
 
     it('maps puncture category to Mechanic', function() {
-      var result = mapService({ ...base, category: 'puncture' as any })
+      const result = mapService({ ...base, category: 'puncture' as any })
       expect(result.type).toBe('Mechanic')
       expect(result.filterType).toBe('Mechanic')
     })

@@ -11,7 +11,7 @@ import { logClientError } from '@/lib/client-logger';
 
 type Channel = 'stable' | 'beta' | 'nightly' | 'all';
 
-var CHANNELS: { key: Channel; label: string }[] = [
+const CHANNELS: { key: Channel; label: string }[] = [
   { key: 'all', label: 'All' },
   { key: 'stable', label: 'Stable' },
   { key: 'beta', label: 'Beta' },
@@ -19,18 +19,18 @@ var CHANNELS: { key: Channel; label: string }[] = [
 ];
 
 export default function ReleaseNotesPage() {
-  var [releases, setReleases] = useState<ReleaseSummary[]>([]);
-  var [loading, setLoading] = useState(true);
-  var [error, setError] = useState<string | null>(null);
-  var [channel, setChannel] = useState<Channel>('all');
-  var [page, setPage] = useState(1);
-  var limit = 20;
+  const [releases, setReleases] = useState<ReleaseSummary[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [channel, setChannel] = useState<Channel>('all');
+  const [page, setPage] = useState(1);
+  const limit = 20;
 
-  var load = useCallback(async function () {
+  const load = useCallback(async function () {
     setLoading(true);
     setError(null);
     try {
-      var data = await fetchReleases(channel === 'all' ? undefined : channel, limit, (page - 1) * limit);
+      const data = await fetchReleases(channel === 'all' ? undefined : channel, limit, (page - 1) * limit);
       setReleases(data);
     } catch (err) {
       setError('Failed to load release notes');
@@ -75,13 +75,13 @@ export default function ReleaseNotesPage() {
         </div>
 
         {loading && (
-          <div className="flex justify-center py-20">
+          <div className="flex justify-center py-20" role="alert">
             <Loader2 className="w-8 h-8 animate-spin text-emerald-400" />
           </div>
         )}
 
         {error && (
-          <div className="flex items-center gap-2 p-4 bg-red-900/20 border border-red-700/40 rounded-lg text-red-300">
+          <div className="flex items-center gap-2 p-4 bg-red-900/20 border border-red-700/40 rounded-lg text-red-300" role="alert">
             <AlertTriangle className="w-5 h-5" />
             {error}
           </div>

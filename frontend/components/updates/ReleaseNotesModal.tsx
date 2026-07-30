@@ -14,8 +14,8 @@ interface ReleaseNotesModalProps {
 }
 
 export default function ReleaseNotesModal({ version, onClose }: ReleaseNotesModalProps) {
-  var [release, setRelease] = useState<ReleaseDetail | null>(null);
-  var [loading, setLoading] = useState(false);
+  const [release, setRelease] = useState<ReleaseDetail | null>(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(function () {
     if (!version) return;

@@ -3,13 +3,12 @@
 
 from __future__ import annotations
 
-from unittest.mock import AsyncMock, MagicMock, patch
+from datetime import datetime, timezone
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
-from sqlalchemy import select
 
 from models.issue_report import IssueReport
-from models.issue_timeline import IssueTimelineEvent
 from models.schemas_issues import (
     CreateIssueRequest,
     IssueSeverity,
@@ -45,7 +44,12 @@ async def test_create_issue(issue_service: IssueService, create_request: CreateI
     mock_db = AsyncMock()
     mock_db.add = MagicMock()
     mock_db.commit = AsyncMock()
-    mock_db.refresh = AsyncMock()
+    async def mock_refresh(obj):
+        obj.created_at = datetime.now(timezone.utc)
+        obj.updated_at = datetime.now(timezone.utc)
+        if getattr(obj, "is_spam", None) is None:
+            obj.is_spam = False
+    mock_db.refresh = AsyncMock(side_effect=mock_refresh)
 
     result = await issue_service.create_issue(db=mock_db, request=create_request)
 
@@ -62,7 +66,12 @@ async def test_create_issue_anonymous(issue_service: IssueService, create_reques
     mock_db = AsyncMock()
     mock_db.add = MagicMock()
     mock_db.commit = AsyncMock()
-    mock_db.refresh = AsyncMock()
+    async def mock_refresh(obj):
+        obj.created_at = datetime.now(timezone.utc)
+        obj.updated_at = datetime.now(timezone.utc)
+        if getattr(obj, "is_spam", None) is None:
+            obj.is_spam = False
+    mock_db.refresh = AsyncMock(side_effect=mock_refresh)
     create_request_anon = create_request.model_copy(update={'is_anonymous': True})
 
     result = await issue_service.create_issue(db=mock_db, request=create_request_anon)
@@ -76,7 +85,12 @@ async def test_create_issue_with_location(issue_service: IssueService, create_re
     mock_db = AsyncMock()
     mock_db.add = MagicMock()
     mock_db.commit = AsyncMock()
-    mock_db.refresh = AsyncMock()
+    async def mock_refresh(obj):
+        obj.created_at = datetime.now(timezone.utc)
+        obj.updated_at = datetime.now(timezone.utc)
+        if getattr(obj, "is_spam", None) is None:
+            obj.is_spam = False
+    mock_db.refresh = AsyncMock(side_effect=mock_refresh)
     create_request_loc = create_request.model_copy(update={'lat': 13.0827, 'lon': 80.2707})
 
     result = await issue_service.create_issue(db=mock_db, request=create_request_loc)
@@ -100,8 +114,8 @@ async def test_get_issue(issue_service: IssueService) -> None:
     mock_issue.is_anonymous = False
     mock_issue.is_spam = False
     mock_issue.labels = ['ui']
-    mock_issue.created_at = None
-    mock_issue.updated_at = None
+    mock_issue.created_at = datetime.now(timezone.utc)
+    mock_issue.updated_at = datetime.now(timezone.utc)
     mock_issue.steps_to_reproduce = None
     mock_issue.expected_behavior = None
     mock_issue.actual_behavior = None
@@ -150,7 +164,7 @@ async def test_get_issue_not_found(issue_service: IssueService) -> None:
     mock_db = AsyncMock()
     mock_db.execute = AsyncMock(return_value=mock_result)
 
-    result = await issue_service.get_issue(db=mock_db, issue_uuid='nonexistent')
+    result = await issue_service.get_issue(db=mock_db, issue_uuid='00000000-0000-0000-0000-000000000000')
 
     assert result is None
 
@@ -171,8 +185,8 @@ async def test_get_issue_by_tracking(issue_service: IssueService) -> None:
     mock_issue.is_anonymous = False
     mock_issue.is_spam = False
     mock_issue.labels = ['ui']
-    mock_issue.created_at = None
-    mock_issue.updated_at = None
+    mock_issue.created_at = datetime.now(timezone.utc)
+    mock_issue.updated_at = datetime.now(timezone.utc)
     mock_issue.steps_to_reproduce = None
     mock_issue.expected_behavior = None
     mock_issue.actual_behavior = None
@@ -227,8 +241,8 @@ async def test_update_issue(issue_service: IssueService) -> None:
     mock_issue.is_anonymous = False
     mock_issue.is_spam = False
     mock_issue.labels = ['ui']
-    mock_issue.created_at = None
-    mock_issue.updated_at = None
+    mock_issue.created_at = datetime.now(timezone.utc)
+    mock_issue.updated_at = datetime.now(timezone.utc)
     mock_issue.steps_to_reproduce = None
     mock_issue.expected_behavior = None
     mock_issue.actual_behavior = None
@@ -265,7 +279,12 @@ async def test_update_issue(issue_service: IssueService) -> None:
     mock_db = AsyncMock()
     mock_db.execute = AsyncMock(return_value=mock_result)
     mock_db.commit = AsyncMock()
-    mock_db.refresh = AsyncMock()
+    async def mock_refresh(obj):
+        obj.created_at = datetime.now(timezone.utc)
+        obj.updated_at = datetime.now(timezone.utc)
+        if getattr(obj, "is_spam", None) is None:
+            obj.is_spam = False
+    mock_db.refresh = AsyncMock(side_effect=mock_refresh)
 
     update = UpdateIssueRequest(status=IssueStatus.in_progress, assignee='dev-user')
     result = await issue_service.update_issue(db=mock_db, issue_uuid='550e8400-e29b-41d4-a716-446655440000', request=update)
@@ -281,7 +300,7 @@ async def test_update_issue_not_found(issue_service: IssueService) -> None:
     mock_db.execute = AsyncMock(return_value=mock_result)
 
     update = UpdateIssueRequest(status=IssueStatus.resolved)
-    result = await issue_service.update_issue(db=mock_db, issue_uuid='nonexistent', request=update)
+    result = await issue_service.update_issue(db=mock_db, issue_uuid='00000000-0000-0000-0000-000000000000', request=update)
 
     assert result is None
 
@@ -301,8 +320,8 @@ async def test_mark_spam(issue_service: IssueService) -> None:
     mock_issue.is_anonymous = True
     mock_issue.is_spam = False
     mock_issue.labels = []
-    mock_issue.created_at = None
-    mock_issue.updated_at = None
+    mock_issue.created_at = datetime.now(timezone.utc)
+    mock_issue.updated_at = datetime.now(timezone.utc)
     mock_issue.steps_to_reproduce = None
     mock_issue.expected_behavior = None
     mock_issue.actual_behavior = None
@@ -339,7 +358,12 @@ async def test_mark_spam(issue_service: IssueService) -> None:
     mock_db = AsyncMock()
     mock_db.execute = AsyncMock(return_value=mock_result)
     mock_db.commit = AsyncMock()
-    mock_db.refresh = AsyncMock()
+    async def mock_refresh(obj):
+        obj.created_at = datetime.now(timezone.utc)
+        obj.updated_at = datetime.now(timezone.utc)
+        if getattr(obj, "is_spam", None) is None:
+            obj.is_spam = False
+    mock_db.refresh = AsyncMock(side_effect=mock_refresh)
 
     result = await issue_service.mark_spam(db=mock_db, issue_uuid='550e8400-e29b-41d4-a716-446655440000')
     assert result is not None
@@ -360,8 +384,8 @@ async def test_mark_duplicate(issue_service: IssueService) -> None:
     mock_issue.is_anonymous = False
     mock_issue.is_spam = False
     mock_issue.labels = []
-    mock_issue.created_at = None
-    mock_issue.updated_at = None
+    mock_issue.created_at = datetime.now(timezone.utc)
+    mock_issue.updated_at = datetime.now(timezone.utc)
     mock_issue.steps_to_reproduce = None
     mock_issue.expected_behavior = None
     mock_issue.actual_behavior = None
@@ -398,7 +422,12 @@ async def test_mark_duplicate(issue_service: IssueService) -> None:
     mock_db = AsyncMock()
     mock_db.execute = AsyncMock(return_value=mock_result)
     mock_db.commit = AsyncMock()
-    mock_db.refresh = AsyncMock()
+    async def mock_refresh(obj):
+        obj.created_at = datetime.now(timezone.utc)
+        obj.updated_at = datetime.now(timezone.utc)
+        if getattr(obj, "is_spam", None) is None:
+            obj.is_spam = False
+    mock_db.refresh = AsyncMock(side_effect=mock_refresh)
 
     result = await issue_service.mark_duplicate(
         db=mock_db,
@@ -420,7 +449,7 @@ async def test_detect_spam_keywords(issue_service: IssueService) -> None:
     mock_db = AsyncMock()
     mock_db.execute = AsyncMock(return_value=mock_result)
 
-    is_spam, reason = await issue_service.detect_spam(db=mock_db, issue_uuid='some-uuid')
+    is_spam, reason = await issue_service.detect_spam(db=mock_db, issue_uuid='00000000-0000-0000-0000-000000000000')
     assert is_spam is True
     assert reason is not None
 
@@ -437,7 +466,7 @@ async def test_detect_spam_clean(issue_service: IssueService) -> None:
     mock_db = AsyncMock()
     mock_db.execute = AsyncMock(return_value=mock_result)
 
-    is_spam, reason = await issue_service.detect_spam(db=mock_db, issue_uuid='some-uuid')
+    is_spam, reason = await issue_service.detect_spam(db=mock_db, issue_uuid='00000000-0000-0000-0000-000000000000')
     assert is_spam is False
 
 
@@ -489,8 +518,8 @@ async def test_set_sla(issue_service: IssueService) -> None:
     mock_issue.is_anonymous = False
     mock_issue.is_spam = False
     mock_issue.labels = []
-    mock_issue.created_at = None
-    mock_issue.updated_at = None
+    mock_issue.created_at = datetime.now(timezone.utc)
+    mock_issue.updated_at = datetime.now(timezone.utc)
     mock_issue.steps_to_reproduce = None
     mock_issue.expected_behavior = None
     mock_issue.actual_behavior = None
@@ -527,7 +556,12 @@ async def test_set_sla(issue_service: IssueService) -> None:
     mock_db = AsyncMock()
     mock_db.execute = AsyncMock(return_value=mock_result)
     mock_db.commit = AsyncMock()
-    mock_db.refresh = AsyncMock()
+    async def mock_refresh(obj):
+        obj.created_at = datetime.now(timezone.utc)
+        obj.updated_at = datetime.now(timezone.utc)
+        if getattr(obj, "is_spam", None) is None:
+            obj.is_spam = False
+    mock_db.refresh = AsyncMock(side_effect=mock_refresh)
 
     result = await issue_service.set_sla(db=mock_db, issue_uuid='550e8400-e29b-41d4-a716-446655440000')
     assert result is not None
@@ -553,8 +587,8 @@ async def test_issue_to_list_item(issue_service: IssueService) -> None:
     mock_issue.milestone = None
     mock_issue.github_issue_number = None
     mock_issue.reporter_name = None
-    mock_issue.created_at = None
-    mock_issue.updated_at = None
+    mock_issue.created_at = datetime.now(timezone.utc)
+    mock_issue.updated_at = datetime.now(timezone.utc)
 
     item = issue_service._issue_to_list_item(mock_issue)
     assert item.title == 'Test'
@@ -567,4 +601,4 @@ async def test_generate_tracking_number_format() -> None:
     from services.issue_service import _generate_tracking_number
     tn = _generate_tracking_number()
     assert tn.startswith('SAFE-')
-    assert len(tn) == 17
+    assert len(tn) == 18

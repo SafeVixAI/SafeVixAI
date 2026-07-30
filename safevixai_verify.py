@@ -1,8 +1,7 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2026 SafeVixAI Team
 #!/usr/bin/env python3
-"""
-SafeVixAI end-to-end verification script.
+"""SafeVixAI end-to-end verification script.
 
 Runs source, local-runtime, and deployed-service checks for the full app:
 frontend PWA, offline SOS/report sync, crash detection, maps/tests, backend
@@ -43,7 +42,6 @@ from typing import Any
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
-
 
 REPO_ROOT = Path(__file__).resolve().parent
 BACKEND_URL = os.getenv("BACKEND_URL", "https://safevixai-api.onrender.com").rstrip("/")

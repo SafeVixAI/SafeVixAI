@@ -1,11 +1,11 @@
 jest.mock('@gsap/react', function() { return { useGSAP: jest.fn() } })
 jest.mock('@/lib/gsap', function() { return { gsap: { fromTo: jest.fn() } } })
-jest.mock('next/link', function() { return function({ children, href, ...rest }) { var React = require('react'); return React.createElement('a', { href: href, 'aria-label': rest['aria-label'] }, children) } })
+jest.mock('next/link', function() { return function({ children, href, ...rest }) { const React = require('react'); return React.createElement('a', { href: href, 'aria-label': rest['aria-label'] }, children) } })
 jest.mock('lucide-react', function() { return { Menu: function() { return null }, X: function() { return null } } })
 
-var React = require('react')
-var { render, screen: rtlScreen } = require('@testing-library/react')
-var LandingNavbar = require('../LandingNavbar').default
+const React = require('react')
+const { render, screen: rtlScreen } = require('@testing-library/react')
+const LandingNavbar = require('../LandingNavbar').default
 
 describe('LandingNavbar', function() {
   it('renders brand name', function() {
@@ -28,7 +28,7 @@ describe('LandingNavbar', function() {
 
   it('has navigation elements', function() {
     render(React.createElement(LandingNavbar))
-    var navs = rtlScreen.getAllByRole('navigation')
+    const navs = rtlScreen.getAllByRole('navigation')
     expect(navs.length).toBeGreaterThanOrEqual(1)
   })
 

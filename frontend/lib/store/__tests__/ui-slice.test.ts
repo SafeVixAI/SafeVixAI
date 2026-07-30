@@ -13,15 +13,15 @@ describe('UISlice', function() {
   }
 
   it('has default values', function() {
-    var store = createTestStore()
-    var state = store.getState()
+    const store = createTestStore()
+    const state = store.getState()
     expect(state.isSystemSidebarOpen).toBe(false)
     expect(state.isDesktopSidebarCollapsed).toBe(false)
     expect(state.isThinSidebarEnabled).toBe(true)
   })
 
   it('toggles system sidebar', function() {
-    var store = createTestStore()
+    const store = createTestStore()
     store.getState().setSystemSidebarOpen(true)
     expect(store.getState().isSystemSidebarOpen).toBe(true)
     store.getState().setSystemSidebarOpen(false)
@@ -29,7 +29,7 @@ describe('UISlice', function() {
   })
 
   it('toggles desktop sidebar collapse', function() {
-    var store = createTestStore()
+    const store = createTestStore()
     store.getState().setDesktopSidebarCollapsed(true)
     expect(store.getState().isDesktopSidebarCollapsed).toBe(true)
     store.getState().setDesktopSidebarCollapsed(false)
@@ -37,7 +37,7 @@ describe('UISlice', function() {
   })
 
   it('toggles thin sidebar', function() {
-    var store = createTestStore()
+    const store = createTestStore()
     store.getState().setThinSidebarEnabled(false)
     expect(store.getState().isThinSidebarEnabled).toBe(false)
     store.getState().setThinSidebarEnabled(true)
@@ -45,11 +45,11 @@ describe('UISlice', function() {
   })
 
   it('all sidebar state is independent', function() {
-    var store = createTestStore()
+    const store = createTestStore()
     store.getState().setSystemSidebarOpen(true)
     store.getState().setDesktopSidebarCollapsed(true)
     store.getState().setThinSidebarEnabled(false)
-    var s = store.getState()
+    const s = store.getState()
     expect(s.isSystemSidebarOpen).toBe(true)
     expect(s.isDesktopSidebarCollapsed).toBe(true)
     expect(s.isThinSidebarEnabled).toBe(false)

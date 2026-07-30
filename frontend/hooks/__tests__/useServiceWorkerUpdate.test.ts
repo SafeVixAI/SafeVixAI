@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 SafeVixAI Team
 
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { useServiceWorkerUpdate } from '@/hooks/useServiceWorkerUpdate';
 
 describe('useServiceWorkerUpdate', function () {
-  var mockWaiting: ServiceWorker;
-  var mockRegistration: ServiceWorkerRegistration;
-  var addEventListenerCallbacks: Record<string, Function>;
+  let mockWaiting: ServiceWorker;
+  let mockRegistration: ServiceWorkerRegistration;
+  let addEventListenerCallbacks: Record<string, Function>;
 
   beforeEach(function () {
     addEventListenerCallbacks = {};
@@ -38,32 +38,34 @@ describe('useServiceWorkerUpdate', function () {
     localStorage.clear();
   });
 
-  it('detects waiting service worker', function () {
-    var { result } = renderHook(function () { return useServiceWorkerUpdate(); });
-    expect(result.current.updateAvailable).toBe(true);
+  it('detects waiting service worker', async function () {
+    const { result } = renderHook(function () { return useServiceWorkerUpdate(); });
+    await waitFor(() => expect(result.current.updateAvailable).toBe(true));
     expect(result.current.waitingSw).toBe(mockWaiting);
   });
 
-  it('applyUpdate sends SKIP_WAITING and reloads', function () {
-    var { result } = renderHook(function () { return useServiceWorkerUpdate(); });
+  it('applyUpdate sends SKIP_WAITING and reloads', async function () {
+    const { result } = renderHook(function () { return useServiceWorkerUpdate(); });
+    await waitFor(() => expect(result.current.updateAvailable).toBe(true));
     act(function () {
       result.current.applyUpdate();
     });
     expect(mockWaiting.postMessage).toHaveBeenCalledWith({ action: 'SKIP_WAITING' });
   });
 
-  it('dismissUpdate sets localStorage', function () {
-    var { result } = renderHook(function () { return useServiceWorkerUpdate(); });
+  it('dismissUpdate sets localStorage', async function () {
+    const { result } = renderHook(function () { return useServiceWorkerUpdate(); });
+    await waitFor(() => expect(result.current.updateAvailable).toBe(true));
     act(function () {
       result.current.dismissUpdate();
     });
-    var val = localStorage.getItem('pwa_update_dismissed');
+    const val = localStorage.getItem('pwa_update_dismissed');
     expect(val).not.toBeNull();
   });
 
   it('respects 24h cooldown after dismiss', function () {
     localStorage.setItem('pwa_update_dismissed', Date.now().toString());
-    var { result } = renderHook(function () { return useServiceWorkerUpdate(); });
+    const { result } = renderHook(function () { return useServiceWorkerUpdate(); });
     expect(result.current.updateAvailable).toBe(false);
   });
 
@@ -77,7 +79,7 @@ describe('useServiceWorkerUpdate', function () {
       writable: true,
       configurable: true,
     });
-    var { result } = renderHook(function () { return useServiceWorkerUpdate(); });
+    const { result } = renderHook(function () { return useServiceWorkerUpdate(); });
     expect(result.current.updateAvailable).toBe(false);
     expect(result.current.waitingSw).toBeNull();
   });

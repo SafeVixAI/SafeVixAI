@@ -6,7 +6,7 @@ jest.mock('sonner', function () {
 })
 
 jest.mock('../crash/CrashCountdown', function () {
-  var r = require('react')
+  const r = require('react')
   return { CrashCountdown: function CrashCountdownMock(props) {
     return r.createElement('div', { 'data-testid': 'crash-countdown' },
       r.createElement('span', { 'data-testid': 'crash-severity' }, props.severity),
@@ -32,12 +32,12 @@ jest.mock('@/lib/safety-constants', function () {
 })
 
 describe('ClientAppHooks', function () {
-  var crashHandler: Function
+  let crashHandler: Function
 
   beforeEach(function() {
     jest.clearAllMocks()
     crashHandler = function() {}
-    var crashMod = require('@/lib/crash-detection')
+    const crashMod = require('@/lib/crash-detection')
     crashMod.startCrashDetection.mockImplementation(function(handler) {
       crashHandler = handler
       return Promise.resolve()
@@ -45,7 +45,7 @@ describe('ClientAppHooks', function () {
   })
 
   it('renders without crashing', function () {
-    var { container } = render(React.createElement(require('../ClientAppHooks').ClientAppHooks))
+    const { container } = render(React.createElement(require('../ClientAppHooks').ClientAppHooks))
     expect(container).toBeDefined()
   })
 
@@ -83,14 +83,14 @@ describe('ClientAppHooks', function () {
   })
 
   it('shows toast error on crash detect', function () {
-    var toast = require('sonner').toast
+    const toast = require('sonner').toast
     render(React.createElement(require('../ClientAppHooks').ClientAppHooks))
     act(function() { crashHandler(147.09975) })
     expect(toast.error).toHaveBeenCalled()
   })
 
   it('calls registerOfflineSyncListeners', function () {
-    var queue = require('@/lib/offline-sos-queue')
+    const queue = require('@/lib/offline-sos-queue')
     render(React.createElement(require('../ClientAppHooks').ClientAppHooks))
     expect(queue.registerOfflineSyncListeners).toHaveBeenCalled()
   })

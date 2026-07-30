@@ -6,15 +6,14 @@
 from __future__ import annotations
 
 import asyncio
-from contextlib import suppress
 import logging
+from contextlib import suppress
 from datetime import UTC, datetime
-from typing import Optional
 
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession, AsyncSessionTransaction
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from models.update_management import ReleaseChannel, UpdateSetting
+from models.update_management import UpdateSetting
 from services.update_service import UpdateService
 
 logger = logging.getLogger("safevixai.backend.update_scheduler")
@@ -40,20 +39,20 @@ class UpdateScheduler:
     def __init__(
         self,
         session_factory,
-        update_service: Optional[UpdateService] = None,
+        update_service: UpdateService | None = None,
     ) -> None:
         self._session_factory = session_factory
         self._service = update_service or UpdateService()
-        self._task: Optional[asyncio.Task] = None
+        self._task: asyncio.Task | None = None
         self._running = False
-        self._last_check: Optional[datetime] = None
+        self._last_check: datetime | None = None
 
     @property
     def is_running(self) -> bool:
         return self._running
 
     @property
-    def last_check(self) -> Optional[datetime]:
+    def last_check(self) -> datetime | None:
         return self._last_check
 
     async def start(self) -> None:

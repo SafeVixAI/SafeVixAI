@@ -2,7 +2,7 @@ import React from 'react'
 import { render, screen, waitFor, act } from '@testing-library/react'
 
 jest.mock('@/lib/store', function() {
-  var mockStore = {
+  const mockStore = {
     crashDetectionEnabled: false,
     gpsLocation: { lat: 13.0827, lon: 80.2707, accuracy: 50, timestamp: Date.now() },
     userProfile: { name: 'Test User', bloodGroup: 'O+', vehicleNumber: 'TN01AB1234', preferredLanguage: 'en' },
@@ -80,7 +80,7 @@ jest.mock('@/lib/i18n', function() {
 })
 
 jest.mock('@/components/crash/CrashCountdown', function() {
-  var React2 = require('react')
+  const React2 = require('react')
   return { CrashCountdown: function CrashCountdownMock(props) {
     return React2.createElement('div', { 'data-testid': 'crash-countdown' },
       props.severity,
@@ -126,117 +126,117 @@ describe('EnterpriseClientAppHooks', function() {
   })
 
   it('renders without crashing', async function() {
-    var mod = await import('../EnterpriseClientAppHooks')
-    var { container } = render(React.createElement(mod.EnterpriseClientAppHooks))
+    const mod = await import('../EnterpriseClientAppHooks')
+    const { container } = render(React.createElement(mod.EnterpriseClientAppHooks))
     expect(container).toBeDefined()
   })
 
   it('does not show warming banner when not warming', async function() {
-    var mod = await import('../EnterpriseClientAppHooks')
+    const mod = await import('../EnterpriseClientAppHooks')
     render(React.createElement(mod.EnterpriseClientAppHooks))
     expect(screen.queryByText('CONNECTING...')).not.toBeInTheDocument()
   })
 
   it('loads and exports EnterpriseClientAppHooks', async function() {
-    var mod = await import('../EnterpriseClientAppHooks')
+    const mod = await import('../EnterpriseClientAppHooks')
     expect(mod.EnterpriseClientAppHooks).toBeDefined()
   })
 
   it('registers service worker on mount', async function() {
-    var mod = await import('../EnterpriseClientAppHooks')
+    const mod = await import('../EnterpriseClientAppHooks')
     render(React.createElement(mod.EnterpriseClientAppHooks))
     expect(navigator.serviceWorker.register).toHaveBeenCalledWith('/sw.js')
   })
 
   it('calls initRUM on mount', async function() {
-    var rum = require('@/lib/rum')
-    var mod = await import('../EnterpriseClientAppHooks')
+    const rum = require('@/lib/rum')
+    const mod = await import('../EnterpriseClientAppHooks')
     render(React.createElement(mod.EnterpriseClientAppHooks))
     expect(rum.initRUM).toHaveBeenCalled()
   })
 
   it('calls registerOfflineSyncListeners on mount', async function() {
-    var queue = require('@/lib/offline-sos-queue')
-    var mod = await import('../EnterpriseClientAppHooks')
+    const queue = require('@/lib/offline-sos-queue')
+    const mod = await import('../EnterpriseClientAppHooks')
     render(React.createElement(mod.EnterpriseClientAppHooks))
     expect(queue.registerOfflineSyncListeners).toHaveBeenCalled()
   })
 
   it('calls migrateUserProfileFromLocalStorage on mount', async function() {
-    var ps = require('@/lib/profile-storage')
-    var mod = await import('../EnterpriseClientAppHooks')
+    const ps = require('@/lib/profile-storage')
+    const mod = await import('../EnterpriseClientAppHooks')
     render(React.createElement(mod.EnterpriseClientAppHooks))
     expect(ps.migrateUserProfileFromLocalStorage).toHaveBeenCalled()
   })
 
   it('calls loadUserProfileFromIndexedDB on mount', async function() {
-    var ps = require('@/lib/profile-storage')
-    var mod = await import('../EnterpriseClientAppHooks')
+    const ps = require('@/lib/profile-storage')
+    const mod = await import('../EnterpriseClientAppHooks')
     render(React.createElement(mod.EnterpriseClientAppHooks))
     await waitFor(function() { expect(ps.loadUserProfileFromIndexedDB).toHaveBeenCalled() })
   })
 
   it('sets user profile from IndexedDB when profile is found', async function() {
-    var ps = require('@/lib/profile-storage')
-    var profileData = { name: 'Stored User', bloodGroup: 'A+', phone: '+919999999999' }
+    const ps = require('@/lib/profile-storage')
+    const profileData = { name: 'Stored User', bloodGroup: 'A+', phone: '+919999999999' }
     ps.loadUserProfileFromIndexedDB.mockResolvedValueOnce(profileData)
-    var mod = await import('../EnterpriseClientAppHooks')
+    const mod = await import('../EnterpriseClientAppHooks')
     render(React.createElement(mod.EnterpriseClientAppHooks))
     await waitFor(function() { expect(ps.loadUserProfileFromIndexedDB).toHaveBeenCalled() })
-    var store = require('@/lib/store')
+    const store = require('@/lib/store')
     expect(store.useAppStore.getState().setUserProfile).toHaveBeenCalledWith(profileData)
     expect(store.useAppStore.getState().setProfileHydrated).toHaveBeenCalledWith(true)
   })
 
   it('calls fetchCsrfToken on mount', async function() {
-    var api = require('@/lib/api')
-    var mod = await import('../EnterpriseClientAppHooks')
+    const api = require('@/lib/api')
+    const mod = await import('../EnterpriseClientAppHooks')
     render(React.createElement(mod.EnterpriseClientAppHooks))
     expect(api.fetchCsrfToken).toHaveBeenCalled()
   })
 
   it('syncs auth session on mount', async function() {
-    var supabase = require('@/lib/supabase-auth')
-    var mod = await import('../EnterpriseClientAppHooks')
+    const supabase = require('@/lib/supabase-auth')
+    const mod = await import('../EnterpriseClientAppHooks')
     render(React.createElement(mod.EnterpriseClientAppHooks))
     expect(supabase.getSupabaseBrowserClient).toHaveBeenCalled()
   })
 
   it('calls setAuth when supabase session exists', async function() {
-    var supabase = require('@/lib/supabase-auth')
-    var fakeSession = { access_token: 'tok', user: { email: 'user@test.com' } }
+    const supabase = require('@/lib/supabase-auth')
+    const fakeSession = { access_token: 'tok', user: { email: 'user@test.com' } }
     supabase.getSupabaseBrowserClient.mockReturnValueOnce({
       auth: {
         getSession: jest.fn(function() { return Promise.resolve({ data: { session: fakeSession }, error: null }) }),
         onAuthStateChange: jest.fn(function() { return { data: { subscription: { unsubscribe: jest.fn() } } } }),
       },
     })
-    var mod = await import('../EnterpriseClientAppHooks')
+    const mod = await import('../EnterpriseClientAppHooks')
     render(React.createElement(mod.EnterpriseClientAppHooks))
     await waitFor(function() {
-      var store = require('@/lib/store')
+      const store = require('@/lib/store')
       expect(store.useAppStore.getState().setAuth).toHaveBeenCalledWith('user@test.com')
     })
   })
 
   it('calls clearAuth when supabase session is null', async function() {
-    var mod = await import('../EnterpriseClientAppHooks')
+    const mod = await import('../EnterpriseClientAppHooks')
     render(React.createElement(mod.EnterpriseClientAppHooks))
     await waitFor(function() {
-      var store = require('@/lib/store')
+      const store = require('@/lib/store')
       expect(store.useAppStore.getState().clearAuth).toHaveBeenCalled()
     })
   })
 
   it('dispatches page load timing', async function() {
-    var analytics = require('@/lib/analytics')
-    var mod = await import('../EnterpriseClientAppHooks')
+    const analytics = require('@/lib/analytics')
+    const mod = await import('../EnterpriseClientAppHooks')
     render(React.createElement(mod.EnterpriseClientAppHooks))
     expect(analytics.track.pageLoadTiming).toHaveBeenCalled()
   })
 
   it('calls requestPersistentStorage', async function() {
-    var mod = await import('../EnterpriseClientAppHooks')
+    const mod = await import('../EnterpriseClientAppHooks')
     render(React.createElement(mod.EnterpriseClientAppHooks))
     await waitFor(function() { expect(navigator.storage.persist).toHaveBeenCalled() })
   })
@@ -244,82 +244,82 @@ describe('EnterpriseClientAppHooks', function() {
   it('handles E2E skip auth flag', async function() {
     process.env.NODE_ENV = 'development'
     window.localStorage.getItem = jest.fn(function() { return 'true' })
-    var mod = await import('../EnterpriseClientAppHooks')
+    const mod = await import('../EnterpriseClientAppHooks')
     render(React.createElement(mod.EnterpriseClientAppHooks))
     expect(screen.queryByText('CONNECTING...')).not.toBeInTheDocument()
   })
 
   it('calls setServerWarming(true) when health check is aborted', async function() {
     globalThis.fetch = jest.fn(function() { return Promise.reject(Object.assign(new Error('The operation was aborted'), { name: 'AbortError' })) })
-    var store = require('@/lib/store')
-    var mod = await import('../EnterpriseClientAppHooks')
+    const store = require('@/lib/store')
+    const mod = await import('../EnterpriseClientAppHooks')
     render(React.createElement(mod.EnterpriseClientAppHooks))
     await waitFor(function() { expect(store.useAppStore.getState().setServerWarming).toHaveBeenCalledWith(true) })
   })
 
   it('registers service worker on load event when not ready', async function() {
     Object.defineProperty(document, 'readyState', { value: 'loading', writable: true, configurable: true })
-    var addEventListenerMock = jest.fn()
+    const addEventListenerMock = jest.fn()
     window.addEventListener = addEventListenerMock
-    var mod = await import('../EnterpriseClientAppHooks')
+    const mod = await import('../EnterpriseClientAppHooks')
     render(React.createElement(mod.EnterpriseClientAppHooks))
-    var loadCall = addEventListenerMock.mock.calls.find(function(c) { return c[0] === 'load' })
+    const loadCall = addEventListenerMock.mock.calls.find(function(c) { return c[0] === 'load' })
     expect(loadCall).toBeDefined()
   })
 
   it('logs service worker registration failure', async function() {
-    var consoleSpy = jest.spyOn(console, 'error').mockImplementation(function() {})
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(function() {})
     ;(navigator as any).serviceWorker = { register: jest.fn(function() { return Promise.reject(new Error('SW failed')) }) }
-    var mod = await import('../EnterpriseClientAppHooks')
+    const mod = await import('../EnterpriseClientAppHooks')
     render(React.createElement(mod.EnterpriseClientAppHooks))
     await waitFor(function() { expect(consoleSpy).toHaveBeenCalled() })
     consoleSpy.mockRestore()
   })
 
   it('sets RTL direction for Arabic locale', async function() {
-    var store = require('@/lib/store')
+    const store = require('@/lib/store')
     store.useAppStore.getState().userProfile.preferredLanguage = 'ar'
-    var i18nMod = require('@/lib/i18n')
-    var mod = await import('../EnterpriseClientAppHooks')
+    const i18nMod = require('@/lib/i18n')
+    const mod = await import('../EnterpriseClientAppHooks')
     render(React.createElement(mod.EnterpriseClientAppHooks))
     await waitFor(function() { expect(i18nMod.default.changeLanguage).toHaveBeenCalledWith('ar') })
   })
 
   it('calls fetch health endpoint on mount', async function() {
     globalThis.fetch = jest.fn(function() { return Promise.resolve({ ok: true, status: 200 }) })
-    var mod = await import('../EnterpriseClientAppHooks')
+    const mod = await import('../EnterpriseClientAppHooks')
     render(React.createElement(mod.EnterpriseClientAppHooks))
     await waitFor(function() { expect(globalThis.fetch).toHaveBeenCalled() })
   })
 
   it('sets crash state when crash is detected', async function() {
-    var features = require('@/lib/features')
+    const features = require('@/lib/features')
     features.FEATURES.crashDetection = true
-    var store = require('@/lib/store')
+    const store = require('@/lib/store')
     store.useAppStore.getState().crashDetectionEnabled = true
-    var crashDetection = require('@/lib/crash-detection')
+    const crashDetection = require('@/lib/crash-detection')
     crashDetection.startCrashDetection.mockImplementationOnce(function(handler) {
       handler(98.0665)
       return Promise.resolve()
     })
-    var mod = await import('../EnterpriseClientAppHooks')
+    const mod = await import('../EnterpriseClientAppHooks')
     render(React.createElement(mod.EnterpriseClientAppHooks))
     await waitFor(function() { expect(screen.getByTestId('crash-countdown')).toBeInTheDocument() })
   })
 
   it('dispatches page load timing on load event when not ready', async function() {
     Object.defineProperty(document, 'readyState', { value: 'loading', writable: true, configurable: true })
-    var addEventListenerMock = jest.fn()
+    const addEventListenerMock = jest.fn()
     window.addEventListener = addEventListenerMock
-    var mod = await import('../EnterpriseClientAppHooks')
+    const mod = await import('../EnterpriseClientAppHooks')
     render(React.createElement(mod.EnterpriseClientAppHooks))
-    var loadCall = addEventListenerMock.mock.calls.find(function(c) { return c[0] === 'load' })
+    const loadCall = addEventListenerMock.mock.calls.find(function(c) { return c[0] === 'load' })
     expect(loadCall).toBeDefined()
   })
 
   it('calls syncSession via onAuthStateChange when auth event fires', async function() {
-    var supabase = require('@/lib/supabase-auth')
-    var onAuthCb: Function = function() {}
+    const supabase = require('@/lib/supabase-auth')
+    let onAuthCb: Function = function() {}
     supabase.getSupabaseBrowserClient.mockReturnValueOnce({
       auth: {
         getSession: jest.fn(function() { return Promise.resolve({ data: { session: null }, error: null }) }),
@@ -329,34 +329,34 @@ describe('EnterpriseClientAppHooks', function() {
         }),
       },
     })
-    var store = require('@/lib/store')
-    var mod = await import('../EnterpriseClientAppHooks')
+    const store = require('@/lib/store')
+    const mod = await import('../EnterpriseClientAppHooks')
     render(React.createElement(mod.EnterpriseClientAppHooks))
     onAuthCb('SIGNED_IN', { access_token: 'tok', user: { email: 'auth@test.com' } })
     await waitFor(function() { expect(store.useAppStore.getState().setAuth).toHaveBeenCalledWith('auth@test.com') })
   })
 
   it('calls ping when visibility becomes visible', async function() {
-    var origFetch = globalThis.fetch
+    const origFetch = globalThis.fetch
     globalThis.fetch = jest.fn(function() { return Promise.resolve({ ok: true }) })
-    var origDocAddEventListener = document.addEventListener
-    var addEventListenerMock = jest.fn()
+    const origDocAddEventListener = document.addEventListener
+    const addEventListenerMock = jest.fn()
     document.addEventListener = addEventListenerMock
-    var mod = await import('../EnterpriseClientAppHooks')
+    const mod = await import('../EnterpriseClientAppHooks')
     render(React.createElement(mod.EnterpriseClientAppHooks))
-    var visCb = addEventListenerMock.mock.calls.find(function(c) { return c[0] === 'visibilitychange' })
+    const visCb = addEventListenerMock.mock.calls.find(function(c) { return c[0] === 'visibilitychange' })
     expect(visCb).toBeDefined()
     document.addEventListener = origDocAddEventListener
     globalThis.fetch = origFetch
   })
 
   it('triggers ping callback when visibility changes to visible', async function() {
-    var fetchMock = jest.fn(function() { return Promise.resolve({ ok: true }) })
+    const fetchMock = jest.fn(function() { return Promise.resolve({ ok: true }) })
     globalThis.fetch = fetchMock
-    var origDocAddEventListener = document.addEventListener
-    var listeners: Record<string, Function> = {}
+    const origDocAddEventListener = document.addEventListener
+    const listeners: Record<string, Function> = {}
     document.addEventListener = jest.fn(function(event: string, cb: Function) { listeners[event] = cb })
-    var mod = await import('../EnterpriseClientAppHooks')
+    const mod = await import('../EnterpriseClientAppHooks')
     render(React.createElement(mod.EnterpriseClientAppHooks))
     await new Promise(function(r) { return setTimeout(r, 100) })
     listeners['visibilitychange']()
@@ -366,39 +366,39 @@ describe('EnterpriseClientAppHooks', function() {
   })
 
   it('handleDispatchSos sends SOS without crash detection', async function() {
-    var features = require('@/lib/features')
+    const features = require('@/lib/features')
     features.FEATURES.crashDetection = true
-    var store = require('@/lib/store')
+    const store = require('@/lib/store')
     store.useAppStore.getState().crashDetectionEnabled = true
     store.useAppStore.getState().userProfile = { name: '  ', bloodGroup: 'O+', preferredLanguage: 'en' }
-    var crashDetection = require('@/lib/crash-detection')
+    const crashDetection = require('@/lib/crash-detection')
     crashDetection.startCrashDetection.mockImplementationOnce(function(handler) {
       handler(98.0665)
       return Promise.resolve()
     })
-    var mod = await import('../EnterpriseClientAppHooks')
+    const mod = await import('../EnterpriseClientAppHooks')
     render(React.createElement(mod.EnterpriseClientAppHooks))
     await waitFor(function() { expect(screen.getByTestId('crash-countdown')).toBeInTheDocument() })
-    var crashCountdown = screen.getByTestId('crash-countdown')
+    const crashCountdown = screen.getByTestId('crash-countdown')
     expect(crashCountdown).toBeInTheDocument()
   })
 
   it('dispatch click triggers SOS with tracking for named user', async function() {
-    var features = require('@/lib/features')
+    const features = require('@/lib/features')
     features.FEATURES.crashDetection = true
-    var store = require('@/lib/store')
+    const store = require('@/lib/store')
     store.useAppStore.getState().crashDetectionEnabled = true
     store.useAppStore.getState().userProfile.name = 'Test User'
-    var api = require('@/lib/api')
+    const api = require('@/lib/api')
     api.triggerSos.mockResolvedValueOnce({ id: 'sos-1' })
-    var liveTracking = require('@/lib/live-tracking')
+    const liveTracking = require('@/lib/live-tracking')
     liveTracking.startFamilyTracking.mockResolvedValueOnce({ session_id: 'sess-1', tracking_url: 'http://track.test' })
-    var crashDetection = require('@/lib/crash-detection')
+    const crashDetection = require('@/lib/crash-detection')
     crashDetection.startCrashDetection.mockImplementationOnce(function(handler) {
       handler(98.0665)
       return Promise.resolve()
     })
-    var mod = await import('../EnterpriseClientAppHooks')
+    const mod = await import('../EnterpriseClientAppHooks')
     render(React.createElement(mod.EnterpriseClientAppHooks))
     await waitFor(function() { expect(screen.getByTestId('dispatch-btn')).toBeInTheDocument() })
     await act(async function() { screen.getByTestId('dispatch-btn').click() })
@@ -408,19 +408,19 @@ describe('EnterpriseClientAppHooks', function() {
   })
 
   it('dispatch click queues offline SOS when triggerSos fails', async function() {
-    var features = require('@/lib/features')
+    const features = require('@/lib/features')
     features.FEATURES.crashDetection = true
-    var store = require('@/lib/store')
+    const store = require('@/lib/store')
     store.useAppStore.getState().crashDetectionEnabled = true
-    var api = require('@/lib/api')
+    const api = require('@/lib/api')
     api.triggerSos.mockRejectedValueOnce(new Error('network error'))
-    var queue = require('@/lib/offline-sos-queue')
-    var crashDetection = require('@/lib/crash-detection')
+    const queue = require('@/lib/offline-sos-queue')
+    const crashDetection = require('@/lib/crash-detection')
     crashDetection.startCrashDetection.mockImplementationOnce(function(handler) {
       handler(98.0665)
       return Promise.resolve()
     })
-    var mod = await import('../EnterpriseClientAppHooks')
+    const mod = await import('../EnterpriseClientAppHooks')
     render(React.createElement(mod.EnterpriseClientAppHooks))
     await waitFor(function() { expect(screen.getByTestId('dispatch-btn')).toBeInTheDocument() })
     await act(async function() { screen.getByTestId('dispatch-btn').click() })
@@ -428,58 +428,58 @@ describe('EnterpriseClientAppHooks', function() {
   })
 
   it('shows location error toast when crash dispatch has no GPS', async function() {
-    var features = require('@/lib/features')
+    const features = require('@/lib/features')
     features.FEATURES.crashDetection = true
-    var store = require('@/lib/store')
+    const store = require('@/lib/store')
     store.useAppStore.getState().crashDetectionEnabled = true
     store.useAppStore.getState().gpsLocation = null
-    var crashDetection = require('@/lib/crash-detection')
+    const crashDetection = require('@/lib/crash-detection')
     crashDetection.startCrashDetection.mockImplementationOnce(function(handler) {
       handler(98.0665)
       return Promise.resolve()
     })
-    var mod = await import('../EnterpriseClientAppHooks')
+    const mod = await import('../EnterpriseClientAppHooks')
     render(React.createElement(mod.EnterpriseClientAppHooks))
     await waitFor(function() { expect(screen.getByTestId('dispatch-btn')).toBeInTheDocument() })
     await act(async function() { screen.getByTestId('dispatch-btn').click() })
-    var { toast } = require('sonner')
+    const { toast } = require('sonner')
     expect(toast.error).toHaveBeenCalled()
   })
 
   it('shows toast when family tracking fails on crash dispatch', async function() {
-    var features = require('@/lib/features')
+    const features = require('@/lib/features')
     features.FEATURES.crashDetection = true
-    var store = require('@/lib/store')
+    const store = require('@/lib/store')
     store.useAppStore.getState().crashDetectionEnabled = true
     store.useAppStore.getState().userProfile.name = 'Test User'
-    var api = require('@/lib/api')
+    const api = require('@/lib/api')
     api.triggerSos.mockResolvedValueOnce({ id: 'sos-1' })
-    var liveTracking = require('@/lib/live-tracking')
+    const liveTracking = require('@/lib/live-tracking')
     liveTracking.startFamilyTracking.mockRejectedValueOnce(new Error('tracking failed'))
-    var crashDetection = require('@/lib/crash-detection')
+    const crashDetection = require('@/lib/crash-detection')
     crashDetection.startCrashDetection.mockImplementationOnce(function(handler) {
       handler(98.0665)
       return Promise.resolve()
     })
-    var mod = await import('../EnterpriseClientAppHooks')
+    const mod = await import('../EnterpriseClientAppHooks')
     render(React.createElement(mod.EnterpriseClientAppHooks))
     await waitFor(function() { expect(screen.getByTestId('dispatch-btn')).toBeInTheDocument() })
     await act(async function() { screen.getByTestId('dispatch-btn').click() })
-    var { toast } = require('sonner')
+    const { toast } = require('sonner')
     expect(toast.error).toHaveBeenCalled()
   })
 
   it('cancels crash on cancel button click', async function() {
-    var features = require('@/lib/features')
+    const features = require('@/lib/features')
     features.FEATURES.crashDetection = true
-    var store = require('@/lib/store')
+    const store = require('@/lib/store')
     store.useAppStore.getState().crashDetectionEnabled = true
-    var crashDetection = require('@/lib/crash-detection')
+    const crashDetection = require('@/lib/crash-detection')
     crashDetection.startCrashDetection.mockImplementationOnce(function(handler) {
       handler(98.0665)
       return Promise.resolve()
     })
-    var mod = await import('../EnterpriseClientAppHooks')
+    const mod = await import('../EnterpriseClientAppHooks')
     render(React.createElement(mod.EnterpriseClientAppHooks))
     await waitFor(function() { expect(screen.getByTestId('cancel-btn')).toBeInTheDocument() })
     await act(async function() { screen.getByTestId('cancel-btn').click() })
@@ -487,22 +487,22 @@ describe('EnterpriseClientAppHooks', function() {
   })
 
   it('shows iOS motion permission toast when DeviceMotionEvent.requestPermission exists', async function() {
-    var origDME = (globalThis as any).DeviceMotionEvent
+    const origDME = (globalThis as any).DeviceMotionEvent
     ;(globalThis as any).DeviceMotionEvent = { requestPermission: jest.fn() }
-    var features = require('@/lib/features')
+    const features = require('@/lib/features')
     features.FEATURES.crashDetection = true
-    var store = require('@/lib/store')
+    const store = require('@/lib/store')
     store.useAppStore.getState().crashDetectionEnabled = true
-    var { toast } = require('sonner')
-    var crashDetection = require('@/lib/crash-detection')
+    const { toast } = require('sonner')
+    const crashDetection = require('@/lib/crash-detection')
     crashDetection.requestCrashPermission.mockResolvedValue(true)
-    var mod = await import('../EnterpriseClientAppHooks')
+    const mod = await import('../EnterpriseClientAppHooks')
     render(React.createElement(mod.EnterpriseClientAppHooks))
     await waitFor(function() { expect(toast.info).toHaveBeenCalled() })
-    var infoCall = toast.info.mock.calls[0]
+    const infoCall = toast.info.mock.calls[0]
     expect(infoCall[0]).toMatch(/iOS Motion Sensors/)
     expect(infoCall[1].action.label).toBe('Authorize')
-    var onAuthorize = infoCall[1].action.onClick
+    const onAuthorize = infoCall[1].action.onClick
     await act(async function() { await onAuthorize() })
     expect(toast.success).toHaveBeenCalledWith('Motion sensors authorized successfully!')
     crashDetection.requestCrashPermission.mockResolvedValue(false)

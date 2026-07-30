@@ -1,9 +1,9 @@
 jest.mock('@/hooks/usePageEntry', function() { return { usePageEntry: function() { return { current: null } } } })
 jest.mock('next/navigation', function() { return { useRouter: function() { return { push: jest.fn(), replace: jest.fn(), back: jest.fn() } }, useSearchParams: function() { return new URLSearchParams() } } })
-jest.mock('next/link', function() { return function({ children, ...rest }) { var React = require('react'); return React.createElement('a', rest, children) } })
+jest.mock('next/link', function() { return function({ children, ...rest }) { const React = require('react'); return React.createElement('a', rest, children) } })
 jest.mock('@/lib/supabase-auth', function() { return { getSupabaseBrowserClient: function() { return null } } })
 jest.mock('@/lib/store', function() {
-  var state = { isAuthenticated: false }
+  const state = { isAuthenticated: false }
   return { useAppStore: Object.assign(function(sel) { return typeof sel === 'function' ? sel(state) : state }, { getState: function() { return state }, setState: jest.fn(), subscribe: jest.fn() }) }
 })
 jest.mock('@/lib/use-form-validation', function() { return { useFormValidation: function() { return { errors: {}, handleChange: jest.fn(), handleBlur: jest.fn(), handleSubmit: function(values, fn) { fn(); return Promise.resolve(true) } } } } })
@@ -11,9 +11,9 @@ jest.mock('@/lib/validation-schemas', function() { return { LOGIN_RULES: functio
 jest.mock('@/components/ui/Logo', function() { return { Logo: function() { return null } } })
 jest.mock('lucide-react', function() { return new Proxy({}, { get: function() { return function() { return null } } }) })
 
-var React = require('react')
-var { render, screen: rtlScreen, fireEvent } = require('@testing-library/react')
-var LoginPage = require('../app/login/page').default
+const React = require('react')
+const { render, screen: rtlScreen, fireEvent } = require('@testing-library/react')
+const LoginPage = require('../app/login/page').default
 
 describe('Login Page', function() {
   it('renders SafeVixAI heading', function() {
@@ -88,7 +88,7 @@ describe('Login Page', function() {
 
   it('toggles password visibility', function() {
     render(React.createElement(LoginPage))
-    var toggle = rtlScreen.getByLabelText('Show password')
+    const toggle = rtlScreen.getByLabelText('Show password')
     fireEvent.click(toggle)
     expect(rtlScreen.getByLabelText('Hide password')).toBeTruthy()
   })

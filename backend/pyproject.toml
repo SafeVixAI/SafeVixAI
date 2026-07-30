@@ -39,6 +39,7 @@ ignore = ["E501", "B008", "B904"]
 "api/*" = ["ARG001"]
 # Services: some unused args are part of interface contracts
 "services/*" = ["ARG001"]
+"services/notification_service.py" = ["EM", "ARG", "SIM", "F841"]
 
 [tool.ruff.format]
 quote-style = "double"

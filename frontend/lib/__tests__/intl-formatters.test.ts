@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 SafeVixAI Team
 
-var mockLanguage = 'en';
+let mockLanguage = 'en';
 
 jest.mock('../i18n', () => ({
   __esModule: true,
@@ -66,7 +66,7 @@ describe('intl-formatters', function() {
     });
 
     it('formats a number with Indian grouping separators', function() {
-      var result = formatNumber(1234567);
+      const result = formatNumber(1234567);
       expect(result).toMatch(/\d{2}[,.]\d{2}[,.]\d{3}/);
     });
 
@@ -75,12 +75,12 @@ describe('intl-formatters', function() {
     });
 
     it('formats a negative number', function() {
-      var result = formatNumber(-500);
+      const result = formatNumber(-500);
       expect(result).toContain('500');
     });
 
     it('formats a decimal number', function() {
-      var result = formatNumber(3.14);
+      const result = formatNumber(3.14);
       expect(result).toMatch(/3[.,]14/);
     });
   });
@@ -89,27 +89,27 @@ describe('intl-formatters', function() {
 
   describe('formatCurrency', function() {
     it('formats amount with ₹ symbol', function() {
-      var result = formatCurrency(500);
+      const result = formatCurrency(500);
       expect(result).toMatch(/₹/);
     });
 
     it('formats zero amount', function() {
-      var result = formatCurrency(0);
+      const result = formatCurrency(0);
       expect(result).toMatch(/0/);
     });
 
     it('formats a large fine amount', function() {
-      var result = formatCurrency(25000);
+      const result = formatCurrency(25000);
       expect(result).toMatch(/₹/);
     });
 
     it('produces no decimal fraction digits', function() {
-      var result = formatCurrency(100);
+      const result = formatCurrency(100);
       expect(result).not.toMatch(/\.\d{2}/);
     });
 
     it('formats negative amount', function() {
-      var result = formatCurrency(-1000);
+      const result = formatCurrency(-1000);
       expect(result).toMatch(/₹/);
     });
   });
@@ -118,12 +118,12 @@ describe('intl-formatters', function() {
 
   describe('formatDecimal', function() {
     it('formats with default 1 decimal place', function() {
-      var result = formatDecimal(3.456);
+      const result = formatDecimal(3.456);
       expect(result).toMatch(/3[.,]/);
     });
 
     it('formats with custom decimal places', function() {
-      var result = formatDecimal(3.456, 3);
+      const result = formatDecimal(3.456, 3);
       expect(result).toMatch(/3[.,]456/);
     });
 
@@ -132,7 +132,7 @@ describe('intl-formatters', function() {
     });
 
     it('rounds to specified decimals', function() {
-      var result = formatDecimal(2.999, 0);
+      const result = formatDecimal(2.999, 0);
       expect(result).toBe('3');
     });
 
@@ -173,12 +173,12 @@ describe('intl-formatters', function() {
     });
 
     it('formats non-round lakh value', function() {
-      var result = formatCompactNumber(250500);
+      const result = formatCompactNumber(250500);
       expect(result).toMatch(/ L$/);
     });
 
     it('formats non-round thousand value', function() {
-      var result = formatCompactNumber(2500);
+      const result = formatCompactNumber(2500);
       expect(result).toMatch(/ K$/);
     });
   });
@@ -215,7 +215,7 @@ describe('intl-formatters', function() {
     });
 
     it('formats only hours when minutes are zero', function() {
-      var result = formatDuration(7200);
+      const result = formatDuration(7200);
       expect(result).toContain('hr');
       expect(result).not.toContain('min');
     });
@@ -241,12 +241,12 @@ describe('intl-formatters', function() {
 
   describe('formatCoordinate', function() {
     it('formats lat/lon with 4 decimal places', function() {
-      var result = formatCoordinate(13.0827, 80.2707);
+      const result = formatCoordinate(13.0827, 80.2707);
       expect(result).toMatch(/13\.\d{4}, 80\.\d{4}/);
     });
 
     it('formats negative coordinates', function() {
-      var result = formatCoordinate(-33.8688, 151.2093);
+      const result = formatCoordinate(-33.8688, 151.2093);
       expect(result).toContain(',');
     });
 
@@ -259,23 +259,23 @@ describe('intl-formatters', function() {
 
   describe('formatDate', function() {
     it('formats a Date object', function() {
-      var d = new Date(2026, 5, 22);
-      var result = formatDate(d);
+      const d = new Date(2026, 5, 22);
+      const result = formatDate(d);
       expect(result.length).toBeGreaterThan(0);
     });
 
     it('formats a date string', function() {
-      var result = formatDate('2026-06-22');
+      const result = formatDate('2026-06-22');
       expect(result.length).toBeGreaterThan(0);
     });
 
     it('formats a timestamp number', function() {
-      var result = formatDate(1769000000000);
+      const result = formatDate(1769000000000);
       expect(result.length).toBeGreaterThan(0);
     });
 
     it('returns string for invalid date', function() {
-      var result = formatDate('not-a-date');
+      const result = formatDate('not-a-date');
       expect(typeof result).toBe('string');
     });
   });
@@ -284,18 +284,18 @@ describe('intl-formatters', function() {
 
   describe('formatTime', function() {
     it('formats time with hours and minutes', function() {
-      var d = new Date(2026, 5, 22, 14, 30, 0);
-      var result = formatTime(d);
+      const d = new Date(2026, 5, 22, 14, 30, 0);
+      const result = formatTime(d);
       expect(result).toMatch(/:/);
     });
 
     it('formats a date string', function() {
-      var result = formatTime('2026-06-22T09:15:00');
+      const result = formatTime('2026-06-22T09:15:00');
       expect(result).toMatch(/:/);
     });
 
     it('formats a timestamp number', function() {
-      var result = formatTime(1769000000000);
+      const result = formatTime(1769000000000);
       expect(typeof result).toBe('string');
     });
   });
@@ -304,18 +304,18 @@ describe('intl-formatters', function() {
 
   describe('formatDateTime', function() {
     it('formats datetime with date and time', function() {
-      var d = new Date(2026, 5, 22, 14, 30, 0);
-      var result = formatDateTime(d);
+      const d = new Date(2026, 5, 22, 14, 30, 0);
+      const result = formatDateTime(d);
       expect(result.length).toBeGreaterThan(0);
     });
 
     it('formats a date string', function() {
-      var result = formatDateTime('2026-06-22T09:15:00');
+      const result = formatDateTime('2026-06-22T09:15:00');
       expect(result.length).toBeGreaterThan(0);
     });
 
     it('formats a timestamp number', function() {
-      var result = formatDateTime(1769000000000);
+      const result = formatDateTime(1769000000000);
       expect(typeof result).toBe('string');
     });
   });
@@ -324,31 +324,31 @@ describe('intl-formatters', function() {
 
   describe('formatRelativeTime', function() {
     it('returns "now" for current time', function() {
-      var result = formatRelativeTime(new Date());
+      const result = formatRelativeTime(new Date());
       expect(result.length).toBeGreaterThan(0);
     });
 
     it('formats a past date', function() {
-      var past = new Date(Date.now() - 60000);
-      var result = formatRelativeTime(past);
+      const past = new Date(Date.now() - 60000);
+      const result = formatRelativeTime(past);
       expect(result.length).toBeGreaterThan(0);
     });
 
     it('formats a future date', function() {
-      var future = new Date(Date.now() + 3600000);
-      var result = formatRelativeTime(future);
+      const future = new Date(Date.now() + 3600000);
+      const result = formatRelativeTime(future);
       expect(result.length).toBeGreaterThan(0);
     });
 
     it('handles a date string input', function() {
-      var past = new Date(Date.now() - 86400000);
-      var result = formatRelativeTime(past.toISOString());
+      const past = new Date(Date.now() - 86400000);
+      const result = formatRelativeTime(past.toISOString());
       expect(result.length).toBeGreaterThan(0);
     });
 
     it('handles a timestamp number input', function() {
-      var past = Date.now() - 7200000;
-      var result = formatRelativeTime(past);
+      const past = Date.now() - 7200000;
+      const result = formatRelativeTime(past);
       expect(result.length).toBeGreaterThan(0);
     });
   });
@@ -367,7 +367,7 @@ describe('intl-formatters', function() {
 
     it('formatCurrency falls back when Intl.NumberFormat throws (line 53)', function() {
       jest.spyOn(Intl, 'NumberFormat').mockImplementation(function() { throw new Error('mock'); });
-      var result = formatCurrency(500);
+      const result = formatCurrency(500);
       expect(result).toMatch(/₹/);
       expect(result).toContain('500');
     });
@@ -379,36 +379,36 @@ describe('intl-formatters', function() {
 
     it('formatTime falls back to toTimeString when Intl.DateTimeFormat throws (line 154)', function() {
       jest.spyOn(Intl, 'DateTimeFormat').mockImplementation(function() { throw new Error('mock'); });
-      var d = new Date(2026, 5, 22, 14, 30, 0);
-      var result = formatTime(d);
+      const d = new Date(2026, 5, 22, 14, 30, 0);
+      const result = formatTime(d);
       expect(result).toMatch(/14:30/);
     });
 
     it('formatDateTime falls back when Intl.DateTimeFormat throws (lines 168-169)', function() {
       jest.spyOn(Intl, 'DateTimeFormat').mockImplementation(function() { throw new Error('mock'); });
-      var d = new Date(2026, 5, 22, 14, 30, 0);
-      var result = formatDateTime(d);
+      const d = new Date(2026, 5, 22, 14, 30, 0);
+      const result = formatDateTime(d);
       expect(result).toMatch(/Jun/);
     });
 
     it('formatRelativeTime falls back when Intl.RelativeTimeFormat throws (lines 203-210)', function() {
       jest.spyOn(Intl, 'RelativeTimeFormat').mockImplementation(function() { throw new Error('mock'); });
-      var past = new Date(Date.now() - 60000);
-      var result = formatRelativeTime(past);
+      const past = new Date(Date.now() - 60000);
+      const result = formatRelativeTime(past);
       expect(result).toMatch(/min ago|just now/);
     });
 
     it('formatRelativeTime catch block returns hr ago for 2-hour gap', function() {
       jest.spyOn(Intl, 'RelativeTimeFormat').mockImplementation(function() { throw new Error('mock'); });
-      var past = new Date(Date.now() - 7200000);
-      var result = formatRelativeTime(past);
+      const past = new Date(Date.now() - 7200000);
+      const result = formatRelativeTime(past);
       expect(result).toMatch(/hr ago/);
     });
 
     it('formatRelativeTime catch block returns toLocaleDateString for 3-day gap', function() {
       jest.spyOn(Intl, 'RelativeTimeFormat').mockImplementation(function() { throw new Error('mock'); });
-      var past = new Date(Date.now() - 259200000);
-      var result = formatRelativeTime(past);
+      const past = new Date(Date.now() - 259200000);
+      const result = formatRelativeTime(past);
       expect(result.length).toBeGreaterThan(0);
     });
   });

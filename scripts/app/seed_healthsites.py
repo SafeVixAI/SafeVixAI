@@ -51,6 +51,7 @@ def fetch_all_facilities(token: str, country: str = "IND") -> list[dict]:
 
     Raises:
         httpx.HTTPStatusError: If the API returns a non-success HTTP status.
+
     """
     facilities = []
     page = 1
@@ -99,13 +100,11 @@ def fetch_all_facilities(token: str, country: str = "IND") -> list[dict]:
 def _map_amenity(amenity: str) -> str:
     """Map Healthsites amenity type to our category schema."""
     amenity = amenity.lower()
-    if "hospital" in amenity:
+    if "hospital" in amenity or "clinic" in amenity:
         return "hospital"
-    elif "clinic" in amenity:
-        return "hospital"
-    elif "pharmacy" in amenity:
+    if "pharmacy" in amenity:
         return "pharmacy"
-    elif "doctors" in amenity:
+    if "doctors" in amenity:
         return "hospital"
     return "hospital"  # Default
 

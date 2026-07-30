@@ -2,7 +2,7 @@ jest.mock('@/hooks/usePageEntry', function() { return { usePageEntry: function()
 jest.mock('@/components/ui/TerminalHeader', function() { return { TerminalHeader: function() { return null } } })
 jest.mock('@/components/ui/SurfaceCard', function() { return { SurfaceCard: function({ children }) { return children } } })
 jest.mock('@/lib/store', function() {
-  return { useAppStore: Object.assign(function(sel) { var state = {}; return typeof sel === 'function' ? sel(state) : state }, { getState: function() { return {} }, setState: jest.fn(), subscribe: jest.fn() }) }
+  return { useAppStore: Object.assign(function(sel) { const state = {}; return typeof sel === 'function' ? sel(state) : state }, { getState: function() { return {} }, setState: jest.fn(), subscribe: jest.fn() }) }
 })
 jest.mock('@/lib/provider-api', function() {
   return {
@@ -23,17 +23,17 @@ import ProvidersPage from '../app/providers/page'
 
 describe('ProvidersPage', function() {
   it('renders without error', function() {
-    var { container } = render(React.createElement(ProvidersPage))
+    const { container } = render(React.createElement(ProvidersPage))
     expect(container).toBeTruthy()
   })
 
   it('renders provider management shell', function() {
-    var { container } = render(React.createElement(ProvidersPage))
+    const { container } = render(React.createElement(ProvidersPage))
     expect(container.querySelector('main') || container.querySelector('[class]')).toBeTruthy()
   })
 
   it('renders with surface card wrappers', function() {
-    var { container } = render(React.createElement(ProvidersPage))
+    const { container } = render(React.createElement(ProvidersPage))
     expect(container).toBeTruthy()
   })
 })

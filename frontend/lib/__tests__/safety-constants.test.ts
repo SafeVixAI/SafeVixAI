@@ -49,7 +49,7 @@ describe('safety-constants', function() {
   });
 
   it('all constants are frozen exports', function() {
-    var allExports = Object.keys(constants);
+    const allExports = Object.keys(constants);
     expect(allExports.length).toBeGreaterThan(0);
     for (const key of allExports) {
       expect(typeof (constants as any)[key]).toMatch(/number|string/);

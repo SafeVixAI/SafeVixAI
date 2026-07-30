@@ -5,7 +5,7 @@ jest.mock('@/lib/notifications', function() {
     markNotificationRead: jest.fn().mockResolvedValue(undefined),
     markAllNotificationsRead: jest.fn().mockResolvedValue(2),
     deleteNotification: jest.fn().mockResolvedValue(undefined),
-    getNotificationColor: function(p) { var c = { critical: 'text-red-500', high: 'text-orange-500', normal: 'text-blue-500', low: 'text-gray-500' }; return c[p] || 'text-gray-500' },
+    getNotificationColor: function(p) { const c = { critical: 'text-red-500', high: 'text-orange-500', normal: 'text-blue-500', low: 'text-gray-500' }; return c[p] || 'text-gray-500' },
     getTimeAgo: function() { return '1m ago' },
     getNotificationIcon: function() { return 'Bell' },
     useNotificationWebSocket: function() { return { notifications: [], connected: false, sendAck: jest.fn(), sendMarkRead: jest.fn() } },
@@ -32,7 +32,7 @@ jest.mock('@/lib/store/notification-slice', function() {
   }
 })
 jest.mock('@/lib/store', function() {
-  var appState = { operatorName: 'TestOp' }
+  const appState = { operatorName: 'TestOp' }
   return {
     useAppStore: Object.assign(function(sel) { return typeof sel === 'function' ? sel(appState) : appState }, {
       getState: function() { return appState },
@@ -43,17 +43,17 @@ jest.mock('@/lib/store', function() {
 })
 jest.mock('lucide-react', function() { return new Proxy({}, { get: function() { return function() { return null } } }) })
 
-var React = require('react')
-var { render, screen, fireEvent, waitFor, act } = require('@testing-library/react')
-var { NotificationCenter } = require('@/components/notifications/NotificationCenter')
+const React = require('react')
+const { render, screen, fireEvent, waitFor, act } = require('@testing-library/react')
+const { NotificationCenter } = require('@/components/notifications/NotificationCenter')
 
 describe('NotificationCenter', function() {
   beforeEach(function() {
     jest.clearAllMocks()
-    var store = require('@/lib/store/notification-slice').useNotificationStore
+    const store = require('@/lib/store/notification-slice').useNotificationStore
     store.setState({ items: [], unreadCount: 0, isCenterOpen: false })
-    var notif = require('@/lib/notifications')
-    var mockNotifications = [
+    const notif = require('@/lib/notifications')
+    const mockNotifications = [
       { id: 'n1', user_id: 'test', channel: 'in_app', category: 'system_health', priority: 'normal', status: 'sent', title: 'Server Health OK', body: 'All systems nominal', created_at: new Date(Date.now() - 60000).toISOString() },
       { id: 'n2', user_id: 'test', channel: 'email', category: 'security', priority: 'critical', status: 'delivered', title: 'Security Alert', body: 'Unauthorized access attempt detected', created_at: new Date(Date.now() - 3600000).toISOString() },
       { id: 'n3', user_id: 'test', channel: 'in_app', category: 'update', priority: 'low', status: 'read', title: 'Update Available', created_at: new Date(Date.now() - 86400000).toISOString() },
@@ -67,24 +67,24 @@ describe('NotificationCenter', function() {
 
   it('renders with aria-live region and title', function() {
     render(React.createElement(NotificationCenter))
-    var region = screen.getByRole('region')
+    const region = screen.getByRole('region')
     expect(region).toBeTruthy()
     expect(region.getAttribute('aria-label')).toBe('Notification center')
     expect(screen.getByText('Notifications')).toBeTruthy()
   })
 
   it('has screen-reader status for unread count', function() {
-    var store = require('@/lib/store/notification-slice').useNotificationStore
+    const store = require('@/lib/store/notification-slice').useNotificationStore
     store.setState({ unreadCount: 2 })
     render(React.createElement(NotificationCenter))
-    var sr = document.querySelector('.sr-only[role="status"]')
+    const sr = document.querySelector('.sr-only[role="status"]')
     expect(sr).toBeTruthy()
     expect(sr.textContent).toBe('2 unread notifications')
   })
 
   it('shows zero unread in screen-reader status', function() {
     render(React.createElement(NotificationCenter))
-    var sr = document.querySelector('.sr-only[role="status"]')
+    const sr = document.querySelector('.sr-only[role="status"]')
     expect(sr.textContent).toBe('No unread notifications')
   })
 
@@ -100,10 +100,10 @@ describe('NotificationCenter', function() {
     await waitFor(function() {
       expect(screen.getByText('Server Health OK')).toBeTruthy()
     })
-    var titleBtn = screen.getByText('Server Health OK').closest('button')
+    const titleBtn = screen.getByText('Server Health OK').closest('button')
     fireEvent.click(titleBtn)
     await waitFor(function() {
-      var markRead = require('@/lib/notifications').markNotificationRead
+      const markRead = require('@/lib/notifications').markNotificationRead
       expect(markRead).toHaveBeenCalledWith('n1', 'TestOp')
     })
   })
@@ -113,7 +113,7 @@ describe('NotificationCenter', function() {
     await waitFor(function() {
       expect(screen.getByText('Server Health OK')).toBeTruthy()
     })
-    var titleBtn = screen.getByText('Server Health OK').closest('button')
+    const titleBtn = screen.getByText('Server Health OK').closest('button')
     fireEvent.click(titleBtn)
     expect(titleBtn.getAttribute('aria-expanded')).toBe('true')
   })
@@ -123,10 +123,10 @@ describe('NotificationCenter', function() {
     await waitFor(function() {
       expect(screen.getByText('Server Health OK')).toBeTruthy()
     })
-    var titleBtn = screen.getByText('Server Health OK').closest('button')
+    const titleBtn = screen.getByText('Server Health OK').closest('button')
     fireEvent.keyDown(titleBtn, { key: 'Enter' })
     await waitFor(function() {
-      var markRead = require('@/lib/notifications').markNotificationRead
+      const markRead = require('@/lib/notifications').markNotificationRead
       expect(markRead).toHaveBeenCalled()
     })
   })
@@ -136,10 +136,10 @@ describe('NotificationCenter', function() {
     await waitFor(function() {
       expect(screen.getByText('Server Health OK')).toBeTruthy()
     })
-    var titleBtn = screen.getByText('Server Health OK').closest('button')
+    const titleBtn = screen.getByText('Server Health OK').closest('button')
     fireEvent.keyDown(titleBtn, { key: ' ' })
     await waitFor(function() {
-      var markRead = require('@/lib/notifications').markNotificationRead
+      const markRead = require('@/lib/notifications').markNotificationRead
       expect(markRead).toHaveBeenCalled()
     })
   })
@@ -149,10 +149,10 @@ describe('NotificationCenter', function() {
     await waitFor(function() {
       expect(screen.getByText('Mark all read')).toBeTruthy()
     })
-    var markAll = screen.getByText('Mark all read')
+    const markAll = screen.getByText('Mark all read')
     fireEvent.click(markAll)
     await waitFor(function() {
-      var markAllFn = require('@/lib/notifications').markAllNotificationsRead
+      const markAllFn = require('@/lib/notifications').markAllNotificationsRead
       expect(markAllFn).toHaveBeenCalledWith('TestOp')
     })
   })
@@ -162,10 +162,10 @@ describe('NotificationCenter', function() {
     await waitFor(function() {
       expect(screen.getByText('Server Health OK')).toBeTruthy()
     })
-    var deleteBtns = screen.getAllByLabelText(/Delete/)
+    const deleteBtns = screen.getAllByLabelText(/Delete/)
     fireEvent.click(deleteBtns[0])
     await waitFor(function() {
-      var del = require('@/lib/notifications').deleteNotification
+      const del = require('@/lib/notifications').deleteNotification
       expect(del).toHaveBeenCalled()
     })
   })
@@ -175,9 +175,9 @@ describe('NotificationCenter', function() {
     await waitFor(function() {
       expect(screen.getByTitle('Filters')).toBeTruthy()
     })
-    var filterButton = screen.getByTitle('Filters')
+    const filterButton = screen.getByTitle('Filters')
     fireEvent.click(filterButton)
-    var allTab = screen.getByRole('tab', { name: 'Show all categories' })
+    const allTab = screen.getByRole('tab', { name: 'Show all categories' })
     expect(allTab.getAttribute('aria-selected')).toBe('true')
   })
 
@@ -186,9 +186,9 @@ describe('NotificationCenter', function() {
     await waitFor(function() {
       expect(screen.getByTitle('Filters')).toBeTruthy()
     })
-    var filterButton = screen.getByTitle('Filters')
+    const filterButton = screen.getByTitle('Filters')
     fireEvent.click(filterButton)
-    var securityTab = screen.getByRole('tab', { name: 'Filter by Security' })
+    const securityTab = screen.getByRole('tab', { name: 'Filter by Security' })
     fireEvent.click(securityTab)
     expect(securityTab.getAttribute('aria-selected')).toBe('true')
   })
@@ -198,9 +198,9 @@ describe('NotificationCenter', function() {
     await waitFor(function() {
       expect(screen.getByTitle('Filters')).toBeTruthy()
     })
-    var filterButton = screen.getByTitle('Filters')
+    const filterButton = screen.getByTitle('Filters')
     fireEvent.click(filterButton)
-    var unreadBtn = screen.getByText('Unread only')
+    const unreadBtn = screen.getByText('Unread only')
     fireEvent.click(unreadBtn)
     expect(unreadBtn.getAttribute('aria-pressed')).toBe('true')
   })
@@ -214,7 +214,7 @@ describe('NotificationCenter', function() {
   })
 
   it('shows empty state when no notifications', async function() {
-    var mockNotifications = require('@/lib/notifications')
+    const mockNotifications = require('@/lib/notifications')
     mockNotifications.fetchNotifications.mockResolvedValue({ notifications: [], total: 0, unread: 0, limit: 50, offset: 0 })
     render(React.createElement(NotificationCenter))
     await waitFor(function() {
@@ -223,7 +223,7 @@ describe('NotificationCenter', function() {
   })
 
   it('shows error state on fetch failure', async function() {
-    var mockNotifications = require('@/lib/notifications')
+    const mockNotifications = require('@/lib/notifications')
     mockNotifications.fetchNotifications.mockRejectedValue(new Error('Network failure'))
     render(React.createElement(NotificationCenter))
     await waitFor(function() {
@@ -246,18 +246,18 @@ describe('NotificationCenter', function() {
   })
 
   it('handles onClose callback', async function() {
-    var onClose = jest.fn()
+    const onClose = jest.fn()
     render(React.createElement(NotificationCenter, { onClose: onClose }))
     await waitFor(function() {
       expect(screen.getByText('Notifications')).toBeTruthy()
     })
-    var closeBtns = screen.getAllByRole('button')
-    var xBtn = Array.from(closeBtns).find(function(b) { return b.getAttribute('title') === 'Close' || b.innerHTML.includes('x') })
+    const closeBtns = screen.getAllByRole('button')
+    const xBtn = Array.from(closeBtns).find(function(b) { return b.getAttribute('title') === 'Close' || b.innerHTML.includes('x') })
     if (xBtn) { fireEvent.click(xBtn); expect(onClose).toHaveBeenCalled() }
   })
 
   it('does not show category badge for notification without category', async function() {
-    var mockNotifications = require('@/lib/notifications')
+    const mockNotifications = require('@/lib/notifications')
     mockNotifications.fetchNotifications.mockResolvedValue({
       notifications: [{ id: 'n4', user_id: 'test', channel: 'in_app', priority: 'normal', status: 'sent', title: 'No Cat', created_at: new Date().toISOString() }],
       total: 1, unread: 1, limit: 50, offset: 0,
@@ -271,7 +271,7 @@ describe('NotificationCenter', function() {
   it('displays notification time via getTimeAgo', async function() {
     render(React.createElement(NotificationCenter))
     await waitFor(function() {
-      var times = screen.getAllByText(/m ago|h ago|d ago|just now/)
+      const times = screen.getAllByText(/m ago|h ago|d ago|just now/)
       expect(times.length).toBeGreaterThan(0)
     })
   })

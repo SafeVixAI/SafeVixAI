@@ -7,7 +7,7 @@ import { ServerHealthStatus } from '../ServerHealthStatus'
 
 describe('ServerHealthStatus', function() {
   beforeEach(function() {
-    var mockFetch = jest.fn().mockResolvedValue({ ok: true, json: function() { return Promise.resolve({ database_available: true }) } })
+    const mockFetch = jest.fn().mockResolvedValue({ ok: true, json: function() { return Promise.resolve({ database_available: true }) } })
     global.fetch = mockFetch as any
   })
 
@@ -23,7 +23,7 @@ describe('ServerHealthStatus', function() {
 
   it('toggles expanded panel on button click', function() {
     render(React.createElement(ServerHealthStatus))
-    var btn = screen.getByTitle('Server health status')
+    const btn = screen.getByTitle('Server health status')
     act(function() { btn.click() })
     expect(screen.getByText('Backend')).toBeTruthy()
     expect(screen.getByText('Database')).toBeTruthy()
@@ -32,7 +32,7 @@ describe('ServerHealthStatus', function() {
 
   it('closes expanded panel on second click', function() {
     render(React.createElement(ServerHealthStatus))
-    var btn = screen.getByTitle('Server health status')
+    const btn = screen.getByTitle('Server health status')
     act(function() { btn.click() })
     expect(screen.getByText('Backend')).toBeTruthy()
     act(function() { btn.click() })

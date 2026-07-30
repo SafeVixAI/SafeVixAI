@@ -20,12 +20,12 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import React from 'react'
 import { MobileResultsList, DesktopResultsList } from '../LocatorResults'
 
-var mockServices = [
+const mockServices = [
   { id: 's1', name: 'City Hospital', type: 'Hospital', filterType: 'Hospital' as const, distance: '500 m', address: 'Main Rd', accentColor: '#ef4444', coords: [13, 80] as [number, number], phone: '1234567890', category: 'hospital' as const },
   { id: 's2', name: 'Police Station', type: 'Police', filterType: 'Police' as const, distance: '1.2 km', address: 'Market St', accentColor: '#3b82f6', coords: [13.1, 80.1] as [number, number], phone: '100', category: 'police' as const },
 ]
 
-var defaultProps = {
+const defaultProps = {
   filtered: mockServices,
   selectedServiceId: null,
   routeLoadingId: null,
@@ -56,31 +56,31 @@ describe('MobileResultsList', function() {
 
   it('renders Call buttons with phone links', function() {
     render(React.createElement(MobileResultsList, defaultProps))
-    var calls = screen.getAllByText('Call')
+    const calls = screen.getAllByText('Call')
     expect(calls).toHaveLength(2)
   })
 
   it('renders Locate buttons', function() {
     render(React.createElement(MobileResultsList, defaultProps))
-    var locates = screen.getAllByText('Locate')
+    const locates = screen.getAllByText('Locate')
     expect(locates).toHaveLength(2)
   })
 
   it('renders Focus buttons', function() {
     render(React.createElement(MobileResultsList, defaultProps))
-    var focuses = screen.getAllByText('Focus')
+    const focuses = screen.getAllByText('Focus')
     expect(focuses).toHaveLength(2)
   })
 
   it('calls onLocateService when Locate clicked', function() {
-    var onLocate = jest.fn()
+    const onLocate = jest.fn()
     render(React.createElement(MobileResultsList, { ...defaultProps, onLocateService: onLocate }))
     fireEvent.click(screen.getAllByText('Locate')[0])
     expect(onLocate).toHaveBeenCalledWith(mockServices[0])
   })
 
   it('calls onPreviewService when Focus clicked', function() {
-    var onPreview = jest.fn()
+    const onPreview = jest.fn()
     render(React.createElement(MobileResultsList, { ...defaultProps, onPreviewService: onPreview }))
     fireEvent.click(screen.getAllByText('Focus')[1])
     expect(onPreview).toHaveBeenCalledWith(mockServices[1])
@@ -98,8 +98,8 @@ describe('MobileResultsList', function() {
   })
 
   it('applies selected style when selectedServiceId matches', function() {
-    var { container } = render(React.createElement(MobileResultsList, { ...defaultProps, selectedServiceId: 's1' }))
-    var cards = container.querySelectorAll('.locator-result-card')
+    const { container } = render(React.createElement(MobileResultsList, { ...defaultProps, selectedServiceId: 's1' }))
+    const cards = container.querySelectorAll('.locator-result-card')
     expect(cards[0].className).toContain('border-brand/30')
   })
 })
@@ -126,7 +126,7 @@ describe('DesktopResultsList', function() {
 
   it('renders Call buttons', function() {
     render(React.createElement(DesktopResultsList, defaultProps))
-    var calls = screen.getAllByText('Call')
+    const calls = screen.getAllByText('Call')
     expect(calls).toHaveLength(2)
   })
 
@@ -136,14 +136,14 @@ describe('DesktopResultsList', function() {
   })
 
   it('calls onLocateService when Locate clicked', function() {
-    var onLocate = jest.fn()
+    const onLocate = jest.fn()
     render(React.createElement(DesktopResultsList, { ...defaultProps, onLocateService: onLocate }))
     fireEvent.click(screen.getAllByText('Locate')[0])
     expect(onLocate).toHaveBeenCalledWith(mockServices[0])
   })
 
   it('calls onPreviewService when Focus clicked', function() {
-    var onPreview = jest.fn()
+    const onPreview = jest.fn()
     render(React.createElement(DesktopResultsList, { ...defaultProps, onPreviewService: onPreview }))
     fireEvent.click(screen.getAllByText('Focus')[1])
     expect(onPreview).toHaveBeenCalledWith(mockServices[1])
@@ -156,8 +156,8 @@ describe('DesktopResultsList', function() {
   })
 
   it('applies selected style when selectedServiceId matches', function() {
-    var { container } = render(React.createElement(DesktopResultsList, { ...defaultProps, selectedServiceId: 's2' }))
-    var cards = container.querySelectorAll('.locator-result-card')
+    const { container } = render(React.createElement(DesktopResultsList, { ...defaultProps, selectedServiceId: 's2' }))
+    const cards = container.querySelectorAll('.locator-result-card')
     expect(cards[1].className).toContain('border-brand/30')
   })
 })

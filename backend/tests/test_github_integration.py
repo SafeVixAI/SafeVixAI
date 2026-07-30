@@ -3,7 +3,9 @@
 
 from __future__ import annotations
 
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import httpx
 
 import pytest
 
@@ -24,7 +26,7 @@ async def test_disabled_no_token() -> None:
 
 @pytest.mark.asyncio
 async def test_create_issue_success(github: GitHubIntegration) -> None:
-    mock_response = AsyncMock()
+    mock_response = MagicMock()
     mock_response.status_code = 201
     mock_response.json.return_value = {
         'number': 42,
@@ -45,7 +47,7 @@ async def test_create_issue_success(github: GitHubIntegration) -> None:
 
 @pytest.mark.asyncio
 async def test_create_issue_failure(github: GitHubIntegration) -> None:
-    mock_response = AsyncMock()
+    mock_response = MagicMock()
     mock_response.status_code = 422
 
     mock_client = AsyncMock()
@@ -62,7 +64,7 @@ async def test_create_issue_failure(github: GitHubIntegration) -> None:
 async def test_create_issue_timeout(github: GitHubIntegration) -> None:
     mock_client = AsyncMock()
     mock_client.__aenter__.return_value = mock_client
-    mock_client.post.side_effect = TimeoutError('Timeout')
+    mock_client.post.side_effect = httpx.TimeoutException('Timeout')
 
     with patch('httpx.AsyncClient', return_value=mock_client):
         result = await github.create_issue(title='Test', body='Body')
@@ -72,7 +74,7 @@ async def test_create_issue_timeout(github: GitHubIntegration) -> None:
 
 @pytest.mark.asyncio
 async def test_update_issue_success(github: GitHubIntegration) -> None:
-    mock_response = AsyncMock()
+    mock_response = MagicMock()
     mock_response.status_code = 200
     mock_response.json.return_value = {'number': 42, 'state': 'closed'}
 
@@ -88,7 +90,7 @@ async def test_update_issue_success(github: GitHubIntegration) -> None:
 
 @pytest.mark.asyncio
 async def test_add_comment_success(github: GitHubIntegration) -> None:
-    mock_response = AsyncMock()
+    mock_response = MagicMock()
     mock_response.status_code = 201
     mock_response.json.return_value = {'id': 123, 'body': 'Thanks!'}
 
@@ -104,7 +106,7 @@ async def test_add_comment_success(github: GitHubIntegration) -> None:
 
 @pytest.mark.asyncio
 async def test_close_issue(github: GitHubIntegration) -> None:
-    mock_response = AsyncMock()
+    mock_response = MagicMock()
     mock_response.status_code = 200
     mock_response.json.return_value = {'number': 42, 'state': 'closed'}
 
@@ -120,7 +122,7 @@ async def test_close_issue(github: GitHubIntegration) -> None:
 
 @pytest.mark.asyncio
 async def test_get_labels(github: GitHubIntegration) -> None:
-    mock_response = AsyncMock()
+    mock_response = MagicMock()
     mock_response.status_code = 200
     mock_response.json.return_value = [
         {'name': 'bug', 'color': 'd73a4a'},
@@ -139,7 +141,7 @@ async def test_get_labels(github: GitHubIntegration) -> None:
 
 @pytest.mark.asyncio
 async def test_get_labels_empty_on_failure(github: GitHubIntegration) -> None:
-    mock_response = AsyncMock()
+    mock_response = MagicMock()
     mock_response.status_code = 500
 
     mock_client = AsyncMock()

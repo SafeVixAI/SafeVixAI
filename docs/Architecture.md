@@ -1,6 +1,6 @@
-# SafeVixAI � Architecture v3.1
+# SafeVixAI — Architecture v3.1
 
-> **AI-powered road safety platform** | Free & open-source (?0 infra cost)
+> **AI-powered road safety platform** | Free & open-source (₹0 infra cost)
 
 ---
 

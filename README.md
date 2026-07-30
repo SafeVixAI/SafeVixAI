@@ -1,4 +1,4 @@
-﻿# SafeVixAI
+# SafeVixAI
 
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License" /></a>

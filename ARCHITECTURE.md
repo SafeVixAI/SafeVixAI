@@ -1,4 +1,4 @@
-﻿# SafeVixAI — Architecture
+# SafeVixAI — Architecture
 
 > **Last Updated:** 2026-07-29
 

@@ -1,4 +1,4 @@
-﻿# Frequently Asked Questions
+# Frequently Asked Questions
 
 > **SafeVixAI** — AI-Powered Road Safety Platform
 > MIT License — IIT Madras Road Safety Hackathon 2026

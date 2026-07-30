@@ -8,9 +8,13 @@
   
   <p><strong>The Enterprise AI-Powered Road Safety & Emergency Response Platform</strong></p>
   
-  <p>
-    <a href="https://github.com/SafeVixAI/SafeVixAI/actions/workflows/backend.yml"><img src="https://img.shields.io/github/actions/workflow/status/SafeVixAI/SafeVixAI/backend.yml?label=Build&logo=githubactions&logoColor=white&style=flat-square" alt="Build Status" /></a> <a href="https://github.com/SafeVixAI/SafeVixAI/actions/workflows/codeql.yml"><img src="https://img.shields.io/github/actions/workflow/status/SafeVixAI/SafeVixAI/codeql.yml?label=CodeQL&logo=github&logoColor=white&style=flat-square" alt="CodeQL" /></a> <a href="https://codecov.io/gh/SafeVixAI/SafeVixAI"><img src="https://img.shields.io/badge/Coverage-97%25-brightgreen?logo=codecov&logoColor=white&style=flat-square" alt="Coverage" /></a> <a href="https://safevixai.github.io/SafeVixAI/"><img src="https://img.shields.io/badge/Docs-MkDocs-teal?logo=markdown&logoColor=white&style=flat-square" alt="Documentation" /></a> <a href="https://scorecard.dev/viewer/?uri=github.com/SafeVixAI/SafeVixAI"><img src="https://img.shields.io/badge/OpenSSF-Scorecard-brightgreen?logo=openssf&logoColor=white&style=flat-square" alt="OpenSSF Scorecard" /></a> <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg?logo=open-source-initiative&logoColor=white&style=flat-square" alt="License" /></a>
-  </p>
+  <!-- Primary Status Badges -->
+  [![Build Status](https://img.shields.io/github/actions/workflow/status/SafeVixAI/SafeVixAI/backend.yml?label=Build&logo=githubactions&logoColor=white&style=flat-square)](https://github.com/SafeVixAI/SafeVixAI/actions/workflows/backend.yml) [![CodeQL](https://img.shields.io/github/actions/workflow/status/SafeVixAI/SafeVixAI/codeql.yml?label=CodeQL&logo=github&logoColor=white&style=flat-square)](https://github.com/SafeVixAI/SafeVixAI/actions/workflows/codeql.yml) [![Coverage](https://img.shields.io/badge/Coverage-97%25-brightgreen?logo=codecov&logoColor=white&style=flat-square)](https://codecov.io/gh/SafeVixAI/SafeVixAI) [![Documentation](https://img.shields.io/badge/Docs-MkDocs-teal?logo=markdown&logoColor=white&style=flat-square)](https://safevixai.github.io/SafeVixAI/) [![OpenSSF Scorecard](https://img.shields.io/badge/OpenSSF-Scorecard-brightgreen?logo=openssf&logoColor=white&style=flat-square)](https://scorecard.dev/viewer/?uri=github.com/SafeVixAI/SafeVixAI) [![License](https://img.shields.io/badge/License-MIT-blue.svg?logo=open-source-initiative&logoColor=white&style=flat-square)](LICENSE)
+  
+  <br />
+
+  <!-- Technology & Community Badges -->
+  [![Python 3.11+](https://img.shields.io/badge/Python-3.11+-blue.svg?logo=python&logoColor=white&style=flat-square)](https://python.org) [![Next.js 15](https://img.shields.io/badge/Next.js-15-black.svg?logo=next.js&logoColor=white&style=flat-square)](https://nextjs.org) [![Docker Support](https://img.shields.io/badge/Docker-Ready-2496ED.svg?logo=docker&logoColor=white&style=flat-square)](https://docker.com) [![Discord](https://img.shields.io/badge/Discord-Join_Community-5865F2?logo=discord&logoColor=white&style=flat-square)](https://github.com/SafeVixAI/SafeVixAI/discussions)
 
   <p>
     <a href="#-project-vision">Vision</a> •
@@ -223,6 +227,20 @@ Join the thousands of developers building a safer road ecosystem:
 - **Discussions**: Join the architectural conversation on [GitHub Discussions](https://github.com/SafeVixAI/SafeVixAI/discussions).
 - **Issues**: Report platform bugs or request robust features via [GitHub Issues](https://github.com/SafeVixAI/SafeVixAI/issues).
 - **Support SLAs**: View enterprise support tiers in [SUPPORT.md](docs/compliance-and-reports/SUPPORT.md).
+
+---
+
+## ✨ Contributors
+
+A massive thank you to everyone who has contributed to making SafeVixAI a reality. 
+
+<a href="https://github.com/SafeVixAI/SafeVixAI/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=SafeVixAI/SafeVixAI" alt="Contributors Graph" />
+</a>
+
+## 📈 Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=SafeVixAI/SafeVixAI&type=Date)](https://star-history.com/#SafeVixAI/SafeVixAI&Date)
 
 ---
 <div align="center">

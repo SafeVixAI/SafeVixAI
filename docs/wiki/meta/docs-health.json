@@ -1,22 +1,22 @@
 {
-  "generated_at": "2026-07-28T14:02:26.495869+00:00",
+  "generated_at": "2026-07-30T04:58:29.263774+00:00",
   "schema_version": 2,
   "wiki": {
-    "total_files": 415,
-    "coverage_pct": 110.7,
+    "total_files": 426,
+    "coverage_pct": 113.6,
     "coverage_target": 375,
-    "fresh": 415,
+    "fresh": 426,
     "stale": 0,
     "undated": 232,
     "freshness_pct": 100.0,
     "stale_pct": 0.0,
     "stale_threshold_days": 90,
     "mermaid_blocks": 781,
-    "ownership_pct": 9.4,
-    "owned_files": 39,
+    "ownership_pct": 11.7,
+    "owned_files": 50,
     "owners": {
-      "frontend-team": 19,
-      "docs-team": 8,
+      "frontend-team": 26,
+      "docs-team": 12,
       "chatbot-team": 2,
       "data-team": 10
     }
@@ -28,6 +28,6 @@
   },
   "git": {
     "branch": "main",
-    "sha": "94a87035842c1d425deb2ef4baa20a2f16060603"
+    "sha": "08679a38f026e3dafe5d9496a116ee266bcd871f"
   }
 }

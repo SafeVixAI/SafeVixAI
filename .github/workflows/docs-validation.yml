@@ -1,0 +1,77 @@
+name: Documentation Validation
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - '**.md'
+      - 'docs/**'
+      - 'mkdocs.yml'
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - '**.md'
+      - 'docs/**'
+      - 'mkdocs.yml'
+
+jobs:
+  validate-markdown:
+    name: Markdown Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run markdownlint
+        uses: DavidAnson/markdownlint-cli2-action@v15
+        with:
+          globs: "**/*.md"
+
+  validate-links:
+    name: Broken Link Checker
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Link Checker
+        uses: lycheeverse/lychee-action@v1.10.0
+        with:
+          args: --offline --no-progress './**/*.md'
+          fail: true
+
+  validate-mermaid:
+    name: Mermaid Validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install Mermaid CLI
+        run: npm install -g @mermaid-js/mermaid-cli
+      - name: Validate Mermaid Diagrams
+        run: |
+          # Finds all markdown files and attempts to parse mermaid blocks
+          # mmdc requires input and output. We can test parse by running mmdc on md files.
+          # We'll use a simple shell script just for CI to loop over files and check if they compile.
+          find . -name "*.md" -type f | while read file; do
+            if grep -q "\`\`\`mermaid" "$file"; then
+              echo "Validating mermaid in $file"
+              mmdc -i "$file" -o "${file%.md}.svg" || exit 1
+              rm "${file%.md}.svg"
+            fi
+          done
+
+  build-mkdocs:
+    name: MkDocs Build Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install MkDocs Dependencies
+        run: |
+          pip install mkdocs-material mkdocs
+          if [ -f "mkdocs-requirements.txt" ]; then pip install -r mkdocs-requirements.txt; fi
+      - name: Build Docs
+        run: mkdocs build --strict

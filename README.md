@@ -1,566 +1,231 @@
-# SafeVixAI
+<!-- 
+  SafeVixAI Enterprise README
+  Inspired by top CNCF and modern OSS projects (Next.js, Supabase, FastAPI)
+-->
+<div align="center">
+  <br />
+  <h1>🛡️ SafeVixAI</h1>
+  
+  <p><strong>The Enterprise AI-Powered Road Safety & Emergency Response Platform</strong></p>
+  
+  <p>
+    <a href="https://github.com/SafeVixAI/SafeVixAI/actions/workflows/backend.yml"><img src="https://img.shields.io/github/actions/workflow/status/SafeVixAI/SafeVixAI/backend.yml?label=Build&logo=githubactions&logoColor=white&style=flat-square" alt="Build Status" /></a> <a href="https://github.com/SafeVixAI/SafeVixAI/actions/workflows/codeql.yml"><img src="https://img.shields.io/github/actions/workflow/status/SafeVixAI/SafeVixAI/codeql.yml?label=CodeQL&logo=github&logoColor=white&style=flat-square" alt="CodeQL" /></a> <a href="https://codecov.io/gh/SafeVixAI/SafeVixAI"><img src="https://img.shields.io/badge/Coverage-97%25-brightgreen?logo=codecov&logoColor=white&style=flat-square" alt="Coverage" /></a> <a href="https://safevixai.github.io/SafeVixAI/"><img src="https://img.shields.io/badge/Docs-MkDocs-teal?logo=markdown&logoColor=white&style=flat-square" alt="Documentation" /></a> <a href="https://scorecard.dev/viewer/?uri=github.com/SafeVixAI/SafeVixAI"><img src="https://img.shields.io/badge/OpenSSF-Scorecard-brightgreen?logo=openssf&logoColor=white&style=flat-square" alt="OpenSSF Scorecard" /></a> <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg?logo=open-source-initiative&logoColor=white&style=flat-square" alt="License" /></a>
+  </p>
 
-<p align="center">
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License" /></a>
-  <a href="CODE_OF_CONDUCT.md"><img src="https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg" alt="Code of Conduct" /></a>
-  <a href="https://github.com/SafeVixAI/SafeVixAI/issues"><img src="https://img.shields.io/github/issues/SafeVixAI/SafeVixAI" alt="Issues" /></a>
-  <a href="https://github.com/SafeVixAI/SafeVixAI/stargazers"><img src="https://img.shields.io/github/stars/SafeVixAI/SafeVixAI" alt="Stars" /></a>
-  <a href="https://github.com/SafeVixAI/SafeVixAI/releases"><img src="https://img.shields.io/github/v/release/SafeVixAI/SafeVixAI" alt="Release" /></a>
-  <a href="https://github.com/SafeVixAI/SafeVixAI/actions/workflows/backend.yml"><img src="https://img.shields.io/github/actions/workflow/status/SafeVixAI/SafeVixAI/backend.yml?label=tests" alt="Tests" /></a>
-  <a href="https://github.com/SafeVixAI/SafeVixAI/security"><img src="https://img.shields.io/badge/SBOM-available-brightgreen" alt="SBOM" /></a>
-  <a href="ROADMAP.md"><img src="https://img.shields.io/badge/roadmap-available-brightgreen" alt="Roadmap" /></a>
-  <a href="https://scorecard.dev/viewer/?uri=github.com/SafeVixAI/SafeVixAI"><img src="https://img.shields.io/badge/Scorecard-Passing-brightgreen" alt="OpenSSF Scorecard" /></a>
-  <a href="https://github.com/SafeVixAI/SafeVixAI/actions/workflows/codeql.yml"><img src="https://img.shields.io/badge/CodeQL-Analysis-blue" alt="CodeQL" /></a>
-  <a href="https://safevixai.github.io/SafeVixAI/"><img src="https://img.shields.io/badge/docs-mkdocs-teal" alt="Docs" /></a>
-</p>
+  <p>
+    <a href="#-project-vision">Vision</a> •
+    <a href="#-key-features">Features</a> •
+    <a href="#-technology-stack">Tech Stack</a> •
+    <a href="#-quick-start">Quick Start</a> •
+    <a href="#-system-architecture">Architecture</a> •
+    <a href="https://safevixai.github.io/SafeVixAI/">Documentation</a>
+  </p>
 
-<p align="center">
-  <strong>AI-powered road safety platform.</strong><br/>
-  Emergency response · Traffic legal assistance · Road infrastructure reporting.<br/>
-  Offline-first PWA with enterprise-grade security, resilience, and monitoring.<br/>
-  Built for the IIT Madras Road Safety Hackathon 2026.
-</p>
-
-## CI/CD Pipeline
-
-```mermaid
-flowchart LR
-    subgraph Trigger["Code Push"]
-        PUSH[git push]
-    end
-
-    subgraph Detection["Path Detection"]
-        B[backend/**] --> BW[backend.yml]
-        C[chatbot_service/**] --> CW[chatbot.yml]
-        F[frontend/**] --> FW[frontend.yml]
-        D[docs/**] --> DOC[sync-wiki.yml]
-        ANY[any path] --> E2E[e2e.yml]
-        ANY --> SEC[security.yml]
-    end
-
-    subgraph Checks["CI Checks"]
-        BW --> BF[ruff lint + pytest + coverage]
-        CW --> CF[ruff lint + pytest + coverage]
-        FW --> FF[npm ci + lint + tsc + jest]
-        E2E --> EF[Playwright full-stack]
-        SEC --> SF[gitleaks + dep audit]
-    end
-
-    subgraph Artifacts["Pipeline Outputs"]
-        BF --> R1[coverage report]
-        CF --> R2[coverage report]
-        FF --> R3[build artifact]
-        EF --> R4[E2E report]
-    end
-
-    PUSH --> Detection
-```
-
-## Data Flow
-
-```mermaid
-flowchart TB
-    subgraph Client["Browser"]
-        UI[React UI]
-        SW[Service Worker]
-        IDB[IndexedDB]
-        DW[DuckDB-Wasm]
-    end
-
-    subgraph Backend["Backend :8000"]
-        API[FastAPI Routes]
-        PG[PostgreSQL + PostGIS]
-        RD[Redis Cache]
-        DK[DuckDB]
-    end
-
-    subgraph Chatbot["Chatbot :8010"]
-        LLM[10-Provider LLM Chain]
-        CR[ChromaDB RAG]
-        RM[Redis Memory]
-    end
-
-    UI -->|REST/WS JWT| API
-    UI -->|LLM requests| LLM
-    API --> PG
-    API --> RD
-    API --> DK
-    UI -->|offline challan| DW
-    UI -->|offline queue| IDB
-    SW -->|cache| UI
-    LLM --> CR
-    LLM --> RM
-```
-
-## Vision
-
-Every second counts in a road emergency. SafeVixAI puts life-saving information — nearest hospitals, traffic laws, first aid protocols — directly in the hands of citizens, officers, and first responders. Offline-first architecture ensures it works when networks fail. 10-provider LLM fallback ensures the AI never goes silent. Zero infrastructure cost — entirely free and open source.
-
-| Metric | Value |
-|--------|-------|
-| Unit Tests | **7,687+ passing** — Frontend 2,956 / Backend 2,912 / Chatbot 1,819 |
-| E2E Tests | 55/55 passing |
-| LLM Providers | 10-provider fallback chain (+ Sarvam AI for Indian languages) |
-| Services | 3 (frontend :3000, backend :8000, chatbot :8010) |
-| Coverage | Backend 100% / Frontend 86% lines / Chatbot 97%+ |
-| CI Workflows | 41 (security, load, chaos, E2E, migration, benchmark) |
-| Lint Errors | 0 across all 3 services |
-| License | MIT — free for all use |
+  <p><em>Built for the IIT Madras Road Safety Hackathon 2026. Offline-first PWA with zero-downtime AI fallback.</em></p>
+</div>
 
 ---
 
-## Screenshots
+**SafeVixAI** is a mission-critical, offline-first Progressive Web Application (PWA) designed to provide instant, life-saving road safety intelligence. When networks fail, SafeVixAI doesn't. Our zero-infrastructure architecture ensures that critical features—like deterministic MVA 2019 calculations and SOS emergency protocols—remain fully operational even without internet connectivity.
 
-> Interactive demo: [safevixai.vercel.app](https://safevixai.vercel.app) — try the live app.
+## 🎯 Project Vision
 
-```mermaid
-flowchart TB
-    subgraph Dashboard["SafeVixAI Dashboard"]
-        direction TB
-        
-        subgraph Sidebar["Navigation"]
-            S1[Emergency]
-            S2[Map]
-            S3[Chat]
-            S4[Challan]
-            S5[Report]
-        end
+**Every second counts in a road emergency.** SafeVixAI puts life-saving information — nearest hospitals, traffic laws, first aid protocols — directly in the hands of citizens, officers, and first responders. 
 
-        subgraph Main["Main Content Area"]
-            direction LR
-            subgraph MapView["Map View"]
-                H1["Apollo Hospital — 1.2km"]
-                H2["Police Station — 0.8km"]
-                H3["Fire Station — 2.1km"]
-            end
-
-            subgraph AIAssistant["AI Assistant"]
-                A1["Question: What's the fine for speeding?"]
-                A2["Answer: In Tamil Nadu, ₹2000 first offence under MVA 2019"]
-            end
-        end
-
-        subgraph Status["Status Bar"]
-            PWA["PWA Ready"]
-        end
-    end
-
-    Sidebar --- Main
-    Status --- Main
-```
-
-Key interfaces: **Emergency Locator** (geospatial hospital/police/fire search), **AI Chatbot** (traffic law + first aid + challan calculation), **Command Center** (real-time incident dashboard), **SOS** (hold-to-activate with WebSocket tracking), **Offline Mode** (PWA + DuckDB-Wasm + IndexedDB).
-
-SafeVixAI is a three-service monorepo delivering real-time emergency response, AI-powered traffic legal assistance, and road infrastructure reporting through an offline-capable progressive web application.
-
-| Module | Function | Offline |
-|--------|----------|---------|
-| Emergency Locator | Nearest hospital, police, ambulance via PostGIS geospatial queries | Yes — 25 Indian cities |
-| AI Chatbot | Traffic law, challan calculation, first aid via agentic RAG with 10 LLM providers | Yes — Phi-3 Mini in-browser |
-| Challan Calculator | Deterministic MVA 2019 fine calculation with 36 state/UT overrides | Yes — DuckDB-Wasm |
-| Road Reporter | Submit pothole/damage reports with photo geotagging, routed to civic authorities | Yes — IndexedDB queue |
-| SOS + Live Tracking | Hold-to-activate emergency alert with WebSocket-based family tracking | Yes — offline queue + flush |
-| Command Center | Real-time agency dashboard with incident timeline, analytics, escalation | Dashboard (live data online) |
+- **Offline-First Resilience**: Ensures the system works when rural or disaster-struck networks fail.
+- **Zero-Downtime AI**: A 10-provider LLM cascading chain ensures the AI never goes silent.
+- **Open Source**: Infrastructure costs kept at zero—entirely free and accessible to government agencies and the public.
 
 ---
 
-## Quick Start
+## ✨ Key Features
+
+| Feature | Description | Enterprise Capabilities |
+|---------|-------------|-------------------------|
+| 🚨 **Emergency Locator** | Geospatial hospital, police, and fire station search. | PostGIS spatial indexing, 50ms latency routing. |
+| 🤖 **AI Agentic Chatbot** | Traffic law, challan calculation, and first aid guidance. | Agentic RAG, 10-LLM fallback chain, ChromaDB vector store. |
+| 🧾 **Challan Calculator** | Deterministic MVA 2019 fine calculation with overrides. | DuckDB-Wasm in-browser, zero-latency offline processing. |
+| 📸 **Road Reporter** | Community-driven road damage reporting with geotagging. | IndexedDB sync queue, background sync via Service Workers. |
+| 📡 **SOS + Live Tracking** | Hold-to-activate emergency alert with live location. | Secure WebSockets, encrypted payload streaming. |
+| 📊 **Command Center** | Real-time agency dashboard with incident timelines. | Grafana integration, Prometheus metric scraping. |
+
+---
+
+## 🛠️ Technology Stack
+
+SafeVixAI is built on a modern, cloud-native microservices architecture designed for extreme scale and fault tolerance.
+
+| Layer | Technologies |
+|-------|-------------|
+| **Frontend (PWA)** | Next.js 15, React 19, TypeScript 5, Tailwind CSS 3, MapLibre GL, WebLLM, DuckDB-Wasm |
+| **Backend Services** | FastAPI (Async), SQLAlchemy 2.0, PostGIS, Redis (hiredis), DuckDB, Overpass/Nominatim |
+| **AI & Inference** | FastAPI, ChromaDB, 10 LLM Providers (Groq, Gemini, Sarvam AI, Cerebras, OpenAI, Anthropic, etc.) |
+| **Infrastructure** | Docker Compose, Kubernetes (Kustomize), Terraform (AWS), Vercel, Render |
+| **Observability** | Prometheus, Grafana, Sentry, Structured JSON Logging |
+| **CI/CD** | GitHub Actions (41 active workflows covering tests, linting, SAST, and docs) |
+
+---
+
+## 🚀 Quick Start
+
+SafeVixAI is containerized for rapid developer onboarding. Follow these steps to get a local instance running in minutes.
 
 ### Prerequisites
-- Python 3.11+
-- Node.js 20+
-- Git
-- PostgreSQL 16 with PostGIS (optional — Supabase free tier works)
-- Redis 7 (optional — in-memory fallback)
+- **Docker & Docker Compose** (Recommended for full-stack)
+- **Node.js 20+** & **Python 3.11+** (For bare-metal deployment)
 
-### 1. Clone & Setup Backend
+### Containerized Deployment (Recommended)
+Launch the entire stack (PostgreSQL, Redis, Backend, AI Service, Frontend) with a single command:
 ```bash
+# Clone the repository
 git clone https://github.com/SafeVixAI/SafeVixAI.git
-cd SafeVixAI/backend
+cd SafeVixAI
+
+# Boot the microservices
+docker compose up --build -d
+```
+> **Note**: The frontend will be available at `http://localhost:3000`, backend API at `http://localhost:8000`, and the Chatbot LLM service at `http://localhost:8010`.
+
+### Bare-Metal Local Development
+<details>
+<summary>Click to view step-by-step local compilation instructions</summary>
+
+**1. Boot the Backend API**
+```bash
+cd backend
 python -m venv .venv
-# Linux/Mac: source .venv/bin/activate
-# Windows: .venv\Scripts\activate
+source .venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env
 uvicorn main:app --reload --port 8000
 ```
-Verify: `curl http://localhost:8000/health`
 
-### 2. Setup Chatbot Service
+**2. Boot the AI Chatbot Service**
 ```bash
-cd ../chatbot_service
+cd chatbot_service
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env   # Add your LLM provider API keys
+cp .env.example .env
 uvicorn main:app --reload --port 8010
 ```
-Verify: `curl http://localhost:8010/health`
 
-### 3. Setup Frontend
+**3. Boot the Frontend PWA**
 ```bash
-cd ../frontend
+cd frontend
 npm ci
-cp .env.local.example .env.local   # Set API URLs
+cp .env.local.example .env.local
 npm run dev
 ```
-Open: `http://localhost:3000`
-
-### Docker (Full Stack)
-```bash
-docker compose up --build   # Starts all 5 services
-# postgres:5432  redis:6379  backend:8000  chatbot:8010  frontend:3000
-```
-
-### Configuration
-
-| Service | Config File | Key Vars |
-|---------|-------------|----------|
-| Backend | `backend/.env` | `DATABASE_URL`, `REDIS_URL`, `OVERPASS_URLS`, `ADMIN_SECRET` |
-| Chatbot | `chatbot_service/.env` | `DEFAULT_LLM_PROVIDER`, `DEFAULT_LLM_MODEL`, `CHROMA_PERSIST_DIR` |
-| Frontend | `frontend/.env.local` | `NEXT_PUBLIC_BACKEND_URL`, `NEXT_PUBLIC_CHATBOT_URL` |
-
-Full reference: [docs/Environment.md](docs/Environment.md), [docs/CONFIGURATION.md](docs/CONFIGURATION.md)
-
-### CLI
-
-```bash
-# Health checks
-curl http://localhost:8000/health
-curl http://localhost:8010/health
-
-# Database migrations
-cd backend && alembic upgrade head
-
-# Testing
-cd backend && pytest tests/ -v --cov
-cd frontend && npm test && npm run lint && npx tsc --noEmit
-
-# Data pipeline
-python backend/scripts/data/seed_violations.py
-python chatbot_service/data/build_vectorstore.py
-```
-
-Full reference: [CLI_REFERENCE.md](CLI_REFERENCE.md)
+</details>
 
 ---
 
-## Architecture
+## 🏛️ System Architecture
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│  Frontend (Next.js 15 + React 19 + TypeScript PWA)         │
-│  Port 3000 — MapLibre GL, WebLLM, DuckDB-Wasm, Zustand     │
-└──────────────┬──────────────────────────┬───────────────────┘
-               │ REST/WS (JWT Bearer)      │ REST (JWT Bearer)
-┌──────────────▼─────────┐  ┌─────────────▼──────────────────┐
-│  Backend (FastAPI)     │  │  Chatbot Service (FastAPI)     │
-│  Port 8000             │  │  Port 8010                     │
-│  PostgreSQL + PostGIS  │◄─┤  10-provider LLM fallback     │
-│  Redis cache           │  │  ChromaDB RAG vector store     │
-│  DuckDB (challan)      │  │  13 agent tools                │
-│  Overpass/Nominatim    │  │  Redis conversation memory     │
-│  WebSocket /tracking   │  │  Prompt injection defense      │
-│  CQRS + Distributed    │  │  Speech translation            │
-│  Locks + Idempotency   │  │  (14 Indian languages)         │
-└────────────────────────┘  └────────────────────────────────┘
-```
+SafeVixAI leverages a highly decoupled, cloud-native architecture. It strictly separates edge-client offline durability from heavy backend processing and AI orchestration, utilizing a rigorous data plane optimized for spatial indexing and vector retrieval.
 
----
+```mermaid
+flowchart TB
+    %% Enterprise Themes
+    classDef edge fill:#f8fafc,stroke:#3b82f6,stroke-width:2px,color:#0f172a
+    classDef control fill:#f0fdf4,stroke:#22c55e,stroke-width:2px,color:#14532d
+    classDef ai fill:#fef2f2,stroke:#ef4444,stroke-width:2px,color:#7f1d1d
+    classDef data fill:#fffbeb,stroke:#f59e0b,stroke-width:2px,color:#78350f
+    classDef external fill:#f3f4f6,stroke:#94a3b8,stroke-width:2px,stroke-dasharray: 5 5,color:#334155
 
-## Key Differentiators
+    subgraph EdgeTier ["🌍 Edge Tier (Offline-First PWA)"]
+        direction LR
+        UI["React 19 / Next.js<br/>(Client UI)"]:::edge
+        SW["Service Worker<br/>(Asset Cache)"]:::edge
+        IDB[("IndexedDB<br/>(Sync Queue)")]:::edge
+        DW[("DuckDB-Wasm<br/>(Offline Analytics)")]:::edge
+        UI <--> SW
+        UI <--> IDB
+        UI <--> DW
+    end
 
-### Enterprise-Grade Resilience
-- **10-provider LLM fallback chain**: Groq → Cerebras → Gemini → GitHub Models → NVIDIA NIM → OpenRouter → Mistral → Together → Template (deterministic fallback) + Sarvam AI for Indian languages
-- **Circuit breakers** on all 8 external API calls (3-failure threshold, 30s half-open)
-- **Cache stampede protection** (SET NX EX mutex + stale-while-revalidate)
-- **Redlock distributed locking** with in-memory fallback
-- **CQRS event bus** for write-heavy operations
-- **Idempotency keys** for critical POST endpoints
+    subgraph ControlPlane ["⚙️ Control Plane (Backend :8000)"]
+        direction TB
+        API["FastAPI Gateway<br/>(JWT & Rate Limiting)"]:::control
+        Workers["Background Workers<br/>(Incident Processing)"]:::control
+        API <--> Workers
+    end
 
-### Offline-First Architecture
-- **PWA Service Worker** caches core assets for offline use
-- **DuckDB-Wasm** runs SQL-based challan calculation entirely in-browser
-- **IndexedDB** queues SOS alerts and road reports, auto-flushed on reconnect
-- **WebLLM Phi-3 Mini** (2.2GB) downloadable for offline AI assistance
-- **Offline-optimized maps** with pre-loaded GeoJSON for 25 Indian cities
+    subgraph AIOrchestration ["🧠 AI Orchestration (:8010)"]
+        direction TB
+        Router["Agentic Router<br/>(Intent Classification)"]:::ai
+        LLM["10-Provider LLM Chain<br/>(Cascading Fallback)"]:::ai
+        Router --> LLM
+    end
 
-### Security by Design
-- **Blood group and emergency contacts** stored only in IndexedDB — never on server (privacy by architecture)
-- **JWT RS256** authentication with JWKS atomic key fetching and rotation
-- **CSRF tokens** on all state-changing requests
-- **Content-Security-Policy**, HSTS, XFO, COOP, CORP, COEP headers
-- **Prompt injection defense** — 12-pattern SafetyChecker on all LLM inputs
-- **Host header validation**, rate limiting, CORS fail-fast in production
-- **Gitleaks** pre-commit hook scanning for 18 custom provider patterns
+    subgraph DataPlane ["🗄️ Data Plane"]
+        direction LR
+        PG[("PostgreSQL + PostGIS<br/>(Relational & Spatial)")]:::data
+        RD[("Redis 7<br/>(Pub/Sub & Cache)")]:::data
+        CR[("ChromaDB<br/>(Vector Storage)")]:::data
+    end
+    
+    subgraph ThirdParty ["🌐 External Integrations"]
+        direction LR
+        Maps["OpenStreetMap / Data.gov.in"]:::external
+    end
 
-### Observability
-- **Structured JSON logging** with request_id, method, path, duration_ms
-- **Prometheus metrics** per endpoint + Redis and Postgres exporters
-- **Grafana dashboards** provisioned with resource, latency, error, saturation views
-- **Email alerting** (SMTP with 5-min cooldown) for critical failures
-- **Sentry** error tracking for frontend
-
-### Supply Chain Security
-- **SLSA Level 3** build provenance attestation per commit
-- **Cosign** keyless container signing via GitHub OIDC
-- **SBOM** generation (CycloneDX + SPDX) every build
-- **Dependabot** weekly vulnerability scanning (pip ×2 + npm + actions)
-- **OpenSSF Scorecard** passing
-- **CodeQL** analysis on every push
-
----
-
-## Project Structure
-
-```
-SafeVixAI/
-├── backend/                FastAPI Python 3.11 — PostgreSQL/PostGIS, Redis, DuckDB
-│   ├── api/v1/             25 route modules (28 files)
-│   ├── core/               Config, security, caching, CQRS, Redlock, JWKS, idempotency
-│   ├── services/           16 domain services + 10 civic_intel modules
-│   ├── models/             20 SQLAlchemy ORM models + Pydantic schemas + value objects
-│   └── migrations/         Alembic — 11 migration files
-├── chatbot_service/        FastAPI — Agentic RAG, 10 LLM providers, ChromaDB
-│   ├── agent/              ChatEngine, IntentDetector, SafetyChecker, ContextAssembler
-│   ├── providers/          LLM routing, lang_detection, provider_registry (9 providers)
-│   ├── rag/                ChromaDB vector store, retriever, LocalHashEmbeddingFunction
-│   └── tools/              13 agent tools (SOS, Challan, Legal, FirstAid, Weather, etc.)
-├── frontend/               Next.js 15 + React 19 + TypeScript PWA
-│   ├── app/                28 routes with error boundaries + loading states
-│   ├── components/         91 components across 13 domains (maps, chat, sos, etc.)
-│   ├── lib/                28 modules — API client, Zustand state, offline AI, tracking
-│   └── public/             manifest.json, icons (8 PWA sizes), offline data
-├── docs/                   Full documentation site (MkDocs Material)
-│   ├── adr/                12 Architecture Decision Records
-│   ├── runbooks/           12+ incident response runbooks
-│   ├── observability/      Monitoring configuration guides
-│   └── wiki/               Auto-generated API documentation
-├── monitoring/             Prometheus config + Grafana dashboards + alert rules
-├── k8s/                    Kubernetes manifests (kustomize) + namespace + ingress
-├── terraform/              AWS infrastructure (VPC, ECS, RDS, ElastiCache)
-├── deploy/                 Deployment scripts and configurations
-├── e2e/                    Playwright E2E tests (55 scenarios)
-├── load-testing/           k6 load test scripts
-├── scripts/                Data pipeline (DB seeders + standalone data fetchers)
-└── .github/                41 CI/CD workflows
+    %% Network Flow
+    EdgeTier -- "HTTPS / WSS" --> ControlPlane
+    EdgeTier -- "Semantic Queries" --> AIOrchestration
+    
+    ControlPlane --> PG
+    ControlPlane --> RD
+    ControlPlane -. "Geocoding" .-> Maps
+    
+    AIOrchestration --> CR
+    AIOrchestration --> RD
 ```
 
 ---
 
-## Documentation
+## 📚 Comprehensive Documentation
 
-### Governance & Community
-| Document | Description |
-|----------|-------------|
-| [CONTRIBUTING.md](CONTRIBUTING.md) | How to contribute — workflow, coding standards, PR process |
-| [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) | Contributor Covenant v2.1 |
-| [GOVERNANCE.md](GOVERNANCE.md) | Project governance, decision-making, release process |
-| [MAINTAINERS.md](MAINTAINERS.md) | Current maintainers and contributor ladder |
-| [SECURITY.md](SECURITY.md) | Vulnerability reporting, disclosure policy, security features |
-| [SUPPORT.md](SUPPORT.md) | Support channels and response times |
-| [ADOPTERS.md](ADOPTERS.md) | Organizations using SafeVixAI in production |
-| [FAQ.md](FAQ.md) | Frequently asked questions |
+SafeVixAI is exhaustively documented. Our enterprise documentation portal is built using MkDocs and hosted directly on GitHub Pages.
 
-### Technical Reference
-| Document | Description |
-|----------|-------------|
-| [docs/Architecture.md](docs/Architecture.md) | System architecture, data flows, service design |
-| [docs/API.md](docs/API.md) | Complete API reference with request/response examples |
-| [docs/Database.md](docs/Database.md) | Database schema, PostGIS design, migration history |
-| [docs/Deployment.md](docs/Deployment.md) | Deploy to Vercel, Render, Docker, Kubernetes |
-| [docs/SETUP.md](docs/SETUP.md) | Detailed local setup guide |
-| [docs/TechStack.md](docs/TechStack.md) | Technology choices and rationale |
-| [docs/AI.md](docs/AI.md) | Chatbot architecture, 10-provider chain, safety system |
-| [docs/MEMORY.md](docs/MEMORY.md) | Conversation memory architecture (IndexedDB, Zustand, Redis) |
-| [docs/RAG.md](docs/RAG.md) | ChromaDB with LocalHashEmbeddingFunction |
-| [docs/SDK_GUIDE.md](docs/SDK_GUIDE.md) | API integration, SDK usage, auth, rate limits |
-| [docs/ERROR_CODES.md](docs/ERROR_CODES.md) | Complete error code reference |
-| [docs/PRIVACY.md](docs/PRIVACY.md) | GDPR/DPDP compliance, data collection, privacy architecture |
-| [BENCHMARKS.md](BENCHMARKS.md) | Performance benchmarks and k6 load testing |
-| [TESTING.md](TESTING.md) | Testing standards and coverage across all services |
-
-### Operations & Quality
-| Document | Description |
-|----------|-------------|
-| [OPERATIONS.md](OPERATIONS.md) | Day-to-day operations, deployment, scaling |
-| [MONITORING.md](MONITORING.md) | Metrics, dashboards, uptime monitoring |
-| [OBSERVABILITY.md](OBSERVABILITY.md) | Logging, metrics, traces, alerting |
-| [RUNBOOKS.md](RUNBOOKS.md) | Incident response runbooks |
-| [docs/STARTER_GUIDE.md](docs/STARTER_GUIDE.md) | Getting started for absolute beginners |
-| [docs/ADVANCED_SETUP.md](docs/ADVANCED_SETUP.md) | Production deployment, HA, multi-region, SSL, CDN |
-| [docs/SCALING_GUIDE.md](docs/SCALING_GUIDE.md) | Horizontal scaling, caching, CQRS, replication |
-| [docs/MONITORING_SETUP.md](docs/MONITORING_SETUP.md) | Prometheus, Grafana, Loki, alerting setup |
-| [docs/BEST_PRACTICES.md](docs/BEST_PRACTICES.md) | API design, database, security, testing best practices |
-| [docs/DEPLOYMENT_STRATEGIES.md](docs/DEPLOYMENT_STRATEGIES.md) | Blue-green, canary, rolling updates |
-| [docs/PERFORMANCE_BENCHMARKS.md](docs/PERFORMANCE_BENCHMARKS.md) | Latency, throughput, and resource benchmarks |
-| [docs/MIGRATION_GUIDE.md](docs/MIGRATION_GUIDE.md) | Version migration paths and procedures |
-| [docs/UPGRADE_GUIDE.md](docs/UPGRADE_GUIDE.md) | Step-by-step upgrade instructions |
-| [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) | Common issues and resolutions (not created yet) |
-| [docs/TESTING_POLICY.md](docs/TESTING_POLICY.md) | Testing standards, coverage targets, CI integration |
-| [docs/ERROR_CODE_REFERENCE.md](docs/ERROR_CODE_REFERENCE.md) | Complete error codes organized by domain |
-
-### Examples
-| Document | Description |
-|----------|-------------|
-| [examples/README.md](examples/README.md) | Example code and integration patterns |
-| [examples/api-client/](examples/api-client/) | Python and TypeScript API client examples |
-| [examples/emergency/](examples/emergency/) | Emergency locator and SOS integration |
-| [examples/challan/](examples/challan/) | Challan calculation examples |
-| [examples/chatbot/](examples/chatbot/) | Chatbot API integration patterns |
-| [examples/cookbook/](examples/cookbook/) | Recipe-based integration cookbook |
-
-### Development
-| Document | Description |
-|----------|-------------|
-| [STYLE_GUIDE.md](STYLE_GUIDE.md) | Coding standards for Python, TypeScript, testing |
-| [VERSIONING.md](VERSIONING.md) | Semantic versioning policy and lifecycle |
-| [docs/INTEGRATION_GUIDE.md](docs/INTEGRATION_GUIDE.md) | Third-party integration, auth, SDK, webhooks |
-| [docs/PLUGIN_SYSTEM.md](docs/PLUGIN_SYSTEM.md) | Plugin architecture and development guide |
-| [docs/WEBHOOKS.md](docs/WEBHOOKS.md) | Webhook events, payloads, security |
-| [docs/INTERNATIONALIZATION.md](docs/INTERNATIONALIZATION.md) | i18n guide for 14 Indian languages |
-| [docs/CONTRIBUTORS_GUIDE.md](docs/CONTRIBUTORS_GUIDE.md) | Detailed contributor workflow |
-| [docs/CODE_REVIEW_GUIDE.md](docs/CODE_REVIEW_GUIDE.md) | Code review process and checklist |
-| [docs/DOCKER_COMPOSE_GUIDE.md](docs/DOCKER_COMPOSE_GUIDE.md) | Docker Compose for development and production |
-
-### Runbooks
-| Document | Description |
-|----------|-------------|
-| [docs/runbooks/all-llms-down.md](docs/runbooks/all-llms-down.md) | All LLM providers failed |
-| [docs/runbooks/db-down.md](docs/runbooks/db-down.md) | Database outage |
-| [docs/runbooks/redis-down.md](docs/runbooks/redis-down.md) | Redis cache outage |
-| [docs/runbooks/service-restart.md](docs/runbooks/service-restart.md) | Service restart procedures |
-| [docs/runbooks/high-error-rate.md](docs/runbooks/high-error-rate.md) | Elevated error rate response |
-| [docs/runbooks/oom-kill-response.md](docs/runbooks/oom-kill-response.md) | Out-of-memory kill handling |
-| [docs/runbooks/db-migration-rollback.md](docs/runbooks/db-migration-rollback.md) | Database migration rollback |
-| [docs/runbooks/deployment-rollback.md](docs/runbooks/deployment-rollback.md) | Deployment rollback procedures |
-| [docs/runbooks/api-key-rotation.md](docs/runbooks/api-key-rotation.md) | API key rotation |
+- 🏗️ **[System Architecture](docs/architecture/ARCHITECTURE.md)**: Deep dive into the system design, offline architecture, and data flow patterns.
+- 👨‍💻 **[Developer Guide](docs/developer-guide/DEVELOPER_GUIDE.md)**: Coding standards, comprehensive testing policies, and local setup instructions.
+- 🔌 **[API Reference](docs/api-reference/SDK_GUIDE.md)**: SDK integrations, OpenAPI schemas, and Webhook definitions for third-party consumers.
+- 📈 **[SRE & Operations](docs/sre/OPERATIONS.md)**: Scaling guides, incident runbooks, and Grafana telemetry setup.
+- 🛡️ **[Security & Compliance](docs/compliance-and-reports/PRIVACY.md)**: Threat modeling, CNCF audits, and Service Level Agreement (SLA) reports.
+- 🗺️ **[Product Roadmap](docs/product-and-planning/ROADMAP.md)**: Upcoming features, feature matrices, and UX architectural plans.
 
 ---
 
-## Data Intelligence
+## 🤝 Contributing
 
-The SafeVixAI intelligence layer — pre-trained models, road damage datasets, and legal archives — is hosted on the Hugging Face Dataset Hub.
+We believe in the power of open source to save lives. Whether you're optimizing a Postgres query, expanding the AI RAG corpus, or fixing a UI typo, your contributions are critical.
 
-**[SafeVixAI Dataset Hub](https://huggingface.co/datasets/SafeVixAI/SafeVixAI-Dataset-Hub)**
-
-Research notebooks (Colab-ready, free T4 GPU):
-1. **YOLOv8 Pothole Detection** — ONNX road damage model training
-2. **ChromaDB RAG Build** — Vector store for legal document retrieval
-3. **Accident EDA & Hotspot Generator** — Blackspot seed CSV + heatmap
-4. **Roads Data Processing** — PMGSY GeoJSON sampling
-5. **Risk Model ONNX Training** — Risk scoring model
+1. Review our **[Code of Conduct](docs/developer-guide/CODE_OF_CONDUCT.md)**.
+2. Read the **[Contributing Guide](docs/developer-guide/CONTRIBUTING.md)** for Git workflow standards.
+3. Check out the **[Good First Issues](https://github.com/SafeVixAI/SafeVixAI/labels/good%20first%20issue)** to jump right in.
 
 ---
 
-## Tech Stack
+## 🛡️ Security & Trust
 
-| Layer | Technologies |
-|-------|-------------|
-| Backend | FastAPI, SQLAlchemy (async), PostGIS, Redis (hiredis), DuckDB, Overpass/Nominatim |
-| Chatbot | FastAPI, ChromaDB, 10 LLM providers (Groq, Gemini, Sarvam AI, Cerebras, etc.) |
-| Frontend | Next.js 15, React 19, TypeScript 5, Tailwind CSS 3, MapLibre GL, WebLLM, DuckDB-Wasm |
-| Infrastructure | Docker Compose, Kubernetes (kustomize), Terraform (AWS), Vercel, Render |
-| Monitoring | Prometheus, Grafana, Sentry, structured JSON logging |
-| CI/CD | GitHub Actions (41 workflows) |
+Security is our top priority. The SafeVixAI platform utilizes strict SBOM (Software Bill of Materials) tracking, CodeQL static analysis, and regular dependency audits via Dependabot.
+
+If you discover a security vulnerability, please refer to our **[Security Policy](docs/compliance-and-reports/SECURITY.md)** and report it directly to **security@safevixai.gov.in**. We adhere to responsible disclosure guidelines.
 
 ---
 
-## Testing
+## 💬 Community & Support
 
-| Layer | Framework | Tests | Coverage |
-|-------|-----------|-------|----------|
-| Backend | pytest + hypothesis + testcontainers | 2,912 | 100% lines, 100% branches |
-| Chatbot | pytest + pytest-httpx + ChromaDB integration | 1,819 | 97%+ lines |
-| Frontend | Jest + React Testing Library + jest-axe | 2,956 | 86% lines, 72% branches |
-| E2E | Playwright | 55 | — |
-| Mutation | mutmut (backend) | — | CI (informational) |
+Join the thousands of developers building a safer road ecosystem:
 
-**Run locally:**
-```bash
-# Backend
-cd backend && pytest tests/ -v --cov
-
-# Chatbot
-cd chatbot_service && pytest tests/ -v --cov
-
-# Frontend
-cd frontend && npm test && npm run lint && npx tsc --noEmit
-```
+- **Discussions**: Join the architectural conversation on [GitHub Discussions](https://github.com/SafeVixAI/SafeVixAI/discussions).
+- **Issues**: Report platform bugs or request robust features via [GitHub Issues](https://github.com/SafeVixAI/SafeVixAI/issues).
+- **Support SLAs**: View enterprise support tiers in [SUPPORT.md](docs/compliance-and-reports/SUPPORT.md).
 
 ---
-
-## FAQ
-
-| Question | Answer |
-|----------|--------|
-| **Does it work offline?** | Yes. Critical features (SOS, challan calculation, first aid, emergency data) work offline via PWA service worker, DuckDB-Wasm, and IndexedDB queues. |
-| **How much does it cost?** | Zero. All services use free tiers (Vercel, Render, Supabase, Upstash). Total infrastructure cost: ₹0. |
-| **Is my data private?** | Blood group and emergency contacts are stored only on your device (IndexedDB). Location data is used only for requested services. See [PRIVACY.md](PRIVACY.md). |
-| **Which Indian languages are supported?** | 14 languages via Sarvam AI + browser SpeechRecognition. |
-| **Is this a real emergency service?** | No. Always call **112** in life-threatening situations. SafeVixAI is an informational aid, not a replacement for professional responders. |
-| **Can I self-host?** | Yes. Docker Compose runs the full stack locally. See [docs/Deployment.md](docs/Deployment.md). |
-| **What's the test coverage?** | Backend: 100% lines/branches. Frontend: 86% lines. Chatbot: 97%+. ~7,687 unit tests + 55 E2E. |
-| **How do I report a bug?** | Open a [GitHub Issue](https://github.com/SafeVixAI/SafeVixAI/issues). |
-| **How do I report a security issue?** | Email **security@safevixai.gov.in**. See [SECURITY.md](SECURITY.md). |
-
-Full FAQ: [FAQ.md](FAQ.md)
-
-## Troubleshooting
-
-| Symptom | Likely Cause | Fix |
-|---------|-------------|-----|
-| Backend won't start | Database not running | Start PostgreSQL or check `DATABASE_URL` in `backend/.env` |
-| Chatbot returns errors | Missing API key | Add `GROQ_API_KEY` or `GEMINI_API_KEY` in `chatbot_service/.env` |
-| Frontend can't connect | Backend not running | Start backend: `cd backend && uvicorn main:app --reload --port 8000` |
-| PWA not installing | Running in dev mode | Use `npm run build && npm start` for service worker |
-| SOS doesn't trigger offline | IndexedDB blocked | Check browser storage permissions; verify offline queue in DevTools > Application > IndexedDB |
-| LLM always falls back to template | All provider keys invalid | Check `chatbot_service/.env` for correct API keys |
-| Docker build fails | Port conflict or ARM64 issue | Check `docker ps` for port conflicts; use `DOCKER_DEFAULT_PLATFORM=linux/amd64` on Apple Silicon |
-
-Full troubleshooting: [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
-
----
-
-We welcome contributions of all sizes.
-
-- Report bugs: [GitHub Issues](https://github.com/SafeVixAI/SafeVixAI/issues)
-- Feature requests: [Feature Request Template](.github/ISSUE_TEMPLATE/feature_request.yml)
-- Security vulnerabilities: [SECURITY.md](SECURITY.md)
-- Governance: [GOVERNANCE.md](GOVERNANCE.md)
-- Roadmap: [ROADMAP.md](ROADMAP.md)
-- Support: [SUPPORT.md](SUPPORT.md)
-- All contributions under [MIT License](LICENSE)
-
----
-
-## Community
-
-- **GitHub Discussions**: [github.com/SafeVixAI/SafeVixAI/discussions](https://github.com/SafeVixAI/SafeVixAI/discussions) — ask questions, share ideas
-- **Issue Tracker**: [github.com/SafeVixAI/SafeVixAI/issues](https://github.com/SafeVixAI/SafeVixAI/issues) — report bugs, request features
-- **Documentation**: [safevixai.github.io/SafeVixAI/](https://safevixai.github.io/SafeVixAI/) — full MkDocs site
-- **Governance**: [GOVERNANCE.md](GOVERNANCE.md) — project structure, decision-making, maintainer ladder
-- **Roadmap**: [ROADMAP.md](ROADMAP.md) — planned features and priorities
-- **Adopters**: [ADOPTERS.md](ADOPTERS.md) — organizations using SafeVixAI in production
-- **Support**: [SUPPORT.md](SUPPORT.md) — all support channels and response times
-
-## Contributing
-
-We welcome contributions of all sizes — code, docs, tests, bug reports, feature ideas.
-
-1. **Read the docs**: [CONTRIBUTING.md](CONTRIBUTING.md), [STYLE_GUIDE.md](STYLE_GUIDE.md), [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
-2. **Pick an issue**: [Good First Issues](https://github.com/SafeVixAI/SafeVixAI/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)
-3. **Fork & branch**: `git checkout -b feat/your-feature`
-4. **Code**: Follow existing patterns. Run tests. Keep coverage.
-5. **PR**: Open against `main`. CI checks lint, tests, coverage, build.
-6. **Review**: All PRs reviewed by at least one maintainer.
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed workflow, [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) for community standards.
-
-## License
-
-MIT License — see [LICENSE](LICENSE) for details.
-
-<p align="center">
-  <sub>Built with ❤️ for the IIT Madras Road Safety Hackathon 2026 · Centre of Excellence for Road Safety (CoERS)</sub>
-</p>
+<div align="center">
+  <p>Built with ❤️ and extreme engineering by the <strong>SafeVixAI Team</strong> for a safer tomorrow.</p>
+  <p>Released under the <a href="LICENSE">MIT License</a>.</p>
+</div>

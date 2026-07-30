@@ -122,6 +122,10 @@ const nextConfig = {
             key: 'X-DNS-Prefetch-Control',
             value: 'on',
           },
+          {
+            key: 'Content-Security-Policy',
+            value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://eu.posthog.com https://us.posthog.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https://images.unsplash.com https://picsum.photos https://source.unsplash.com https://unpkg.com https://nominatim.openstreetmap.org https://lh3.googleusercontent.com https://huggingface.co; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' wss: https:; worker-src 'self' blob:; frame-src 'self';",
+          },
         ],
       },
       {

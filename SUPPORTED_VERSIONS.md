@@ -9,6 +9,31 @@
 
 ---
 
+## Version Lifecycle
+
+```mermaid
+stateDiagram-v2
+    [*] --> Current
+    Current --> LTS : Major version bump
+    Current --> EOL : End of support
+    LTS --> EOL : 12 months
+
+    state Current {
+        [*] --> SecurityPatches
+        [*] --> BugFixes
+        [*] --> FeatureBackports
+    }
+
+    state LTS {
+        [*] --> CriticalPatches
+        CriticalPatches --> [*]
+    }
+
+    state EOL {
+        [*] --> NoUpdates
+    }
+```
+
 ## Support Policy
 
 - **Current releases** receive security patches, bug fixes, and feature backports.

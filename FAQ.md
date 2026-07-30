@@ -1,7 +1,88 @@
 ﻿# Frequently Asked Questions
 
-> **SafeVixAI** — AI-Powered Road Safety Platform  
+> **SafeVixAI** — AI-Powered Road Safety Platform
 > MIT License — IIT Madras Road Safety Hackathon 2026
+
+## FAQ Topic Map
+
+```mermaid
+mindmap
+  root((SafeVixAI FAQ))
+    About
+      What is SafeVixAI
+      Who built it
+      License
+      Cost
+    Features
+      Emergency Locator
+      AI Chatbot
+      Challan Calculator
+      Road Reporter
+      SOS
+      Bystander Mode
+    Tech Stack
+      Frontend
+      Backend
+      Chatbot Service
+      Database
+    Installation
+      Prerequisites
+      Quick Start
+      Docker
+    Configuration
+      Environment Variables
+      Redis
+      PostGIS
+    Deployment
+      Vercel
+      Render
+      Supabase
+    Security & Privacy
+      Data Protection
+      GDPR
+      JWT
+    Offline
+      PWA
+      DuckDB-Wasm
+      WebLLM
+      Offline Queues
+    Integration
+      REST API
+      WebSocket
+      MCP Server
+    Contributing
+      Bug Reports
+      Feature Requests
+      PR Process
+```
+
+## SOS Feature Workflow
+
+```mermaid
+flowchart TD
+    USER[User in Emergency] --> PRESS[Press & Hold SOS Button]
+    PRESS --> ANIM[2-second hold animation<br/>RAF + performance.now]
+
+    ANIM --> ACTIVATE{SOS Activated}
+
+    ACTIVATE --> GEO[Capture GPS Coordinates<br/>navigator.geolocation]
+
+    GEO --> ONLINE{Device Online?}
+
+    ONLINE -->|Yes| API[POST /api/v1/emergency/sos]
+    API --> DISPATCH[Create sos_incident record<br/>PostGIS point]
+    DISPATCH --> NOTIFY[Send SMS + WhatsApp<br/>to Emergency Contacts]
+    NOTIFY --> TRACKING[Start WebSocket Tracking<br/>ws://host/tracking/{group_id}]
+    TRACKING --> DONE[Dispatch Confirmed]
+
+    ONLINE -->|No| QUEUE[Enqueue in IndexedDB<br/>offline-sos-queue.ts]
+    QUEUE --> WAIT[Wait for online event]
+    WAIT --> FLUSH[Auto-flush on<br/>navigator.onLine]
+    FLUSH --> DISPATCH
+
+    DONE --> SHARE[Share Tracking URL<br/>with family members]
+    SHARE --> LIVE["Live Tracking Active<br/>(location every 5s)"]
+```
 
 ---
 
@@ -84,7 +165,7 @@ Run `docker compose up --build` from the project root. This starts all 5 service
 Each service has its own `.env` file. Backend uses `backend/.env`, chatbot uses `chatbot_service/.env`, frontend uses `frontend/.env.local`. See [AGENTS.md](./AGENTS.md) for the full variable reference.
 
 ### How do I configure the chatbot provider?
-Set `DEFAULT_LLM_PROVIDER` and `DEFAULT_LLM_MODEL` in `chatbot_service/.env`. The fallback chain is: Groq → Cerebras → Gemini → GitHub Models → NVIDIA NIM → OpenRouter → Mistral → Together → Template.
+Set `DEFAULT_LLM_PROVIDER` and `DEFAULT_LLM_MODEL` in `chatbot_service/.env`. The fallback chain is: Groq to Cerebras to Gemini to GitHub Models to NVIDIA NIM to OpenRouter to Mistral to Together to Template.
 
 ### How do I change the language?
 The app supports 14 Indian languages. Users can switch languages from the settings page. Language detection is automatic for chatbot queries.
@@ -168,7 +249,7 @@ Email **security@safevixai.gov.in**. Do not file a public issue. See [SECURITY.m
 
 ---
 
-*Last updated: 2026-07-26*
+*Last updated: 2026-07-29*
 
 ## Related
 

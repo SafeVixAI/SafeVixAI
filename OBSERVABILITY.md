@@ -4,6 +4,79 @@
 
 SafeVixAI provides production-grade observability with zero-cost tooling: structured JSON logging, Prometheus metrics, Grafana dashboards, and email alerting.
 
+## Three Pillars of Observability
+
+```mermaid
+flowchart TD
+    subgraph Logging["Pillar 1: Logging"]
+        L1[Structured JSON Logs<br/>NDJSON stdout]
+        L2[Consistent Fields<br/>timestamp, level, service<br/>request_id, duration_ms]
+        L3[Sentry Error Tracking<br/>0.05 sample rate]
+    end
+
+    subgraph Metrics["Pillar 2: Metrics"]
+        M1[Prometheus Collection<br/>/metrics endpoints]
+        M2[Grafana Dashboards<br/>Provisioned as code]
+        M3[Key Metrics<br/>HTTP rate, latency, errors<br/>DB pool, memory, cache]
+    end
+
+    subgraph Alerting["Pillar 3: Alerting"]
+        A1[Prometheus Alert Rules<br/>prometheus-rules.yml]
+        A2[Email Alerts<br/>SMTP with 5-min cooldown]
+        A3[Health Check Endpoints<br/>GET /health on each service]
+    end
+
+    Logging --> OBS[Full Observability]
+    Metrics --> OBS
+    Alerting --> OBS
+```
+
+## Structured Log Schema
+
+```mermaid
+classDiagram
+    class LogEntry {
+        +string timestamp
+        +string level
+        +string service
+        +string request_id
+        +string method
+        +string path
+        +int duration_ms
+        +int status_code
+        +string user_id
+        +string error
+        +object additional_fields
+    }
+
+    class BackendLog {
+        +string db_query
+        +float db_duration_ms
+        +float redis_hit_ratio
+        +string circuit_breaker_state
+    }
+
+    class ChatbotLog {
+        +string provider
+        +string model
+        +float provider_latency_ms
+        +string intent
+        +int context_tokens
+    }
+
+    class FrontendLog {
+        +string page
+        +string component
+        +float web_vital_cls
+        +float web_vital_lcp
+        +float web_vital_fid
+    }
+
+    LogEntry <|-- BackendLog
+    LogEntry <|-- ChatbotLog
+    LogEntry <|-- FrontendLog
+```
+
 ---
 
 ## Quick Links
@@ -18,8 +91,6 @@ SafeVixAI provides production-grade observability with zero-cost tooling: struct
 | Error Codes | [`ERROR_CODES.md`](ERROR_CODES.md) |
 
 ---
-
-## Three Pillars
 
 ### 1. Logging
 

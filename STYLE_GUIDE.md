@@ -5,6 +5,53 @@
 
 ---
 
+## Style Decision Tree
+
+```mermaid
+flowchart TB
+    FILE{What language?}
+    FILE -->|Python| PY[Python rules]
+    FILE -->|TypeScript/React| TS[TS/React rules]
+
+    PY --> PY_FMT{Formatter}
+    PY_FMT -->|Black| BLC[88 char line length]
+    PY --> PY_LINT{Ruff linter}
+    PY --> PY_TYPE{Type annotations}
+    PY_TYPE -->|Public func| TA[Required]
+    PY_TYPE -->|Python 3.11+| UNION["`str | None` over Optional[str]"]
+
+    TS --> TS_FMT{Formatter}
+    TS_FMT -->|ESLint + Prettier| PRT[Single quotes, semicolons]
+    TS --> TS_REACT{Component?}
+    TS_REACT -->|Interactive| CLIENT["`'use client'` directive"]
+    TS_REACT -->|Props| IFACE["`interface` over `type`"]
+
+    PY --> IMPORT{Import Order}
+    IMPORT --> STDLIB[stdlib → third-party → local]
+```
+
+## Import Ordering Rules
+
+```mermaid
+flowchart LR
+    subgraph StdLib["Standard Library"]
+        S1[os, sys, json]
+        S2[typing, datetime]
+    end
+
+    subgraph ThirdParty["Third-Party"]
+        T1[fastapi, sqlalchemy]
+        T2[pydantic, redis]
+    end
+
+    subgraph Local["Local"]
+        L1["`from core.config import Settings`"]
+        L2["`from models import User`"]
+    end
+
+    StdLib --> ThirdParty --> Local
+```
+
 ## Python (Backend & Chatbot)
 
 ### Formatting

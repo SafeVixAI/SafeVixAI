@@ -17,6 +17,38 @@ SafeVixAI provides:
 
 ## 3. NOT AN EMERGENCY SERVICE
 
+```mermaid
+flowchart TB
+    subgraph Important["CRITICAL: NOT AN EMERGENCY SERVICE"]
+        WARNING[⚠️ SafeVixAI is informational only]
+        CALL112["ALWAYS call 112<br/>India's unified emergency number"]
+        NEVER["NEVER delay contacting<br/>professional responders"]
+    end
+
+    subgraph Usage["How to Use"]
+        INFO[AI-generated info for reference]
+        VERIFY[Always verify with professionals]
+        AID[Supplemental tool, not primary response]
+    end
+
+    subgraph Legal["Your Responsibilities"]
+        ACCURATE[Provide accurate data]
+        NO_MISUSE[No false SOS alerts]
+        SECURE[Keep credentials safe]
+        COMPLY[Follow applicable laws]
+    end
+
+    WARNING --> CALL112
+    CALL112 --> NEVER
+    NEVER --> INFO
+    INFO --> VERIFY
+    VERIFY --> AID
+    AID --> ACCURATE
+    ACCURATE --> NO_MISUSE
+    NO_MISUSE --> SECURE
+    SECURE --> COMPLY
+```
+
 **SafeVixAI is NOT a replacement for professional emergency services.** Always call **112** (India's unified emergency number) in life-threatening situations. The Service provides informational tools and should never delay contacting professional responders.
 
 ## 4. AI Disclaimer

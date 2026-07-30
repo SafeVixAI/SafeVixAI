@@ -20,6 +20,21 @@ Formal benchmarks for all SafeVixAI services, measured via k6 load testing and p
 
 ## Service Level Targets
 
+```mermaid
+flowchart LR
+    subgraph BackendSLAs["Backend SLAs"]
+        H["/health<br/>1000 rps | 100ms"]
+        E["/emergency/nearby<br/>500 rps | 200ms"]
+        C["/challan/calculate<br/>200 rps | 300ms"]
+        R["/roadwatch/issues<br/>100 rps | 500ms"]
+    end
+
+    subgraph ChatbotSLAs["Chatbot SLAs"]
+        CH["/chat/<br/>20 rps | 5s"]
+        ST["/chat/stream<br/>10 rps | 30s"]
+    end
+```
+
 | Service | Endpoint | P95 Target | Throughput |
 |---------|----------|------------|------------|
 | Backend | `/health` | < 100ms | 1000 req/s |

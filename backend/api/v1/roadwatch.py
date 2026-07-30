@@ -319,7 +319,7 @@ async def get_complaint_timeline(
             actor_id=e.actor_id,
             actor_role=e.actor_role,
             notes=e.notes,
-            metadata=e.metadata or {},
+            metadata=e.event_metadata or {},
             created_at=e.created_at
         )
         for e in events

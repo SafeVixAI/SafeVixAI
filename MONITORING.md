@@ -2,7 +2,72 @@
 
 > **Metrics collection, dashboard setup, uptime monitoring, and performance tracking.**
 
-SafeVixAI uses Prometheus for metric collection and Grafana for visualization — both provisioned as code.
+SafeVixAI uses Prometheus for metric collection and Grafana for visualization - both provisioned as code.
+
+## Monitoring Stack
+
+```mermaid
+flowchart TD
+    subgraph Services["Instrumented Services"]
+        BE[Backend :8000<br/>/metrics endpoint]
+        CB[Chatbot :8010<br/>/metrics endpoint]
+        FE[Frontend :3000<br/>Web Vitals]
+    end
+
+    subgraph Collection["Metrics Collection"]
+        PROM[Prometheus<br/>Pull-based scraping]
+        PROM_CONFIG[prometheus-config.yml<br/>Scrape configs]
+    end
+
+    subgraph Visualization["Visualization & Alerting"]
+        GRAF[Grafana<br/>Provisioned dashboards]
+        ALERT[Alert Rules<br/>prometheus-rules.yml]
+        EMAIL[Email Alerts<br/>SMTP with 5-min cooldown]
+    end
+
+    subgraph Logs["Logging"]
+        STRUCT[Structured JSON Logs<br/>NDJSON stdout]
+        SENTRY[Sentry Error Tracking<br/>0.05 sample rate]
+    end
+
+    BE --> PROM
+    CB --> PROM
+    FE -->|RUM| SENTRY
+
+    PROM --> GRAF
+    PROM --> ALERT
+    ALERT --> EMAIL
+
+    BE --> STRUCT
+    CB --> STRUCT
+    FE --> SENTRY
+```
+
+## Alert Lifecycle
+
+```mermaid
+stateDiagram-v2
+    [*] --> OK: All thresholds normal
+
+    OK --> Pending: Metric exceeds threshold<br/>(within 1m window)
+    Pending --> Firing: Threshold exceeded for 5m
+
+    Firing --> Alerting: Send notification
+    Alerting --> Acknowledged: Operator acknowledges
+
+    Acknowledged --> Investigating: Operator investigates
+    Investigating --> Resolved: Root cause fixed
+    Resolved --> OK: Metrics return to normal
+
+    Firing --> OK: Metric recovers<br/>(auto-resolve)
+    Alerting --> OK: False alarm
+
+    note right of Firing
+        Triggers: email alert
+        Channels: SMTP
+        Cooldown: 5 minutes
+    end note
+```
 
 ---
 

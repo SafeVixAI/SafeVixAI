@@ -183,6 +183,52 @@
 
 ---
 
+## Go/No-Go Decision Process
+
+```mermaid
+flowchart TB
+    START[RC Assessment] --> T1{Tests Passing?}
+    T1 -->|Yes| T2{Coverage Thresholds Met?}
+    T1 -->|No| NOGO[NO-GO]
+
+    T2 -->|Yes| T3{Build Successful?}
+    T2 -->|No| NOGO
+
+    T3 -->|Yes| T4{P0/P1 Blockers?}
+    T3 -->|No| NOGO
+
+    T4 -->|None| GO[GO - Release]
+    T4 -->|Has Blockers| B1{Blocker Type?}
+
+    B1 -->|P0: Critical| NOGO
+    B1 -->|P1: Minor| COND[CONDITIONAL GO]
+    COND --> GO
+
+    GO --> VERIFY[CI Workflows]
+    VERIFY --> TAG[Create GitHub Tag]
+```
+
+## Release Readiness Stages
+
+```mermaid
+stateDiagram-v2
+    [*] --> Development
+    Development --> Alpha : Feature complete
+    Alpha --> Beta : Test coverage met
+    Beta --> RC : All P0 fixed
+
+    RC --> RC_Assessment : Readiness review
+    RC_Assessment --> Ready : All checks pass
+    RC_Assessment --> Blocked : P0/P1 blockers
+
+    Blocked --> Development : Fix blockers
+
+    Ready --> Released : Tag & deploy
+    Released --> Current : Stable release
+    Current --> LTS : 12 month window
+    LTS --> EOL : End of life
+```
+
 ## 8. GO / NO-GO RECOMMENDATION
 
 ### ✅ GO

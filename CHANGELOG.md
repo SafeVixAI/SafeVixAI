@@ -2,6 +2,57 @@
 
 All notable changes to SafeVixAI are documented here in [Keep a Changelog](https://keepachangelog.com/) format.
 
+## Release Timeline
+
+```mermaid
+gantt
+    title SafeVixAI Version History
+    dateFormat  YYYY-MM-DD
+    axisFormat  %b %d
+
+    section Development
+    0.x (Prototype)        :2026-06-01, 2026-06-09
+    Alpha builds           :2026-06-09, 2026-06-30
+
+    section Alpha Testing
+    v1.0.0-alpha (Jun 22)  :milestone, 2026-06-22, 0d
+    v1.0.0-alpha (Jun 23)  :milestone, 2026-06-23, 0d
+    v1.0.0-alpha (Jun 25)  :milestone, 2026-06-25, 0d
+    v1.0.0-alpha (Jun 27)  :milestone, 2026-06-27, 0d
+    v1.0.0-alpha (Jun 28)  :milestone, 2026-06-28, 0d
+    v1.0.0-alpha (Jun 30)  :milestone, 2026-06-30, 0d
+    v1.0.0-alpha (Jul 06)  :milestone, 2026-07-06, 0d
+    v1.0.0-alpha (Jul 08)  :milestone, 2026-07-08, 0d
+
+    section Release Candidate
+    RC readiness           :2026-07-08, 2026-07-20
+    v1.0.0-rc.1            :milestone, 2026-07-20, 0d
+
+    section Stable
+    v1.0.0 (Current)       :2026-07-20, 2026-07-29
+```
+
+## Release Branch Strategy
+
+```mermaid
+gitGraph
+    commit id: "initial dev"
+    branch feat/coverage-push
+    commit id: "add frontend tests"
+    checkout main
+    merge feat/coverage-push
+    branch feat/enterprise-hardening
+    commit id: "CQRS + Redlock"
+    commit id: "100% backend coverage"
+    checkout main
+    merge feat/enterprise-hardening
+    branch release/v1.0.0-rc
+    commit id: "RC readiness"
+    checkout main
+    merge release/v1.0.0-rc
+    commit id: "v1.0.0 release"
+```
+
 ## [1.0.0] — 2026-07-20
 
 ### Added

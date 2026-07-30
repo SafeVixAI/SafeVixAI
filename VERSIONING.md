@@ -84,7 +84,41 @@ Within a MAJOR version:
 
 ---
 
+## Version Bump Decision Tree
+
+```mermaid
+flowchart TB
+    CHANGE[Code Change] --> TYPE{Change Type?}
+
+    TYPE -->|Breaking API / DB Schema| MAJOR["MAJOR bump<br/>1.0.0 → 2.0.0"]
+    TYPE -->|New Feature / Deprecation| MINOR["MINOR bump<br/>1.0.0 → 1.1.0"]
+    TYPE -->|Bug Fix / Security Patch| PATCH["PATCH bump<br/>1.0.0 → 1.0.1"]
+
+    MAJOR --> NOTES[Announce migration path]
+    MINOR --> NOTES2[Add deprecation warnings]
+    PATCH --> NOTES3[Hotfix release]
+```
+
 ## Version Lifecycle
+
+```mermaid
+stateDiagram-v2
+    [*] --> Development
+    Development --> Alpha : Code complete
+    Alpha --> Beta : Feature freeze
+    Beta --> RC : All tests pass
+    RC --> Current : Release approval
+    Current --> LTS : Major version bumps
+    LTS --> EOL : 12 months after LTS start
+
+    note right of Development
+        Active development on main
+    end note
+
+    note right of LTS
+        Critical patches only
+    end note
+```
 
 | Stage | Description | Timeline |
 |-------|-------------|----------|

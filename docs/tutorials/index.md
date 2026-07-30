@@ -15,7 +15,7 @@ Step-by-step guides for common SafeVixAI tasks.
 
 Before starting any tutorial, ensure you have:
 
-1. A running SafeVixAI instance (see [Setup Guide](../SETUP.md))
+1. A running SafeVixAI instance (see [Setup Guide](../../SETUP.md))
 2. API access credentials (JWT token for authenticated endpoints)
 3. Basic familiarity with REST APIs and HTTP clients
 

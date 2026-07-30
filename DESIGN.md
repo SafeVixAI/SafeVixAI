@@ -99,6 +99,87 @@ Core rules:
 
 ---
 
+## Token System Architecture
+
+```mermaid
+flowchart LR
+    subgraph Primitive["Primitive Tokens"]
+        P1[--color-brand: #1A5C38]
+        P2[--color-emergency: #DC2626]
+        P3[--color-bg: #0A0E14]
+        P4[--font-sans: Inter Variable]
+    end
+
+    subgraph Semantic["Semantic Tokens"]
+        S1[--surface-1: card bg]
+        S2[--text-1: primary text]
+        S3[--border: subtle borders]
+        S4[--r-lg: 8px cards]
+    end
+
+    subgraph Component["Component Tokens"]
+        C1[Standard Card: bg surface-1, border border, r-lg]
+        C2[Emergency SOS: gradient, border-red, r-hero]
+        C3[Button Primary: bg brand, r-md]
+        C4[Filter Chip: bg dim, r-pill]
+    end
+
+    P1 --> S1
+    P2 --> S3
+    P3 --> S1
+    P4 --> S2
+    S1 --> C1
+    S1 --> C2
+    S2 --> C3
+    S3 --> C4
+```
+
+## GSAP Animation Flow
+
+```mermaid
+flowchart LR
+    A[Page Mount] --> B{prefers-reduced-motion?}
+    B -->|yes| C[Skip animation, show immediately]
+    B -->|no| D[gsap.fromTo: opacity 0→1]
+    D --> E[Stagger children by 0.05s]
+    E --> F[GPU-composited transform/opacity only]
+    F --> G[will-change managed on mount]
+    G --> H[Unmount: kill timeline, reset will-change]
+```
+
+## Component Hierarchy
+
+```mermaid
+flowchart TB
+    L[Layout] --> S[Sidebar]
+    L --> H[Header Bar]
+    L --> M[Main Content]
+    L --> B[Bottom Nav]
+
+    subgraph Sidebar2["Sidebar 192px"]
+        SN[Nav Items]
+        ED[Emergency Dial]
+    end
+
+    subgraph Main2["Main Content Area"]
+        MP[Map / Dashboard]
+        CH[Chat Interface]
+        FG[Form + Grid]
+    end
+
+    subgraph Bottom2["Bottom Nav 64px"]
+        T1[Map]
+        T2[Chat]
+        T3[Locator]
+        T4[Report]
+        T5[First Aid]
+    end
+
+    S --> Sidebar2
+    M --> Main2
+    B --> Bottom2
+```
+
 ## 1. Color Tokens
 
 ### Brand

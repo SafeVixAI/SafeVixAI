@@ -76,6 +76,9 @@ hooks:
   - docs/hooks/analytics.py
 
 extra:
+  version:
+    provider: mike
+    default: latest
   analytics:
     provider: custom
     feedback:
@@ -128,7 +131,14 @@ nav:
       - Starter Guide: STARTER_GUIDE.md
       - User Guide: USER_GUIDE.md
       - Quick Start: ../README.md
+      - Tutorials:
+          - Overview: tutorials/index.md
+          - SOS Setup: tutorials/sos-setup.md
+          - Challan Integration: tutorials/challan-integration.md
+          - Chatbot Customization: tutorials/chatbot-customization.md
       - Architecture: Architecture.md
+      - System Design: SYSTEM_DESIGN.md
+      - Developer Guide: DEVELOPER_GUIDE.md
       - Features: Features.md
       - Tech Stack: TechStack.md
   - AI & Agents:
@@ -142,6 +152,7 @@ nav:
       - Memory System: ../MEMORY.md
   - API & Developer:
       - API Overview: API.md
+      - CLI Reference: ../CLI_REFERENCE.md
       - SDK Guide: ../SDK_GUIDE.md
       - Integration Guide: INTEGRATION_GUIDE.md
       - Webhooks: WEBHOOKS.md

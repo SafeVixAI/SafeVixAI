@@ -2,6 +2,107 @@
 
 Complete guide to install dependencies and run both backend and frontend locally.
 
+## Architecture Overview
+
+```mermaid
+flowchart LR
+    subgraph DevEnv["Development Environment"]
+        T1[Terminal 1<br/>Backend :8000]
+        T2[Terminal 2<br/>Chatbot :8010]
+        T3[Terminal 3<br/>Frontend :3000]
+    end
+
+    subgraph Code["Source Code"]
+        BE_REPO[backend/<br/>FastAPI + SQLAlchemy]
+        CB_REPO[chatbot_service/<br/>FastAPI + ChromaDB]
+        FE_REPO[frontend/<br/>Next.js 15 + React 19]
+    end
+
+    subgraph Data["Data Layer"]
+        PG[PostgreSQL 16 + PostGIS<br/>Supabase / Local]
+        RD[Redis 7<br/>Upstash / Local]
+    end
+
+    T1 --> BE_REPO
+    T2 --> CB_REPO
+    T3 --> FE_REPO
+
+    BE_REPO --> PG
+    BE_REPO --> RD
+    CB_REPO --> RD
+    FE_REPO -->|REST/WS| BE_REPO
+    FE_REPO -->|REST| CB_REPO
+```
+
+## Setup Workflow
+
+```mermaid
+flowchart TD
+    START[Start] --> CLONE[git clone]
+    CLONE --> VERIFY{Node >= 20<br/>Python >= 3.11}
+
+    VERIFY -->|No| INSTALL_PRE[Install Prerequisites]
+    INSTALL_PRE --> VERIFY
+
+    VERIFY -->|Yes| BE_SETUP[Backend Setup]
+    BE_SETUP --> BE_VENV[Create .venv<br/>python -m venv .venv]
+    BE_VENV --> BE_ACTIVATE[Activate venv]
+    BE_ACTIVATE --> BE_PIP[pip install -r requirements.txt]
+    BE_PIP --> BE_ENV[cp .env.example .env<br/>Configure API keys]
+    BE_ENV --> BE_DB["Run migrations<br/>alembic upgrade head"]
+    BE_DB --> BE_RUN[uvicorn main:app<br/>--reload --port 8000]
+
+    VERIFY --> CB_SETUP[Chatbot Setup]
+    CB_SETUP --> CB_VENV[Create .venv<br/>python -m venv .venv]
+    CB_VENV --> CB_ACTIVATE[Activate venv]
+    CB_ACTIVATE --> CB_PIP[pip install -r requirements.txt]
+    CB_PIP --> CB_ENV[cp .env.example .env<br/>Configure LLM keys]
+    CB_ENV --> CB_RUN[uvicorn main:app<br/>--reload --port 8010]
+
+    VERIFY --> FE_SETUP[Frontend Setup]
+    FE_SETUP --> FE_NPM[npm ci]
+    FE_NPM --> FE_ENV[cp .env.example .env]
+    FE_ENV --> FE_RUN[npm run dev]
+
+    BE_RUN --> DONE[All 3 services running]
+    CB_RUN --> DONE
+    FE_RUN --> DONE
+
+    DONE --> VERIFY_HEALTH[Verify localhost:8000/health<br/>localhost:8010/health<br/>localhost:3000]
+```
+
+## Estimated Setup Times
+
+```mermaid
+gantt
+    title SafeVixAI Setup Timeline
+    dateFormat  mm
+    axisFormat %M min
+
+    section Prerequisites
+    Git Clone                 :0, 2m
+    Check Versions            :2m, 1m
+
+    section Backend
+    Create Virtual Env        :3m, 2m
+    pip install (3-5 min)      :5m, 10m
+    Configure .env             :15m, 3m
+    Database Migrations        :18m, 3m
+
+    section Chatbot Service
+    Create Virtual Env        :3m, 2m
+    pip install (incl torch)   :5m, 15m
+    Configure .env             :20m, 3m
+
+    section Frontend
+    npm ci (2-4 min)           :3m, 5m
+    Configure .env             :8m, 2m
+
+    section Verification
+    Run all 3 services        :25m, 3m
+    Smoke tests                :28m, 2m
+```
+
 ---
 
 ## Prerequisites
@@ -16,40 +117,12 @@ Complete guide to install dependencies and run both backend and frontend locally
 
 ---
 
-## Architecture Diagram
-
-```mermaid
-sequenceDiagram
-    participant Dev as Developer
-    participant Backend as Backend :8000
-    participant Chatbot as Chatbot :8010
-    participant Frontend as Frontend :3000
-
-    Dev->>Backend: uvicorn main:app --reload --port 8000
-    Dev->>Chatbot: uvicorn main:app --reload --port 8010
-    Dev->>Frontend: npm run dev
-
-    Note over Backend: Health check: GET /health
-    Note over Chatbot: Health check: GET /health
-    Note over Frontend: Open http://localhost:3000
-
-    Frontend->>Backend: REST/WS API calls
-    Frontend->>Chatbot: Chat API calls
-    Backend-->>Frontend: Emergency, challan, tracking data
-    Chatbot-->>Frontend: AI responses
-```
-
 ## Step 1 — Clone the Repository
 
 ```bash
-# Go to your workspace folder
 cd C:\Projects\SafeVixAI        # Windows
 # cd ~/projects                 # Linux/Mac
-
-# Clone the repository
 git clone https://github.com/SafeVixAI/SafeVixAI.git
-
-# Enter the project folder
 cd SafeVixAI
 ```
 
@@ -173,12 +246,11 @@ Edit `chatbot_service/.env` with your API keys (Gemini, Groq, etc.).
 
 **Optional but recommended — Email alerts for production failures:**
 ```bash
-# In chatbot_service/.env — add these for failure notifications:
 ALERT_EMAIL=your-gmail@gmail.com
 ALERT_EMAIL_PASSWORD=abcd efgh ijkl mnop   # Gmail App Password, NOT your regular password
-ALERT_EMAIL_TO=team-lead@gmail.com         # Recipient (defaults to ALERT_EMAIL)
+ALERT_EMAIL_TO=team-lead@gmail.com
 ```
-> **Get a Gmail App Password:** Go to [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords) → Select "Mail" → "Other" → Name it "SafeVixAI" → Copy the 16-char code.
+> **Get a Gmail App Password:** Go to [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords) to Mail to Other to Name it "SafeVixAI" to Copy the 16-char code.
 
 ---
 
@@ -219,7 +291,7 @@ npm install
 - **@mlc-ai/web-llm** — offline AI (browser-based LLM)
 - **@turf/turf** — geospatial analysis utilities
 
-> First install takes 2–4 minutes.
+> First install takes 2-4 minutes.
 
 Verify:
 ```bash
@@ -263,9 +335,9 @@ npm run build
 npm start
 
 # Visit http://localhost:3000 in Chrome
-# DevTools → Application → Service Workers → verify "Activated"
-# DevTools → Network → check "Offline"
-# Navigate to /emergency → protocols should still load from cache
+# DevTools to Application to Service Workers to verify "Activated"
+# DevTools to Network to check "Offline"
+# Navigate to /emergency to protocols should still load from cache
 ```
 
 ---
@@ -278,7 +350,6 @@ Once installed, you only need:
 # Terminal 1: Backend
 cd SafeVixAI/backend
 .venv\Scripts\activate         # Windows
-# source .venv/bin/activate    # Linux/Mac
 uvicorn main:app --reload --port 8000
 
 # Terminal 2: Chatbot Service
@@ -304,36 +375,23 @@ npm run dev
 ## Backend Commands
 
 ```bash
-# Run server
 uvicorn main:app --reload --port 8000
-
-# Testing
-pytest tests/ -q                                         # Run all tests (quiet mode)
-pytest tests/test_challan.py -q                          # Run one test file
-pytest tests/test_challan.py::test_drunk_driving_fine -v # Run single test (verbose)
-
-# Test API endpoints
+pytest tests/ -q
+pytest tests/test_challan.py -q
+pytest tests/test_challan.py::test_drunk_driving_fine -v
 curl "http://localhost:8000/api/v1/emergency/nearby?lat=13.0827&lon=80.2707"
 curl "http://localhost:8000/api/v1/challan/calculate?violation_code=MVA_185"
 curl "http://localhost:8000/health"
-
-# Virtual environment
-.venv\Scripts\activate                                   # Activate (Windows)
-source .venv/bin/activate                                # Activate (Linux/Mac)
-deactivate                                               # Deactivate
+.venv\Scripts\activate
+deactivate
 ```
 
 ## Chatbot Service Commands
 
 ```bash
-# Run server
 uvicorn main:app --reload --port 8010
-
-# Testing
-pytest tests/ -q                                         # Run all tests (quiet mode)
-pytest tests/test_safety_checker.py -q                   # Run one test file
-
-# Test API endpoints
+pytest tests/ -q
+pytest tests/test_safety_checker.py -q
 curl "http://localhost:8010/health"
 curl "http://localhost:8010/api/v1/chat/" -X POST -H "Content-Type: application/json" -d '{"message":"Hello"}'
 ```
@@ -341,30 +399,23 @@ curl "http://localhost:8010/api/v1/chat/" -X POST -H "Content-Type: application/
 ## Frontend Commands
 
 ```bash
-# Development
-npm run dev                                              # Start dev server (hot reload)
-npm run build                                            # Build for production
-npm start                                                # Run production build
-
-# Code quality
-npm run lint                                             # Run ESLint
-
-# Testing
-npm test                                                 # Run tests (572 total)
-
-# Packages
-npm install                                              # Install all dependencies
-npm install [package-name]                               # Add a new package
-npm uninstall [package-name]                             # Remove a package
+npm run dev
+npm run build
+npm start
+npm run lint
+npm test
+npm install
+npm install [package-name]
+npm uninstall [package-name]
 ```
 
 ## E2E Testing
 
 ```bash
 # From frontend/ directory
-npx playwright test e2e/                                 # Run all E2E tests
-npx playwright test e2e/ --grep-invert="Visual"          # Run excluding visual tests
-npx playwright show-report                               # View last test report
+npx playwright test e2e/
+npx playwright test e2e/ --grep-invert="Visual"
+npx playwright show-report
 ```
 
 ---
@@ -373,7 +424,6 @@ npx playwright show-report                               # View last test report
 
 ### `ModuleNotFoundError` in backend
 ```bash
-# Make sure .venv is activated — check for (.venv) in terminal
 .venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 ```
@@ -384,16 +434,13 @@ pip install -r requirements.txt
 
 ### `GROQ_API_KEY` missing error
 - Create a free account at [console.groq.com](https://console.groq.com)
-- Go to API Keys → Create Key
+- Go to API Keys to Create Key
 - Copy the `gsk_...` key into `backend/.env`
 
 ### Port already in use
 ```bash
-# Windows — find and kill the process
 netstat -ano | findstr :8000
 taskkill /PID [PID_NUMBER] /F
-
-# Run on a different port
 npm run dev -- -p 3001
 ```
 

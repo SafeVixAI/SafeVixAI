@@ -393,3 +393,175 @@ export interface DisputeDraftResponse {
   confidence_score: number;
   instructions: string[];
 }
+
+// ── Issue Reporting Types ──────────────────────────────────────────────────────
+
+export type IssueType =
+  | 'bug'
+  | 'feature_request'
+  | 'feedback'
+  | 'performance'
+  | 'security'
+  | 'crash'
+  | 'ai_feedback'
+  | 'other';
+
+export type IssueSeverity = 'critical' | 'high' | 'medium' | 'low' | 'cosmetic';
+
+export type IssuePriority = 'urgent' | 'high' | 'normal' | 'low';
+
+export type IssueStatus =
+  | 'new'
+  | 'triaged'
+  | 'acknowledged'
+  | 'in_progress'
+  | 'needs_info'
+  | 'resolved'
+  | 'closed'
+  | 'wont_fix'
+  | 'duplicate'
+  | 'spam';
+
+export interface CreateIssueRequest {
+  issueType: IssueType;
+  category?: string;
+  severity?: IssueSeverity;
+  priority?: IssuePriority;
+  title: string;
+  description: string;
+  stepsToReproduce?: string | null;
+  expectedBehavior?: string | null;
+  actualBehavior?: string | null;
+  environment?: string | null;
+  browserInfo?: Record<string, unknown> | null;
+  deviceInfo?: Record<string, unknown> | null;
+  osInfo?: string | null;
+  appVersion?: string | null;
+  screenshotUrls?: string[] | null;
+  screenRecordingUrl?: string | null;
+  logs?: Record<string, unknown> | null;
+  systemInfo?: Record<string, unknown> | null;
+  labels?: string[] | null;
+  isAnonymous?: boolean;
+  reporterName?: string | null;
+  reporterEmail?: string | null;
+  lat?: number | null;
+  lon?: number | null;
+}
+
+export interface UpdateIssueRequest {
+  status?: IssueStatus;
+  severity?: IssueSeverity;
+  priority?: IssuePriority;
+  assignee?: string | null;
+  milestone?: string | null;
+  labels?: string[] | null;
+  title?: string | null;
+  description?: string | null;
+}
+
+export interface IssueListItem {
+  uuid: string;
+  trackingNumber: string;
+  issueType: string;
+  category: string;
+  severity: string;
+  priority: string;
+  status: string;
+  title: string;
+  labels: string[] | null;
+  isAnonymous: boolean;
+  isSpam: boolean;
+  duplicateOf: string | null;
+  aiCategory: string | null;
+  assignee: string | null;
+  milestone: string | null;
+  githubIssueNumber: number | null;
+  reporterName: string | null;
+  createdAt: string;
+  updatedAt: string | null;
+}
+
+export interface IssueDetail {
+  uuid: string;
+  trackingNumber: string;
+  issueType: string;
+  category: string;
+  severity: string;
+  priority: string;
+  status: string;
+  title: string;
+  description: string;
+  stepsToReproduce: string | null;
+  expectedBehavior: string | null;
+  actualBehavior: string | null;
+  environment: string | null;
+  browserInfo: Record<string, unknown> | null;
+  deviceInfo: Record<string, unknown> | null;
+  osInfo: string | null;
+  appVersion: string | null;
+  attachments: Record<string, unknown>[] | null;
+  screenshotUrls: string[] | null;
+  screenRecordingUrl: string | null;
+  logs: Record<string, unknown> | null;
+  systemInfo: Record<string, unknown> | null;
+  labels: string[] | null;
+  assignee: string | null;
+  milestone: string | null;
+  isAnonymous: boolean;
+  isSpam: boolean;
+  spamReason: string | null;
+  duplicateOf: string | null;
+  duplicateScore: number | null;
+  aiCategory: string | null;
+  aiSummary: string | null;
+  aiSuggestedFix: string | null;
+  aiConfidence: number | null;
+  githubIssueUrl: string | null;
+  githubIssueNumber: number | null;
+  githubDiscussionUrl: string | null;
+  reporterName: string | null;
+  reporterEmail: string | null;
+  slaResponseAt: string | null;
+  slaResolutionAt: string | null;
+  resolvedAt: string | null;
+  createdAt: string;
+  updatedAt: string | null;
+}
+
+export interface IssueListResponse {
+  items: IssueListItem[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}
+
+export interface IssueStatsResponse {
+  total: number;
+  byType: Record<string, number>;
+  byStatus: Record<string, number>;
+  bySeverity: Record<string, number>;
+  byCategory: Record<string, number>;
+  openCount: number;
+  resolvedCount: number;
+  spamCount: number;
+  duplicateCount: number;
+  avgResolutionHours: number | null;
+  slaBreachCount: number;
+}
+
+export interface IssueTemplate {
+  issueType: IssueType;
+  titlePlaceholder: string;
+  descriptionTemplate: string;
+  fields: Array<{ name: string; label: string; type: string }>;
+}
+
+export interface TimelineEvent {
+  eventType: string;
+  description: string;
+  actor: string | null;
+  metadata: Record<string, unknown> | null;
+  createdAt: string;
+}

@@ -1,6 +1,52 @@
 # Contributing to SafeVixAI
 
-Thank you for contributing to SafeVixAI — an open-source, AI-powered road safety platform.
+Thank you for contributing to SafeVixAI - an open-source, AI-powered road safety platform.
+
+## Contribution Workflow
+
+```mermaid
+flowchart LR
+    A[Fork Repo] --> B[Create Branch<br/>feature/ or fix/]
+    B --> C[Write Code<br/>+ Tests]
+    C --> D[Run Tests<br/>npm test / pytest]
+    D --> E{All Pass?}
+    E -->|No| C
+    E -->|Yes| F[Commit & Push]
+    F --> G[Open PR<br/>against main]
+    G --> H[Code Review<br/>+ CI Checks]
+    H --> I{Approved?}
+    I -->|Changes Needed| C
+    I -->|Yes| J[Squash & Merge]
+    J --> K[Deploy to<br/>Vercel / Render]
+```
+
+## PR Lifecycle
+
+```mermaid
+sequenceDiagram
+    participant D as Developer
+    participant PR as GitHub PR
+    participant CI as CI Pipeline
+    participant R as Reviewer
+    participant M as Maintainer
+
+    D->>PR: Open PR (feature/fix branch)
+    PR->>CI: Trigger workflows
+    CI->>CI: backend.yml (pytest)
+    CI->>CI: frontend.yml (lint+tsc)
+    CI->>CI: chatbot.yml (pytest)
+    CI->>CI: migration-safety.yml
+    CI->>CI: codeql.yml
+    CI-->>PR: Status: Check / Cross
+    R->>PR: Review code
+    R->>PR: Request changes (if needed)
+    D->>PR: Push fixes
+    R->>PR: Approve
+    M->>PR: Squash & Merge
+    PR->>CI: Deploy workflow
+    CI->>CI: Vercel (frontend)
+    CI->>CI: Render (backend+chatbot)
+```
 
 ## Code of Conduct
 
@@ -110,7 +156,7 @@ cd frontend && npm test && npm run lint && npx tsc --noEmit
 
 ## Security
 
-Report vulnerabilities to **security@safevixai.gov.in** — do not file public issues. See [SECURITY.md](SECURITY.md).
+Report vulnerabilities to **security@safevixai.gov.in** - do not file public issues. See [SECURITY.md](SECURITY.md).
 
 ## Related
 

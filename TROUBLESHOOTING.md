@@ -1,7 +1,87 @@
 # Troubleshooting Guide
 
-> **Version:** 1.0  
-> **Last updated:** 2026-07-26
+> **Version:** 1.0
+> **Last updated:** 2026-07-29
+
+## Diagnosis Flowcharts
+
+### Backend Won't Start
+
+```mermaid
+flowchart TD
+    A[Backend fails to start] --> B{Virtual env active?}
+    B -->|No| C[Activate .venv]
+    C --> D[Retry]
+    D --> A
+
+    B -->|Yes| E{Dependencies installed?}
+    E -->|No| F[pip install -r requirements.txt]
+    F --> D
+
+    E -->|Yes| G{Python version >= 3.11?}
+    G -->|No| H[Install Python 3.11+]
+    H --> D
+
+    G -->|Yes| I{.env configured?}
+    I -->|No| J[cp .env.example .env<br/>Fill required values]
+    J --> D
+
+    I -->|Yes| K[Check port 8000 availability]
+    K -->|In Use| L[netstat / taskkill or<br/>use different port]
+    L --> D
+
+    K -->|Free| M[Run: uvicorn main:app<br/>--reload --port 8000]
+    M --> N{Any error output?}
+    N -->|Yes| O[Read error message<br/>Check module imports]
+    N -->|No| P[Backend running]
+
+    O --> D
+```
+
+### 401 Unauthorized
+
+```mermaid
+flowchart TD
+    A[API returns 401] --> B{Token exists?}
+    B -->|No| C[Login to get JWT<br/>POST /api/v1/auth/login]
+    C --> D[Retry with Bearer token]
+
+    B -->|Yes| E{Token expired?}
+    E -->|Yes| F[Refresh token<br/>POST /api/v1/auth/refresh]
+    F --> D
+
+    E -->|No| G{Header format correct?}
+    G -->|No| H[Ensure format:<br/>Authorization: Bearer <token>]
+    H --> D
+
+    G -->|Yes| I{JWKS cache stale?}
+    I -->|Yes| J[Purge cache<br/>POST /api/v1/admin/cache/purge]
+    J --> D
+
+    I -->|No| K[Token invalid - re-login]
+    K --> C
+```
+
+### Map Not Loading
+
+```mermaid
+flowchart TD
+    A[Map shows blank/empty] --> B{maplibre-gl.css imported?}
+    B -->|No| C[Add to layout.tsx:<br/>import 'maplibre-gl/dist/maplibre-gl.css']
+    C --> D[Reload page]
+
+    B -->|Yes| E{Component wrapped in<br/>dynamic({ssr:false})?}
+    E -->|No| F[Use: dynamic(() => import('...'),<br/>{ ssr: false })]
+    F --> D
+
+    E -->|Yes| G{Tile provider API key set?}
+    G -->|No| H[Set tile API key in env<br/>or use default tiles]
+    H --> D
+
+    G -->|Yes| I{Browser DevTools errors?}
+    I -->|Yes| J[Check console for<br/>WebGL or CORS errors]
+    I -->|No| K[Map should render]
+```
 
 ---
 
@@ -64,7 +144,7 @@ npm run dev
 For `npm run build` failures related to `.next/types/`:
 ```
 npm run build 2>&1 | head -50  # Check exact error
-# If "Cannot find namespace 'React'" — this is a Next.js generated-code bug
+# If "Cannot find namespace 'React'" - this is a Next.js generated-code bug
 # Workaround: npx next build --no-lint
 ```
 
@@ -89,7 +169,7 @@ pg_isready -h localhost -p 5432
 # Verify DATABASE_URL format
 # postgresql+asyncpg://user:password@host:port/dbname
 ```
-If using Supabase: check the connection string in Supabase dashboard → Settings → Database.
+If using Supabase: check the connection string in Supabase dashboard to Settings to Database.
 
 ### Alembic Migration Fails
 
@@ -119,7 +199,7 @@ alembic downgrade -1    # Roll back last migration
 **Symptom:** Backend logs `Error connecting to Redis: -100`.
 
 **Solutions:**
-- Redis is **optional** — backend falls back to in-memory cache
+- Redis is **optional** - backend falls back to in-memory cache
 - If using Redis: verify `REDIS_URL` and that Redis is running
 - For Upstash: use `rediss://` URL format (TLS)
 
@@ -249,7 +329,7 @@ If all providers fail, the TemplateProvider should always work (deterministic re
 ```bash
 npm run build && npm start  # Production mode enables SW
 ```
-Check DevTools → Application → Service Workers for registration status.
+Check DevTools to Application to Service Workers for registration status.
 
 ### PWA Install Prompt Not Showing
 
@@ -258,13 +338,13 @@ Check DevTools → Application → Service Workers for registration status.
 **Solutions:**
 - Must be served over HTTPS (or localhost)
 - Must meet PWA criteria (manifest, SW, icons)
-- In Chrome DevTools → Application → Manifest → "Add to homescreen"
+- In Chrome DevTools to Application to Manifest to "Add to homescreen"
 
 ### `crypto.randomUUID` Not Supported
 
 **Symptom:** Frontend test fails with `crypto.randomUUID is not a function`.
 
-**Solution:** This is a JSDOM limitation — ignored via Istanbul comments in the source code. Does not affect production (browsers support it).
+**Solution:** This is a JSDOM limitation - ignored via Istanbul comments in the source code. Does not affect production (browsers support it).
 
 ### Speech Recognition Fails
 
@@ -315,7 +395,7 @@ docker compose up --build
 **Symptom:** Container OOM-killed during build.
 
 **Solutions:**
-- Increase Docker memory limit: Docker Desktop → Settings → Resources
+- Increase Docker memory limit: Docker Desktop to Settings to Resources
 - For chatbot service (torch): allocate at least 2GB RAM
 
 ---

@@ -161,6 +161,32 @@ ws_connections_total = Gauge(
     registry=REGISTRY,
 )
 
+# ── Issue Report Metrics ─────────────────────────────────────────────────────
+issue_reports_total = Counter(
+    "issue_reports_total",
+    "Total number of issue reports created",
+    ["issue_type", "category"],
+    registry=REGISTRY,
+)
+
+issue_sla_breaches_total = Counter(
+    "issue_sla_breaches_total",
+    "Total number of SLA breaches",
+    registry=REGISTRY,
+)
+
+issue_duplicates_detected = Counter(
+    "issue_duplicates_detected",
+    "Total number of duplicate issues detected",
+    registry=REGISTRY,
+)
+
+issue_spam_detected = Counter(
+    "issue_spam_detected",
+    "Total number of spam issues detected",
+    registry=REGISTRY,
+)
+
 # ── Circuit Breaker Metrics ──────────────────────────────────────────────────
 circuit_breaker_state = Gauge(
     "circuit_breaker_state",

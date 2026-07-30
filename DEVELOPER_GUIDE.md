@@ -12,29 +12,79 @@
 
 ## Repository Structure
 
+```mermaid
+flowchart TB
+    subgraph Core["Core Services"]
+        BE[Backend<br/>FastAPI :8000]
+        CB[Chatbot<br/>FastAPI :8010]
+        FE[Frontend<br/>Next.js :3000]
+    end
+
+    subgraph BE_Internal["Backend Internals"]
+        BE_API["api/v1/ - 28 route modules"]
+        BE_CORE["core/ - Config, CQRS, Redlock, Security"]
+        BE_SVC["services/ - 16 domain + 10 civic_intel"]
+        BE_MODELS["models/ - 20 ORM + Pydantic"]
+        BE_MIG["migrations/ - Alembic"]
+    end
+
+    subgraph CB_Internal["Chatbot Internals"]
+        CB_AGENT["agent/ - ChatEngine, IntentDetector"]
+        CB_PROV["providers/ - 10 LLM routing"]
+        CB_RAG["rag/ - ChromaDB + embeddings"]
+        CB_TOOLS["tools/ - 13 agent tools"]
+        CB_MEM["memory/ - Redis sessions"]
+    end
+
+    subgraph FE_Internal["Frontend Internals"]
+        FE_APP["app/ - 28 routes"]
+        FE_COMP["components/ - 91 components"]
+        FE_LIB["lib/ - 28 modules"]
+    end
+
+    subgraph Infra["Infrastructure"]
+        K8S["k8s/ - Kustomize manifests"]
+        TF["terraform/ - AWS modules"]
+        MON["monitoring/ - Prometheus + Grafana"]
+        CI[".github/ - CI/CD workflows"]
+    end
+
+    BE --> BE_Internal
+    CB --> CB_Internal
+    FE --> FE_Internal
+    BE <--> CB
+    FE --> BE
+    FE --> CB
+    Core --> Infra
 ```
-SafeVixAI/
-├── backend/              FastAPI + PostgreSQL/PostGIS + Redis (port 8000)
-│   ├── api/v1/           28 route modules (auth, emergency, challan, roads, etc.)
-│   ├── core/             Config, security, caching, CQRS, Redlock, JWKS
-│   ├── services/         16 domain services + 10 civic_intel modules
-│   ├── models/           20 SQLAlchemy models + Pydantic schemas
-│   └── migrations/       Alembic — 3 migration files
-├── chatbot_service/      FastAPI — Agentic RAG, 10 LLM providers, ChromaDB (port 8010)
-│   ├── agent/            ChatEngine, IntentDetector, SafetyChecker, ContextAssembler
-│   ├── providers/        LLM routing, lang_detection, provider_registry
-│   ├── rag/              ChromaDB vector store, retriever, embeddings
-│   ├── tools/            13 agent tools (SOS, Challan, Legal, FirstAid, etc.)
-│   └── memory/           Redis conversation memory
-├── frontend/             Next.js 15 + React 19 + TypeScript PWA (port 3000)
-│   ├── app/              28 routes with error boundaries + loading states
-│   ├── components/       91 components across 13 domains
-│   └── lib/              28 modules — API client, state, offline AI, tracking
-├── docs/                 Architecture, API, database, deployment, ADRs, runbooks
-├── k8s/                  Kubernetes manifests (kustomize)
-├── terraform/            AWS infrastructure
-├── monitoring/           Prometheus config + Grafana dashboards
-└── .github/              40+ CI/CD workflows
+
+## Development Workflow
+
+```mermaid
+sequenceDiagram
+    participant Dev as Developer
+    participant BE as Backend
+    participant CB as Chatbot
+    participant FE as Frontend
+    participant DB as Database
+
+    Dev->>BE: Start: uvicorn main:app --port 8000
+    BE->>DB: alembic upgrade head
+    BE-->>Dev: Health OK :8000
+
+    Dev->>CB: Start: uvicorn main:app --port 8010
+    CB-->>Dev: Health OK :8010
+
+    Dev->>FE: Start: npm run dev
+    FE-->>Dev: Ready :3000
+
+    Dev->>FE: Write feature
+    FE->>BE: API calls
+    FE->>CB: Chat requests
+
+    Dev->>BE: pytest tests/ -v
+    Dev->>CB: pytest tests/ -v
+    Dev->>FE: npm test + lint + tsc
 ```
 
 ## Local Setup

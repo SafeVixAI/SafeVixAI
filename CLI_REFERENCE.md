@@ -4,6 +4,72 @@
 
 All commands are run from the repository root. The Makefile provides the primary development interface. Windows users should use WSL, Git Bash, or Docker for Makefile commands.
 
+## Command Decision Tree
+
+```mermaid
+flowchart TB
+    TASK[What do you need?] --> CMD
+
+    CMD{Choose category}
+    CMD -->|Develop| DEV[Development commands]
+    CMD -->|Test| TEST[Testing commands]
+    CMD -->|Deploy| DEP[Deployment commands]
+    CMD -->|Infrastructure| INFRA[Infra commands]
+
+    DEV --> DEV_C{Task type}
+    DEV_C -->|Setup| S[make setup]
+    DEV_C -->|Run backend| UB[uvicorn main:app :8000]
+    DEV_C -->|Run chatbot| UC[uvicorn main:app :8010]
+    DEV_C -->|Run frontend| UF[npm run dev]
+
+    TEST --> T_C{Test type}
+    T_C -->|All| TA[make test]
+    T_C -->|Backend| TB[pytest tests/ -v --cov]
+    T_C -->|Chatbot| TC[pytest tests/ -v]
+    T_C -->|Frontend| TF[npm test]
+    T_C -->|E2E| TE[make e2e]
+
+    DEP --> D_C{Target}
+    D_C -->|Docker| DK[make docker-up]
+    D_C -->|K8s| K8[make k8s-apply]
+    D_C -->|Terraform| TF2[make tf-apply]
+
+    INFRA --> I_C{Type}
+    I_C -->|Migration| MIG[alembic upgrade head]
+    I_C -->|Load test| K6[make k6-load]
+    I_C -->|Security| SEC[make security-scan]
+```
+
+## Makefile Workflow
+
+```mermaid
+flowchart LR
+    subgraph Setup["Setup"]
+        SETUP[make setup]
+        SETUP --> BE_INST[pip install backend/]
+        SETUP --> CB_INST[pip install chatbot/]
+        SETUP --> FE_INST[npm ci frontend/]
+        SETUP --> ENV[copy .env templates]
+    end
+
+    subgraph Daily["Daily Development"]
+        TEST2[make test]
+        LINT[make lint]
+        TYPE[make typecheck]
+        BUILD[make build]
+    end
+
+    subgraph Deploy2["Deployment"]
+        DOCKER[make docker-up]
+        KUBE[make k8s-apply]
+        TF3[make tf-apply]
+        ECR[make ecr-build-push-all]
+    end
+
+    Setup --> Daily
+    Daily --> Deploy2
+```
+
 ## Development Commands
 
 | Command | Description | Notes |

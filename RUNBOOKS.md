@@ -30,6 +30,50 @@ Comprehensive runbooks covering common failure scenarios, recovery procedures, a
 
 ---
 
+## Incident Response Flow
+
+```mermaid
+flowchart TB
+    DETECT[Incident Detected] --> TRIAGE[Triage]
+    TRIAGE --> SEV{Severity}
+    SEV -->|P0: Service Down| P0["< 5 min response"]
+    SEV -->|P1: Degraded| P1["< 15 min response"]
+    SEV -->|P2: Feature Broken| P2["< 1 hour response"]
+    SEV -->|P3: Cosmetic| P3["Next business day"]
+
+    P0 --> DIAGNOSE[Diagnose Root Cause]
+    P1 --> DIAGNOSE
+    P2 --> DIAGNOSE
+    P3 --> DIAGNOSE
+
+    DIAGNOSE --> RESOLVE[Apply Fix]
+    RESOLVE --> VERIFY[Verify Resolution]
+    VERIFY -->|Fixed| CLOSE[Close Incident]
+    VERIFY -->|Not Fixed| DIAGNOSE
+    CLOSE --> POST[Post-Mortem]
+```
+
+## Severity State Diagram
+
+```mermaid
+stateDiagram-v2
+    [*] --> Monitoring
+    Monitoring --> P0_Active : Service Unavailable
+    Monitoring --> P1_Active : Degraded Performance
+    Monitoring --> P2_Active : Feature Broken
+
+    P0_Active --> Diagnosing : Engineer assigned
+    P1_Active --> Diagnosing
+    P2_Active --> Diagnosing
+
+    Diagnosing --> Resolving : Root cause found
+    Resolving --> Verifying : Fix applied
+    Verifying --> Monitoring : Confirmed resolved
+
+    Verifying --> Diagnosing : Fix failed
+    P0_Active --> Escalated : > 5 min without fix
+```
+
 ## Runbook Template
 
 Each runbook follows the same format:

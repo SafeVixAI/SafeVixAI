@@ -27,8 +27,10 @@ from api.v1.public import router as public_router
 from api.v1.roadwatch import router as roadwatch_router
 from api.v1.routing import router as routing_router
 from api.v1.tracking import router as tracking_router
+from api.v1.notifications import router as notifications_router
 from api.v1.probes import router as probes_router
 from api.v1.updates import router as updates_router
+from api.v1.issues import router as issues_router
 from api.v1.user import router as user_router
 from api.v1.wards import router as wards_router
 from api.v1.waze_feed import router as waze_feed_router
@@ -60,5 +62,7 @@ api_router.include_router(command_center_router)
 api_router.include_router(garage_router)
 api_router.include_router(providers_router)
 api_router.include_router(updates_router)
+api_router.include_router(issues_router)
+api_router.include_router(notifications_router)
 api_router.include_router(probes_router)
 

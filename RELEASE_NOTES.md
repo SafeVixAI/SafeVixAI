@@ -1,5 +1,59 @@
 # Release Notes
 
+## Version Timeline
+
+```mermaid
+gantt
+    title SafeVixAI Release History
+    dateFormat  YYYY-MM-DD
+    axisFormat  %b %d
+
+    section Pre-release
+    Prototype (0.x)        :done, 2026-06-01, 2026-06-09
+    Alpha Series           :done, 2026-06-09, 2026-06-30
+
+    section Alpha Milestones
+    v1.0.0-alpha (Jun 9)   :milestone, 2026-06-09, 0d
+    v1.0.0-alpha (Jun 22)  :milestone, 2026-06-22, 0d
+    v1.0.0-alpha (Jun 30)  :milestone, 2026-06-30, 0d
+    v1.0.0-alpha (Jul 8)   :milestone, 2026-07-08, 0d
+
+    section Stable
+    RC Phase               :done, 2026-07-08, 2026-07-20
+    v1.0.0 (Current)       :active, 2026-07-20, 2026-07-29
+    Future Releases        :2026-07-29, 2026-08-29
+```
+
+## Feature Categories
+
+```mermaid
+mindmap
+  root((SafeVixAI v1.0.0))
+    Emergency
+      Locator
+      SOS Alerting
+      Live Tracking
+      Bystander Mode
+    AI Chatbot
+      10 LLM Providers
+      Indian Languages
+      RAG Legal Search
+      First Aid Guidance
+    Challan
+      50+ Violations
+      36 States/UTs
+      DuckDB-Wasm Offline
+    Road Reporter
+      Photo Upload
+      Geotagging
+      Civic Routing
+    Infrastructure
+      PWA Offline
+      41 CI Workflows
+      CQRS + Redlock
+      K8s / Terraform
+```
+
 ## v1.0.0 — 2026-07-20
 
 Initial production release of SafeVixAI, an AI-powered road safety PWA.

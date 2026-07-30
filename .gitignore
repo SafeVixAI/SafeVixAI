@@ -298,10 +298,25 @@ backend/data/civic_intel/
 # ROTATION LOGS (secrets rotation output, contains metadata)
 # ============================================================
 rotation-log-*.json
-
+ 
 # ============================================================
 # LOAD TESTING CACHE (k6 output artifacts)
 # ============================================================
 load-testing/**/results.json
 load-testing/**/*.tar
 *.k6.tar
+
+# ============================================================
+# MKDOCS BUILD OUTPUT (generated site/)
+# ============================================================
+site/
+
+# ============================================================
+# VERIFICATION SCRIPT OUTPUT
+# ============================================================
+scripts/verify-result*.txt
+
+# ============================================================
+# TEMPLATE SCAFFOLDS (not project source)
+# ============================================================
+templates/

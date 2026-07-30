@@ -168,6 +168,31 @@ def create_app() -> FastAPI:
         app.state.update_scheduler = update_scheduler
         await update_scheduler.start()
 
+        # ── Wire Issue Reporting services into app.state ────────────────────
+        from services.ai_issue_service import AIIssueService
+        from services.github_integration import GitHubIntegration
+        from services.issue_notification_service import IssueNotificationService
+        from services.issue_service import IssueService
+
+        issue_service = IssueService()
+        ai_issue_service = AIIssueService()
+        github_integration = GitHubIntegration(
+            token=settings.github_token,
+            repo_owner=settings.github_repo_owner,
+            repo_name=settings.github_repo_name,
+            webhook_secret=settings.github_webhook_secret,
+        )
+        issue_notifier = IssueNotificationService(
+            slack_webhook_url=settings.slack_webhook_url,
+            discord_webhook_url=settings.discord_webhook_url,
+            webhook_urls=settings.issue_webhook_urls,
+        )
+
+        app.state.issue_service = issue_service
+        app.state.ai_issue_service = ai_issue_service
+        app.state.github_integration = github_integration
+        app.state.issue_notifier = issue_notifier
+
         # ── Wire remaining domain services into app.state ────────────────────
         from services.ai_verification import AIVerificationPipeline
         from services.challan_dispute_service import ChallanDisputeService

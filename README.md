@@ -21,6 +21,77 @@
   Built for the IIT Madras Road Safety Hackathon 2026.
 </p>
 
+## CI/CD Pipeline
+
+```mermaid
+flowchart LR
+    subgraph Trigger["Code Push"]
+        PUSH[git push]
+    end
+
+    subgraph Detection["Path Detection"]
+        B[backend/**] --> BW[backend.yml]
+        C[chatbot_service/**] --> CW[chatbot.yml]
+        F[frontend/**] --> FW[frontend.yml]
+        D[docs/**] --> DOC[sync-wiki.yml]
+        ANY[any path] --> E2E[e2e.yml]
+        ANY --> SEC[security.yml]
+    end
+
+    subgraph Checks["CI Checks"]
+        BW --> BF[ruff lint + pytest + coverage]
+        CW --> CF[ruff lint + pytest + coverage]
+        FW --> FF[npm ci + lint + tsc + jest]
+        E2E --> EF[Playwright full-stack]
+        SEC --> SF[gitleaks + dep audit]
+    end
+
+    subgraph Artifacts["Pipeline Outputs"]
+        BF --> R1[coverage report]
+        CF --> R2[coverage report]
+        FF --> R3[build artifact]
+        EF --> R4[E2E report]
+    end
+
+    PUSH --> Detection
+```
+
+## Data Flow
+
+```mermaid
+flowchart TB
+    subgraph Client["Browser"]
+        UI[React UI]
+        SW[Service Worker]
+        IDB[IndexedDB]
+        DW[DuckDB-Wasm]
+    end
+
+    subgraph Backend["Backend :8000"]
+        API[FastAPI Routes]
+        PG[PostgreSQL + PostGIS]
+        RD[Redis Cache]
+        DK[DuckDB]
+    end
+
+    subgraph Chatbot["Chatbot :8010"]
+        LLM[10-Provider LLM Chain]
+        CR[ChromaDB RAG]
+        RM[Redis Memory]
+    end
+
+    UI -->|REST/WS JWT| API
+    UI -->|LLM requests| LLM
+    API --> PG
+    API --> RD
+    API --> DK
+    UI -->|offline challan| DW
+    UI -->|offline queue| IDB
+    SW -->|cache| UI
+    LLM --> CR
+    LLM --> RM
+```
+
 ## Vision
 
 Every second counts in a road emergency. SafeVixAI puts life-saving information — nearest hospitals, traffic laws, first aid protocols — directly in the hands of citizens, officers, and first responders. Offline-first architecture ensures it works when networks fail. 10-provider LLM fallback ensures the AI never goes silent. Zero infrastructure cost — entirely free and open source.

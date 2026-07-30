@@ -95,7 +95,28 @@ class Settings(BaseSettings):
     etl_batch_size: int = 1000
     etl_enabled: bool = True
     municipal_gis_registry_env: str = Field(default='{}', validation_alias='MUNICIPAL_GIS_REGISTRY')
+
+    github_token: str | None = Field(default=None, validation_alias='GITHUB_TOKEN')
+    github_repo_owner: str = 'safevixai'
+    github_repo_name: str = 'SafeVixAI'
+    github_webhook_secret: str | None = Field(default=None, validation_alias='GITHUB_WEBHOOK_SECRET')
+    slack_webhook_url: str | None = Field(default=None, validation_alias='SLACK_WEBHOOK_URL')
+    discord_webhook_url: str | None = Field(default=None, validation_alias='DISCORD_WEBHOOK_URL')
+    issue_webhook_urls: list[str] | None = None
     grievance_portals_env: str = Field(default='{}', validation_alias='GRIEVANCE_PORTALS')
+
+    smtp_host: str = Field(default='smtp.gmail.com', validation_alias='SMTP_HOST')
+    smtp_port: int = Field(default=587, validation_alias='SMTP_PORT')
+    smtp_user: str | None = Field(default=None, validation_alias='SMTP_USER')
+    smtp_password: str | None = Field(default=None, validation_alias='SMTP_PASSWORD')
+    push_enabled: bool = Field(default=False, validation_alias='PUSH_ENABLED')
+    push_service_url: str | None = Field(default=None, validation_alias='PUSH_SERVICE_URL')
+    sms_provider_url: str | None = Field(default=None, validation_alias='SMS_PROVIDER_URL')
+    sms_api_key: str | None = Field(default=None, validation_alias='SMS_API_KEY')
+    notification_retry_max: int = Field(default=3, validation_alias='NOTIFICATION_RETRY_MAX')
+    notification_retry_delay_seconds: int = Field(default=300, validation_alias='NOTIFICATION_RETRY_DELAY_SECONDS')
+    notification_digest_hour: int = Field(default=8, validation_alias='NOTIFICATION_DIGEST_HOUR')
+    notification_cleanup_days: int = Field(default=90, validation_alias='NOTIFICATION_CLEANUP_DAYS')
 
     model_config = SettingsConfigDict(
         env_file='.env',

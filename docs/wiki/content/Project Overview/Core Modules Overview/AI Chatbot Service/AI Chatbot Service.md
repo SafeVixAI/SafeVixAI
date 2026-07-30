@@ -1,4 +1,4 @@
-﻿# AI Chatbot Service
+# AI Chatbot Service
 
 <cite>
 **Referenced Files in This Document**

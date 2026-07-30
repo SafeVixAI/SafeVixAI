@@ -1,4 +1,4 @@
-﻿# API Documentation
+# API Documentation
 
 Interactive API documentation for SafeVixAI services, generated from OpenAPI specifications.
 

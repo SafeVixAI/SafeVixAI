@@ -1,4 +1,4 @@
-﻿# Contributing Guidelines
+# Contributing Guidelines
 
 <cite>
 **Referenced Files in This Document**

@@ -1,4 +1,4 @@
-﻿# Glossary
+# Glossary
 
 Key terms used across the SafeVixAI documentation.
 

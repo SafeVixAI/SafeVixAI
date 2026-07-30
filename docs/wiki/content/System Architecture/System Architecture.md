@@ -1,4 +1,4 @@
-﻿# System Architecture
+# System Architecture
 
 <cite>
 **Referenced Files in This Document**

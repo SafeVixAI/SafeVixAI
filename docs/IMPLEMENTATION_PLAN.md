@@ -1,4 +1,4 @@
-﻿# SafeVixAI — Master Implementation Plan
+# SafeVixAI — Master Implementation Plan
 
 > Generated: 2026-06-09 | Based on comprehensive analysis of all 3 services
 > Sources: `docs/analysis/*.md` (10 documents), AGENTS.md

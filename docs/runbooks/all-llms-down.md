@@ -1,4 +1,4 @@
-﻿# SafeVixAI — Runbook: All LLM Providers Down
+# SafeVixAI — Runbook: All LLM Providers Down
 
 > **SNAPSHOT**: This document reflects the state as of its creation date. For current state see [AGENTS.md](../../AGENTS.md).
 

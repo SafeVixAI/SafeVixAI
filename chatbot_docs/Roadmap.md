@@ -1,4 +1,4 @@
-﻿# SafeVixAI Chatbot — Implementation Roadmap
+# SafeVixAI Chatbot — Implementation Roadmap
 
 The development of the chatbot service was divided into nine phases to ensure build consistency and avoid conflicts.
 

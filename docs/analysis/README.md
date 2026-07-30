@@ -1,4 +1,4 @@
-﻿# Analysis Reports
+# Analysis Reports
 
 This directory contains historical analysis and assessment reports for SafeVixAI.
 

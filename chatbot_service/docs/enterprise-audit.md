@@ -1,4 +1,4 @@
-﻿# Enterprise Architecture Audit — Chatbot Service
+# Enterprise Architecture Audit — Chatbot Service
 
 ## 1. Coverage Status
 

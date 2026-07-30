@@ -1,4 +1,4 @@
-﻿# Architecture Decision Records (ADRs)
+# Architecture Decision Records (ADRs)
 
 This directory contains Architecture Decision Records for SafeVixAI.
 Each ADR documents a significant architectural decision, the context, options considered, and the chosen approach.

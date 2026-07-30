@@ -1,4 +1,4 @@
-﻿# SafeVixAI Chatbot — Architecture
+# SafeVixAI Chatbot — Architecture
 
 The SafeVixAI AI chatbot is a **separate Python service** (port 8010) that connects the frontend to advanced LLM behavior and real-time backend data.
 

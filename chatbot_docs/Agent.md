@@ -1,4 +1,4 @@
-﻿# SafeVixAI Chatbot — Agent Documentation
+# SafeVixAI Chatbot — Agent Documentation
 
 The SafeVixAI Chatbot is an **Agentic AI Assistant**, moving beyond simple chat interfaces to a system that can take real-world actions in emergencies.
 

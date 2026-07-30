@@ -1,4 +1,4 @@
-﻿# Technology Stack
+# Technology Stack
 
 <cite>
 **Referenced Files in This Document**

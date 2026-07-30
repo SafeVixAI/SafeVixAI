@@ -1,4 +1,4 @@
-﻿# Security and Safety — SafeVixAI Chatbot
+# Security and Safety — SafeVixAI Chatbot
 
 Since the SafeVixAI Chatbot operates in emergency and legal contexts, security and safety are non-negotiable.
 

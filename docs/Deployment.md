@@ -1,4 +1,4 @@
-﻿# SafeVixAI v1.0.0 — Deployment Guide
+# SafeVixAI v1.0.0 — Deployment Guide
 
 ## Deployment Topology
 

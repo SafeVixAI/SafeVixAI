@@ -1,4 +1,4 @@
-﻿# SafeVixAI Chatbot — Key Features
+# SafeVixAI Chatbot — Key Features
 
 The SafeVixAI AI chatbot provides a robust set of features categorized by module: SafeVixAI (Emergency), DriveLegal (Traffic Law), and RoadWatch (Infrastructure).
 

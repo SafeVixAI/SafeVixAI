@@ -1,4 +1,4 @@
-﻿# Data Management
+# Data Management
 
 <cite>
 **Referenced Files in This Document**

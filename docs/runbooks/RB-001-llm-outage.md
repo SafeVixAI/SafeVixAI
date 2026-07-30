@@ -1,4 +1,4 @@
-﻿# RB-001: LLM Provider Outage
+# RB-001: LLM Provider Outage
 
 **Severity:** P0  
 **Last Updated:** 2026-06-16  

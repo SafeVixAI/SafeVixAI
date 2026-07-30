@@ -1,4 +1,4 @@
-﻿# SafeVixAI — Gap Analysis (2026-05-26)
+# SafeVixAI — Gap Analysis (2026-05-26)
 
 > **SNAPSHOT**: This document reflects the state as of 2026-05-26. For current state see [AGENTS.md](../../AGENTS.md).
 

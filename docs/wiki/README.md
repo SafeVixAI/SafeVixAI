@@ -1,4 +1,4 @@
-﻿# SafeVixAI Repository Wiki
+# SafeVixAI Repository Wiki
 
 > **Auto-synced** from `.qoder/repowiki/en/` via GitHub Actions
 

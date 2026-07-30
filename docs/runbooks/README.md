@@ -1,4 +1,4 @@
-﻿# Runbooks
+# Runbooks
 
 This directory contains operational runbooks for SafeVixAI production incidents.
 

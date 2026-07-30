@@ -1,4 +1,4 @@
-﻿# SafeVixAI — Production Hardening Report
+# SafeVixAI — Production Hardening Report
 
 **Date:** 2026-07-19  
 **Scope:** Full-stack production readiness audit across 7 dimensions  

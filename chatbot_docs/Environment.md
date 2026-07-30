@@ -1,4 +1,4 @@
-﻿# Environment Configuration — Chatbot Service
+# Environment Configuration — Chatbot Service
 
 Create a `.env` file in the `chatbot_service/` root based on `.env.example`. This file should contain all the secret keys and service URLs.
 

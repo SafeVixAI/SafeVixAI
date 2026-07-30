@@ -1,4 +1,4 @@
-﻿# Getting Started
+# Getting Started
 
 <cite>
 **Referenced Files in This Document**

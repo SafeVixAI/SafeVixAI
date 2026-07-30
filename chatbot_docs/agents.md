@@ -1,4 +1,4 @@
-﻿# Agent Specialization Overview
+# Agent Specialization Overview
 
 The SafeVixAI Chatbot operates as a unified interface but adapts its persona and tools dynamically according to the user's current context: Emergency (SafeVixAI), Legal (DriveLegal), or Infrastructure (RoadWatch).
 

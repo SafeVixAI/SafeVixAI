@@ -1,4 +1,4 @@
-﻿# Project Overview
+# Project Overview
 
 <cite>
 **Referenced Files in This Document**

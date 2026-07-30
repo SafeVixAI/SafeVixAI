@@ -1,4 +1,4 @@
-﻿# SafeVixAI — Agent Guide
+# SafeVixAI — Agent Guide
 
 > **READ THIS FIRST.** This document is written for any developer, AI agent, or team member who opens this codebase for the first time.
 

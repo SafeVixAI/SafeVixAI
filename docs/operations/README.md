@@ -1,4 +1,4 @@
-﻿# SafeVixAI Operations Handbook
+# SafeVixAI Operations Handbook
 
 **Version:** 1.0
 **Last Updated:** 2026-07-14

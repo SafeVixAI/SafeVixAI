@@ -1,4 +1,4 @@
-﻿# OpenSSF Best Practices — Implementation Audit Report
+# OpenSSF Best Practices — Implementation Audit Report
 
 **Project:** SafeVixAI  
 **Date:** 2026-06-17  

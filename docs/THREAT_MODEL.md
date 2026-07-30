@@ -1,4 +1,4 @@
-﻿# Threat Model & Assurance Case
+# Threat Model & Assurance Case
 
 > **Version:** 1.0  
 > **Applies to:** SafeVixAI (all three services: backend, chatbot, frontend)  

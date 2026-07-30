@@ -1,4 +1,4 @@
-﻿# ADR-002: 10-provider LLM Fallback Chain
+# ADR-002: 10-provider LLM Fallback Chain
 
 **Date:** 2026-05-20  
 **Status:** ✅ Accepted  

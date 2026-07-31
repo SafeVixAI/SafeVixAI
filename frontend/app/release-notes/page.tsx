@@ -44,7 +44,7 @@ export default function ReleaseNotesPage() {
 
   return (
     <main className="min-h-screen bg-slate-950 text-slate-200">
-      <TerminalHeader />
+      <TerminalHeader title="Release Notes" />
       <div className="max-w-4xl mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold flex items-center gap-2">

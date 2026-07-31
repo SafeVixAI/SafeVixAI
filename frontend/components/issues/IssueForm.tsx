@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Select } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { logClientError } from '@/lib/client-logger';
 import { useAppStore } from '@/lib/store';
@@ -54,8 +54,8 @@ export function IssueForm({ onSuccess, prefilledType }: IssueFormProps) {
 
   useEffect(() => {
     if (user && userProfile) {
-      setReporterName(userProfile.displayName || userProfile.name || '');
-      setReporterEmail(userProfile.email || '');
+      setReporterName((userProfile as any).displayName || (userProfile as any).full_name || (userProfile as any).name || '');
+      setReporterEmail((userProfile as any).email || '');
     }
   }, [user, userProfile]);
 
@@ -141,28 +141,30 @@ export function IssueForm({ onSuccess, prefilledType }: IssueFormProps) {
       <div className="grid grid-cols-2 gap-4">
         <div>
           <Label htmlFor="severity">Severity</Label>
-          <Select value={severity} onValueChange={(v) => setSeverity(v as IssueSeverity)}>
-            <SelectTrigger id="severity"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="critical">Critical</SelectItem>
-              <SelectItem value="high">High</SelectItem>
-              <SelectItem value="medium">Medium</SelectItem>
-              <SelectItem value="low">Low</SelectItem>
-              <SelectItem value="cosmetic">Cosmetic</SelectItem>
-            </SelectContent>
-          </Select>
+          <Select
+            value={severity}
+            onChange={(v) => setSeverity(v as IssueSeverity)}
+            options={[
+              { value: "critical", label: "Critical" },
+              { value: "high", label: "High" },
+              { value: "medium", label: "Medium" },
+              { value: "low", label: "Low" },
+              { value: "cosmetic", label: "Cosmetic" },
+            ]}
+          />
         </div>
         <div>
           <Label htmlFor="priority">Priority</Label>
-          <Select value={priority} onValueChange={(v) => setPriority(v as IssuePriority)}>
-            <SelectTrigger id="priority"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="urgent">Urgent</SelectItem>
-              <SelectItem value="high">High</SelectItem>
-              <SelectItem value="normal">Normal</SelectItem>
-              <SelectItem value="low">Low</SelectItem>
-            </SelectContent>
-          </Select>
+          <Select
+            value={priority}
+            onChange={(v) => setPriority(v as IssuePriority)}
+            options={[
+              { value: "urgent", label: "Urgent" },
+              { value: "high", label: "High" },
+              { value: "normal", label: "Normal" },
+              { value: "low", label: "Low" },
+            ]}
+          />
         </div>
       </div>
 

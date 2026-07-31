@@ -9,7 +9,7 @@ import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Select } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
 import { fetchIssue, fetchTimeline, updateIssue, markSpam } from '@/lib/api/issues';
@@ -223,20 +223,14 @@ export default function IssueDetailPage() {
                   <span className="text-muted-foreground">Status</span>
                   <Select
                     value={status}
-                    onValueChange={(v) => handleStatusChange(v as IssueStatus)}
+                    onChange={(v) => handleStatusChange(v as IssueStatus)}
                     disabled={updating || issue.isSpam}
-                  >
-                    <SelectTrigger className="w-full h-8 text-xs">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {STATUS_OPTIONS.map((s) => (
-                        <SelectItem key={s} value={s} className="capitalize">
-                          {s.replace(/_/g, ' ')}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    options={STATUS_OPTIONS.map((s) => ({
+                      value: s,
+                      label: s.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+                    }))}
+                    className="w-full"
+                  />
                 </div>
 
                 {issue.assignee && (
@@ -285,10 +279,12 @@ export default function IssueDetailPage() {
                     <span className="text-muted-foreground">Response by</span>
                     <span>{new Date(issue.slaResponseAt).toLocaleDateString()}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Resolution by</span>
-                    <span>{new Date(issue.slaResolutionAt).toLocaleDateString()}</span>
-                  </div>
+                  {issue.slaResolutionAt && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Resolution by</span>
+                      <span>{new Date(issue.slaResolutionAt).toLocaleDateString()}</span>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             )}

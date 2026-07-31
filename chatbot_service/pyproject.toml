@@ -62,3 +62,5 @@ paths_to_infect = ["agent/", "providers/", "rag/", "tools/", "services/", "memor
 backup = false
 runner = "pytest tests/ -q --no-header"
 dict_sync = false
+[tool.hatch.build.targets.wheel]
+packages = ['agent', 'api', 'core', 'models', 'providers', 'rag', 'services', 'tools', 'utils']

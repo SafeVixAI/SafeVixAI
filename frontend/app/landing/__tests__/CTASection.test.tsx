@@ -3,6 +3,8 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 
+jest.mock('@gsap/react', function() { return { useGSAP: jest.fn() } })
+jest.mock('@/lib/gsap', function() { return { gsap: { fromTo: jest.fn(), to: jest.fn(), set: jest.fn(), timeline: function() { return { fromTo: jest.fn(), to: jest.fn() } } } } })
 jest.mock('../hooks/useLandingGSAP', function() {
   return { useScrollReveal: jest.fn().mockReturnValue({ current: null }) };
 });

@@ -245,7 +245,7 @@ export function addToOfflineQueue(item: Omit<OfflineNotification, 'id' | 'create
   const queue = getOfflineQueue();
   queue.push({
     ...item,
-    id: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+    id: typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${typeof crypto !== 'undefined' ? crypto.getRandomValues(new Uint32Array(1))[0].toString(36) : Math.random().toString(36).slice(2)}`,
     createdAt: Date.now(),
   });
   try {
@@ -302,7 +302,7 @@ export function useNotificationWebSocket(userId: string | null) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [connected, setConnected] = useState(false);
   const wsRef = useRef<WebSocket | null>(null);
-  const reconnectRef = useRef<ReturnType<typeof setTimeout>>();
+  const reconnectRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const attemptRef = useRef(0);
 
   const connect = useCallback(() => {
@@ -320,7 +320,8 @@ export function useNotificationWebSocket(userId: string | null) {
       setConnected(false);
       const delay = Math.min(1000 * Math.pow(2, attemptRef.current), MAX_RECONNECT_DELAY);
       attemptRef.current++;
-      const jitter = delay * (0.5 + Math.random() * 0.5);
+      const secureRandom = typeof crypto !== 'undefined' ? crypto.getRandomValues(new Uint32Array(1))[0] / 4294967295 : Math.random();
+      const jitter = delay * (0.5 + secureRandom * 0.5);
       reconnectRef.current = setTimeout(connect, jitter);
     };
 

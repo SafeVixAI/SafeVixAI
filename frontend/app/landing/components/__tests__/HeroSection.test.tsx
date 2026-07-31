@@ -15,7 +15,7 @@ describe('HeroSection', function() {
 
   it('renders headline about AI-powered road safety', function() {
     render(React.createElement(HeroSection))
-    expect(rtlScreen.getByText(/AI-Powered/)).toBeTruthy()
+    expect(rtlScreen.getByLabelText(/AI-Powered/)).toBeTruthy()
   })
 
   it('renders Launch Platform link', function() {

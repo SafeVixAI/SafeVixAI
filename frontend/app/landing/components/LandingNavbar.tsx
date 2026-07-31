@@ -38,7 +38,7 @@ function ShieldLogo() {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       aria-hidden="true"
-      className="flex-shrink-0"
+      className="flex-shrink-0 shield-glow"
     >
       {/* Shield body */}
       <path
@@ -63,8 +63,12 @@ function ShieldLogo() {
 export default function LandingNavbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState('#platform');
+  
   const navRef = useRef<HTMLElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
+  const indicatorRef = useRef<HTMLDivElement>(null);
+  const linksContainerRef = useRef<HTMLDivElement>(null);
 
   /* ── Scroll listener ── */
   useEffect(() => {
@@ -103,6 +107,66 @@ export default function LandingNavbar() {
     },
     { scope: navRef }
   );
+
+  /* ── Active Section Observer ── */
+  useEffect(() => {
+    if (typeof IntersectionObserver === 'undefined') return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActiveSection(`#${entry.target.id}`);
+          }
+        });
+      },
+      { rootMargin: '-20% 0px -80% 0px' }
+    );
+    NAV_LINKS.forEach(link => {
+      const el = document.querySelector(link.href);
+      if (el) observer.observe(el);
+    });
+    return () => observer.disconnect();
+  }, []);
+
+  /* ── Indicator & Mobile Menu Animations ── */
+  useGSAP(() => {
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReducedMotion) return;
+
+    // Desktop nav indicator animation
+    if (indicatorRef.current && linksContainerRef.current) {
+      const activeLink = linksContainerRef.current.querySelector(`a[href="${activeSection}"]`) as HTMLAnchorElement;
+      if (activeLink) {
+        const linkRect = activeLink.getBoundingClientRect();
+        const containerRect = linksContainerRef.current.getBoundingClientRect();
+        const left = linkRect.left - containerRect.left;
+        const width = linkRect.width;
+
+        gsap.to(indicatorRef.current, {
+          x: left,
+          width: width,
+          opacity: 1,
+          duration: 0.3,
+          ease: 'power2.out'
+        });
+      }
+    }
+  }, [activeSection]);
+
+  useGSAP(() => {
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReducedMotion || !mobileOpen) return;
+
+    // Mobile menu staggered entry
+    if (mobileMenuRef.current) {
+      const links = mobileMenuRef.current.querySelectorAll('nav a');
+      gsap.fromTo(
+        links,
+        { opacity: 0, x: 20 },
+        { opacity: 1, x: 0, stagger: 0.05, duration: 0.4, ease: 'power2.out', delay: 0.1 }
+      );
+    }
+  }, [mobileOpen]);
 
   /* ── Smooth scroll handler ── */
   const handleNavClick = useCallback(
@@ -145,23 +209,28 @@ export default function LandingNavbar() {
           </Link>
 
           {/* ── Center Nav (desktop) ── */}
-          <div className="hidden md:flex items-center gap-8">
+          <div ref={linksContainerRef} className="hidden md:flex items-center gap-8 relative">
             {NAV_LINKS.map((link) => (
               <a
                 key={link.href}
                 href={link.href}
                 onClick={(e) => handleNavClick(e, link.href)}
-                className="
-                  font-sans text-sm text-text-2
-                  hover:text-text-1 transition-colors duration-200
+                className={`
+                  font-sans text-sm transition-colors duration-200
                   relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-px
                   after:bg-brand-light after:transition-all after:duration-300
                   hover:after:w-full
-                "
+                  ${activeSection === link.href ? 'text-text-1' : 'text-text-2 hover:text-text-1'}
+                `}
               >
                 {link.label}
               </a>
             ))}
+            {/* Active Indicator */}
+            <div
+              ref={indicatorRef}
+              className="nav-indicator absolute -bottom-[6px] left-0 h-[2px] bg-brand-light opacity-0 pointer-events-none transition-none"
+            />
           </div>
 
           {/* ── Right actions ── */}
@@ -173,7 +242,7 @@ export default function LandingNavbar() {
                 bg-brand hover:bg-brand-hover text-white
                 px-5 py-2.5 rounded-md text-sm font-semibold
                 transition-all duration-200
-                hover:shadow-brand
+                hover:shadow-brand shimmer-on-hover
               "
             >
               Launch Platform

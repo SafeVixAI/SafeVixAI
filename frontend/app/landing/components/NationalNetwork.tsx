@@ -2,9 +2,7 @@
 
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 SafeVixAI Team
-import React from 'react';
-
-
+import React, { useState, useEffect } from 'react';
 import { useRef } from 'react';
 import { useGSAP } from '@gsap/react';
 import { gsap } from '@/lib/gsap';
@@ -146,7 +144,7 @@ function StatCounter({ stat }: { stat: StatBlock }) {
   const ref = useCountUp(stat.value, { duration: 2.2, start: 'top 85%' });
 
   return (
-    <div className="reveal-item">
+    <div className="reveal-item shimmer-on-hover rounded-xl p-4 transition-colors hover:bg-white/[0.02]">
       <div className="flex items-baseline gap-1">
         <span
           ref={ref}
@@ -175,6 +173,26 @@ export default function NationalNetwork() {
   const sectionRef = useScrollReveal({ y: 40, stagger: 0.1, start: 'top 80%' });
   const connections = generateConnections(NETWORK_NODES, 80);
   const svgRef = useRef<SVGSVGElement>(null);
+  
+  const [activeNodeIdx, setActiveNodeIdx] = useState(-1);
+  const [syncCounter, setSyncCounter] = useState(2);
+
+  // Sync Counter Logic
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setSyncCounter(prev => prev >= 30 ? 0 : prev + 1);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Random Activity Pulse Logic
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveNodeIdx(Math.floor(Math.random() * NETWORK_NODES.length));
+      setTimeout(() => setActiveNodeIdx(-1), 1500);
+    }, 2500);
+    return () => clearInterval(interval);
+  }, []);
 
   // Animate connection lines drawing on scroll
   useGSAP(
@@ -206,6 +224,13 @@ export default function NationalNetwork() {
     },
     { scope: svgRef }
   );
+
+  // Extract subset of connections for data flow dots
+  const dataFlowConnections = connections
+    .filter(line => 
+      NETWORK_NODES.some(n => n.pulse && ((n.cx === line.x1 && n.cy === line.y1) || (n.cx === line.x2 && n.cy === line.y2)))
+    )
+    .slice(0, 6); // Add up to 6 traveling dots
 
   return (
     <section
@@ -269,11 +294,28 @@ export default function NationalNetwork() {
                   />
                 ))}
 
+                {/* Data flow dots */}
+                {dataFlowConnections.map((line, i) => (
+                  <circle key={`flow-${i}`} cx={line.x1} cy={line.y1} r="2" fill="var(--brand-light)">
+                    <animate attributeName="cx" values={`${line.x1};${line.x2}`} dur={`${2 + (i % 3) * 0.5}s`} repeatCount="indefinite" begin={`${i * 0.4}s`} />
+                    <animate attributeName="cy" values={`${line.y1};${line.y2}`} dur={`${2 + (i % 3) * 0.5}s`} repeatCount="indefinite" begin={`${i * 0.4}s`} />
+                    <animate attributeName="opacity" values="0;1;1;0" dur={`${2 + (i % 3) * 0.5}s`} repeatCount="indefinite" begin={`${i * 0.4}s`} />
+                  </circle>
+                ))}
+
                 {/* Network nodes */}
                 {NETWORK_NODES.map((node, i) => {
                   const color = NODE_COLORS[node.type];
                   return (
                     <g key={`node-${i}`}>
+                      {/* Random activity pulse */}
+                      {activeNodeIdx === i && (
+                        <circle cx={node.cx} cy={node.cy} r="6" fill="none" stroke={color} strokeWidth="1.5">
+                          <animate attributeName="r" from="6" to="24" dur="1.5s" fill="freeze" />
+                          <animate attributeName="opacity" from="0.8" to="0" dur="1.5s" fill="freeze" />
+                        </circle>
+                      )}
+
                       {/* Pulse ring */}
                       {node.pulse && (
                         <circle
@@ -362,14 +404,14 @@ export default function NationalNetwork() {
 
             {/* Network status bar */}
             <div className="reveal-item flex items-center gap-3 p-4 rounded-xl bg-surface-1 border border-white/[0.06]">
-              <div className="relative flex h-3 w-3">
+              <div className="relative flex h-3 w-3 neon-pulse-green rounded-full">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-light opacity-75" />
                 <span className="relative inline-flex rounded-full h-3 w-3 bg-brand-light" />
               </div>
               <div>
                 <p className="text-xs font-medium text-text-1">Network Status: Operational</p>
                 <p className="text-[10px] text-text-3 font-mono mt-0.5">
-                  All 28 state nodes online · Last sync: 2s ago · Latency: 12ms avg
+                  All 28 state nodes online · Last sync: {syncCounter}s ago · Latency: 12ms avg
                 </p>
               </div>
             </div>

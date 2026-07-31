@@ -22,72 +22,64 @@ from rag.document_loader import (
 
 
 class TestReadText:
-    def test_reads_text_file(self) -> None:
-        path = Path(tempfile.mktemp(suffix=".txt"))
+    def test_reads_text_file(self, tmp_path: Path) -> None:
+        path = tmp_path / "test.txt"
         path.write_text("Hello World", encoding="utf-8")
         result = _read_text(path)
         assert "Hello World" in result
-        path.unlink()
 
-    def test_reads_markdown_file(self) -> None:
-        path = Path(tempfile.mktemp(suffix=".md"))
+    def test_reads_markdown_file(self, tmp_path: Path) -> None:
+        path = tmp_path / "test.md"
         path.write_text("# Title\n\nBody text", encoding="utf-8")
         result = _read_text(path)
         assert "# Title" in result
-        path.unlink()
 
 
 class TestReadJson:
-    def test_reads_json_file(self) -> None:
+    def test_reads_json_file(self, tmp_path: Path) -> None:
         data = {"key": "value", "nested": {"a": 1}}
-        path = Path(tempfile.mktemp(suffix=".json"))
+        path = tmp_path / "test.json"
         path.write_text(json.dumps(data), encoding="utf-8")
         result = _read_json(path)
         assert "key" in result
         assert "value" in result
-        path.unlink()
 
-    def test_invalid_json_raises(self) -> None:
-        path = Path(tempfile.mktemp(suffix=".json"))
+    def test_invalid_json_raises(self, tmp_path: Path) -> None:
+        path = tmp_path / "test.json"
         path.write_text("not-json", encoding="utf-8")
         with pytest.raises(json.JSONDecodeError):
             _read_json(path)
-        path.unlink()
 
 
 class TestReadCsv:
-    def test_reads_csv_file(self) -> None:
-        path = Path(tempfile.mktemp(suffix=".csv"))
+    def test_reads_csv_file(self, tmp_path: Path) -> None:
+        path = tmp_path / "test.csv"
         path.write_text("name,age\nAlice,30\nBob,25\n", encoding="utf-8-sig")
         result = _read_csv(path)
         assert "Columns:" in result
         assert "Alice" in result
-        path.unlink()
 
-    def test_respects_max_csv_rows(self) -> None:
-        path = Path(tempfile.mktemp(suffix=".csv"))
+    def test_respects_max_csv_rows(self, tmp_path: Path) -> None:
+        path = tmp_path / "test.csv"
         lines = ["col"] + [f"row{i}" for i in range(MAX_CSV_ROWS + 10)]
         path.write_text("\n".join(lines), encoding="utf-8-sig")
         result = _read_csv(path)
         row_count = result.count("\n")
         assert row_count <= MAX_CSV_ROWS + 2
-        path.unlink()
 
-    def test_empty_csv(self) -> None:
-        path = Path(tempfile.mktemp(suffix=".csv"))
+    def test_empty_csv(self, tmp_path: Path) -> None:
+        path = tmp_path / "test.csv"
         path.write_text("", encoding="utf-8-sig")
         result = _read_csv(path)
         assert result == ""
-        path.unlink()
 
 
 class TestReadPdf:
-    def test_returns_empty_when_no_pypdf(self) -> None:
-        path = Path(tempfile.mktemp(suffix=".pdf"))
+    def test_returns_empty_when_no_pypdf(self, tmp_path: Path) -> None:
+        path = tmp_path / "test.pdf"
         path.write_text("fake pdf content", encoding="utf-8")
         result = _read_pdf(path)
         assert result == ""
-        path.unlink()
 
 
 class TestLoadDocuments:

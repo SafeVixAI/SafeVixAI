@@ -85,8 +85,8 @@ function DesktopStagePanel({ stage, index }: { stage: Stage; index: number }) {
           {/* Left — Text content */}
           <div className="flex flex-col">
             <span
-              className="font-mono text-[clamp(80px,10vw,120px)] font-extrabold leading-none select-none"
-              style={{ color: 'rgba(255,255,255,0.03)' }}
+              className="font-mono text-[clamp(80px,10vw,120px)] font-extrabold leading-none select-none text-gradient-animated opacity-20"
+              style={{ color: 'rgba(255,255,255,0.04)' }}
             >
               {String(index + 1).padStart(2, '0')}
             </span>
@@ -101,7 +101,7 @@ function DesktopStagePanel({ stage, index }: { stage: Stage; index: number }) {
               {STAGES.map((s, i) => (
                 <div
                   key={s.title}
-                  className="w-2 h-2 rounded-full transition-all duration-300"
+                  className={`w-2 h-2 rounded-full transition-all duration-300 ${i === index ? 'neon-pulse-green' : ''}`}
                   style={{
                     backgroundColor: i === index ? stage.color : 'rgba(255,255,255,0.1)',
                     transform: i === index ? 'scale(1.5)' : 'scale(1)',
@@ -116,7 +116,7 @@ function DesktopStagePanel({ stage, index }: { stage: Stage; index: number }) {
             <div className="relative">
               {/* Outer glow ring */}
               <div
-                className="absolute inset-0 rounded-full blur-2xl opacity-20"
+                className="absolute inset-0 rounded-full blur-2xl opacity-20 sv-glow-breathe"
                 style={{ backgroundColor: stage.color }}
               />
               {/* Ring border */}
@@ -163,7 +163,7 @@ function MobileStageCard({ stage, index }: { stage: Stage; index: number }) {
   const Icon = stage.icon;
 
   return (
-    <div className="reveal-item bg-surface-1 border border-white/[0.06] rounded-xl p-6 relative overflow-hidden">
+    <div className="reveal-item bg-surface-1 border border-white/[0.06] rounded-xl p-6 relative overflow-hidden shimmer-on-hover glass-shimmer">
       {/* Top color accent */}
       <div
         className="absolute top-0 left-0 right-0 h-[2px]"
@@ -307,7 +307,7 @@ if (typeof window === 'undefined') return;
         <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-white/[0.06] z-20">
           <div
             ref={progressRef}
-            className="h-full w-full origin-left bg-brand-light"
+            className="h-full w-full origin-left bg-brand-light neon-progress"
             style={{ transform: 'scaleX(0)' }}
           />
         </div>

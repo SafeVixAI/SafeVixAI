@@ -5,10 +5,11 @@
 import React from 'react';
 
 
-import { useRef } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { useGSAP } from '@gsap/react';
 import { gsap } from '@/lib/gsap';
 import { useScrollReveal } from '../hooks/useLandingGSAP';
+import IntelligenceGlobe from './three/IntelligenceGlobe';
 
 /* ═══════════════════════════════════════════════════════════
    CommandCenter — Live Intelligence Dashboard Simulation
@@ -46,56 +47,6 @@ const BAR_DATA = [
   { day: 'Sat', pct: 55 },
 ];
 
-// ── City dots for India map ────────────────────────────────
-interface CityDot {
-  name: string;
-  cx: number;
-  cy: number;
-  color: string;
-  pulse: boolean;
-}
-
-const CITY_DOTS: CityDot[] = [
-  { name: 'Delhi', cx: 195, cy: 145, color: '#DC2626', pulse: true },
-  { name: 'Mumbai', cx: 130, cy: 290, color: '#D97706', pulse: false },
-  { name: 'Bengaluru', cx: 175, cy: 385, color: '#00C896', pulse: true },
-  { name: 'Chennai', cx: 215, cy: 375, color: '#3B82F6', pulse: false },
-  { name: 'Kolkata', cx: 285, cy: 230, color: '#DC2626', pulse: true },
-  { name: 'Hyderabad', cx: 190, cy: 325, color: '#D97706', pulse: false },
-  { name: 'Ahmedabad', cx: 115, cy: 225, color: '#00C896', pulse: false },
-  { name: 'Jaipur', cx: 155, cy: 175, color: '#3B82F6', pulse: true },
-  { name: 'Lucknow', cx: 225, cy: 180, color: '#DC2626', pulse: false },
-  { name: 'Kochi', cx: 165, cy: 420, color: '#00C896', pulse: false },
-];
-
-// ── Simplified India SVG outline path ──────────────────────
-const INDIA_PATH = `
-  M 190 50 
-  C 200 55, 220 60, 230 70 
-  C 240 80, 260 85, 275 95 
-  C 290 105, 305 120, 310 140 
-  C 315 160, 320 180, 315 200 
-  C 310 215, 305 225, 300 240 
-  C 295 255, 290 260, 285 265 
-  C 280 270, 278 275, 275 280 
-  C 265 295, 255 305, 250 315 
-  C 245 325, 240 340, 235 355 
-  C 230 370, 225 380, 220 395 
-  C 215 410, 210 420, 200 435 
-  C 190 450, 180 455, 170 445 
-  C 165 440, 160 430, 155 415 
-  C 150 400, 148 390, 145 375 
-  C 140 355, 138 345, 140 330 
-  C 142 315, 135 305, 125 295 
-  C 115 285, 108 275, 100 260 
-  C 92 245, 88 235, 85 220 
-  C 82 205, 85 190, 90 175 
-  C 95 160, 100 150, 110 140 
-  C 120 130, 125 120, 135 110 
-  C 145 100, 150 90, 160 80 
-  C 170 70, 175 60, 180 55 
-  C 185 50, 188 48, 190 50 Z
-`;
 
 // ── Stat pills ─────────────────────────────────────────────
 const STAT_PILLS = [
@@ -116,6 +67,14 @@ export default function CommandCenter() {
   const sectionRef = useScrollReveal({ y: 30, stagger: 0.08, start: 'top 80%' });
   const barsRef = useRef<HTMLDivElement>(null);
   const severityRef = useRef<HTMLDivElement>(null);
+  const [activeIncidentIdx, setActiveIncidentIdx] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveIncidentIdx((prev) => (prev + 1) % INCIDENTS.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, []);
 
   // ── Animate bar chart heights on scroll ──────────────────
   useGSAP(
@@ -205,7 +164,7 @@ export default function CommandCenter() {
         </div>
 
         {/* ── Dashboard Mockup ──────────────────────────── */}
-        <div className="reveal-item rounded-2xl border border-white/[0.06] bg-surface-1/50 backdrop-blur-sm overflow-hidden p-1 shadow-modal max-w-[1200px] mx-auto">
+        <div className="reveal-item glass-shimmer rounded-2xl border border-white/[0.06] bg-surface-1/50 backdrop-blur-sm overflow-hidden p-1 shadow-modal max-w-[1200px] mx-auto">
           <div className="bg-bg rounded-xl overflow-hidden relative">
             {/* Scan line overlay */}
             <div
@@ -233,14 +192,16 @@ export default function CommandCenter() {
               </span>
 
               {/* LIVE badge */}
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emergency/10 border border-emergency/20">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emergency opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emergency" />
-                </span>
-                <span className="text-[10px] font-mono font-semibold tracking-wider text-emergency uppercase">
-                  Live
-                </span>
+              <div className="neon-pulse-green rounded-full">
+                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emergency/10 border border-emergency/20">
+                  <span className="relative flex h-2.5 w-2.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emergency opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emergency" />
+                  </span>
+                  <span className="text-[10px] font-mono font-semibold tracking-wider text-emergency uppercase">
+                    Live
+                  </span>
+                </div>
               </div>
             </div>
 
@@ -256,7 +217,9 @@ export default function CommandCenter() {
                   {INCIDENTS.map((inc, i) => (
                     <div
                       key={i}
-                      className="py-2.5 border-b border-white/[0.04] last:border-b-0 group"
+                      className={`py-2.5 px-2 -mx-2 rounded border-b border-white/[0.04] last:border-b-0 group transition-colors duration-300 ${
+                        i === activeIncidentIdx ? 'bg-white/[0.04] incident-flash' : ''
+                      }`}
                     >
                       <div className="flex items-start gap-2.5">
                         {/* Severity dot */}
@@ -296,89 +259,13 @@ export default function CommandCenter() {
                   NATIONAL OVERVIEW
                 </p>
 
-                {/* India SVG Map */}
-                <div className="relative flex justify-center">
-                  <svg
-                    viewBox="0 0 400 500"
-                    className="w-full max-w-[340px] h-auto"
-                    aria-label="Map of India showing incident locations"
-                    role="img"
-                  >
-                    {/* Country outline */}
-                    <path
-                      d={INDIA_PATH}
-                      fill="none"
-                      stroke="rgba(255,255,255,0.08)"
-                      strokeWidth="1.5"
-                      className="drop-shadow-sm"
-                    />
-                    <path
-                      d={INDIA_PATH}
-                      fill="rgba(0,200,150,0.03)"
-                      stroke="none"
-                    />
-
-                    {/* City markers with pulse rings */}
-                    {CITY_DOTS.map((city) => (
-                      <g key={city.name}>
-                        {/* Pulse ring for pulsing cities */}
-                        {city.pulse && (
-                          <circle
-                            cx={city.cx}
-                            cy={city.cy}
-                            r="8"
-                            fill="none"
-                            stroke={city.color}
-                            strokeWidth="0.8"
-                            opacity="0.5"
-                          >
-                            <animate
-                              attributeName="r"
-                              from="4"
-                              to="16"
-                              dur="2s"
-                              repeatCount="indefinite"
-                            />
-                            <animate
-                              attributeName="opacity"
-                              from="0.6"
-                              to="0"
-                              dur="2s"
-                              repeatCount="indefinite"
-                            />
-                          </circle>
-                        )}
-
-                        {/* Outer glow */}
-                        <circle
-                          cx={city.cx}
-                          cy={city.cy}
-                          r="6"
-                          fill={city.color}
-                          opacity="0.15"
-                        />
-
-                        {/* Dot */}
-                        <circle
-                          cx={city.cx}
-                          cy={city.cy}
-                          r="3"
-                          fill={city.color}
-                        />
-
-                        {/* City label */}
-                        <text
-                          x={city.cx + 8}
-                          y={city.cy + 3}
-                          fill="rgba(255,255,255,0.35)"
-                          fontSize="8"
-                          fontFamily="var(--font-mono)"
-                        >
-                          {city.name}
-                        </text>
-                      </g>
-                    ))}
-                  </svg>
+                {/* 3D Intelligence Globe */}
+                <div 
+                  className="relative flex justify-center h-[350px] md:h-[400px]"
+                  role="img"
+                  aria-label="India SVG map"
+                >
+                  <IntelligenceGlobe />
                 </div>
 
                 {/* Stat pills */}
@@ -413,7 +300,7 @@ export default function CommandCenter() {
                     <div key={bar.day} className="flex-1 flex flex-col items-center gap-1">
                       <div className="w-full relative h-full flex items-end">
                         <div
-                          className="bar-fill w-full rounded-t"
+                          className="bar-fill w-full rounded-t hover:scale-x-110 hover:brightness-110 transition-all duration-200 cursor-pointer"
                           data-height={`${bar.pct}%`}
                           style={{
                             height: '0%',
@@ -427,7 +314,7 @@ export default function CommandCenter() {
                 </div>
 
                 {/* Severity Distribution */}
-                <div ref={severityRef}>
+                <div ref={severityRef} className="shimmer-auto">
                   <p className="text-[10px] font-mono text-text-3 uppercase tracking-wider mb-2 mt-4">
                     Severity Distribution
                   </p>
@@ -463,7 +350,15 @@ export default function CommandCenter() {
                   {AI_ALERTS.map((alert, idx) => (
                     <div
                       key={idx}
-                      className="flex items-start gap-2 p-2 rounded-md bg-white/[0.02] border border-white/[0.04]"
+                      className="flex items-start gap-2 p-2 rounded-md bg-white/[0.02] border border-white/[0.04] border-l-2"
+                      style={{
+                        borderLeftColor:
+                          alert.severity === 'high'
+                            ? '#DC2626'
+                            : alert.severity === 'medium'
+                              ? '#D97706'
+                              : '#3B82F6',
+                      }}
                     >
                       <span
                         className="mt-1 w-1.5 h-1.5 rounded-full flex-shrink-0"

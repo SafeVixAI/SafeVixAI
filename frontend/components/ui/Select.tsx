@@ -22,6 +22,7 @@ interface SelectProps {
   error?: string
   ariaLabel?: string
   className?: string
+  disabled?: boolean
 }
 
 export function Select({
@@ -33,6 +34,7 @@ export function Select({
   error,
   ariaLabel,
   className,
+  disabled,
 }: SelectProps) {
   const id = label ? label.toLowerCase().replace(/\s+/g, '-') : undefined
 
@@ -51,12 +53,14 @@ export function Select({
           id={id}
           value={value}
           onChange={(e) => onChange(e.target.value)}
+          disabled={disabled}
           aria-label={ariaLabel ?? label}
           className={cn(
             'w-full appearance-none rounded-[6px] border bg-surface-2 px-3 py-2.5 pr-10 text-sm text-text-1 transition-all outline-none',
             'border-border focus:border-brand-light/50 focus:ring-3 focus:ring-brand-light/12',
             error && 'border-emergency focus:border-emergency/50 focus:ring-emergency/12',
             !value && 'text-text-3',
+            disabled && 'opacity-50 cursor-not-allowed',
           )}
         >
           {placeholder && (

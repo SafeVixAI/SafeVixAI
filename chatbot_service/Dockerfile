@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2026 SafeVixAI Team
 # ── Stage 1: Build dependencies ──────────────────────────────────────────────
-FROM python:3.11.9-slim-bookworm AS builder
+FROM python:3.11.9-slim-bookworm@sha256:2856e6af199e8128161abd320575eb9b341f3b76f017b5d0c9cd364f60d8a050 AS builder
 
 WORKDIR /app
 
@@ -19,7 +19,7 @@ COPY requirements-render.txt .
 RUN pip install --prefix=/install -r requirements-render.txt
 
 # ── Stage 2: Runtime image ────────────────────────────────────────────────────
-FROM python:3.11.9-slim-bookworm
+FROM python:3.11.9-slim-bookworm@sha256:2856e6af199e8128161abd320575eb9b341f3b76f017b5d0c9cd364f60d8a050
 
 WORKDIR /app
 

@@ -2,10 +2,7 @@
 
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 SafeVixAI Team
-import React from 'react';
-
-
-import { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { useScrollReveal } from '../hooks/useLandingGSAP';
 
 /* ── Tech data ── */
@@ -47,6 +44,7 @@ function OrbitalItem({
   counterClass: string;
 }) {
   const angle = (360 / total) * index;
+  const [isHovered, setIsHovered] = useState(false);
 
   return (
     <div
@@ -58,7 +56,13 @@ function OrbitalItem({
       }}
     >
       <div
-        className={`${counterClass} flex items-center gap-2 bg-surface-1 border border-white/[0.06] rounded-lg px-3 py-2 shadow-card`}
+        className={`${counterClass} flex items-center gap-2 bg-surface-1 border border-white/[0.06] rounded-lg px-3 py-2 shadow-card transition-all duration-300 hover:shadow-lg cursor-pointer`}
+        style={{
+          boxShadow: isHovered ? `0 0 16px ${item.color}40` : undefined,
+          borderColor: isHovered ? `${item.color}80` : undefined
+        }}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
       >
         <span
           className="w-2 h-2 rounded-full flex-shrink-0"
@@ -120,6 +124,7 @@ function ShieldLogo({ size = 64 }: { size?: number }) {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className="sv-glow-breathe"
+      style={{ filter: 'drop-shadow(0 0 8px rgba(0,200,150,0.3))' }}
     >
       <path
         d="M32 4L8 16v16c0 14.4 10.24 27.84 24 32 13.76-4.16 24-17.6 24-32V16L32 4z"
@@ -152,7 +157,7 @@ function ShieldLogo({ size = 64 }: { size?: number }) {
 /* ── Mobile Grid Badge ── */
 function TechBadge({ item }: { item: TechItem }) {
   return (
-    <div className="reveal-item flex items-center gap-2 bg-surface-1 border border-white/[0.06] rounded-lg px-4 py-3 shadow-card">
+    <div className="reveal-item shimmer-on-hover flex items-center gap-2 bg-surface-1 border border-white/[0.06] rounded-lg px-4 py-3 shadow-card">
       <span
         className="w-2 h-2 rounded-full flex-shrink-0"
         style={{ backgroundColor: item.color }}
@@ -180,6 +185,21 @@ export default function TechStack() {
   }, []);
 
   const allTech = [...INNER_RING, ...MIDDLE_RING, ...OUTER_RING];
+
+  function getPos(radius: number, index: number, total: number) {
+    const angle = (360 / total) * index;
+    const rad = angle * (Math.PI / 180);
+    return {
+      x: 280 + radius * Math.cos(rad),
+      y: 280 + radius * Math.sin(rad)
+    };
+  }
+
+  const allTechPositions = [
+    ...INNER_RING.map((_, i) => getPos(120, i, INNER_RING.length)),
+    ...MIDDLE_RING.map((_, i) => getPos(200, i, MIDDLE_RING.length)),
+    ...OUTER_RING.map((_, i) => getPos(270, i, OUTER_RING.length))
+  ];
 
   return (
     <section id="tech-stack" className="landing-section bg-bg">
@@ -213,6 +233,22 @@ export default function TechStack() {
               });
             }}
           >
+            {/* Connection Lines Overlay */}
+            <svg className="absolute inset-0 z-0 pointer-events-none" width="560" height="560">
+              {allTechPositions.map((pos, i) => (
+                <line 
+                  key={`line-${i}`} 
+                  x1="280" 
+                  y1="280" 
+                  x2={pos.x} 
+                  y2={pos.y} 
+                  stroke="rgba(0,200,150,0.06)" 
+                  strokeWidth="0.5" 
+                  strokeDasharray="4 4" 
+                />
+              ))}
+            </svg>
+
             {/* Center Shield */}
             <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
               <ShieldLogo size={64} />

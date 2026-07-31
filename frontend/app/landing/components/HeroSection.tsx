@@ -5,7 +5,7 @@
 import React from 'react';
 
 
-import { useRef } from 'react';
+import { useRef, useCallback } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { useGSAP } from '@gsap/react';
@@ -14,6 +14,14 @@ import { gsap } from '@/lib/gsap';
 /* ────────────────────────────────────────────────────────────
    SafeVixAI Landing — Cinematic Hero Section
    ──────────────────────────────────────────────────────────── */
+
+const splitText = (text: string) => {
+  return text.split('').map((char, index) => (
+    <span key={index} className="inline-block" style={{ opacity: 0, display: 'inline-block' }}>
+      {char === ' ' ? '\u00A0' : char}
+    </span>
+  ));
+};
 
 /* ── Dynamic 3D Globe (SSR disabled) ── */
 const GlobeScene = dynamic(
@@ -111,6 +119,7 @@ export default function HeroSection() {
   const descRef = useRef<HTMLParagraphElement>(null);
   const buttonsRef = useRef<HTMLDivElement>(null);
   const statusRef = useRef<HTMLDivElement>(null);
+  const statusTextRef = useRef<HTMLSpanElement>(null);
   const panelsRef = useRef<HTMLDivElement>(null);
 
   /* ── GSAP staggered entry animations ── */
@@ -142,20 +151,34 @@ export default function HeroSection() {
 
       // Overline
       if (overlineRef.current) {
-        tl.fromTo(
-          overlineRef.current,
-          { opacity: 0, y: 20 },
-          { opacity: 1, y: 0, duration: 0.6 },
-          0.2
-        );
+        const text = "National Road Safety Intelligence";
+        overlineRef.current.textContent = "";
+        overlineRef.current.classList.add('typewriter-cursor');
+        gsap.set(overlineRef.current, { opacity: 1 });
+        const obj = { len: 0 };
+        tl.to(obj, {
+          len: text.length,
+          duration: 1.5,
+          ease: "none",
+          onUpdate: () => {
+            if (overlineRef.current) {
+              overlineRef.current.textContent = text.substring(0, Math.floor(obj.len));
+            }
+          },
+          onComplete: () => {
+            overlineRef.current?.classList.remove('typewriter-cursor');
+          }
+        }, 0.2);
       }
 
       // Headline
       if (headlineRef.current) {
+        const chars = headlineRef.current.querySelectorAll('span > span');
+        gsap.set(headlineRef.current, { opacity: 1 });
         tl.fromTo(
-          headlineRef.current,
-          { opacity: 0, y: 30 },
-          { opacity: 1, y: 0, duration: 0.8 },
+          chars,
+          { opacity: 0, y: 40, rotateX: -90 },
+          { opacity: 1, y: 0, rotateX: 0, stagger: 0.02, duration: 0.8 },
           0.4
         );
       }
@@ -181,13 +204,26 @@ export default function HeroSection() {
       }
 
       // Status line
-      if (statusRef.current) {
+      if (statusRef.current && statusTextRef.current) {
         tl.fromTo(
           statusRef.current,
           { opacity: 0 },
-          { opacity: 1, duration: 0.5 },
+          { opacity: 1, duration: 0.2 },
           1.2
         );
+        const text = "System Online — Monitoring Active";
+        statusTextRef.current.textContent = "";
+        const obj = { len: 0 };
+        tl.to(obj, {
+          len: text.length,
+          duration: 1.5,
+          ease: "none",
+          onUpdate: () => {
+            if (statusTextRef.current) {
+              statusTextRef.current.textContent = text.substring(0, Math.floor(obj.len));
+            }
+          }
+        }, 1.4);
       }
 
       // Floating panels (slide in from right)
@@ -217,12 +253,24 @@ export default function HeroSection() {
     { scope: sectionRef }
   );
 
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLElement>) => {
+    if (!sectionRef.current) return;
+    const rect = sectionRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    sectionRef.current.style.setProperty('--mouse-x', `${x}px`);
+    sectionRef.current.style.setProperty('--mouse-y', `${y}px`);
+  }, []);
+
   return (
     <section
       ref={sectionRef}
       id="platform"
+      onMouseMove={handleMouseMove}
       className="relative min-h-dvh hero-gradient-bg grid-pattern overflow-hidden"
     >
+      {/* Mouse follower glow */}
+      <div className="hidden lg:block absolute inset-0 pointer-events-none z-0" style={{ background: 'radial-gradient(600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(0,200,150,0.04), transparent 40%)' }} />
       {/* ── Content Grid ── */}
       <div className="landing-container grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 min-h-dvh">
         {/* ── Left Column: Text Content ── */}
@@ -231,7 +279,7 @@ export default function HeroSection() {
           <p
             ref={overlineRef}
             className="font-mono text-[11px] font-semibold tracking-[0.10em] uppercase text-brand-light mb-6"
-            style={{ opacity: 0 }}
+            style={{ opacity: 1 }}
           >
             National Road Safety Intelligence
           </p>
@@ -239,14 +287,15 @@ export default function HeroSection() {
           {/* Headline */}
           <h1
             ref={headlineRef}
-            className="font-space text-[clamp(2.5rem,6vw,4.5rem)] font-bold leading-[1.05] tracking-tight text-text-1 mb-6"
-            style={{ opacity: 0 }}
+            className="font-space text-[clamp(2.5rem,6vw,4.5rem)] font-bold leading-[1.05] tracking-tight text-text-1 mb-6 text-gradient-animated"
+            style={{ opacity: 1 }}
+            aria-label="India's AI-Powered Road Safety Infrastructure"
           >
-            India&apos;s AI-Powered
+            <span className="inline-block">{splitText("India's AI-Powered")}</span>
             <br />
-            Road Safety
+            <span className="inline-block">{splitText("Road Safety")}</span>
             <br />
-            Infrastructure
+            <span className="inline-block">{splitText("Infrastructure")}</span>
           </h1>
 
           {/* Description */}
@@ -274,6 +323,7 @@ export default function HeroSection() {
                 uppercase tracking-wider
                 transition-all duration-200
                 hover:-translate-y-0.5 hover:shadow-brand
+                shimmer-on-hover magnetic-cta
               "
             >
               Launch Platform
@@ -288,6 +338,7 @@ export default function HeroSection() {
                 px-7 py-3.5 rounded-lg text-sm font-semibold
                 transition-all duration-200
                 uppercase tracking-wider
+                shimmer-on-hover
               "
             >
               Create Account
@@ -319,7 +370,7 @@ export default function HeroSection() {
             style={{ opacity: 0 }}
           >
             <div className="w-2 h-2 rounded-full bg-brand-light animate-pulse" />
-            <span className="text-xs text-text-3 font-mono uppercase tracking-wider">
+            <span ref={statusTextRef} className="text-xs text-text-3 font-mono uppercase tracking-wider">
               System Online — Monitoring Active
             </span>
           </div>

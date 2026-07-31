@@ -2,6 +2,9 @@
 # Copyright (c) 2026 SafeVixAI Team
 name: Notify Failure
 
+permissions:
+  contents: read
+
 on:
   workflow_call:
     inputs:

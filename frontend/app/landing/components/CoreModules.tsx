@@ -6,6 +6,7 @@ import React from 'react';
 
 
 import { useRef, useState, useCallback } from 'react';
+import { useGSAP } from '@gsap/react';
 import { gsap } from '@/lib/gsap';
 import { useScrollReveal } from '../hooks/useLandingGSAP';
 import {
@@ -102,6 +103,9 @@ function ModuleCard({ module }: { module: ModuleData }) {
       const rotateY = (mouseX / (rect.width / 2)) * 8;
       const rotateX = -(mouseY / (rect.height / 2)) * 8;
 
+      innerRef.current.style.setProperty('--spot-x', `${e.clientX - rect.left}px`);
+      innerRef.current.style.setProperty('--spot-y', `${e.clientY - rect.top}px`);
+
       gsap.to(innerRef.current, {
         rotateX,
         rotateY,
@@ -130,18 +134,52 @@ function ModuleCard({ module }: { module: ModuleData }) {
     setIsHovered(true);
   }, []);
 
+  useGSAP(
+    () => {
+      if (!innerRef.current || !cardRef.current) return;
+      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      
+      const items = innerRef.current.querySelectorAll('li');
+      if (items.length === 0) return;
+
+      if (prefersReducedMotion) {
+        items.forEach((item) => {
+          gsap.set(item, { opacity: 1, x: 0 });
+        });
+        return;
+      }
+
+      gsap.fromTo(
+        items,
+        { opacity: 0, x: -10 },
+        {
+          opacity: 1,
+          x: 0,
+          stagger: 0.08,
+          duration: 0.5,
+          ease: 'power2.out',
+          scrollTrigger: {
+            trigger: cardRef.current,
+            start: 'top 85%',
+          },
+        }
+      );
+    },
+    { scope: cardRef }
+  );
+
   return (
     <div
       ref={cardRef}
-      className="card-3d reveal-item"
+      className="card-3d reveal-item group/card"
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       onMouseEnter={handleMouseEnter}
     >
-      <div ref={innerRef} className="card-3d-inner">
+      <div ref={innerRef} className="card-3d-inner relative">
         <div
-          className={`bg-surface-1 border border-white/[0.06] rounded-xl overflow-hidden transition-all duration-300 ${
-            isHovered ? `${module.glowClass} animated-border` : ''
+          className={`bg-surface-1 glass-shimmer rounded-xl overflow-hidden transition-all duration-300 ${
+            isHovered ? `${module.glowClass}` : ''
           }`}
         >
           {/* Top color border accent */}
@@ -150,11 +188,18 @@ function ModuleCard({ module }: { module: ModuleData }) {
             style={{ backgroundColor: module.color }}
           />
 
+          <div
+            className="absolute inset-0 pointer-events-none z-0 rounded-xl opacity-0 group-hover/card:opacity-100 transition-opacity duration-300"
+            style={{
+              background: 'radial-gradient(300px circle at var(--spot-x, 50%) var(--spot-y, 50%), rgba(0,200,150,0.06), transparent 70%)',
+            }}
+          />
+
           {/* Card content */}
-          <div className="p-8">
+          <div className="p-8 shimmer-on-hover relative z-10">
             {/* Icon */}
             <div
-              className="w-14 h-14 rounded-xl flex items-center justify-center"
+              className="w-14 h-14 rounded-xl flex items-center justify-center transition-transform duration-500 group-hover/card:scale-110 group-hover/card:-translate-y-1"
               style={{ backgroundColor: `${module.color}1A` }}
             >
               <Icon size={28} strokeWidth={1.5} style={{ color: module.color }} />
@@ -182,7 +227,7 @@ function ModuleCard({ module }: { module: ModuleData }) {
             {/* Explore link */}
             <div className="mt-6 pt-4 border-t border-white/[0.06]">
               <button
-                className="group/link flex items-center gap-2 text-sm font-semibold transition-all duration-300 hover:gap-3"
+                className="group/link flex items-center gap-2 text-sm font-semibold transition-all duration-300 group-hover/card:gap-3 hover:gap-3"
                 style={{ color: module.color }}
               >
                 Explore

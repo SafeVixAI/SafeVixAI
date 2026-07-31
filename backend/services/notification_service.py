@@ -497,12 +497,12 @@ class NotificationService:
             server.send_message(msg)
 
     async def _send_sms_via_provider(self, phone: str, message: str) -> None:
-        logger.info('SMS sending to %s: %s', phone[:5] + '***', message[:60])
+        logger.info('SMS sending to %s', phone[:5] + '***')
 
     async def _send_push_notification(
         self, token: str, title: str, body: str, metadata: dict[str, Any] | None
     ) -> None:
-        logger.info('Push notification to token %s: %s', token[:8] + '***', title)
+        logger.info('Push notification to token %s', token[:8] + '***')
 
     # ── Preferences ───────────────────────────────────────────────────────────
 

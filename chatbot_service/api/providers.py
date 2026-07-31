@@ -92,11 +92,21 @@ async def test_provider(
 
     import httpx
 
+    import urllib.parse
+    
     api_key = data.get("api_key", "")
     provider_name = data.get("provider_name", "custom")
     model = data.get("model", "gpt-3.5-turbo")
 
     base_url = data.get("base_url", "") or _lookup_provider_url(provider_name, provider_router)
+    
+    if not base_url.startswith("https://"):
+        return {"status": "error", "message": "Only HTTPS endpoints are allowed for custom providers"}
+    
+    parsed = urllib.parse.urlparse(base_url)
+    hostname = parsed.hostname or ""
+    if hostname in ("localhost", "127.0.0.1", "0.0.0.0", "169.254.169.254", "::1"):
+        return {"status": "error", "message": "Internal network endpoints are not allowed"}
 
     headers = {
         "Authorization": f"Bearer {api_key}",
@@ -113,10 +123,10 @@ async def test_provider(
             resp = await client.post(base_url, headers=headers, json=test_payload)
             if resp.status_code == 200:
                 return {"status": "ok", "message": "Connection successful", "provider": provider_name}
-            return {"status": "error", "message": f"HTTP {resp.status_code}: {resp.text[:200]}"}
+            return {"status": "error", "message": f"HTTP {resp.status_code}: Error testing provider"}
     except Exception as exc:
-        logger.exception("Provider test failed for %s", provider_name)
-        return {"status": "error", "message": str(exc)}
+        logger.warning("Provider test failed for %s: %s", provider_name, exc)
+        return {"status": "error", "message": "Connection failed or timeout occurred"}
 
 
 @router.post("/reset")

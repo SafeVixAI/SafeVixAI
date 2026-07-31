@@ -22,21 +22,35 @@ jest.mock('next/navigation', () => ({
   useSearchParams: () => new URLSearchParams(),
 }))
 
+jest.mock('../lib/store', () => {
+  const actual = jest.requireActual('../lib/store');
+  return {
+    ...actual,
+    useAppStore: (selector: any) => {
+      const state = { isAuthenticated: true };
+      // If the selector requests isAuthenticated, return true
+      if (selector.toString().includes('isAuthenticated')) return true;
+      return actual.useAppStore(selector);
+    }
+  }
+})
+
+
 describe('Home Page structural verification', function() {
-  it('renders the SafeVixAI app shell', function() {
+  it('renders the SafeVixAI app shell', async function() {
     render(<Page />)
-    expect(screen.getByPlaceholderText(/Ask Maps or Search/i)).toBeInTheDocument()
-    expect(screen.getAllByText(/Enable Location/i).length).toBeGreaterThan(0)
+    expect(await screen.findByPlaceholderText(/Ask Maps or Search/i)).toBeInTheDocument()
+    expect((await screen.findAllByText(/Enable Location/i)).length).toBeGreaterThan(0)
   })
 
-  it('renders the emergency protocol surface', function() {
+  it('renders the emergency protocol surface', async function() {
     render(<Page />)
-    expect(screen.getByText(/Emergency Protocols/i)).toBeInTheDocument()
-    expect(screen.getAllByTitle(/Geolocation not supported/i).length).toBeGreaterThan(0)
+    expect(await screen.findByText(/Emergency Protocols/i)).toBeInTheDocument()
+    expect((await screen.findAllByTitle(/Geolocation not supported/i)).length).toBeGreaterThan(0)
   })
 
-  it('renders with proper heading structure', function() {
+  it('renders with proper heading structure', async function() {
     render(<Page />)
-    expect(screen.getByRole('heading', { level: 1 })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { level: 1 })).toBeInTheDocument()
   })
 })

@@ -329,6 +329,405 @@
   background-clip: text;
 }
 
+/* ═══════════════════════════════════════════════════════════
+   ENTERPRISE ANIMATION SYSTEM — Cinematic Landing Upgrade
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── Shimmer travel — travels across buttons/cards ── */
+@keyframes shimmer-travel {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.shimmer-on-hover {
+  position: relative;
+  overflow: hidden;
+}
+
+.shimmer-on-hover::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 40%,
+    rgba(255,255,255,0.06) 45%,
+    rgba(255,255,255,0.12) 50%,
+    rgba(255,255,255,0.06) 55%,
+    transparent 60%
+  );
+  transform: translateX(-100%);
+  pointer-events: none;
+}
+
+.shimmer-on-hover:hover::after {
+  animation: shimmer-travel 0.8s ease-in-out;
+}
+
+/* ── Auto shimmer (continuous) ── */
+.shimmer-auto {
+  position: relative;
+  overflow: hidden;
+}
+
+.shimmer-auto::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 40%,
+    rgba(255,255,255,0.04) 45%,
+    rgba(255,255,255,0.08) 50%,
+    rgba(255,255,255,0.04) 55%,
+    transparent 60%
+  );
+  animation: shimmer-travel 3s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* ── Heartbeat glow — crisis section background ── */
+@keyframes heartbeat-glow {
+  0%, 100% {
+    opacity: 0.03;
+    transform: scale(1);
+  }
+  14% {
+    opacity: 0.08;
+    transform: scale(1.02);
+  }
+  28% {
+    opacity: 0.03;
+    transform: scale(1);
+  }
+  42% {
+    opacity: 0.06;
+    transform: scale(1.01);
+  }
+}
+
+.heartbeat-glow::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 600px;
+  height: 600px;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(220,38,38,0.15), transparent 70%);
+  animation: heartbeat-glow 2s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Data packet — dots traveling along paths ── */
+@keyframes data-packet-h {
+  0% { left: 0; opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { left: 100%; opacity: 0; }
+}
+
+@keyframes data-packet-v {
+  0% { top: 0; opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { top: 100%; opacity: 0; }
+}
+
+.data-packet {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--brand-light, #00C896);
+  box-shadow: 0 0 8px rgba(0,200,150,0.6), 0 0 16px rgba(0,200,150,0.3);
+  animation: data-packet-h 2s linear infinite;
+  pointer-events: none;
+}
+
+.data-packet-v {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--brand-light, #00C896);
+  box-shadow: 0 0 8px rgba(0,200,150,0.6), 0 0 16px rgba(0,200,150,0.3);
+  animation: data-packet-v 2s linear infinite;
+  pointer-events: none;
+}
+
+/* ── Typewriter cursor ── */
+@keyframes typewriter-cursor {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+.typewriter-cursor::after {
+  content: '▌';
+  display: inline-block;
+  color: var(--brand-light, #00C896);
+  animation: typewriter-cursor 1s step-end infinite;
+  margin-left: 2px;
+  font-weight: 300;
+}
+
+/* ── Beam drift — slowly moving light beams ── */
+@keyframes beam-drift {
+  0% { transform: rotate(var(--beam-start, 15deg)) translateY(0); }
+  50% { transform: rotate(var(--beam-end, 18deg)) translateY(-20px); }
+  100% { transform: rotate(var(--beam-start, 15deg)) translateY(0); }
+}
+
+.beam-animated {
+  animation: beam-drift 8s ease-in-out infinite;
+}
+
+/* ── Glow breathe — gentle scale + opacity pulse ── */
+@keyframes glow-breathe {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.05); }
+}
+
+.sv-glow-breathe {
+  animation: glow-breathe 4s ease-in-out infinite;
+}
+
+/* ── Ripple expand — button click/hover ripple ── */
+@keyframes ripple-expand {
+  0% { transform: scale(0); opacity: 0.4; }
+  100% { transform: scale(2.5); opacity: 0; }
+}
+
+.ripple-container {
+  position: relative;
+  overflow: hidden;
+}
+
+.ripple-container .ripple-ring {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(0,200,150,0.15);
+  pointer-events: none;
+  animation: ripple-expand 0.6s ease-out forwards;
+}
+
+/* ── Neon progress bar ── */
+.neon-progress {
+  position: relative;
+}
+
+.neon-progress::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: -2px;
+  bottom: -2px;
+  width: 20px;
+  background: radial-gradient(circle at right, rgba(0,200,150,0.5), transparent);
+  border-radius: 0 2px 2px 0;
+  filter: blur(3px);
+}
+
+/* ── Animated gradient text ── */
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.text-gradient-animated {
+  background: linear-gradient(
+    90deg,
+    #E0E0E0 0%,
+    #00C896 25%,
+    #FFFFFF 50%,
+    #00C896 75%,
+    #E0E0E0 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradient-shift 6s ease infinite;
+}
+
+/* ── Glass shimmer border (holographic) ── */
+@property --shimmer-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes shimmer-rotate {
+  to { --shimmer-angle: 360deg; }
+}
+
+.glass-shimmer {
+  position: relative;
+}
+
+.glass-shimmer::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: conic-gradient(
+    from var(--shimmer-angle),
+    transparent 0%,
+    rgba(0,200,150,0.3) 10%,
+    rgba(59,130,246,0.2) 20%,
+    transparent 30%,
+    transparent 70%,
+    rgba(220,38,38,0.2) 80%,
+    rgba(217,119,6,0.3) 90%,
+    transparent 100%
+  );
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  -webkit-mask-composite: xor;
+  animation: shimmer-rotate 3s linear infinite;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.glass-shimmer:hover::before {
+  opacity: 1;
+}
+
+/* ── Card spotlight follow ── */
+.card-spotlight {
+  position: relative;
+  overflow: hidden;
+}
+
+.card-spotlight::after {
+  content: '';
+  position: absolute;
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0,200,150,0.08), transparent 70%);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  transform: translate(-50%, -50%);
+  z-index: 0;
+}
+
+.card-spotlight:hover::after {
+  opacity: 1;
+}
+
+/* ── Neon pulse — node activity indicator ── */
+@keyframes neon-pulse {
+  0%, 100% {
+    box-shadow: 0 0 4px rgba(0,200,150,0.4);
+  }
+  50% {
+    box-shadow: 0 0 12px rgba(0,200,150,0.8), 0 0 24px rgba(0,200,150,0.4);
+  }
+}
+
+.neon-pulse-green {
+  animation: neon-pulse 2s ease-in-out infinite;
+}
+
+/* ── Activity ping — random node flash ── */
+@keyframes activity-ping {
+  0% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(2.5); opacity: 0; }
+  100% { transform: scale(1); opacity: 0; }
+}
+
+.activity-ping {
+  animation: activity-ping 1.5s ease-out;
+}
+
+/* ── Text flicker (subtle) ── */
+@keyframes text-flicker {
+  0%, 92%, 100% { opacity: 1; }
+  93% { opacity: 0.6; }
+  94% { opacity: 1; }
+  96% { opacity: 0.7; }
+  97% { opacity: 1; }
+}
+
+.text-flicker {
+  animation: text-flicker 4s ease-in-out infinite;
+}
+
+/* ── Stagger children reveal helper ── */
+.stagger-children > * {
+  opacity: 0;
+  transform: translateY(16px);
+}
+
+.stagger-children.revealed > * {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.stagger-children.revealed > *:nth-child(1) { transition-delay: 0s; }
+.stagger-children.revealed > *:nth-child(2) { transition-delay: 0.08s; }
+.stagger-children.revealed > *:nth-child(3) { transition-delay: 0.16s; }
+.stagger-children.revealed > *:nth-child(4) { transition-delay: 0.24s; }
+.stagger-children.revealed > *:nth-child(5) { transition-delay: 0.32s; }
+.stagger-children.revealed > *:nth-child(6) { transition-delay: 0.40s; }
+
+/* ── Incident flash — brief highlight ── */
+@keyframes incident-flash {
+  0% { background-color: rgba(0,200,150,0.12); }
+  100% { background-color: transparent; }
+}
+
+.incident-flash {
+  animation: incident-flash 1.5s ease-out;
+}
+
+/* ── Connection data flow dots ── */
+@keyframes connection-flow {
+  0% { offset-distance: 0%; opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { offset-distance: 100%; opacity: 0; }
+}
+
+/* ── Magnetic CTA enhanced ── */
+.magnetic-cta {
+  transition: transform 300ms cubic-bezier(0.34, 1.56, 0.64, 1),
+              box-shadow 300ms ease;
+}
+
+.magnetic-cta:hover {
+  box-shadow: 0 8px 32px rgba(0,200,150,0.25),
+              0 0 0 1px rgba(0,200,150,0.2);
+}
+
+/* ── Active nav indicator ── */
+.nav-indicator {
+  position: absolute;
+  bottom: 0;
+  height: 2px;
+  background: var(--brand-light, #00C896);
+  border-radius: 1px;
+  transition: left 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+              width 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ── Logo shield glow ── */
+@keyframes shield-glow {
+  0%, 100% { filter: drop-shadow(0 0 2px rgba(0,200,150,0.2)); }
+  50% { filter: drop-shadow(0 0 8px rgba(0,200,150,0.5)); }
+}
+
+.shield-glow {
+  animation: shield-glow 3s ease-in-out infinite;
+}
+
 /* ── Responsive helpers ── */
 @media (max-width: 768px) {
   .landing-section {
@@ -365,11 +764,36 @@
   .orbit-item-reverse,
   .flow-line-animated,
   .animated-border::before,
-  .network-line {
+  .network-line,
+  .shimmer-on-hover::after,
+  .shimmer-auto::after,
+  .heartbeat-glow::after,
+  .data-packet,
+  .data-packet-v,
+  .typewriter-cursor::after,
+  .beam-animated,
+  .sv-glow-breathe,
+  .text-gradient-animated,
+  .glass-shimmer::before,
+  .neon-pulse-green,
+  .activity-ping,
+  .text-flicker,
+  .shield-glow,
+  .neon-progress::after {
     animation: none !important;
   }
 
   .card-3d-inner {
     transition: none !important;
+  }
+
+  .stagger-children > * {
+    opacity: 1;
+    transform: none;
+    transition: none !important;
+  }
+
+  .card-spotlight::after {
+    display: none;
   }
 }

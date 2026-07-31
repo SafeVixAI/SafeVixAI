@@ -338,7 +338,7 @@ class TestUpdateService:
         ):
             mock_open.return_value.__enter__.return_value.read.return_value = b""
             mock_sha.return_value.hexdigest.return_value = "abc123hash..."
-            result = await service.verify_release_integrity(db, "2.0.0", "/fake/path")
+            result = await service.verify_release_integrity(db, "2.0.0", "/tmp/updates/fake_file.bin")
 
         assert result.success is True
         assert "verified" in result.message.lower()
@@ -355,7 +355,7 @@ class TestUpdateService:
         ):
             mock_open.return_value.__enter__.return_value.read.return_value = b""
             mock_sha.return_value.hexdigest.return_value = "different_hash"
-            result = await service.verify_release_integrity(db, "2.0.0", "/fake/path")
+            result = await service.verify_release_integrity(db, "2.0.0", "/tmp/updates/fake_file.bin")
 
         assert result.success is False
         assert "mismatch" in result.message.lower()
@@ -365,7 +365,7 @@ class TestUpdateService:
         db = _make_mock_db()
         release = _make_release(version="2.0.0", checksum_sha256=None)
         db.execute.return_value = _make_async_result(scalar_one_or_none_return=release)
-        result = await service.verify_release_integrity(db, "2.0.0", "/fake/path")
+        result = await service.verify_release_integrity(db, "2.0.0", "/tmp/updates/fake_file.bin")
         assert result.success is False
 
     async def test_verify_signature_fallback(self, service: UpdateService) -> None:

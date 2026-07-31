@@ -5,6 +5,9 @@
 import React from 'react';
 
 
+import { useRef, useEffect, useCallback } from 'react';
+import { useGSAP } from '@gsap/react';
+import { gsap } from '@/lib/gsap';
 import { useScrollReveal, useTextReveal } from '../hooks/useLandingGSAP';
 
 /* ── Shield SVG (decorative) ── */
@@ -16,7 +19,7 @@ function ShieldMark() {
       viewBox="0 0 64 64"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className="opacity-30 mx-auto"
+      className="opacity-30 mx-auto sv-glow-breathe"
       aria-hidden="true"
     >
       <path
@@ -52,15 +55,80 @@ function ShieldMark() {
 export default function MissionSection() {
   const headingRef = useTextReveal();
   const containerRef = useScrollReveal({ y: 30, stagger: 0.15 });
+  const sectionRef = useRef<HTMLElement>(null);
+  const beam1Ref = useRef<HTMLDivElement>(null);
+  const beam2Ref = useRef<HTMLDivElement>(null);
+
+  /* ── Parallax beams on scroll ── */
+  useGSAP(
+    () => {
+      if (!sectionRef.current) return;
+      const prefersReducedMotion = window.matchMedia(
+        '(prefers-reduced-motion: reduce)'
+      ).matches;
+      if (prefersReducedMotion) return;
+
+      // Beam 1 — slow drift
+      if (beam1Ref.current) {
+        gsap.to(beam1Ref.current, {
+          rotation: '+=6',
+          y: -30,
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: 'top bottom',
+            end: 'bottom top',
+            scrub: 1.5,
+          },
+        });
+      }
+
+      // Beam 2 — counter drift
+      if (beam2Ref.current) {
+        gsap.to(beam2Ref.current, {
+          rotation: '-=5',
+          y: 20,
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: 'top bottom',
+            end: 'bottom top',
+            scrub: 2,
+          },
+        });
+      }
+    },
+    { scope: sectionRef }
+  );
+
+  /* ── Subtle mouse parallax on glow ── */
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLElement>) => {
+    if (!sectionRef.current) return;
+    const rect = sectionRef.current.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    sectionRef.current.style.setProperty('--glow-x', `${x}%`);
+    sectionRef.current.style.setProperty('--glow-y', `${y}%`);
+  }, []);
 
   return (
     <section
       id="mission"
+      ref={sectionRef}
+      onMouseMove={handleMouseMove}
       className="landing-section bg-bg min-h-[80vh] flex items-center justify-center relative overflow-hidden"
     >
-      {/* ── Ambient radial glow ── */}
+      {/* ── Interactive radial glow ── */}
       <div
-        className="absolute inset-0 pointer-events-none"
+        className="absolute inset-0 pointer-events-none hidden lg:block"
+        style={{
+          background:
+            'radial-gradient(ellipse 500px 400px at var(--glow-x, 50%) var(--glow-y, 50%), rgba(0,200,150,0.05), transparent)',
+          transition: 'background 0.3s ease',
+        }}
+        aria-hidden="true"
+      />
+      {/* Fallback glow for mobile */}
+      <div
+        className="absolute inset-0 pointer-events-none lg:hidden"
         style={{
           background:
             'radial-gradient(ellipse 600px 400px at 50% 50%, rgba(0,200,150,0.04), transparent)',
@@ -68,24 +136,45 @@ export default function MissionSection() {
         aria-hidden="true"
       />
 
-      {/* ── Diagonal light beams ── */}
+      {/* ── Animated diagonal light beams ── */}
       <div
-        className="absolute top-0 left-1/4 w-px h-full pointer-events-none"
+        ref={beam1Ref}
+        className="absolute top-0 left-1/4 w-px h-full pointer-events-none beam-animated"
         style={{
           background:
-            'linear-gradient(to bottom, transparent 0%, rgba(255,255,255,0.02) 40%, rgba(255,255,255,0.02) 60%, transparent 100%)',
+            'linear-gradient(to bottom, transparent 0%, rgba(255,255,255,0.03) 30%, rgba(255,255,255,0.04) 50%, rgba(255,255,255,0.03) 70%, transparent 100%)',
           transform: 'rotate(15deg)',
           transformOrigin: 'top center',
+          ['--beam-start' as string]: '15deg',
+          ['--beam-end' as string]: '18deg',
         }}
         aria-hidden="true"
       />
       <div
-        className="absolute top-0 right-1/3 w-px h-full pointer-events-none"
+        ref={beam2Ref}
+        className="absolute top-0 right-1/3 w-px h-full pointer-events-none beam-animated"
         style={{
           background:
-            'linear-gradient(to bottom, transparent 0%, rgba(255,255,255,0.015) 30%, rgba(255,255,255,0.015) 70%, transparent 100%)',
+            'linear-gradient(to bottom, transparent 0%, rgba(255,255,255,0.02) 20%, rgba(255,255,255,0.03) 50%, rgba(255,255,255,0.02) 80%, transparent 100%)',
           transform: 'rotate(-12deg)',
           transformOrigin: 'top center',
+          animationDelay: '-3s',
+          ['--beam-start' as string]: '-12deg',
+          ['--beam-end' as string]: '-9deg',
+        }}
+        aria-hidden="true"
+      />
+      {/* ── Extra subtle beam ── */}
+      <div
+        className="absolute top-0 left-2/3 w-px h-full pointer-events-none beam-animated"
+        style={{
+          background:
+            'linear-gradient(to bottom, transparent 0%, rgba(0,200,150,0.015) 40%, rgba(0,200,150,0.02) 60%, transparent 100%)',
+          transform: 'rotate(8deg)',
+          transformOrigin: 'top center',
+          animationDelay: '-5s',
+          ['--beam-start' as string]: '8deg',
+          ['--beam-end' as string]: '11deg',
         }}
         aria-hidden="true"
       />

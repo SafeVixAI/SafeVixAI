@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Select } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -161,33 +161,36 @@ export default function IssuesDashboardPage() {
                   className="pl-9"
                 />
               </div>
-              <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setPage(1); }}>
-                <SelectTrigger className="w-[140px]">
-                  <SlidersHorizontal className="h-4 w-4 mr-1" />
-                  <SelectValue placeholder="Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">All Statuses</SelectItem>
-                  <SelectItem value="new">New</SelectItem>
-                  <SelectItem value="triaged">Triaged</SelectItem>
-                  <SelectItem value="in_progress">In Progress</SelectItem>
-                  <SelectItem value="resolved">Resolved</SelectItem>
-                  <SelectItem value="closed">Closed</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select value={typeFilter} onValueChange={(v) => { setTypeFilter(v); setPage(1); }}>
-                <SelectTrigger className="w-[140px]">
-                  <SelectValue placeholder="Type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">All Types</SelectItem>
-                  <SelectItem value="bug">Bug</SelectItem>
-                  <SelectItem value="feature_request">Feature</SelectItem>
-                  <SelectItem value="feedback">Feedback</SelectItem>
-                  <SelectItem value="crash">Crash</SelectItem>
-                  <SelectItem value="security">Security</SelectItem>
-                </SelectContent>
-              </Select>
+              <Select
+                value={statusFilter}
+                onChange={(v) => { setStatusFilter(v); setPage(1); }}
+                options={[
+                  { value: "", label: "All Statuses" },
+                  { value: "new", label: "New" },
+                  { value: "triaged", label: "Triaged" },
+                  { value: "in_progress", label: "In Progress" },
+                  { value: "resolved", label: "Resolved" },
+                  { value: "closed", label: "Closed" },
+                ]}
+                className="w-[140px]"
+                ariaLabel="Status Filter"
+                placeholder="Status"
+              />
+              <Select
+                value={typeFilter}
+                onChange={(v) => { setTypeFilter(v); setPage(1); }}
+                options={[
+                  { value: "", label: "All Types" },
+                  { value: "bug", label: "Bug" },
+                  { value: "feature_request", label: "Feature" },
+                  { value: "feedback", label: "Feedback" },
+                  { value: "crash", label: "Crash" },
+                  { value: "security", label: "Security" },
+                ]}
+                className="w-[140px]"
+                ariaLabel="Type Filter"
+                placeholder="Type"
+              />
             </div>
 
             <Card>

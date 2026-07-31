@@ -485,8 +485,15 @@ class UpdateService:
             return {"valid": False, "computed_hash": "", "expected_hash": "", "error": "No checksum provided for verification"}
 
         try:
+            import os
+            # Prevent path traversal
+            safe_base_dir = os.path.abspath("/tmp/updates")
+            abs_path = os.path.abspath(file_path)
+            if not abs_path.startswith(safe_base_dir):
+                return {"valid": False, "computed_hash": "", "expected_hash": expected_hash, "error": "Invalid file path"}
+
             sha = hashlib.sha256()
-            with open(file_path, "rb") as f:
+            with open(abs_path, "rb") as f:
                 for chunk in iter(lambda: f.read(65536), b""):
                     sha.update(chunk)
             computed_hash = sha.hexdigest()

@@ -7,6 +7,8 @@ import React from 'react';
 
 
 import { useScrollReveal, useCountUp } from '../hooks/useLandingGSAP';
+import { useGSAP } from '@gsap/react';
+import { gsap } from '@/lib/gsap';
 
 /* ═══════════════════════════════════════════════════════
    Crisis Metric Card — individual animated counter card
@@ -23,13 +25,32 @@ interface MetricCardProps {
 function MetricCard({ numericValue, suffix, label, color }: MetricCardProps) {
   const counterRef = useCountUp(numericValue, { duration: 2.5, start: 'top 80%' });
 
+  useGSAP(() => {
+    if (!counterRef.current) return;
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReducedMotion) return;
+
+    gsap.timeline({
+      scrollTrigger: {
+        trigger: counterRef.current,
+        start: 'top 80%',
+      },
+      delay: 2.5
+    })
+      .to(counterRef.current, { scale: 1.1, duration: 0.1 })
+      .to(counterRef.current, { scale: 1, duration: 0.4, ease: 'elastic.out(1, 0.5)' });
+  }, { scope: counterRef });
+
   return (
-    <div className="reveal-item bg-surface-1 border border-white/[0.06] rounded-xl p-8 text-center group hover:border-white/[0.12] transition-colors duration-300">
+    <div 
+      className="reveal-item bg-surface-1 border border-white/[0.06] rounded-xl p-8 text-center group group/card hover:border-white/[0.12] hover:border-l-2 shimmer-on-hover transition-colors duration-300"
+      style={{ borderLeftColor: color }}
+    >
       <div
-        className="counter-number text-[clamp(2.5rem,5vw,4rem)] font-extrabold leading-none"
+        className="counter-number text-[clamp(1.5rem,6vw,3.5rem)] font-extrabold leading-none break-all sm:break-normal inline-block"
         style={{ color }}
       >
-        <span ref={counterRef}>0</span>
+        <span ref={counterRef} className="inline-block">0</span>
         {suffix && (
           <span className="inline-block">{suffix}</span>
         )}
@@ -39,7 +60,7 @@ function MetricCard({ numericValue, suffix, label, color }: MetricCardProps) {
       </p>
       {/* Subtle bottom accent bar */}
       <div
-        className="mt-6 mx-auto h-[2px] w-12 rounded-full opacity-30 group-hover:opacity-60 group-hover:w-16 transition-all duration-500"
+        className="mt-6 mx-auto h-[2px] w-12 rounded-full opacity-30 group-hover/card:opacity-60 group-hover/card:w-16 group-hover/card:scale-110 transition-all duration-300"
         style={{ backgroundColor: color }}
       />
     </div>
@@ -99,7 +120,7 @@ export default function CrisisSection() {
   return (
     <section
       id="crisis"
-      className="landing-section bg-bg glow-emergency-ambient"
+      className="landing-section bg-bg glow-emergency-ambient heartbeat-glow"
     >
       <div ref={containerRef} className="landing-container text-center relative z-[1]">
         {/* ── Overline ── */}
@@ -128,7 +149,7 @@ export default function CrisisSection() {
 
         {/* ── Closing Statement ── */}
         <p className="reveal-item mt-16 font-space text-[clamp(1.25rem,3vw,2rem)] text-text-2 max-w-3xl mx-auto leading-relaxed">
-          Every <span className="text-emergency font-semibold">4 minutes</span>, someone dies on Indian roads.
+          Every <span className="text-flicker"><span className="text-emergency font-semibold">4 minutes</span></span>, someone dies on Indian roads.
         </p>
       </div>
     </section>

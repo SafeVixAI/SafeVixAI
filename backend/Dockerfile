@@ -6,7 +6,7 @@
 # ────────────────────────────────────────────────────────────────
 
 # Stage 1: Builder — install build deps and compile wheels
-FROM python:3.11.9-slim-bookworm AS builder
+FROM python:3.11.9-slim-bookworm@sha256:2856e6af199e8128161abd320575eb9b341f3b76f017b5d0c9cd364f60d8a050 AS builder
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
@@ -25,7 +25,7 @@ COPY requirements-render.txt ./requirements-render.txt
 RUN pip install --upgrade pip && pip wheel --no-cache-dir --wheel-dir /wheels -r requirements-render.txt
 
 # Stage 2: Runner — copy only wheels and app code
-FROM python:3.11.9-slim-bookworm AS runner
+FROM python:3.11.9-slim-bookworm@sha256:2856e6af199e8128161abd320575eb9b341f3b76f017b5d0c9cd364f60d8a050 AS runner
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1

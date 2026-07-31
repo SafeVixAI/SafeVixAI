@@ -1,3 +1,5 @@
+jest.mock('@gsap/react', function() { return { useGSAP: jest.fn() } })
+jest.mock('@/lib/gsap', function() { return { gsap: { fromTo: jest.fn(), to: jest.fn(), set: jest.fn(), timeline: function() { return { fromTo: jest.fn(), to: jest.fn() } } } } })
 jest.mock('@/app/landing/hooks/useLandingGSAP', function() { return { useTextReveal: function() { return { current: null } }, useScrollReveal: function() { return function() { return { current: null } } } } })
 
 const React = require('react')

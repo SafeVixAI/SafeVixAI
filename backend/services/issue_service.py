@@ -91,7 +91,7 @@ class IssueService:
         )
 
         if request.lat is not None and request.lon is not None:
-            issue.location = text(f'ST_SetSRID(ST_MakePoint({request.lon}, {request.lat}), 4326)')
+            issue.location = func.ST_SetSRID(func.ST_MakePoint(request.lon, request.lat), 4326)
 
         db.add(issue)
 

@@ -85,12 +85,13 @@
   "overrides": {
     "protobufjs": "^7.6.3",
     "ws": "^8.20.2",
-    "brace-expansion": "^2.0.2",
+    "brace-expansion": "^5.0.9",
     "form-data": "^4.0.6",
     "js-yaml": "^4.1.0",
     "dompurify": "^3.4.12",
     "@babel/core": "^7.26.0",
-    "adm-zip": "0.5.16",
+    "adm-zip": "^0.6.0",
+    "postcss": "$postcss",
     "sharp": "0.35.0"
   }
 }

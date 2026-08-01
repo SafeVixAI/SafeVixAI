@@ -9,7 +9,7 @@
 
 | Organization | Use Case | Contact |
 |-------------|----------|---------|
-| [IIT Madras — Centre of Excellence for Road Safety (CoERS)](https://coers.iitm.ac.in/) | Road safety research, hackathon platform, pilot deployment | coers@iitm.ac.in |
+| [IIT Madras — Centre of Excellence for Road Safety (CoERS)](https://coers.iitm.ac.in/) | Road safety research, hackathon platform, pilot deployment | <coers@iitm.ac.in> |
 
 ---
 
@@ -38,8 +38,10 @@
 3. Submit a pull request
 
 ### Format
+
 ```markdown
 | [Organization Name](https://example.com) | Brief use case description | contact@example.com |
 ```
 
 No endorsement is implied by listing. Listings are for reference only.
+

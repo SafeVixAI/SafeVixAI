@@ -187,12 +187,12 @@ flowchart TB
 
 SafeVixAI is exhaustively documented. Our enterprise documentation portal is built using MkDocs and hosted directly on GitHub Pages.
 
-- 🏗️ **[System Architecture](docs/architecture/ARCHITECTURE.md)**: Deep dive into the system design, offline architecture, and data flow patterns.
+- 🏗️ **[System Architecture](docs/architecture/Architecture.md)**: Deep dive into the system design, offline architecture, and data flow patterns.
 - 👨‍💻 **[Developer Guide](docs/developer-guide/DEVELOPER_GUIDE.md)**: Coding standards, comprehensive testing policies, and local setup instructions.
 - 🔌 **[API Reference](docs/api-reference/SDK_GUIDE.md)**: SDK integrations, OpenAPI schemas, and Webhook definitions for third-party consumers.
 - 📈 **[SRE & Operations](docs/sre/OPERATIONS.md)**: Scaling guides, incident runbooks, and Grafana telemetry setup.
 - 🛡️ **[Security & Compliance](docs/compliance-and-reports/PRIVACY.md)**: Threat modeling, CNCF audits, and Service Level Agreement (SLA) reports.
-- 🗺️ **[Product Roadmap](docs/product-and-planning/ROADMAP.md)**: Upcoming features, feature matrices, and UX architectural plans.
+- 🗺️ **[Product Roadmap](docs/developer-guide/chatbot/roadmap.md)**: Upcoming features, feature matrices, and UX architectural plans.
 
 ---
 
@@ -200,8 +200,8 @@ SafeVixAI is exhaustively documented. Our enterprise documentation portal is bui
 
 We believe in the power of open source to save lives. Whether you're optimizing a Postgres query, expanding the AI RAG corpus, or fixing a UI typo, your contributions are critical.
 
-1. Review our **[Code of Conduct](docs/developer-guide/CODE_OF_CONDUCT.md)**.
-2. Read the **[Contributing Guide](docs/developer-guide/CONTRIBUTING.md)** for Git workflow standards.
+1. Review our **[Code of Conduct](CODE_OF_CONDUCT.md)**.
+2. Read the **[Contributing Guide](CONTRIBUTING.md)** for Git workflow standards.
 3. Check out the **[Good First Issues](https://github.com/SafeVixAI/SafeVixAI/labels/good%20first%20issue)** to jump right in.
 
 ---
@@ -210,7 +210,7 @@ We believe in the power of open source to save lives. Whether you're optimizing 
 
 Security is our top priority. The SafeVixAI platform utilizes strict SBOM (Software Bill of Materials) tracking, CodeQL static analysis, and regular dependency audits via Dependabot.
 
-If you discover a security vulnerability, please refer to our **[Security Policy](docs/compliance-and-reports/SECURITY.md)** and report it directly to **security@safevixai.gov.in**. We adhere to responsible disclosure guidelines.
+If you discover a security vulnerability, please refer to our **[Security Policy](SECURITY.md)** and report it directly to **security@safevixai.gov.in**. We adhere to responsible disclosure guidelines.
 
 ---
 
@@ -220,7 +220,7 @@ Join the thousands of developers building a safer road ecosystem:
 
 - **Discussions**: Join the architectural conversation on [GitHub Discussions](https://github.com/SafeVixAI/SafeVixAI/discussions).
 - **Issues**: Report platform bugs or request robust features via [GitHub Issues](https://github.com/SafeVixAI/SafeVixAI/issues).
-- **Support SLAs**: View enterprise support tiers in [SUPPORT.md](docs/compliance-and-reports/SUPPORT.md).
+- **Support SLAs**: View enterprise support tiers in [SUPPORT.md](SUPPORT.md).
 
 ---
 

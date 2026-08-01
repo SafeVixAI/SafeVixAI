@@ -89,9 +89,9 @@ erDiagram
     }
 ```
 
-## ORM Models (30 Python files in `backend/models/`)
+## ORM Models (23 Python model files in `backend/models/`)
 
-All 30 models are defined under `backend/models/` using SQLAlchemy ORM + GeoAlchemy2. The initial Alembic migration (`backend/migrations/001_initial_schema.py`) creates 7 core tables; subsequent migrations add the remaining tables with PostGIS indexes.
+All 23 model files are defined under `backend/models/` using SQLAlchemy ORM + GeoAlchemy2. The initial Alembic migration (`backend/migrations/versions/001_initial_schema.py`) creates 7 core tables; 31 database migrations add and manage tables, RLS policies, and PostGIS indexes.
 
 **Migrations:**
 | Migration | Tables Added |
@@ -530,7 +530,7 @@ LIMIT 1;
 
 ## Related
 
-- [BENCHMARKS.md](../BENCHMARKS.md) — Database performance benchmarks
-- [TESTING.md](../TESTING.md) — Testing standards for data layer
-- [SCALING_GUIDE.md](SCALING_GUIDE.md) — Horizontal scaling and replication
-- [MIGRATION_GUIDE.md](MIGRATION_GUIDE.md) — Migration paths and procedures
+- [BENCHMARKS.md](../compliance-and-reports/BENCHMARKS.md) — Database performance benchmarks
+- [TESTING.md](../developer-guide/TESTING.md) — Testing standards for data layer
+- [SCALING_GUIDE.md](../sre/SCALING_GUIDE.md) — Horizontal scaling and replication
+- [MIGRATION_GUIDE.md](../sre/MIGRATION_GUIDE.md) — Migration paths and procedures

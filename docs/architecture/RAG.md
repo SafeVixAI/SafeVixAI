@@ -63,7 +63,7 @@ flowchart TD
         BE_Chroma[ChromaDB<br/>backend/data/chroma_db/]
         BE_Chroma --> BE_Git[.gitignored<br/>Build locally]
         BE_Chroma --> BE_Data[Civic Data<br/>Municipal Records<br/>Infrastructure Docs]
-        BE_Chroma --> BE_Build["python data/build_vectorstore.py<br/>~10 min build"]
+        BE_Chroma --> BE_Build["python scripts/app/build_vectorstore.py<br/>~10 min build"]
     end
 
     UserQ[User Query] --> Intent{Intent}
@@ -99,5 +99,5 @@ LocalHashEmbeddingFunction: SHA-256 → 384-dim histogram → unit vector. Zero 
 ## Build
 
 ```bash
-cd chatbot_service && python rag/build_vectorstore.py
+python scripts/app/build_vectorstore.py
 ```

@@ -2,7 +2,7 @@
 
 > **Version:** 1.0  
 > **Last updated:** 2026-07-26  
-> **Cross-references:** [VERSIONING.md](../VERSIONING.md), [CHANGELOG.md](../CHANGELOG.md), [GOVERNANCE.md](../GOVERNANCE.md)
+> **Cross-references:** [VERSIONING.md](../developer-guide/VERSIONING.md), [CHANGELOG.md](../api-reference/api/changelog.md), [GOVERNANCE.md](../../GOVERNANCE.md)
 
 ---
 
@@ -62,7 +62,7 @@ flowchart LR
 - Release branch created: `release/v{x}.{y}.0`
 
 ### 2. Changelog Finalization
-- Review [CHANGELOG.md](../CHANGELOG.md) for completeness
+- Review [CHANGELOG.md](../api-reference/api/changelog.md) for completeness
 - Ensure all changes are documented
 - Add migration notes if applicable
 

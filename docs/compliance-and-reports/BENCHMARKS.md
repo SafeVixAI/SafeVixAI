@@ -10,11 +10,11 @@ Formal benchmarks for all SafeVixAI services, measured via k6 load testing and p
 
 | Document | Description |
 |----------|-------------|
-| [`docs/PERFORMANCE_BENCHMARKS.md`](docs/PERFORMANCE_BENCHMARKS.md) | Detailed latency, throughput, resource benchmarks |
-| [`k6/backend-smoke.js`](k6/backend-smoke.js) | k6 smoke test — 1 VU, all 25 endpoints |
-| [`k6/backend-load.js`](k6/backend-load.js) | k6 load test — 100 VU, 5 min |
-| [`k6/backend-stress.js`](k6/backend-stress.js) | k6 stress test — ramp to 500 VU |
-| [`k6/chatbot-smoke.js`](k6/chatbot-smoke.js) | k6 chatbot — 20 VU chat, 10 VU stream |
+| [`docs/PERFORMANCE_BENCHMARKS.md`](../sre/PERFORMANCE_BENCHMARKS.md) | Detailed latency, throughput, resource benchmarks |
+| [`k6/backend-smoke.js`](../../k6/backend-smoke.js) | k6 smoke test — 1 VU, all 25 endpoints |
+| [`k6/backend-load.js`](../../k6/backend-load.js) | k6 load test — 100 VU, 5 min |
+| [`k6/backend-stress.js`](../../k6/backend-stress.js) | k6 stress test — ramp to 500 VU |
+| [`k6/chatbot-smoke.js`](../../k6/chatbot-smoke.js) | k6 chatbot — 20 VU chat, 10 VU stream |
 
 ---
 
@@ -63,11 +63,11 @@ cd backend && pytest tests/ -v -k "perf" --benchmark-only
 
 ## Test Results History
 
-See [`docs/PERFORMANCE_BENCHMARKS.md`](docs/PERFORMANCE_BENCHMARKS.md) for historical benchmark data and regression tracking.
+See [`docs/PERFORMANCE_BENCHMARKS.md`](../sre/PERFORMANCE_BENCHMARKS.md) for historical benchmark data and regression tracking.
 
 ---
 
 ## Related
 
-- [`docs/MONITORING_SETUP.md`](docs/MONITORING_SETUP.md) — production monitoring
-- [`docs/SCALING_GUIDE.md`](docs/SCALING_GUIDE.md) — horizontal scaling
+- [`docs/MONITORING_SETUP.md`](../sre/observability/MONITORING_SETUP.md) — production monitoring
+- [`docs/SCALING_GUIDE.md`](../sre/SCALING_GUIDE.md) — horizontal scaling

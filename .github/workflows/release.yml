@@ -198,9 +198,43 @@ jobs:
           cosign verify --insecure-ignore-tlog \
             "${{ steps.tag.outputs.image }}:v${{ needs.validate.outputs.version }}"
 
+  build-windows-exe:
+    name: Build Windows Executable
+    needs: [validate]
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install PyInstaller & dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller httpx
+
+      - name: Build SafeVixAI CLI Executable
+        shell: pwsh
+        run: |
+          pyinstaller --onefile --name safevixai-cli-windows-x64 scripts/safevixai_update.py
+          New-Item -ItemType Directory -Force -Path release-binaries
+          Copy-Item dist/safevixai-cli-windows-x64.exe release-binaries/
+          $hash = (Get-FileHash release-binaries/safevixai-cli-windows-x64.exe -Algorithm SHA256).Hash
+          "$hash  safevixai-cli-windows-x64.exe" | Out-File -Encoding ascii release-binaries/safevixai-cli-windows-x64.exe.sha256
+
+      - name: Upload Windows Executable Artifact
+        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1  # v4.6.1
+        with:
+          name: windows-binaries
+          path: release-binaries/*
+
   notify-failure:
     if: always() && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled'))
-    needs: [validate-commits, validate, test, lint, sbom, license-scan, build, sign, create-release]
+    needs: [validate-commits, validate, test, lint, sbom, license-scan, build, sign, build-windows-exe, create-release]
     uses: ./.github/workflows/notify-failure.yml
     with:
       workflow-name: 'Release'
@@ -212,7 +246,7 @@ jobs:
 
   create-release:
     name: Create GitHub Release
-    needs: [validate, build, sbom]
+    needs: [validate, build, sbom, build-windows-exe]
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
@@ -230,14 +264,22 @@ jobs:
             const changelog = fs.readFileSync('CHANGELOG.md', 'utf8');
             const version = '${{ needs.validate.outputs.version }}';
             const section = changelog.match(
-              new RegExp(`## \\[${version}\\] - [\\d-]+\\n\\n([\\s\\S]*?)(?=\\n## \\[|\\n\\[Unreleased\\])`)
+              new RegExp(`## \\[${version}\\](?:\\s*[-—–]\\s*[\\d-]+)?\\n\\n([\\s\\S]*?)(?=\\n## \\[|\\n\\[Unreleased\\]|$)`)
             );
             return section ? section[1].trim() : 'See CHANGELOG.md for details.';
 
       - name: Download SBOM artifacts
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # v4.6.1
         with:
+          name: sbom-artifacts
           path: sbom-artifacts
+        continue-on-error: true
+
+      - name: Download Windows Executable artifacts
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # v4.6.1
+        with:
+          name: windows-binaries
+          path: release-binaries
 
       - name: Create Release
         uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228  # v2.2.1
@@ -247,5 +289,6 @@ jobs:
           body: ${{ steps.notes.outputs.result }}
           files: |
             sbom-artifacts/**/*
+            release-binaries/*
           prerelease: ${{ needs.validate.outputs.channel == 'prerelease' }}
           generate_release_notes: false

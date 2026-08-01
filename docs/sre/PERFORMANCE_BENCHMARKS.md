@@ -2,7 +2,7 @@
 
 > **Version:** 1.0  
 > **Last updated:** 2026-07-26  
-> **Cross-references:** [SCALING_GUIDE.md](./SCALING_GUIDE.md), [MONITORING_SETUP.md](./MONITORING_SETUP.md)
+> **Cross-references:** [SCALING_GUIDE.md](SCALING_GUIDE.md), [MONITORING_SETUP.md](observability/MONITORING_SETUP.md)
 
 ---
 
@@ -134,6 +134,6 @@ Performance regression is checked in CI:
 
 ## Related
 
-- [BENCHMARKS.md](../BENCHMARKS.md) — Performance benchmarks overview
-- [MONITORING.md](../MONITORING.md) — Metrics dashboards and uptime monitoring
+- [BENCHMARKS.md](../compliance-and-reports/BENCHMARKS.md) — Performance benchmarks overview
+- [MONITORING.md](MONITORING.md) — Metrics dashboards and uptime monitoring
 - [SCALING_GUIDE.md](SCALING_GUIDE.md) — Horizontal scaling and caching

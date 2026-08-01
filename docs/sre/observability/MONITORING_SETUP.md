@@ -2,7 +2,7 @@
 
 > **Version:** 1.0  
 > **Last updated:** 2026-07-26  
-> **Cross-references:** [Observability](./observability/), [ADVANCED_SETUP.md](./ADVANCED_SETUP.md)
+> **Cross-references:** [Observability](./observability/), [ADVANCED_SETUP.md](../../developer-guide/ADVANCED_SETUP.md)
 
 ---
 
@@ -195,10 +195,10 @@ jobs:
 ## Runbook Integration
 
 When alerts fire, the dashboard should link directly to the relevant runbook:
-- Backend down → [runbooks/service-restart.md](./runbooks/service-restart.md)
-- All LLMs down → [runbooks/all-llms-down.md](./runbooks/all-llms-down.md)
-- Database down → [runbooks/db-down.md](./runbooks/db-down.md)
-- High error rate → [runbooks/high-error-rate.md](./runbooks/high-error-rate.md)
+- Backend down → [runbooks/service-restart.md](../runbooks/service-restart.md)
+- All LLMs down → [runbooks/all-llms-down.md](../runbooks/all-llms-down.md)
+- Database down → [runbooks/db-down.md](../runbooks/db-down.md)
+- High error rate → [runbooks/high-error-rate.md](../runbooks/high-error-rate.md)
 
 ## Related
 

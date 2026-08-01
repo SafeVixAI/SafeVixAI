@@ -2,7 +2,7 @@
 
 > **Version:** 1.0  
 > **Last updated:** 2026-07-26  
-> **Cross-references:** [UIUX.md](./UIUX.md), [STYLE_GUIDE.md](../STYLE_GUIDE.md)
+> **Cross-references:** [UIUX.md](../product-and-planning/UIUX.md), [STYLE_GUIDE.md](../developer-guide/STYLE_GUIDE.md)
 
 ---
 

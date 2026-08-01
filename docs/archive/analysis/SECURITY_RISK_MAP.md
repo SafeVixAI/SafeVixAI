@@ -1,6 +1,6 @@
 # SafeVixAI — Security Risk Map
 
-> **SNAPSHOT**: This document reflects the state as of its creation date. For current state see [AGENTS.md](../../AGENTS.md).
+> **SNAPSHOT**: This document reflects the state as of its creation date. For current state see [AGENTS.md](../../../AGENTS.md).
 
 > Generated: 2026-05-22 | Full security audit with CVE tracking
 

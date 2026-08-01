@@ -2,7 +2,7 @@
 
 > **Audience:** DevOps engineers, platform administrators  
 > **Last updated:** 2026-07-26  
-> **Cross-references:** [Deployment.md](./Deployment.md), [Environment.md](./Environment.md), [Database.md](./Database.md)
+> **Cross-references:** [Deployment.md](chatbot/deployment.md), [Environment.md](Environment.md), [Database.md](../architecture/Database.md)
 
 ---
 
@@ -208,4 +208,4 @@ services:
 3. **Data corruption**: Restore from backup, replay write-ahead log
 4. **Security incident**: Isolate affected service, rotate all secrets, restore from clean backup
 
-See [docs/runbooks/](./runbooks/) for detailed incident response procedures.
+See [docs/sre/runbooks/](../sre/runbooks/) for detailed incident response procedures.

@@ -2,7 +2,7 @@
 
 > **Version:** 1.0  
 > **Last updated:** 2026-07-26  
-> **Cross-references:** [Environment.md](./Environment.md), [INTEGRATION_GUIDE.md](./INTEGRATION_GUIDE.md), [Security.md](./Security.md)
+> **Cross-references:** [Environment.md](../developer-guide/Environment.md), [INTEGRATION_GUIDE.md](INTEGRATION_GUIDE.md), [Security.md](../architecture/Security.md)
 
 ---
 

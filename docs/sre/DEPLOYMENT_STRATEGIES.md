@@ -2,7 +2,7 @@
 
 > **Version:** 1.0  
 > **Last updated:** 2026-07-26  
-> **Cross-references:** [Deployment.md](./Deployment.md), [ADVANCED_SETUP.md](./ADVANCED_SETUP.md), [SCALING_GUIDE.md](./SCALING_GUIDE.md)
+> **Cross-references:** [Deployment.md](Deployment.md), [ADVANCED_SETUP.md](../developer-guide/ADVANCED_SETUP.md), [SCALING_GUIDE.md](SCALING_GUIDE.md)
 
 ---
 
@@ -183,4 +183,4 @@ kubectl rollout status deployment/backend -n safevixai
 cd backend && alembic downgrade -1
 ```
 
-See [docs/runbooks/deployment-rollback.md](./runbooks/deployment-rollback.md) for detailed rollback procedures.
+See [docs/runbooks/deployment-rollback.md](runbooks/deployment-rollback.md) for detailed rollback procedures.

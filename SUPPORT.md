@@ -55,9 +55,9 @@ Do **not** open a public GitHub issue. See [SECURITY.md](SECURITY.md) for respon
 
 ## Before Asking
 
-- Read [SETUP.md](SETUP.md) for installation issues
-- Read [docs/Deployment.md](docs/Deployment.md) for deployment issues
-- Check [docs/TechStack.md](docs/TechStack.md) for version compatibility
+- Read [SETUP.md](docs/developer-guide/SETUP.md) for installation issues
+- Read [docs/Deployment.md](docs/developer-guide/chatbot/deployment.md) for deployment issues
+- Check [docs/TechStack.md](docs/architecture/TechStack.md) for version compatibility
 - Search closed issues for solutions
 
 ## Service Status

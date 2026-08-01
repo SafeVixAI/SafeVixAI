@@ -2,7 +2,7 @@
 
 > **Version:** 1.0  
 > **Last updated:** 2026-07-26  
-> **Cross-references:** [SETUP.md](./SETUP.md), [STYLE_GUIDE.md](../STYLE_GUIDE.md), [TESTING_POLICY.md](./TESTING_POLICY.md)
+> **Cross-references:** [SETUP.md](SETUP.md), [STYLE_GUIDE.md](STYLE_GUIDE.md), [TESTING_POLICY.md](TESTING_POLICY.md)
 
 ---
 
@@ -273,7 +273,7 @@ The pre-commit configuration runs:
 
 ## Troubleshooting Development Issues
 
-See [TROUBLESHOOTING.md](../TROUBLESHOOTING.md) for detailed issue resolution.
+See [TROUBLESHOOTING.md](../sre/TROUBLESHOOTING.md) for detailed issue resolution.
 
 Common issues:
 - **Virtual environment not activated** — Run `source .venv/bin/activate` (Linux/Mac) or `.venv\Scripts\activate` (Windows)

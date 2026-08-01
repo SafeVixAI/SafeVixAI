@@ -1,6 +1,6 @@
 # SafeVixAI — Complete Project Analysis (Updated 2026-05-26)
 
-> **SNAPSHOT**: This document reflects the state as of 2026-05-26. For current state see [AGENTS.md](../../AGENTS.md).
+> **SNAPSHOT**: This document reflects the state as of 2026-05-26. For current state see [AGENTS.md](../../../AGENTS.md).
 
 > Deep codebase exploration complete. Contains verified ground truth (not audit tool assumptions).
 

@@ -2,7 +2,7 @@
 
 > **Version:** 1.0  
 > **Last updated:** 2026-07-26  
-> **Cross-references:** [API.md](./API.md), [INTEGRATION_GUIDE.md](./INTEGRATION_GUIDE.md)
+> **Cross-references:** [API.md](API.md), [INTEGRATION_GUIDE.md](INTEGRATION_GUIDE.md)
 
 ---
 

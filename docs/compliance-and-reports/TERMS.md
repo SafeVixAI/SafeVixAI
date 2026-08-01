@@ -81,7 +81,7 @@ To the maximum extent permitted by law, SafeVixAI and its contributors are not l
 
 ## 8. Open Source
 
-SafeVixAI is open-source under the [MIT License](LICENSE). You may self-host, modify, and distribute the software subject to the license terms.
+SafeVixAI is open-source under the [MIT License](../../LICENSE). You may self-host, modify, and distribute the software subject to the license terms.
 
 ## 9. Governing Law
 

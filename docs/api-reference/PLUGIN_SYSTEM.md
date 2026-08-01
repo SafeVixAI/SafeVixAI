@@ -2,7 +2,7 @@
 
 > **Version:** 1.0 (Design)  
 > **Last updated:** 2026-07-26  
-> **Cross-references:** [Architecture.md](./Architecture.md), [INTEGRATION_GUIDE.md](./INTEGRATION_GUIDE.md)
+> **Cross-references:** [Architecture.md](../architecture/Architecture.md), [INTEGRATION_GUIDE.md](INTEGRATION_GUIDE.md)
 
 ---
 

@@ -1,6 +1,6 @@
 # SafeVixAI — Performance Report
 
-> **SNAPSHOT**: This document reflects the state as of 2026-05-26. For current state see [AGENTS.md](../../AGENTS.md).
+> **SNAPSHOT**: This document reflects the state as of 2026-05-26. For current state see [AGENTS.md](../../../AGENTS.md).
 
 **Date:** 2026-05-26
 

@@ -2,14 +2,14 @@
 
 > **Version:** 1.0  
 > **Last updated:** 2026-07-26  
-> **Cross-references:** [MIGRATION_GUIDE.md](./MIGRATION_GUIDE.md), [CHANGELOG.md](../CHANGELOG.md), [Deployment.md](./Deployment.md)
+> **Cross-references:** [MIGRATION_GUIDE.md](MIGRATION_GUIDE.md), [CHANGELOG.md](../api-reference/api/changelog.md), [Deployment.md](Deployment.md)
 
 ---
 
 ## Before You Start
 
-1. **Read the changelog** — Review [CHANGELOG.md](../CHANGELOG.md) for all changes between versions
-2. **Check for breaking changes** — See [MIGRATION_GUIDE.md](./MIGRATION_GUIDE.md) for breaking changes
+1. **Read the changelog** — Review [CHANGELOG.md](../api-reference/api/changelog.md) for all changes between versions
+2. **Check for breaking changes** — See [MIGRATION_GUIDE.md](MIGRATION_GUIDE.md) for breaking changes
 3. **Back up your database** — Always take a backup before upgrading
 4. **Review environment variables** — Check for new or changed variables
 
@@ -165,6 +165,6 @@ cd ../frontend && npm ci
 
 ## Need Help?
 
-- Check [TROUBLESHOOTING.md](../TROUBLESHOOTING.md) for common issues
+- Check [TROUBLESHOOTING.md](TROUBLESHOOTING.md) for common issues
 - Search [GitHub Issues](https://github.com/SafeVixAI/SafeVixAI/issues)
 - Ask in [GitHub Discussions](https://github.com/SafeVixAI/SafeVixAI/discussions)

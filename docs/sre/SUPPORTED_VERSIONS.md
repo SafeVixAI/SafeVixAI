@@ -50,7 +50,7 @@ stateDiagram-v2
 | 0.x | 1.0.x | Immediately |
 | 1.0.x | 1.x.x | Within 90 days of release |
 
-See [UPGRADE_GUIDE.md](./docs/UPGRADE_GUIDE.md) for detailed upgrade instructions.
+See [UPGRADE_GUIDE.md](UPGRADE_GUIDE.md) for detailed upgrade instructions.
 
 ---
 

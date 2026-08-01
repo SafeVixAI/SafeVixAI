@@ -98,7 +98,7 @@ SafeVixAI was built by a team participating in the National Road Safety Hackatho
 SafeVixAI addresses road safety through four pillars: (1) instant emergency response with SOS and family tracking, (2) an AI chatbot for traffic law and first-aid guidance, (3) a challan/fine calculator using DuckDB, and (4) a road reporter for citizen infrastructure issue tracking.
 
 ### What is the license?
-SafeVixAI is released under the MIT License. See [LICENSE](./LICENSE) for full terms.
+SafeVixAI is released under the MIT License. See [LICENSE](../../LICENSE) for full terms.
 
 ### Is SafeVixAI free?
 Yes. SafeVixAI is 100% free and open source. Total infrastructure cost is ₹0 — it runs entirely on free tiers (Vercel, Render, Supabase, Upstash).
@@ -146,7 +146,7 @@ MapLibre GL — an open-source alternative to Google Maps. Map components are lo
 ## Installation
 
 ### How do I set up SafeVixAI locally?
-See [SETUP.md](./SETUP.md) for step-by-step instructions. In short: clone the repo, set up Python virtual environments for `backend/` and `chatbot_service/`, add `.env` files, and run `npm install && npm run dev` in `frontend/`.
+See [SETUP.md](../developer-guide/SETUP.md) for step-by-step instructions. In short: clone the repo, set up Python virtual environments for `backend/` and `chatbot_service/`, add `.env` files, and run `npm install && npm run dev` in `frontend/`.
 
 ### What are the system requirements?
 Node.js 20+, Python 3.11+, PostgreSQL 16 with PostGIS, Redis 7 (optional, falls back to in-memory), and a modern browser with PWA support.
@@ -162,7 +162,7 @@ Run `docker compose up --build` from the project root. This starts all 5 service
 ## Configuration
 
 ### Where are environment variables configured?
-Each service has its own `.env` file. Backend uses `backend/.env`, chatbot uses `chatbot_service/.env`, frontend uses `frontend/.env.local`. See [AGENTS.md](./AGENTS.md) for the full variable reference.
+Each service has its own `.env` file. Backend uses `backend/.env`, chatbot uses `chatbot_service/.env`, frontend uses `frontend/.env.local`. See [AGENTS.md](../../AGENTS.md) for the full variable reference.
 
 ### How do I configure the chatbot provider?
 Set `DEFAULT_LLM_PROVIDER` and `DEFAULT_LLM_MODEL` in `chatbot_service/.env`. The fallback chain is: Groq to Cerebras to Gemini to GitHub Models to NVIDIA NIM to OpenRouter to Mistral to Together to Template.
@@ -178,7 +178,7 @@ The app supports 14 Indian languages. Users can switch languages from the settin
 Frontend on Vercel, Backend on Render.com, Chatbot Service on Render.com, Database on Supabase (PostgreSQL + PostGIS), Redis on Upstash.
 
 ### How do I deploy my own instance?
-Fork the repository, connect each service to its respective platform (Vercel for frontend, Render for backend/chatbot), set environment variables, and configure the database. See [docs/Deployment.md](./docs/Deployment.md).
+Fork the repository, connect each service to its respective platform (Vercel for frontend, Render for backend/chatbot), set environment variables, and configure the database. See [docs/Deployment.md](../developer-guide/chatbot/deployment.md).
 
 ### Is there a Kubernetes deployment?
 Yes. See `k8s/` directory for namespace, ingress, and deployment manifests.
@@ -191,7 +191,7 @@ Yes. See `k8s/` directory for namespace, ingress, and deployment manifests.
 Blood group, emergency contacts, and medical info never leave the device — stored in IndexedDB only. JWT authentication uses RS256 signatures. API requests use CSRF tokens. All communications are HTTPS.
 
 ### Is there GDPR compliance?
-Yes. The app respects GDPR/DPDP principles. See [PRIVACY.md](./docs/PRIVACY.md) for details on data collection, retention, and erasure policies.
+Yes. The app respects GDPR/DPDP principles. See [PRIVACY.md](../compliance-and-reports/PRIVACY.md) for details on data collection, retention, and erasure policies.
 
 ### How are API keys secured?
 All secrets go in `.env` files (gitignored). The CI pipeline uses GitHub secrets. The security workflow runs gitleaks to detect committed secrets.
@@ -214,20 +214,20 @@ The SOS is queued in IndexedDB via `offline-sos-queue.ts`. It auto-flushes when 
 ## Integration
 
 ### Does SafeVixAI have an API?
-Yes. The backend exposes REST APIs at `/api/v1/` and WebSocket endpoints for tracking. The chatbot service has its own API at `/api/v1/chat/`. See [docs/API.md](./docs/API.md) and [docs/SDK_GUIDE.md](./docs/SDK_GUIDE.md).
+Yes. The backend exposes REST APIs at `/api/v1/` and WebSocket endpoints for tracking. The chatbot service has its own API at `/api/v1/chat/`. See [docs/API.md](../api-reference/API.md) and [docs/SDK_GUIDE.md](../api-reference/SDK_GUIDE.md).
 
 ### What is the MCP server?
 The backend includes an MCP (Model Context Protocol) server at `api/v1/mcp_server.py` for external agent integration.
 
 ### Can I integrate SafeVixAI with my app?
-Yes. See the [Integration Guide](./docs/INTEGRATION_GUIDE.md) for REST API documentation, authentication, WebSocket connections, rate limits, and SDK examples.
+Yes. See the [Integration Guide](../api-reference/INTEGRATION_GUIDE.md) for REST API documentation, authentication, WebSocket connections, rate limits, and SDK examples.
 
 ---
 
 ## Contributing
 
 ### How can I contribute?
-See [CONTRIBUTING.md](./CONTRIBUTING.md) for contribution guidelines. We welcome bug fixes, features, documentation, tests, and translations.
+See [CONTRIBUTING.md](../developer-guide/Contributing.md) for contribution guidelines. We welcome bug fixes, features, documentation, tests, and translations.
 
 ### How do I report a bug?
 Open a GitHub Issue with the bug report template. Include environment details, reproduction steps, and expected vs actual behavior.
@@ -242,10 +242,10 @@ Open a GitHub Issue using the feature request template. Describe the problem, pr
 ### Where do I get help?
 - [GitHub Issues](https://github.com/SafeVixAI/SafeVixAI/issues) for bug reports and feature requests
 - [GitHub Discussions](https://github.com/SafeVixAI/SafeVixAI/discussions) for Q&A
-- [SUPPORT.md](./SUPPORT.md) for support channels and response times
+- [SUPPORT.md](../../SUPPORT.md) for support channels and response times
 
 ### How do I report a security vulnerability?
-Email **security@safevixai.gov.in**. Do not file a public issue. See [SECURITY.md](./SECURITY.md) for the disclosure policy.
+Email **security@safevixai.gov.in**. Do not file a public issue. See [SECURITY.md](../architecture/Security.md) for the disclosure policy.
 
 ---
 
@@ -253,7 +253,7 @@ Email **security@safevixai.gov.in**. Do not file a public issue. See [SECURITY.m
 
 ## Related
 
-- [TROUBLESHOOTING.md](TROUBLESHOOTING.md) — Common issues and resolutions
-- [RUNBOOKS.md](RUNBOOKS.md) — Incident response procedures
-- [SUPPORT.md](SUPPORT.md) — All support channels
+- [TROUBLESHOOTING.md](../sre/TROUBLESHOOTING.md) — Common issues and resolutions
+- [RUNBOOKS.md](../sre/RUNBOOKS.md) — Incident response procedures
+- [SUPPORT.md](../../SUPPORT.md) — All support channels
 - [FAQ.md](FAQ.md) — Frequently asked questions

@@ -26,6 +26,6 @@ P0 → Project Lead + Security Team + all Core Contributors
 |---------|--------|
 | [RB-001](../runbooks/RB-001-llm-outage.md) | LLM Provider Outage (P0) |
 | [RB-002](../runbooks/RB-002-db-failover.md) | Database Failover (P0) |
-| [RB-003](../runbooks/RB-003-redis-failure.md) | Redis Cache Failure (P1) |
+| [RB-003](../runbooks/redis-down.md) | Redis Cache Failure (P1) |
 | [RB-005](../runbooks/RB-005-rollback.md) | Deployment Rollback (P1) |
-| [All runbooks](../runbooks/README.md) | Complete index |
+| [All runbooks](README.md) | Complete index |

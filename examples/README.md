@@ -11,7 +11,7 @@ This directory contains ready-to-run examples demonstrating how to use SafeVixAI
 | Example | Description | Files |
 |---------|-------------|-------|
 | [`api-client/`](api-client/) | Python & TypeScript API client classes | `client.py`, `client.ts` |
-| [`emergency/`](emergency/) | SOS trigger, emergency lookup, offline queue | `emergency.py`, `offline-queue.ts` |
+| [`emergency/`](../Emergency) | SOS trigger, emergency lookup, offline queue | `emergency.py`, `offline-queue.ts` |
 | [`challan/`](challan/) | Online + DuckDB-Wasm offline challan calc | `calculate.py`, `offline.ts`, `query.sql` |
 | [`chatbot/`](chatbot/) | Simple, streaming, provider override, tool routing | `examples.py` |
 | [`cookbook/`](cookbook/) | 5 integration recipes + WebSocket tracking | `recipes.py`, `tracking.ts` |
@@ -54,7 +54,7 @@ print(f"Fine amount: ₹{resp.json()['amount']}")
 
 ## Related
 
-- [`SDK_GUIDE.md`](../SDK_GUIDE.md) — comprehensive API integration guide
-- [`docs/INTEGRATION_GUIDE.md`](../docs/INTEGRATION_GUIDE.md) — third-party integrations
-- [`docs/WEBHOOKS.md`](../docs/WEBHOOKS.md) — webhook events
-- [`docs/PLUGIN_SYSTEM.md`](../docs/PLUGIN_SYSTEM.md) — plugin development
+- [`SDK_GUIDE.md`](../docs/api-reference/SDK_GUIDE.md) — comprehensive API integration guide
+- [`docs/INTEGRATION_GUIDE.md`](../docs/api-reference/INTEGRATION_GUIDE.md) — third-party integrations
+- [`docs/WEBHOOKS.md`](../docs/api-reference/WEBHOOKS.md) — webhook events
+- [`docs/PLUGIN_SYSTEM.md`](../docs/api-reference/PLUGIN_SYSTEM.md) — plugin development

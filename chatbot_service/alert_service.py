@@ -80,10 +80,10 @@ class AlertService:
                 "  • Cerebras: https://cloud.cerebras.ai\n"
                 "  • Gemini: https://aistudio.google.com/app/apikey\n"
                 "  • OpenRouter: https://openrouter.ai/keys",
-                "CHECK RATE LIMITS — Free-tier limits may be exhausted:\n"
+                "CHECK RATE LIMITS — Provider quota/rate-limits may be reached:\n"
                 "  • Groq: 30 RPM / 14400 RPD\n"
                 "  • Gemini: 15 RPM / 1M tok/day\n"
-                "  • Wait 1 hour or upgrade to paid tier",
+                "  • Check your BYOK API key in Settings / .env or switch to local Ollama",
                 "CHECK SERVICE STATUS — Provider may be down:\n"
                 "  • Groq: https://status.groq.com\n"
                 "  • Gemini: https://status.cloud.google.com\n"
@@ -295,3 +295,8 @@ def get_alert_service() -> AlertService:
     if _instance is None:
         _instance = AlertService()
     return _instance
+
+
+# Backward-compatibility alias
+send_alert = get_alert_service
+

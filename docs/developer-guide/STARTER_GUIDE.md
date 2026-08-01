@@ -221,7 +221,7 @@ pytest tests/ -v
 
 ### If Something Doesn't Work
 
-1. **Check common issues**: See [TROUBLESHOOTING.md](../TROUBLESHOOTING.md)
+1. **Check common issues**: See [TROUBLESHOOTING.md](../sre/TROUBLESHOOTING.md)
 2. **Search existing issues**: https://github.com/SafeVixAI/SafeVixAI/issues
 3. **Ask a question**: [GitHub Discussions](https://github.com/SafeVixAI/SafeVixAI/discussions)
 
@@ -233,14 +233,14 @@ Comment on a `good first issue` saying "I'd like to work on this — could I get
 
 ## What's Next?
 
-- Read [CONTRIBUTING.md](../CONTRIBUTING.md) for detailed contribution guidelines
-- Read [STYLE_GUIDE.md](../STYLE_GUIDE.md) for coding conventions
+- Read [CONTRIBUTING.md](Contributing.md) for detailed contribution guidelines
+- Read [STYLE_GUIDE.md](STYLE_GUIDE.md) for coding conventions
 - Explore the [Documentation Site](https://safevixai.github.io/SafeVixAI/) for complete docs
-- Check [ROADMAP.md](../ROADMAP.md) for planned features
-- Look at [ADOPTERS.md](../ADOPTERS.md) to see who's using SafeVixAI
+- Check [ROADMAP.md](chatbot/roadmap.md) for planned features
+- Look at [ADOPTERS.md](../../ADOPTERS.md) to see who's using SafeVixAI
 
 ## Related
 
-- [TESTING.md](../TESTING.md) — Testing standards and coverage
-- [OPERATIONS.md](../OPERATIONS.md) — Production operations and deployment
-- [SETUP.md](../SETUP.md) — Detailed setup guide
+- [TESTING.md](TESTING.md) — Testing standards and coverage
+- [OPERATIONS.md](../sre/OPERATIONS.md) — Production operations and deployment
+- [SETUP.md](SETUP.md) — Detailed setup guide

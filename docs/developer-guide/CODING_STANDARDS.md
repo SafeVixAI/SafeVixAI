@@ -2,7 +2,7 @@
 
 > **Version:** 1.0  
 > **Last updated:** 2026-07-26  
-> **Cross-references:** [STYLE_GUIDE.md](../STYLE_GUIDE.md), [TESTING_POLICY.md](./TESTING_POLICY.md)
+> **Cross-references:** [STYLE_GUIDE.md](STYLE_GUIDE.md), [TESTING_POLICY.md](TESTING_POLICY.md)
 
 ---
 

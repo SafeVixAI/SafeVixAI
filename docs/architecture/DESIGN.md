@@ -16,7 +16,7 @@ SafeVixAI's frontend has achieved **100% Enterprise-grade GSAP migration**. All 
 
 **E2E Production Note:** GSAP animations silently fail in `node .next/standalone/server.js` production build. The `usePageEntry` hook applies `opacity: 0` inline styles via `gsap.fromTo` but the animation never transitions to `opacity: 1`. All E2E `waitForMount` helpers removed the opacity check and now wait for `[aria-busy="true"]` loading skeleton to disappear.
 
-**UX Audit Score: 100/100 (Enterprise Gold Standard — aspirational target; see [docs/UX_95_PLAN.md](docs/UX_95_PLAN.md) for current measured baseline)**
+**UX Audit Score: 100/100 (Enterprise Gold Standard — aspirational target; see [docs/UX_95_PLAN.md](../product-and-planning/UX_95_PLAN.md) for current measured baseline)**
 
 | Category | Score | Key Strengths | Key Gaps |
 |----------|-------|---------------|----------|
@@ -883,6 +883,6 @@ ALERT_EMAIL_TO=team-lead@gmail.com
 ## Related
 
 - [SYSTEM_DESIGN.md](SYSTEM_DESIGN.md) — Detailed system design and component specs
-- [OBSERVABILITY.md](OBSERVABILITY.md) — Logging, metrics, tracing architecture
-- [ARCHITECTURE.md](docs/ARCHITECTURE.md) — System architecture overview
-- [UIUX.md](docs/UIUX.md) — User experience and interface design
+- [OBSERVABILITY.md](../sre/OBSERVABILITY.md) — Logging, metrics, tracing architecture
+- [ARCHITECTURE.md](Architecture.md) — System architecture overview
+- [UIUX.md](../product-and-planning/UIUX.md) — User experience and interface design

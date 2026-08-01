@@ -1,6 +1,6 @@
 # SafeVixAI — Runbook: Redis Unavailable
 
-> **SNAPSHOT**: This document reflects the state as of its creation date. For current state see [AGENTS.md](../../AGENTS.md).
+> **SNAPSHOT**: This document reflects the state as of its creation date. For current state see [AGENTS.md](../../../AGENTS.md).
 
 **Severity:** P2  
 **Service:** Backend + Chatbot  

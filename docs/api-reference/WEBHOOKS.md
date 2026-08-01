@@ -2,7 +2,7 @@
 
 > **Version:** 1.0  
 > **Last updated:** 2026-07-26  
-> **Cross-references:** [INTEGRATION_GUIDE.md](./INTEGRATION_GUIDE.md), [API.md](./API.md), [Security.md](./Security.md)
+> **Cross-references:** [INTEGRATION_GUIDE.md](INTEGRATION_GUIDE.md), [API.md](API.md), [Security.md](../architecture/Security.md)
 
 ---
 

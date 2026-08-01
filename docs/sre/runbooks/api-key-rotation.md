@@ -1,6 +1,6 @@
 # Runbook: API Key Rotation
 
-> **SNAPSHOT**: This document reflects the state as of its creation date. For current state see [AGENTS.md](../../AGENTS.md).
+> **SNAPSHOT**: This document reflects the state as of its creation date. For current state see [AGENTS.md](../../../AGENTS.md).
 
 **Severity:** SEV2 | **Service:** All | **Time to execute:** 15 minutes
 

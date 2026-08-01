@@ -2,7 +2,7 @@
 
 > **Version:** 1.0  
 > **Last updated:** 2026-07-26  
-> **Cross-references:** [Features.md](./Features.md), [SDK_GUIDE.md](./SDK_GUIDE.md)
+> **Cross-references:** [Features.md](chatbot/features.md), [SDK_GUIDE.md](../api-reference/SDK_GUIDE.md)
 
 ---
 
@@ -136,4 +136,4 @@ jest.mock('react-i18next', () => ({
 4. Test with a language selector
 5. Submit a pull request
 
-See [CONTRIBUTING.md](../CONTRIBUTING.md) for the full contribution workflow.
+See [CONTRIBUTING.md](Contributing.md) for the full contribution workflow.

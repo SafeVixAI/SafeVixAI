@@ -75,12 +75,12 @@ stateDiagram-v2
 
 | Area | Documentation |
 |------|---------------|
-| Setup Guide | [`docs/MONITORING_SETUP.md`](docs/MONITORING_SETUP.md) |
-| Grafana Dashboard | [`docs/observability/grafana-dashboard.json`](docs/observability/grafana-dashboard.json) |
-| Prometheus Config | [`docs/observability/prometheus-config.yml`](docs/observability/prometheus-config.yml) |
-| Alert Rules | [`docs/observability/alerts/`](docs/observability/alerts/) |
-| Telemetry Guide | [`docs/TELEMETRY.md`](docs/TELEMETRY.md) |
-| Performance Benchmarks | [`docs/PERFORMANCE_BENCHMARKS.md`](docs/PERFORMANCE_BENCHMARKS.md) |
+| Setup Guide | [`docs/MONITORING_SETUP.md`](observability/MONITORING_SETUP.md) |
+| Grafana Dashboard | [`docs/observability/grafana-dashboard.json`](observability/observability/grafana-dashboard.json) |
+| Prometheus Config | [`docs/observability/prometheus-config.yml`](observability/observability/prometheus-config.yml) |
+| Alert Rules | [`docs/observability/alerts/`](observability/observability/alerts/) |
+| Telemetry Guide | [`docs/TELEMETRY.md`](observability/TELEMETRY.md) |
+| Performance Benchmarks | [`docs/PERFORMANCE_BENCHMARKS.md`](PERFORMANCE_BENCHMARKS.md) |
 | Observability Overview | [`OBSERVABILITY.md`](OBSERVABILITY.md) |
 
 ---

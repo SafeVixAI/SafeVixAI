@@ -1,6 +1,6 @@
 # SafeVixAI — Final Enterprise Audit Report
 
-> **SNAPSHOT**: This document reflects the state as of its creation date. For current state see [AGENTS.md](../../AGENTS.md).
+> **SNAPSHOT**: This document reflects the state as of its creation date. For current state see [AGENTS.md](../../../AGENTS.md).
 
 **Date:** 2026-05-26  
 **Scope:** Frontend (Next.js 15) + Backend (FastAPI :8000) + Chatbot (FastAPI :8010) + Infrastructure  

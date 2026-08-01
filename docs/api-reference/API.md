@@ -463,6 +463,42 @@ MCP server health check � returns `{"status": "healthy", "mcp_server": "online
 
 ---
 
+## Issues (`/api/v1/issues`)
+
+#### `POST /api/v1/issues`
+
+Submit a new road issue report with AI categorization and SLA assignment.
+
+#### `GET /api/v1/issues`
+
+List road issues with category, severity, status, and bbox filters.
+
+#### `GET /api/v1/issues/{id}`
+
+Get detailed issue report, lifecycle history, and authority assignments.
+
+---
+
+## Issues CLI (`/api/v1/issues-cli`)
+
+#### `POST /api/v1/issues-cli/batch`
+
+Batch ingest issue reports from CLI or external sensors.
+
+---
+
+## Notifications (`/api/v1/notifications`)
+
+#### `POST /api/v1/notifications/sos`
+
+Send emergency SOS notifications to designated emergency contacts.
+
+#### `GET /api/v1/notifications/preferences`
+
+Get notification channel preferences (email, SMS, push).
+
+---
+
 ## Officers (`/api/v1/officers`)
 
 #### `GET /api/v1/officers`
@@ -643,7 +679,47 @@ Waze alert data.
 
 ---
 
-## Speech Endpoints (Chatbot Service � port 8010)
+## Probes (`/api/v1/probes`)
+
+#### `GET /api/v1/probes/healthz`
+
+Liveness probe endpoint returning HTTP 200 when backend is alive.
+
+#### `GET /api/v1/probes/readyz`
+
+Readiness probe verifying DB connection and Redis connectivity.
+
+---
+
+## Providers (`/api/v1/providers`)
+
+#### `GET /api/v1/providers/config`
+
+List configured AI providers and fallback status.
+
+#### `POST /api/v1/providers/key`
+
+Store or update encrypted API key for LLM provider.
+
+---
+
+## Updates (`/api/v1/updates`)
+
+#### `GET /api/v1/updates/version`
+
+Get current application version, release build, and environment metadata.
+
+#### `GET /api/v1/updates/check`
+
+Check for application updates across stable/beta release channels.
+
+#### `POST /api/v1/updates/download`
+
+Trigger background update package download with progress tracking.
+
+---
+
+## Speech Endpoints (Chatbot Service — port 8010)
 
 #### `POST /speech/translate`
 
@@ -673,7 +749,7 @@ Speech service health and available language pairs.
 
 ## Rate Limits
 
-### Server-Side (slowapi � IP-based)
+### Server-Side (slowapi — IP-based)
 
 | Endpoint | Limit |
 |---|---|
@@ -712,11 +788,11 @@ Speech service health and available language pairs.
 
 ---
 
-*Document version: 3.4 | AI-powered road safety platform | 28 backend route modules + chatbot + MCP*
+*Document version: 3.5 | AI-powered road safety platform | All 32 registered backend route modules + chatbot + MCP*
 
 ## Related
 
-- [BENCHMARKS.md](../BENCHMARKS.md) — API performance benchmarks
-- [OPERATIONS.md](../OPERATIONS.md) — Production operations and scaling
-- [SDK_GUIDE.md](../SDK_GUIDE.md) — SDK usage, auth patterns, rate limits
-- [ERROR_CODES.md](../ERROR_CODES.md) — Complete error code reference
+- [BENCHMARKS.md](../compliance-and-reports/BENCHMARKS.md) — API performance benchmarks
+- [OPERATIONS.md](../sre/OPERATIONS.md) — Production operations and scaling
+- [SDK_GUIDE.md](SDK_GUIDE.md) — SDK usage, auth patterns, rate limits
+- [ERROR_CODES.md](ERROR_CODES.md) — Complete error code reference

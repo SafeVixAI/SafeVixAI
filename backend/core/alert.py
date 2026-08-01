@@ -76,10 +76,10 @@ class AlertService:
                 "  \u2022 Cerebras: https://cloud.cerebras.ai\n"
                 "  \u2022 Gemini: https://aistudio.google.com/app/apikey\n"
                 "  \u2022 OpenRouter: https://openrouter.ai/keys",
-                "CHECK RATE LIMITS — Free-tier limits may be exhausted:\n"
-                "  \u2022 Groq: 30 RPM / 14400 RPD\n"
-                "  \u2022 Gemini: 15 RPM / 1M tok/day\n"
-                "  \u2022 Wait 1 hour or upgrade to paid tier",
+                "CHECK RATE LIMITS — Provider quota/rate-limits may be reached:\n"
+                "  • Groq: 30 RPM / 14400 RPD\n"
+                "  • Gemini: 15 RPM / 1M tok/day\n"
+                "  • Check your BYOK API key in Settings / .env or switch to local Ollama",
                 "CHECK SERVICE STATUS — Provider may be down:\n"
                 "  \u2022 Groq: https://status.groq.com\n"
                 "  \u2022 Gemini: https://status.cloud.google.com\n"
@@ -189,9 +189,9 @@ class AlertService:
                 "WAIT FOR AUTOMATIC RECOVERY \u2014 Circuit breakers auto-reset:\n"
                 f"  \u2022 This provider will be re-enabled after {duration_min} minutes\n"
                 "  \u2022 The fallback chain continues serving requests",
-                "CONSIDER PROVIDER REPLACEMENT \u2014 If this happens frequently:\n"
-                "  \u2022 Update .env to use a different primary provider\n"
-                "  \u2022 Consider upgrading to paid tier for higher rate limits",
+                "CONSIDER PROVIDER REPLACEMENT — If this happens frequently:\n"
+                "  • Update .env or frontend Settings with a fresh BYOK provider key\n"
+                "  • Or enable local Ollama provider for unlimited local inference",
             ],
         )
 
@@ -265,3 +265,8 @@ def get_alert_service() -> AlertService:
     if _instance is None:
         _instance = AlertService()
     return _instance
+
+
+# Backward-compatibility alias
+send_alert = get_alert_service
+

@@ -1,6 +1,6 @@
 # Runbook: ChromaDB Index Rebuild
 
-> **SNAPSHOT**: This document reflects the state as of its creation date. For current state see [AGENTS.md](../../AGENTS.md).
+> **SNAPSHOT**: This document reflects the state as of its creation date. For current state see [AGENTS.md](../../../AGENTS.md).
 
 **Severity:** SEV2 | **Service:** Chatbot | **Time to execute:** 10-30 minutes
 

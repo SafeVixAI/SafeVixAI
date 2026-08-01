@@ -2,7 +2,7 @@
 
 > **Version:** 1.0  
 > **Last updated:** 2026-07-26  
-> **Cross-references:** [Security.md](./Security.md), [INTEGRATION_GUIDE.md](./INTEGRATION_GUIDE.md), [API.md](./API.md)
+> **Cross-references:** [Security.md](chatbot/security.md), [INTEGRATION_GUIDE.md](../api-reference/INTEGRATION_GUIDE.md), [API.md](chatbot/api.md)
 
 ---
 
@@ -101,7 +101,7 @@ Keys are cached with distributed locking (see `core/jwks.py`) for 3600 seconds.
 | `operator` | Municipal authority | Command center, report management |
 | `admin` | System administrator | All endpoints, cache management, user admin |
 
-See [AUTHORIZATION.md](./AUTHORIZATION.md) for the complete RBAC matrix.
+See [AUTHORIZATION.md](AUTHORIZATION.md) for the complete RBAC matrix.
 
 ---
 

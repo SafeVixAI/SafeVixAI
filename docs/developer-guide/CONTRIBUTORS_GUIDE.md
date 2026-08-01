@@ -2,7 +2,7 @@
 
 > **Version:** 1.0  
 > **Last updated:** 2026-07-26  
-> **Cross-references:** [CONTRIBUTING.md](../CONTRIBUTING.md), [SETUP.md](./SETUP.md), [STYLE_GUIDE.md](../STYLE_GUIDE.md), [TESTING_POLICY.md](./TESTING_POLICY.md)
+> **Cross-references:** [CONTRIBUTING.md](Contributing.md), [SETUP.md](SETUP.md), [STYLE_GUIDE.md](STYLE_GUIDE.md), [TESTING_POLICY.md](TESTING_POLICY.md)
 
 ---
 
@@ -13,7 +13,7 @@ SafeVixAI is a three-service monorepo:
 - **chatbot_service/**: FastAPI Python service (AI chatbot with 10 LLM providers)
 - **frontend/**: Next.js + React PWA (maps, SOS, chatbot UI, offline support)
 
-See [Architecture.md](./Architecture.md) for system architecture and data flows.
+See [Architecture.md](chatbot/architecture.md) for system architecture and data flows.
 
 ---
 
@@ -49,7 +49,7 @@ cd ../frontend && npm ci
 cp .env.local.example .env.local
 ```
 
-See [SETUP.md](./SETUP.md) for detailed setup instructions.
+See [SETUP.md](SETUP.md) for detailed setup instructions.
 
 ### 3. Create a Branch
 ```bash
@@ -71,7 +71,7 @@ Branch naming: `feature/<issue>-<description>`, `fix/<issue>-<description>`, `do
 - Use Tailwind CSS (no inline styles)
 - Use Lucide icons
 
-See [STYLE_GUIDE.md](../STYLE_GUIDE.md) for detailed coding standards.
+See [STYLE_GUIDE.md](STYLE_GUIDE.md) for detailed coding standards.
 
 ### 5. Write Tests
 
@@ -118,7 +118,7 @@ git commit -m "feat(backend): add SOS cancel endpoint"
 ```
 Use Conventional Commits: `type(scope): description`
 
-See [STYLE_GUIDE.md](../STYLE_GUIDE.md#commit-conventions) for commit types and scopes.
+See [STYLE_GUIDE.md](STYLE_GUIDE.md#commit-conventions) for commit types and scopes.
 
 ### 8. Push and Create PR
 ```bash
@@ -214,4 +214,4 @@ Open a pull request on GitHub with:
 - Comment on your issue or PR — a mentor will respond
 - Join [GitHub Discussions](https://github.com/SafeVixAI/SafeVixAI/discussions)
 - Email `safevixai@googlegroups.com` for project-level questions
-- See [SUPPORT.md](../SUPPORT.md) for all support channels
+- See [SUPPORT.md](../../SUPPORT.md) for all support channels

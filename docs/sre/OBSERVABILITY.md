@@ -83,12 +83,12 @@ classDiagram
 
 | Area | Documentation |
 |------|---------------|
-| Monitoring Setup | [`docs/MONITORING_SETUP.md`](docs/MONITORING_SETUP.md) |
-| Grafana Dashboards | [`docs/observability/grafana-dashboard.json`](docs/observability/grafana-dashboard.json) |
-| Prometheus Config | [`docs/observability/prometheus-config.yml`](docs/observability/prometheus-config.yml) |
-| Telemetry Guide | [`docs/TELEMETRY.md`](docs/TELEMETRY.md) |
-| Performance Benchmarks | [`docs/PERFORMANCE_BENCHMARKS.md`](docs/PERFORMANCE_BENCHMARKS.md) |
-| Error Codes | [`ERROR_CODES.md`](ERROR_CODES.md) |
+| Monitoring Setup | [`docs/MONITORING_SETUP.md`](observability/MONITORING_SETUP.md) |
+| Grafana Dashboards | [`docs/observability/grafana-dashboard.json`](observability/observability/grafana-dashboard.json) |
+| Prometheus Config | [`docs/observability/prometheus-config.yml`](observability/observability/prometheus-config.yml) |
+| Telemetry Guide | [`docs/TELEMETRY.md`](observability/TELEMETRY.md) |
+| Performance Benchmarks | [`docs/PERFORMANCE_BENCHMARKS.md`](PERFORMANCE_BENCHMARKS.md) |
+| Error Codes | [`ERROR_CODES.md`](../api-reference/ERROR_CODES.md) |
 
 ---
 
@@ -138,4 +138,4 @@ Email alerts via SMTP with 5-minute cooldown for:
 
 - [`MONITORING.md`](MONITORING.md) — metrics, dashboards, uptime
 - [`OPERATIONS.md`](OPERATIONS.md) — runbooks, incident response
-- [`docs/observability/README.md`](docs/observability/README.md) — detailed observability guides
+- [`docs/observability/README.md`](incident-response/README.md) — detailed observability guides

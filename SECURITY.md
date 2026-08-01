@@ -148,7 +148,7 @@ This project operates on a **responsible disclosure** basis - no bug bounty prog
 
 ## Related
 
-- [docs/SECURITY.md](docs/SECURITY.md) — Security features and hardening
-- [docs/AUTHENTICATION.md](docs/AUTHENTICATION.md) — Auth flows and JWT validation
-- [docs/AUTHORIZATION.md](docs/AUTHORIZATION.md) — RBAC and permission model
-- [docs/THREAT_MODEL.md](docs/THREAT_MODEL.md) — Threat modeling and risk assessment
+- [docs/SECURITY.md](SECURITY.md) — Security features and hardening
+- [docs/AUTHENTICATION.md](docs/architecture/AUTHENTICATION.md) — Auth flows and JWT validation
+- [docs/AUTHORIZATION.md](docs/architecture/AUTHORIZATION.md) — RBAC and permission model
+- [docs/THREAT_MODEL.md](docs/architecture/THREAT_MODEL.md) — Threat modeling and risk assessment

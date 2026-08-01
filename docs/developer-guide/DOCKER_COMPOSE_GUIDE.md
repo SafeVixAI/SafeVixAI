@@ -2,7 +2,7 @@
 
 > **Version:** 1.0  
 > **Last updated:** 2026-07-26  
-> **Cross-references:** [Deployment.md](./Deployment.md), [ADVANCED_SETUP.md](./ADVANCED_SETUP.md)
+> **Cross-references:** [Deployment.md](chatbot/deployment.md), [ADVANCED_SETUP.md](ADVANCED_SETUP.md)
 
 ---
 

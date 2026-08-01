@@ -10,17 +10,17 @@ SafeVixAI runs on zero-cost infrastructure: Vercel (frontend), Render (backend +
 
 | Area | Documentation |
 |------|---------------|
-| Deployment Guide | [`docs/Deployment.md`](docs/Deployment.md) |
-| Deployment Strategies | [`docs/DEPLOYMENT_STRATEGIES.md`](docs/DEPLOYMENT_STRATEGIES.md) |
-| Advanced Setup | [`docs/ADVANCED_SETUP.md`](docs/ADVANCED_SETUP.md) |
-| Scaling Guide | [`docs/SCALING_GUIDE.md`](docs/SCALING_GUIDE.md) |
-| Docker Compose | [`docs/DOCKER_COMPOSE_GUIDE.md`](docs/DOCKER_COMPOSE_GUIDE.md) |
-| Environment Config | [`docs/operations/environment-configuration.md`](docs/operations/environment-configuration.md) |
-| Maintenance Guide | [`docs/operations/maintenance-guide.md`](docs/operations/maintenance-guide.md) |
-| Monitoring Setup | [`docs/MONITORING_SETUP.md`](docs/MONITORING_SETUP.md) |
+| Deployment Guide | [`docs/Deployment.md`](Deployment.md) |
+| Deployment Strategies | [`docs/DEPLOYMENT_STRATEGIES.md`](DEPLOYMENT_STRATEGIES.md) |
+| Advanced Setup | [`docs/ADVANCED_SETUP.md`](../developer-guide/ADVANCED_SETUP.md) |
+| Scaling Guide | [`docs/SCALING_GUIDE.md`](SCALING_GUIDE.md) |
+| Docker Compose | [`docs/DOCKER_COMPOSE_GUIDE.md`](../developer-guide/DOCKER_COMPOSE_GUIDE.md) |
+| Environment Config | [`docs/operations/environment-configuration.md`](../operations/environment-configuration.md) |
+| Maintenance Guide | [`docs/operations/maintenance-guide.md`](../operations/maintenance-guide.md) |
+| Monitoring Setup | [`docs/MONITORING_SETUP.md`](observability/MONITORING_SETUP.md) |
 | Runbooks | [`RUNBOOKS.md`](RUNBOOKS.md) |
-| Kubernetes | [`k8s/README.md`](k8s/README.md) |
-| Terraform (AWS) | [`terraform/README.md`](terraform/README.md) |
+| Kubernetes | [`k8s/README.md`](incident-response/README.md) |
+| Terraform (AWS) | [`terraform/README.md`](incident-response/README.md) |
 
 ---
 
@@ -109,7 +109,7 @@ cd frontend && npm run dev
 | Chatbot | `DEFAULT_LLM_PROVIDER`, `GROQ_API_KEY`, `GEMINI_API_KEY`, `CHROMA_PERSIST_DIR` |
 | Frontend | `NEXT_PUBLIC_BACKEND_URL`, `NEXT_PUBLIC_CHATBOT_URL` |
 
-Complete reference: [`CONFIGURATION.md`](CONFIGURATION.md)
+Complete reference: [`CONFIGURATION.md`](../developer-guide/CONFIGURATION.md)
 
 ---
 

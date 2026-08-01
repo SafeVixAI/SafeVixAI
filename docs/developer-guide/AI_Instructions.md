@@ -335,8 +335,8 @@ Only activates in production (`npm run build && npm start`), not in dev mode.
 
 ## Related
 
-- [TESTING.md](../TESTING.md) — AI testing standards
-- [BENCHMARKS.md](../BENCHMARKS.md) — Benchmarking methodology
-- [AGENTS.md](../AGENTS.md) — Agent configuration and tool definitions
-- [docs/MEMORY.md](MEMORY.md) — Conversation memory architecture
-- [docs/RAG.md](RAG.md) — Vector search and retrieval
+- [TESTING.md](TESTING.md) — AI testing standards
+- [BENCHMARKS.md](../compliance-and-reports/BENCHMARKS.md) — Benchmarking methodology
+- [AGENTS.md](../../AGENTS.md) — Agent configuration and tool definitions
+- [docs/MEMORY.md](../architecture/MEMORY.md) — Conversation memory architecture
+- [docs/RAG.md](../architecture/RAG.md) — Vector search and retrieval

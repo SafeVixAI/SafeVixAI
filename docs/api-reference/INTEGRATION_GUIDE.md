@@ -2,7 +2,7 @@
 
 > **Version:** 1.0  
 > **Last updated:** 2026-07-26  
-> **Cross-references:** [API.md](./API.md), [SDK_GUIDE.md](./SDK_GUIDE.md), [AUTHENTICATION.md](./AUTHENTICATION.md)
+> **Cross-references:** [API.md](API.md), [SDK_GUIDE.md](SDK_GUIDE.md), [AUTHENTICATION.md](../architecture/AUTHENTICATION.md)
 
 ---
 
@@ -75,7 +75,7 @@ X-API-Key: sk-safevixai-xxxxxxxxxxxx
 
 ## REST API Endpoints
 
-See [API.md](./API.md) for the complete reference. Key groups:
+See [API.md](API.md) for the complete reference. Key groups:
 
 | Area | Base Path |
 |------|-----------|
@@ -175,7 +175,7 @@ Standard error response format:
 
 HTTP status codes: 200 OK, 201 Created, 400 Bad Request, 401 Unauthorized, 403 Forbidden, 404 Not Found, 409 Conflict, 422 Unprocessable Entity, 429 Too Many Requests, 500 Internal Server Error.
 
-See [ERROR_CODES.md](./ERROR_CODES.md) for the complete error code reference.
+See [ERROR_CODES.md](ERROR_CODES.md) for the complete error code reference.
 
 ---
 
@@ -228,7 +228,7 @@ A wildcard `*` in production raises a `RuntimeError`.
 
 ## Webhooks
 
-See [WEBHOOKS.md](./WEBHOOKS.md) for the complete webhook reference.
+See [WEBHOOKS.md](WEBHOOKS.md) for the complete webhook reference.
 
 Available events: `sos.activated`, `report.submitted`, `issue.resolved`, `user.registered`, `tracking.started`, `tracking.ended`.
 

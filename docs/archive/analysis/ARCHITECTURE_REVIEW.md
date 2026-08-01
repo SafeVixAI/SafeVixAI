@@ -1,6 +1,6 @@
 # SafeVixAI — Architecture Review (Updated 2026-05-26)
 
-> **SNAPSHOT**: This document reflects the state as of 2026-05-26. For current state see [AGENTS.md](../../AGENTS.md).
+> **SNAPSHOT**: This document reflects the state as of 2026-05-26. For current state see [AGENTS.md](../../../AGENTS.md).
 
 > Verified against actual codebase. Corrections to prior audit noted.
 

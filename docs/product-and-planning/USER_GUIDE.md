@@ -2,7 +2,7 @@
 
 > **Version:** 1.0  
 > **Last updated:** 2026-07-26  
-> **Cross-references:** [Features.md](./Features.md), [FAQ.md](../FAQ.md)
+> **Cross-references:** [Features.md](Features.md), [FAQ.md](FAQ.md)
 
 ---
 
@@ -179,13 +179,13 @@ The Command Center is for municipal authorities, police, and emergency services.
 - **Analytics** are opt-in (Settings → Share anonymous usage data)
 - **Your data, your control**: Export or delete at any time
 
-See [PRIVACY.md](./PRIVACY.md) for complete privacy policy.
+See [PRIVACY.md](../compliance-and-reports/PRIVACY.md) for complete privacy policy.
 
 ---
 
 ## Getting Help
 
 - In-app help: Use the chatbot with "help"
-- [FAQ.md](../FAQ.md) — Frequently asked questions
+- [FAQ.md](FAQ.md) — Frequently asked questions
 - [GitHub Issues](https://github.com/SafeVixAI/SafeVixAI/issues) — Bug reports and feature requests
-- [SUPPORT.md](../SUPPORT.md) — All support channels
+- [SUPPORT.md](../../SUPPORT.md) — All support channels

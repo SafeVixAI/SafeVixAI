@@ -98,8 +98,8 @@ flowchart LR
 | Area | Documentation |
 |------|---------------|
 | Testing Policy | [`TESTING_POLICY.md`](TESTING_POLICY.md) |
-| Testing Policy (detailed) | [`docs/TESTING_POLICY.md`](docs/TESTING_POLICY.md) |
-| Code Review Guide | [`docs/CODE_REVIEW_GUIDE.md`](docs/CODE_REVIEW_GUIDE.md) |
+| Testing Policy (detailed) | [`docs/TESTING_POLICY.md`](TESTING_POLICY.md) |
+| Code Review Guide | [`docs/CODE_REVIEW_GUIDE.md`](CODE_REVIEW_GUIDE.md) |
 | Style Guide | [`STYLE_GUIDE.md`](STYLE_GUIDE.md) |
 | CI Workflows | [`.github/workflows/`](.github/workflows/) |
 
@@ -134,6 +134,6 @@ cd frontend && npm test && npm run lint && npx tsc --noEmit
 
 ## Related
 
-- [`CONTRIBUTING.md`](CONTRIBUTING.md) — how to write and run tests
+- [`CONTRIBUTING.md`](Contributing.md) — how to write and run tests
 - [`CI/CD workflows`](.github/workflows/) — automation in CI
 - [`STYLE_GUIDE.md`](STYLE_GUIDE.md) — coding standards

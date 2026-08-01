@@ -51,7 +51,7 @@ Important notes:
 
 ## 2. Backend env values and config
 
-Target file: [backend/.env.example](C:/Projects/IITM/SafeVixAI/backend/.env.example) -> copy to `backend/.env`
+Target file: [backend/.env.example](../../backend/.env.example) -> copy to `backend/.env`
 
 | Item | Source | Local save path | Env variable name | Status | Priority |
 |---|---|---|---|---|---|
@@ -97,7 +97,7 @@ Target file: [backend/.env.example](C:/Projects/IITM/SafeVixAI/backend/.env.exam
 
 ## 3. Frontend env values and config
 
-Target file: [frontend/.env.example](C:/Projects/IITM/SafeVixAI/frontend/.env.example) -> copy to `frontend/.env`
+Target file: [frontend/.env.example](../../backend/.env.example) -> copy to `frontend/.env`
 
 | Item | Source | Local save path | Env variable name | Status | Priority |
 |---|---|---|---|---|---|
@@ -153,16 +153,16 @@ Target file: `chatbot_service/.env`
 
 | Item | Source | Local save path | Env variable name | Status | Priority |
 |---|---|---|---|---|---|
-| MapLibre GL JS | https://maplibre.org and npm | [frontend/package.json](C:/Projects/IITM/SafeVixAI/frontend/package.json) | N/A | Wired now | Critical |
-| OpenFreeMap Liberty style | https://tiles.openfreemap.org/styles/liberty | [frontend/components/maps/MapLibreCanvas.tsx](C:/Projects/IITM/SafeVixAI/frontend/components/maps/MapLibreCanvas.tsx) and `frontend/.env` | `NEXT_PUBLIC_MAP_STYLE_URL` | Wired now | Critical |
+| MapLibre GL JS | https://maplibre.org and npm | [frontend/package.json](../../frontend/package.json) | N/A | Wired now | Critical |
+| OpenFreeMap Liberty style | https://tiles.openfreemap.org/styles/liberty | [frontend/components/maps/MapLibreCanvas.tsx](../../frontend/components/maps/MapLibreCanvas.tsx) and `frontend/.env` | `NEXT_PUBLIC_MAP_STYLE_URL` | Wired now | Critical |
 | OpenFreeMap Positron style | https://tiles.openfreemap.org/styles/positron | Future style toggle or theme config | N/A | Future phase | Low |
 | Carto Voyager backup style | https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json | Future fallback in `frontend/components/maps/MapLibreCanvas.tsx` | N/A | Future phase | High |
 | Carto Dark Matter style | Carto CDN | Future dark-mode style toggle | N/A | Future phase | Medium |
-| Photon search geocoder | https://photon.komoot.io/api | [backend/core/config.py](C:/Projects/IITM/SafeVixAI/backend/core/config.py), `backend/.env` | `PHOTON_URL` | Wired now | Critical |
-| Nominatim reverse geocoder | https://nominatim.openstreetmap.org | [backend/core/config.py](C:/Projects/IITM/SafeVixAI/backend/core/config.py), `backend/.env` | `NOMINATIM_URL` | Wired now | Critical |
-| Overpass API | https://overpass-api.de/api/interpreter | [backend/core/config.py](C:/Projects/IITM/SafeVixAI/backend/core/config.py), `backend/.env` | `OVERPASS_URL` | Wired now | Critical |
+| Photon search geocoder | https://photon.komoot.io/api | [backend/core/config.py](../../backend/core/config.py), `backend/.env` | `PHOTON_URL` | Wired now | Critical |
+| Nominatim reverse geocoder | https://nominatim.openstreetmap.org | [backend/core/config.py](../../backend/core/config.py), `backend/.env` | `NOMINATIM_URL` | Wired now | Critical |
+| Overpass API | https://overpass-api.de/api/interpreter | [backend/core/config.py](../../backend/core/config.py), `backend/.env` | `OVERPASS_URL` | Wired now | Critical |
 | Overpass mirror list | `overpass.kumi.systems`, `overpass.private.coffee` | `backend/.env` | `OVERPASS_URLS` | Wired now | High |
-| openrouteservice routing | https://api.openrouteservice.org | [backend/services/routing_service.py](C:/Projects/IITM/SafeVixAI/backend/services/routing_service.py), `backend/.env` | `OPENROUTESERVICE_BASE_URL`, `OPENROUTESERVICE_API_KEY` | Wired now | Critical |
+| openrouteservice routing | https://api.openrouteservice.org | [backend/services/routing_service.py](../../backend/services/routing_service.py), `backend/.env` | `OPENROUTESERVICE_BASE_URL`, `OPENROUTESERVICE_API_KEY` | Wired now | Critical |
 | PMTiles runtime | https://github.com/protomaps/PMTiles | `frontend/public/maps/india.pmtiles` and future PMTiles loader | N/A | Future phase | Medium |
 
 ## 6. Government and public datasets for maps and reporting
@@ -225,8 +225,8 @@ Keep raw training datasets outside git if possible.
 |---|---|---|---|---|---|
 | LocalHashEmbeddingFunction embeddings | `LocalHashEmbeddingFunction (zero-dependency)` on Hugging Face | `chatbot_service/.env` plus `chatbot_service/rag/embeddings.py` | `EMBEDDING_MODEL` | Complete | Critical |
 | multilingual MiniLM embeddings | `hash-based embeddings/paraphrase-multilingual-MiniLM-L12-v2` | Future `chatbot_service/rag/embeddings.py` | `EMBEDDING_MODEL` or upgrade path | Future phase | High |
-| Gemma 4 E2B | `google/gemma-4-E2B-it` | [frontend/lib/edge-ai.ts](C:/Projects/IITM/SafeVixAI/frontend/lib/edge-ai.ts) | N/A | Future phase | Critical |
-| Gemma 4 E4B | `google/gemma-4-E4B-it` | [frontend/lib/edge-ai.ts](C:/Projects/IITM/SafeVixAI/frontend/lib/edge-ai.ts) or future offline vision module | N/A | Future phase | High |
+| Gemma 4 E2B | `google/gemma-4-E2B-it` | [frontend/lib/edge-ai.ts](../../frontend/lib/edge-ai.ts) | N/A | Future phase | Critical |
+| Gemma 4 E4B | `google/gemma-4-E4B-it` | [frontend/lib/edge-ai.ts](../../frontend/lib/edge-ai.ts) or future offline vision module | N/A | Future phase | High |
 | Gemma 4 26B A4B | `google/gemma-4-26B-A4B-it` | Future server-side inference path only | N/A | Future phase | Low |
 | Gemma 4 31B Dense | `google/gemma-4-31B-it` | Future server-side inference path only | N/A | Future phase | Low |
 | Sarvam-30B | AI Kosh / Hugging Face inference | `chatbot_service/providers/sarvam_provider.py` | `HF_TOKEN` | Complete | Critical |

@@ -71,14 +71,14 @@ class AlertService:
                 "  \u2022 Cerebras: https://cloud.cerebras.ai\n"
                 "  \u2022 Gemini: https://aistudio.google.com/app/apikey\n"
                 "  \u2022 OpenRouter: https://openrouter.ai/keys",
-                "CHECK RATE LIMITS \u2014 Free-tier limits may be exhausted:\n"
-                "  \u2022 Groq: 30 RPM / 14400 RPD\n"
-                "  \u2022 Gemini: 15 RPM / 1M tok/day\n"
-                "  \u2022 Wait 1 hour or upgrade to paid tier",
-                "CHECK SERVICE STATUS \u2014 Provider may be down:\n"
-                "  \u2022 Groq: https://status.groq.com\n"
-                "  \u2022 Gemini: https://status.cloud.google.com\n"
-                "  \u2022 Template fallback should ALWAYS work \u2014 if it also failed, "
+                "CHECK RATE LIMITS — Provider quota/rate-limits may be reached:\n"
+                "  • Groq: 30 RPM / 14400 RPD\n"
+                "  • Gemini: 15 RPM / 1M tok/day\n"
+                "  • Check your BYOK API key in Settings / .env or switch to local Ollama",
+                "CHECK SERVICE STATUS — Provider may be down:\n"
+                "  • Groq: https://status.groq.com\n"
+                "  • Gemini: https://status.cloud.google.com\n"
+                "  • Template fallback should ALWAYS work — if it also failed, "
                 "check the application code in providers/base.py",
             ],
         )
@@ -100,13 +100,13 @@ class AlertService:
                 f"Error: {error_msg}"
             ),
             solutions=[
-                f"CHECK API KEY \u2014 Verify {service_name} credentials in .env:",
-                f"CHECK RATE LIMITS \u2014 {service_name} may have daily/monthly limits:"
-                "\n  \u2022 Free-tier APIs typically reset daily at midnight UTC"
-                "\n  \u2022 Consider caching responses to reduce API calls",
-                f"CHECK SERVICE STATUS \u2014 {service_name} may be experiencing downtime:"
-                "\n  \u2022 The tool will return gracefully degraded data"
-                "\n  \u2022 Users will see a 'service temporarily unavailable' message",
+                f"CHECK API KEY — Verify {service_name} credentials in .env:",
+                f"CHECK RATE LIMITS — {service_name} may have daily/monthly limits:"
+                "\n  • Free-tier APIs typically reset daily at midnight UTC"
+                "\n  • Consider caching responses to reduce API calls",
+                f"CHECK SERVICE STATUS — {service_name} may be experiencing downtime:"
+                "\n  • The tool will return gracefully degraded data"
+                "\n  • Users will see a 'service temporarily unavailable' message",
             ],
         )
 
@@ -119,16 +119,16 @@ class AlertService:
                 f"Error: {error_msg}"
             ),
             solutions=[
-                "CHECK SUPABASE STATUS \u2014 https://status.supabase.com\n"
-                "  \u2022 Free-tier projects auto-pause after 7 days of inactivity\n"
-                "  \u2022 Go to https://supabase.com/dashboard \u2192 your project \u2192 Resume",
-                "CHECK CREDENTIALS \u2014 Verify in backend/.env:\n"
-                "  \u2022 SUPABASE_URL should be https://<project-ref>.supabase.co\n"
-                "  \u2022 SUPABASE_KEY should be the anon/public key\n"
-                "  \u2022 SUPABASE_SERVICE_KEY should be the service_role key",
-                "CHECK NETWORK \u2014 The backend server may not have internet access:\n"
-                "  \u2022 Test: curl -s https://api.supabase.co/health\n"
-                "  \u2022 If on Cloud Run, check VPC/firewall settings",
+                "CHECK SUPABASE STATUS — https://status.supabase.com\n"
+                "  • Free-tier projects auto-pause after 7 days of inactivity\n"
+                "  • Go to https://supabase.com/dashboard → your project → Resume",
+                "CHECK CREDENTIALS — Verify in backend/.env:\n"
+                "  • SUPABASE_URL should be https://<project-ref>.supabase.co\n"
+                "  • SUPABASE_KEY should be the anon/public key\n"
+                "  • SUPABASE_SERVICE_KEY should be the service_role key",
+                "CHECK NETWORK — The backend server may not have internet access:\n"
+                "  • Test: curl -s https://api.supabase.co/health\n"
+                "  • If on Cloud Run, check VPC/firewall settings",
             ],
         )
 
@@ -145,10 +145,10 @@ class AlertService:
                 f"DOWN ({len(down)}): {', '.join(down)}\n"
             ),
             solutions=[
-                "IMMEDIATE \u2014 The fallback chain handles this automatically.",
-                "SHORT-TERM \u2014 Check and refresh API keys for downed providers.\n"
+                "IMMEDIATE — The fallback chain handles this automatically.",
+                "SHORT-TERM — Check and refresh BYOK API keys for downed providers.\n"
                 f"  Failed: {', '.join(down)}",
-                "LONG-TERM \u2014 Consider upgrading critical providers to paid tiers.",
+                "LONG-TERM — Use multiple BYOK keys or local Ollama for zero-limit inference.",
             ],
         )
 
@@ -170,15 +170,15 @@ class AlertService:
                 f"Error: {error_message[:200]}"
             ),
             solutions=[
-                f"CHECK {provider.upper()} STATUS \u2014 The provider may be down or rate-limited:\n"
-                f"  \u2022 Verify API key is valid and has remaining quota"
-                f"  \u2022 Check provider status page for outages",
-                "WAIT FOR AUTOMATIC RECOVERY \u2014 Circuit breakers auto-reset:\n"
-                f"  \u2022 This provider will be re-enabled after {duration_min} minutes"
-                "  \u2022 The fallback chain continues serving requests",
-                "CONSIDER PROVIDER REPLACEMENT \u2014 If this happens frequently:\n"
-                "  \u2022 Update .env to use a different primary provider"
-                "  \u2022 Consider upgrading to paid tier for higher rate limits",
+                f"CHECK {provider.upper()} STATUS — The provider may be down or rate-limited:\n"
+                f"  • Verify API key is valid and has remaining quota"
+                f"  • Check provider status page for outages",
+                "WAIT FOR AUTOMATIC RECOVERY — Circuit breakers auto-reset:\n"
+                f"  • This provider will be re-enabled after {duration_min} minutes"
+                "  • The fallback chain continues serving requests",
+                "CONSIDER PROVIDER REPLACEMENT — If this happens frequently:\n"
+                "  • Update .env or frontend Settings with a fresh BYOK provider key"
+                "  • Or enable local Ollama provider for unlimited local inference",
             ],
         )
 
@@ -267,3 +267,8 @@ def get_alert_service() -> AlertService:
     if _instance is None:
         _instance = AlertService()
     return _instance
+
+
+# Backward-compatibility alias
+send_alert = get_alert_service
+

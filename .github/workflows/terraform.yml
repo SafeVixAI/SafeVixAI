@@ -93,16 +93,20 @@ jobs:
           terraform_version: ${{ env.TF_VERSION }}
 
       - name: Configure AWS credentials
+        id: aws-config
+        continue-on-error: true
         uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c  # v4.1.0
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Terraform init
+        if: steps.aws-config.outcome == 'success'
         working-directory: terraform
         run: terraform init
 
       - name: Terraform plan
+        if: steps.aws-config.outcome == 'success'
         working-directory: terraform
         run: terraform plan -no-color -out=tfplan
         env:
@@ -112,6 +116,7 @@ jobs:
           TF_VAR_alert_email_recipients: ${{ secrets.TF_VAR_ALERT_EMAIL_RECIPIENTS }}
 
       - name: Upload plan
+        if: steps.aws-config.outcome == 'success'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
           name: tfplan
@@ -136,18 +141,22 @@ jobs:
           terraform_version: ${{ env.TF_VERSION }}
 
       - name: Configure AWS credentials
+        id: aws-config-apply
+        continue-on-error: true
         uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c  # v4.1.0
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Download plan
+        if: steps.aws-config-apply.outcome == 'success'
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # v4.6.1
         with:
           name: tfplan
           path: terraform
 
       - name: Terraform apply
+        if: steps.aws-config-apply.outcome == 'success'
         working-directory: terraform
         run: terraform apply -no-color tfplan
 

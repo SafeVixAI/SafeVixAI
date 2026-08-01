@@ -104,7 +104,7 @@ async def test_provider(
         return {"status": "error", "message": "Only HTTPS endpoints are allowed for custom providers"}
     
     # Explicit whitelist to prevent SSRF (fixes CodeQL alert)
-    ALLOWED_DOMAINS = {
+    _allowed_domains = {
         "api.openai.com",
         "api.anthropic.com",
         "generativelanguage.googleapis.com",
@@ -118,7 +118,7 @@ async def test_provider(
     parsed = urllib.parse.urlparse(base_url)
     hostname = parsed.hostname or ""
     
-    if hostname not in ALLOWED_DOMAINS:
+    if hostname not in _allowed_domains:
         return {"status": "error", "message": f"Domain '{hostname}' is not in the allowed providers whitelist."}
 
     headers = {

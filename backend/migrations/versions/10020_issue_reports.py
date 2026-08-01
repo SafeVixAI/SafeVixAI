@@ -16,7 +16,7 @@ from alembic import op
 from sqlalchemy.dialects import postgresql
 
 revision: str = '10020'
-down_revision: str | None = '10019'
+down_revision: str | None = '10019_add_retry_on_failure'
 branch_labels: str | None = None
 depends_on: str | None = None
 

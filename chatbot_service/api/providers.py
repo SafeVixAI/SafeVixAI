@@ -103,17 +103,23 @@ async def test_provider(
     if not base_url.startswith("https://"):
         return {"status": "error", "message": "Only HTTPS endpoints are allowed for custom providers"}
     
-    import socket
-    import ipaddress
+    # Explicit whitelist to prevent SSRF (fixes CodeQL alert)
+    ALLOWED_DOMAINS = {
+        "api.openai.com",
+        "api.anthropic.com",
+        "generativelanguage.googleapis.com",
+        "api.groq.com",
+        "api.mistral.ai",
+        "api.together.xyz",
+        "api.x.ai",
+        "api.deepseek.com"
+    }
+
     parsed = urllib.parse.urlparse(base_url)
     hostname = parsed.hostname or ""
-    try:
-        ip = socket.gethostbyname(hostname)
-        ip_obj = ipaddress.ip_address(ip)
-        if ip_obj.is_private or ip_obj.is_loopback or ip_obj.is_link_local or ip_obj.is_reserved:
-            return {"status": "error", "message": "Internal network endpoints are not allowed"}
-    except socket.error:
-        return {"status": "error", "message": "Invalid hostname"}
+    
+    if hostname not in ALLOWED_DOMAINS:
+        return {"status": "error", "message": f"Domain '{hostname}' is not in the allowed providers whitelist."}
 
     headers = {
         "Authorization": f"Bearer {api_key}",
@@ -127,7 +133,6 @@ async def test_provider(
 
     try:
         async with httpx.AsyncClient(timeout=10.0) as client:
-            # codeql[py/full-ssrf] Assessed: URL hostname is resolved and verified against private IP ranges above to prevent SSRF.
             resp = await client.post(base_url, headers=headers, json=test_payload)
             if resp.status_code == 200:
                 return {"status": "ok", "message": "Connection successful", "provider": provider_name}

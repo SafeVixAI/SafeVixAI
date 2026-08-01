@@ -1,9 +1,12 @@
 name: Benchmark Regression
 
 on:
-  issue_comment:
-    types: [created]
   workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'PR Number to benchmark'
+        required: true
+        type: string
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -16,15 +19,15 @@ permissions:
 
 jobs:
   benchmark:
-    if: github.event_name == 'issue_comment' && contains(github.event.comment.body, '/benchmark')
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
     steps:
       - name: Validate PR context
         env:
-          ISSUE_NUMBER: ${{ github.event.issue.number }}
-          COMMENT_USER: ${{ github.event.comment.user.login }}
+          ISSUE_NUMBER: ${{ inputs.pr_number }}
+          COMMENT_USER: ${{ github.actor }}
           GH_TOKEN: ${{ github.token }}
         run: |
           if [ -z "$ISSUE_NUMBER" ]; then
@@ -41,7 +44,7 @@ jobs:
 
       - name: Checkout PR
         env:
-          PR_REF: ${{ github.event_name == 'issue_comment' && format('refs/pull/{0}/head', github.event.issue.number) || github.sha }}
+          PR_REF: ${{ format('refs/pull/{0}/head', inputs.pr_number) }}
         run: |
           git init
           git remote add origin "https://github.com/${{ github.repository }}.git"
@@ -108,13 +111,13 @@ jobs:
               '| Backend Import | ${{ steps.backend-import.outputs.duration }} ms |',
               '| Frontend Tests | ${{ steps.frontend-tests.outputs.duration }} ms |',
               '',
-              '> Triggered by `/benchmark` on PR #${{ github.event.issue.number }}',
+              '> Triggered by `${{ github.actor }}` on PR #${{ inputs.pr_number }}',
               '> Commit: ${{ github.sha }}',
             ];
             const body = lines.join('\n');
             try {
               await github.rest.issues.createComment({
-                issue_number: context.issue.number,
+                issue_number: parseInt('${{ inputs.pr_number }}', 10),
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 body: body,

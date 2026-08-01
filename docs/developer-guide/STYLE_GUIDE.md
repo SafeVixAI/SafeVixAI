@@ -18,13 +18,13 @@ flowchart TB
     PY --> PY_LINT{Ruff linter}
     PY --> PY_TYPE{Type annotations}
     PY_TYPE -->|Public func| TA[Required]
-    PY_TYPE -->|Python 3.11+| UNION["`str | None` over Optional[str]"]
+    PY_TYPE -->|Python 3.11+| UNION["str or None over Optional"]
 
     TS --> TS_FMT{Formatter}
     TS_FMT -->|ESLint + Prettier| PRT[Single quotes, semicolons]
     TS --> TS_REACT{Component?}
-    TS_REACT -->|Interactive| CLIENT["`'use client'` directive"]
-    TS_REACT -->|Props| IFACE["`interface` over `type`"]
+    TS_REACT -->|Interactive| CLIENT["'use client' directive"]
+    TS_REACT -->|Props| IFACE["interface over type"]
 
     PY --> IMPORT{Import Order}
     IMPORT --> STDLIB[stdlib → third-party → local]
@@ -45,8 +45,8 @@ flowchart LR
     end
 
     subgraph Local["Local"]
-        L1["`from core.config import Settings`"]
-        L2["`from models import User`"]
+        L1["from core.config import Settings"]
+        L2["from models import User"]
     end
 
     StdLib --> ThirdParty --> Local

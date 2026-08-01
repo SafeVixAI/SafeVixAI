@@ -113,7 +113,7 @@ nav:
       - Testing: developer-guide/TESTING.md
       - Testing Policy: developer-guide/TESTING_POLICY.md
       - Versioning: developer-guide/VERSIONING.md
-      - Contributing: developer-guide/CONTRIBUTING.md
+      - Contributing: developer-guide/Contributing.md
       - Contributors Guide: developer-guide/CONTRIBUTORS_GUIDE.md
       - New Contributor Guide: developer-guide/NEW_CONTRIBUTOR_GUIDE.md
       - Chatbot:
@@ -123,16 +123,16 @@ nav:
           - Personas: developer-guide/chatbot/personas.md
           - Team Setup: developer-guide/chatbot/team_setup.md
   - Architecture:
-      - System Architecture: architecture/ARCHITECTURE.md
+      - System Architecture: architecture/Architecture.md
       - System Design: architecture/SYSTEM_DESIGN.md
       - Design Specs: architecture/DESIGN.md
       - Offline Architecture: architecture/Offline_Architecture.md
       - Database Schema: architecture/Database.md
-      - AI Agents: architecture/AGENTS.md
+      - AI Agents: developer-guide/Agent.md
       - AI System: architecture/AI.md
       - RAG: architecture/RAG.md
       - Memory: architecture/MEMORY.md
-      - Security: architecture/SECURITY.md
+      - Security: architecture/Security.md
       - Threat Model: architecture/THREAT_MODEL.md
       - Authentication: architecture/AUTHENTICATION.md
       - Authorization: architecture/AUTHORIZATION.md
@@ -158,7 +158,7 @@ nav:
           - Setup: sre/observability/MONITORING_SETUP.md
           - Telemetry: sre/observability/TELEMETRY.md
   - Product & Planning:
-      - Roadmap: product-and-planning/ROADMAP.md
+      - Roadmap: product-and-planning/Roadmap.md
       - PRD: product-and-planning/PRD.md
       - Features: product-and-planning/Features.md
       - UI/UX: product-and-planning/UIUX.md
@@ -169,6 +169,15 @@ nav:
       - Benchmarks: compliance-and-reports/BENCHMARKS.md
       - Completion Status: compliance-and-reports/COMPLETION_STATUS.md
       - Release Candidate: compliance-and-reports/RELEASE_CANDIDATE_READINESS_REPORT.md
+  - Certification Reports:
+      - Open Source Readiness: reports/OPEN_SOURCE_READINESS_REPORT.md
+      - Documentation Coverage: reports/DOCUMENTATION_COVERAGE_REPORT.md
+      - Repository Health: reports/REPOSITORY_HEALTH_REPORT.md
+      - Update System: reports/UPDATE_SYSTEM_REPORT.md
+      - Issue Reporting: reports/ISSUE_REPORTING_REPORT.md
+      - Notification System: reports/NOTIFICATION_SYSTEM_REPORT.md
+      - Final Integration: reports/FINAL_INTEGRATION_REPORT.md
+      - Enterprise Certification: reports/ENTERPRISE_OPEN_SOURCE_CERTIFICATION.md
   - Archive:
-      - Legacy Audits: archive/audit/SECURITY_AUDIT.md
-  - Glossary: glossary.md
+      - Legacy Audits: archive/analysis/SECURITY_AUDIT.md
+  - Glossary: developer-guide/glossary.md

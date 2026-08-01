@@ -7,7 +7,7 @@
 ```mermaid
 flowchart TD
     User[User Message] --> SC[SafetyChecker<br/>Harm & PII Detection]
-    SC -->|Blocked| Block[Return Warning<br/>"Call 112 immediately"]
+    SC -->|Blocked| Block["Return Warning<br/>Call 112 immediately"]
     SC -->|Passed| ID[IntentDetector<br/>9 Intent Classes]
 
     ID --> INTENT{Intent Type}

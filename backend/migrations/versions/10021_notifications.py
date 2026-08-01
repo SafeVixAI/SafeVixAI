@@ -21,31 +21,32 @@ depends_on: str | None = None
 
 
 def upgrade() -> None:
-    # ── notification_channel enum ──
-    sa.Enum(
-        'in_app', 'email', 'sms', 'push', 'slack', 'discord', 'webhook', 'teams',
-        name='notificationchannel',
-    ).create(op.get_bind(), checkfirst=True)
+    # ── safely create enums ──
+    op.execute("""
+        DO $$ BEGIN
+            CREATE TYPE notificationchannel AS ENUM ('in_app', 'email', 'sms', 'push', 'slack', 'discord', 'webhook', 'teams');
+        EXCEPTION WHEN duplicate_object THEN null; END $$;
+    """)
+    op.execute("""
+        DO $$ BEGIN
+            CREATE TYPE notificationpriority AS ENUM ('low', 'normal', 'high', 'critical');
+        EXCEPTION WHEN duplicate_object THEN null; END $$;
+    """)
+    op.execute("""
+        DO $$ BEGIN
+            CREATE TYPE notificationcategory AS ENUM ('system_health', 'ai', 'security', 'performance', 'update', 'maintenance', 'incident', 'deployment', 'usage', 'billing', 'issue', 'sos', 'emergency', 'challan', 'general');
+        EXCEPTION WHEN duplicate_object THEN null; END $$;
+    """)
+    op.execute("""
+        DO $$ BEGIN
+            CREATE TYPE notificationstatus AS ENUM ('pending', 'sent', 'delivered', 'read', 'failed', 'cancelled');
+        EXCEPTION WHEN duplicate_object THEN null; END $$;
+    """)
 
-    # ── notification_priority enum ──
-    sa.Enum(
-        'low', 'normal', 'high', 'critical',
-        name='notificationpriority',
-    ).create(op.get_bind(), checkfirst=True)
-
-    # ── notification_category enum ──
-    sa.Enum(
-        'system_health', 'ai', 'security', 'performance', 'update',
-        'maintenance', 'incident', 'deployment', 'usage', 'billing',
-        'issue', 'sos', 'emergency', 'challan', 'general',
-        name='notificationcategory',
-    ).create(op.get_bind(), checkfirst=True)
-
-    # ── notification_status enum ──
-    sa.Enum(
-        'pending', 'sent', 'delivered', 'read', 'failed', 'cancelled',
-        name='notificationstatus',
-    ).create(op.get_bind(), checkfirst=True)
+    chan_enum = sa.Enum('in_app', 'email', 'sms', 'push', 'slack', 'discord', 'webhook', 'teams', name='notificationchannel', create_type=False)
+    cat_enum = sa.Enum('system_health', 'ai', 'security', 'performance', 'update', 'maintenance', 'incident', 'deployment', 'usage', 'billing', 'issue', 'sos', 'emergency', 'challan', 'general', name='notificationcategory', create_type=False)
+    prio_enum = sa.Enum('low', 'normal', 'high', 'critical', name='notificationpriority', create_type=False)
+    stat_enum = sa.Enum('pending', 'sent', 'delivered', 'read', 'failed', 'cancelled', name='notificationstatus', create_type=False)
 
     # ── notifications ──
     op.create_table(
@@ -53,10 +54,10 @@ def upgrade() -> None:
         sa.Column('id', sa.Uuid(), nullable=False),
         sa.Column('user_id', sa.String(255), nullable=True, index=True),
         sa.Column('org_id', sa.String(36), nullable=True, index=True),
-        sa.Column('channel', sa.Enum('in_app', 'email', 'sms', 'push', 'slack', 'discord', 'webhook', 'teams', name='notificationchannel'), nullable=False),
-        sa.Column('category', sa.Enum('system_health', 'ai', 'security', 'performance', 'update', 'maintenance', 'incident', 'deployment', 'usage', 'billing', 'issue', 'sos', 'emergency', 'challan', 'general', name='notificationcategory'), nullable=False),
-        sa.Column('priority', sa.Enum('low', 'normal', 'high', 'critical', name='notificationpriority'), nullable=False, server_default='normal'),
-        sa.Column('status', sa.Enum('pending', 'sent', 'delivered', 'read', 'failed', 'cancelled', name='notificationstatus'), nullable=False, server_default='pending'),
+        sa.Column('channel', chan_enum, nullable=False),
+        sa.Column('category', cat_enum, nullable=False),
+        sa.Column('priority', prio_enum, nullable=False, server_default='normal'),
+        sa.Column('status', stat_enum, nullable=False, server_default='pending'),
         sa.Column('title', sa.String(512), nullable=False),
         sa.Column('body', sa.Text(), nullable=True),
         sa.Column('metadata', postgresql.JSON(), nullable=True),
@@ -115,8 +116,8 @@ def upgrade() -> None:
         'notification_templates',
         sa.Column('id', sa.Uuid(), nullable=False),
         sa.Column('name', sa.String(128), nullable=False, index=True, unique=True),
-        sa.Column('channel', sa.Enum('in_app', 'email', 'sms', 'push', 'slack', 'discord', 'webhook', 'teams', name='notificationchannel'), nullable=False),
-        sa.Column('category', sa.Enum('system_health', 'ai', 'security', 'performance', 'update', 'maintenance', 'incident', 'deployment', 'usage', 'billing', 'issue', 'sos', 'emergency', 'challan', 'general', name='notificationcategory'), nullable=False),
+        sa.Column('channel', chan_enum, nullable=False),
+        sa.Column('category', cat_enum, nullable=False),
         sa.Column('locale', sa.String(10), nullable=False, server_default=sa.text("'en'")),
         sa.Column('subject_template', sa.Text(), nullable=True),
         sa.Column('body_template', sa.Text(), nullable=False),
@@ -169,8 +170,8 @@ def upgrade() -> None:
         sa.Column('id', sa.Uuid(), nullable=False),
         sa.Column('notification_id', sa.Uuid(), nullable=False, index=True),
         sa.Column('event_type', sa.String(64), nullable=False),
-        sa.Column('channel', sa.Enum('in_app', 'email', 'sms', 'push', 'slack', 'discord', 'webhook', 'teams', name='notificationchannel'), nullable=False),
-        sa.Column('status', sa.Enum('pending', 'sent', 'delivered', 'read', 'failed', 'cancelled', name='notificationstatus'), nullable=False),
+        sa.Column('channel', chan_enum, nullable=False),
+        sa.Column('status', stat_enum, nullable=False),
         sa.Column('error', sa.Text(), nullable=True),
         sa.Column('duration_ms', sa.Float(), nullable=True),
         sa.Column('metadata', postgresql.JSON(), nullable=True),

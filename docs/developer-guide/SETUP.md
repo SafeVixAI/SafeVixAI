@@ -75,32 +75,32 @@ flowchart TD
 
 ```mermaid
 gantt
-    title SafeVixAI Setup Timeline
-    dateFormat  mm
-    axisFormat %M min
+    title SafeVixAI Estimated Setup Timeline
+    dateFormat  HH:mm
+    axisFormat  %M min
 
     section Prerequisites
-    Git Clone                 :0, 2m
-    Check Versions            :2m, 1m
+    Git Clone                 :00:00, 00:02
+    Check Versions            :00:02, 00:03
 
     section Backend
-    Create Virtual Env        :3m, 2m
-    pip install (3-5 min)      :5m, 10m
-    Configure .env             :15m, 3m
-    Database Migrations        :18m, 3m
+    Create Virtual Env        :00:03, 00:05
+    pip install dependencies  :00:05, 00:15
+    Configure env             :00:15, 00:18
+    Database Migrations       :00:18, 00:21
 
     section Chatbot Service
-    Create Virtual Env        :3m, 2m
-    pip install (incl torch)   :5m, 15m
-    Configure .env             :20m, 3m
+    Create Chatbot venv       :00:03, 00:05
+    pip install ML libs       :00:05, 00:20
+    Configure Chatbot env     :00:20, 00:23
 
     section Frontend
-    npm ci (2-4 min)           :3m, 5m
-    Configure .env             :8m, 2m
+    npm ci dependencies       :00:03, 00:08
+    Configure Frontend env    :00:08, 00:10
 
     section Verification
-    Run all 3 services        :25m, 3m
-    Smoke tests                :28m, 2m
+    Run all 3 services        :00:25, 00:28
+    Smoke tests               :00:28, 00:30
 ```
 
 ---

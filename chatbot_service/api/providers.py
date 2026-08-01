@@ -117,9 +117,23 @@ async def test_provider(
 
     parsed = urllib.parse.urlparse(base_url)
     hostname = parsed.hostname or ""
+    scheme = parsed.scheme or ""
+
+    if scheme not in {"http", "https"}:
+        return {"status": "error", "message": "Invalid URL scheme."}
     
     if hostname not in _allowed_domains:
         return {"status": "error", "message": f"Domain '{hostname}' is not in the allowed providers whitelist."}
+
+    # Reconstruct the URL to prevent SSRF parsing discrepancies between urllib and httpx
+    safe_base_url = urllib.parse.urlunparse((
+        scheme,
+        hostname,
+        parsed.path,
+        parsed.params,
+        parsed.query,
+        parsed.fragment
+    ))
 
     headers = {
         "Authorization": f"Bearer {api_key}",
@@ -133,7 +147,7 @@ async def test_provider(
 
     try:
         async with httpx.AsyncClient(timeout=10.0) as client:
-            resp = await client.post(base_url, headers=headers, json=test_payload)
+            resp = await client.post(safe_base_url, headers=headers, json=test_payload)
             if resp.status_code == 200:
                 return {"status": "ok", "message": "Connection successful", "provider": provider_name}
             return {"status": "error", "message": f"HTTP {resp.status_code}: Error testing provider"}

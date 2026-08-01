@@ -4,7 +4,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { Select } from '../ui/Select';
+import { Select } from '../ui/select';
 
 describe('Select', function() {
   const options = [

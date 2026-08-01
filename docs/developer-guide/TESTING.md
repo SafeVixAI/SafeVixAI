@@ -53,8 +53,8 @@ flowchart LR
     subgraph BE_STEPS["Backend CI"]
         BE1[pip install]
         BE2[ruff lint + fix]
-        BE3[pytest --cov=100%]
-        BE4[mutation (info)]
+        BE3["pytest --cov=100%"]
+        BE4["mutation (info)"]
     end
 
     CB --> CB_STEPS
@@ -74,11 +74,11 @@ flowchart LR
 
     CI_OTHER --> OTHER_STEPS
     subgraph OTHER_STEPS["Other CI"]
-        O1[e2e.yml — Playwright Full Stack]
+        O1["e2e.yml — Playwright Full Stack"]
         O2[migration-safety.yml]
-        O3[lighthouse.yml — LHCI]
-        O4[codeql.yml — CodeQL]
-        O5[security.yml — Gitleaks]
+        O3["lighthouse.yml — LHCI"]
+        O4["codeql.yml — CodeQL"]
+        O5["security.yml — Gitleaks"]
     end
 
     BE_STEPS --> RESULT{All Pass?}

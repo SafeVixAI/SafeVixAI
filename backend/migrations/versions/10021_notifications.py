@@ -43,10 +43,10 @@ def upgrade() -> None:
         EXCEPTION WHEN duplicate_object THEN null; END $$;
     """)
 
-    chan_enum = sa.Enum('in_app', 'email', 'sms', 'push', 'slack', 'discord', 'webhook', 'teams', name='notificationchannel', create_type=False)
-    cat_enum = sa.Enum('system_health', 'ai', 'security', 'performance', 'update', 'maintenance', 'incident', 'deployment', 'usage', 'billing', 'issue', 'sos', 'emergency', 'challan', 'general', name='notificationcategory', create_type=False)
-    prio_enum = sa.Enum('low', 'normal', 'high', 'critical', name='notificationpriority', create_type=False)
-    stat_enum = sa.Enum('pending', 'sent', 'delivered', 'read', 'failed', 'cancelled', name='notificationstatus', create_type=False)
+    chan_enum = postgresql.ENUM('in_app', 'email', 'sms', 'push', 'slack', 'discord', 'webhook', 'teams', name='notificationchannel', create_type=False)
+    cat_enum = postgresql.ENUM('system_health', 'ai', 'security', 'performance', 'update', 'maintenance', 'incident', 'deployment', 'usage', 'billing', 'issue', 'sos', 'emergency', 'challan', 'general', name='notificationcategory', create_type=False)
+    prio_enum = postgresql.ENUM('low', 'normal', 'high', 'critical', name='notificationpriority', create_type=False)
+    stat_enum = postgresql.ENUM('pending', 'sent', 'delivered', 'read', 'failed', 'cancelled', name='notificationstatus', create_type=False)
 
     # ── notifications ──
     op.create_table(

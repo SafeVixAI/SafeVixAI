@@ -55,13 +55,11 @@ jobs:
         run: npm install -g @mermaid-js/mermaid-cli
       - name: Validate Mermaid Diagrams
         run: |
-          # Finds all markdown files and attempts to parse mermaid blocks
-          # mmdc requires input and output. We can test parse by running mmdc on md files.
-          # We'll use a simple shell script just for CI to loop over files and check if they compile.
-          find . -name "*.md" -type f | while read file; do
+          echo '{"args": ["--no-sandbox", "--disable-setuid-sandbox"]}' > puppeteer-config.json
+          find . -name "*.md" -type f -not -path "*/node_modules/*" -not -path "*/.next/*" | while read file; do
             if grep -q "\`\`\`mermaid" "$file"; then
               echo "Validating mermaid in $file"
-              mmdc -i "$file" -o "${file%.md}.svg" || exit 1
+              mmdc -p puppeteer-config.json -i "$file" -o "${file%.md}.svg" || exit 1
               rm "${file%.md}.svg"
             fi
           done

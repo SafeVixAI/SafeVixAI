@@ -1,0 +1,15 @@
+<!-- Custom feedback / analytics integration for SafeVixAI docs -->
+<script>
+  /* Setup custom feedback rating handler */
+  var feedback = document.forms.feedback;
+  if (typeof feedback !== "undefined") {
+    feedback.addEventListener("submit", function(ev) {
+      ev.preventDefault();
+      var page = document.location.pathname;
+      var data = ev.submitter ? ev.submitter.getAttribute("data-md-value") : null;
+      if (typeof ga !== "undefined") {
+        ga("send", "event", "feedback", "rating", page, data);
+      }
+    });
+  }
+</script>

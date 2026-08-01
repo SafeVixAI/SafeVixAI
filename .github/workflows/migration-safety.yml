@@ -76,13 +76,13 @@ jobs:
       - name: Verify no duplicate revision IDs
         working-directory: backend
         run: |
-          DUPES=$(grep -h 'revision\s*=' migrations/versions/*.py 2>/dev/null | sort | uniq -d)
+          DUPES=$(grep -hE '^revision(:.*)?\s*=' migrations/versions/*.py 2>/dev/null | sort | uniq -d)
           if [ -n "$DUPES" ]; then
             echo "DUPLICATE revision IDs:"
             echo "$DUPES"
             exit 1
           fi
-          TOTAL=$(grep -h 'revision\s*=' migrations/versions/*.py 2>/dev/null | wc -l)
+          TOTAL=$(grep -hE '^revision(:.*)?\s*=' migrations/versions/*.py 2>/dev/null | wc -l)
           echo "All $TOTAL revision IDs unique"
 
   notify-failure:

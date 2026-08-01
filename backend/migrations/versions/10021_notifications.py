@@ -25,13 +25,13 @@ def upgrade() -> None:
     sa.Enum(
         'in_app', 'email', 'sms', 'push', 'slack', 'discord', 'webhook', 'teams',
         name='notificationchannel',
-    ).create(op.get_bind())
+    ).create(op.get_bind(), checkfirst=True)
 
     # ── notification_priority enum ──
     sa.Enum(
         'low', 'normal', 'high', 'critical',
         name='notificationpriority',
-    ).create(op.get_bind())
+    ).create(op.get_bind(), checkfirst=True)
 
     # ── notification_category enum ──
     sa.Enum(
@@ -39,13 +39,13 @@ def upgrade() -> None:
         'maintenance', 'incident', 'deployment', 'usage', 'billing',
         'issue', 'sos', 'emergency', 'challan', 'general',
         name='notificationcategory',
-    ).create(op.get_bind())
+    ).create(op.get_bind(), checkfirst=True)
 
     # ── notification_status enum ──
     sa.Enum(
         'pending', 'sent', 'delivered', 'read', 'failed', 'cancelled',
         name='notificationstatus',
-    ).create(op.get_bind())
+    ).create(op.get_bind(), checkfirst=True)
 
     # ── notifications ──
     op.create_table(

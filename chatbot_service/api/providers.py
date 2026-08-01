@@ -103,10 +103,17 @@ async def test_provider(
     if not base_url.startswith("https://"):
         return {"status": "error", "message": "Only HTTPS endpoints are allowed for custom providers"}
     
+    import socket
+    import ipaddress
     parsed = urllib.parse.urlparse(base_url)
     hostname = parsed.hostname or ""
-    if hostname in ("localhost", "127.0.0.1", "0.0.0.0", "169.254.169.254", "::1"):
-        return {"status": "error", "message": "Internal network endpoints are not allowed"}
+    try:
+        ip = socket.gethostbyname(hostname)
+        ip_obj = ipaddress.ip_address(ip)
+        if ip_obj.is_private or ip_obj.is_loopback or ip_obj.is_link_local or ip_obj.is_reserved:
+            return {"status": "error", "message": "Internal network endpoints are not allowed"}
+    except socket.error:
+        return {"status": "error", "message": "Invalid hostname"}
 
     headers = {
         "Authorization": f"Bearer {api_key}",

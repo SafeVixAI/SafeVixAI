@@ -605,7 +605,7 @@ function GuideModal({ activeGuide, guides, completedSteps, toggleStep, scrollPro
                   onClick={() => toggleStep(idx)}
                   aria-pressed={completedSteps.has(idx)}
                   // source is static Guide object, not user input — safe for aria-label context
-                  aria-label={`Step ${idx + 1}: ${stepText.split(/<[^>]*>/).join('').substring(0, 60)}`}
+                  aria-label={`Step ${idx + 1}: ${stepText.replace(/<[^>]+>/g, '').substring(0, 60)}`}
                 >
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center font-black flex-shrink-0 text-xs transition-colors ${
                     completedSteps.has(idx) ? 'bg-brand-light text-white' : 'bg-surface-2 dark:bg-white/10 text-text-3'

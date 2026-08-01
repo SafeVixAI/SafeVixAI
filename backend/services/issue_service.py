@@ -11,7 +11,7 @@ import uuid
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
-from sqlalchemy import and_, func, or_, select, text
+from sqlalchemy import and_, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.config import get_settings
@@ -210,9 +210,9 @@ class IssueService:
             query = query.where(not IssueReport.is_spam)
         if search:
             search_filter = or_(
-                IssueReport.title.ilike(f'%{search}%'),
-                IssueReport.description.ilike(f'%{search}%'),
-                IssueReport.tracking_number.ilike(f'%{search}%'),
+                IssueReport.title.icontains(search),
+                IssueReport.description.icontains(search),
+                IssueReport.tracking_number.icontains(search),
             )
             query = query.where(search_filter)
 

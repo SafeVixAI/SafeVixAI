@@ -245,7 +245,7 @@ export function addToOfflineQueue(item: Omit<OfflineNotification, 'id' | 'create
   const queue = getOfflineQueue();
   queue.push({
     ...item,
-    id: typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${typeof crypto !== 'undefined' ? crypto.getRandomValues(new Uint32Array(1))[0].toString(36) : Math.random().toString(36).slice(2)}`,
+    id: typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${crypto.getRandomValues(new Uint32Array(1))[0].toString(36)}`,
     createdAt: Date.now(),
   });
   try {
@@ -320,7 +320,7 @@ export function useNotificationWebSocket(userId: string | null) {
       setConnected(false);
       const delay = Math.min(1000 * Math.pow(2, attemptRef.current), MAX_RECONNECT_DELAY);
       attemptRef.current++;
-      const secureRandom = typeof crypto !== 'undefined' ? crypto.getRandomValues(new Uint32Array(1))[0] / 4294967295 : Math.random();
+      const secureRandom = crypto.getRandomValues(new Uint32Array(1))[0] / 4294967295;
       const jitter = delay * (0.5 + secureRandom * 0.5);
       reconnectRef.current = setTimeout(connect, jitter);
     };

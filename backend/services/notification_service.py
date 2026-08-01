@@ -289,7 +289,7 @@ class NotificationService:
             notification.status = NotificationStatus.FAILED
             notification.last_error = str(exc)
             notification_failed_total.labels(channel=channel.value, error_type=type(exc).__name__).inc()
-            logger.warning('Notification %s failed on %s: %s', notification.id, channel.value, exc)
+            logger.warning('Notification %s failed on %s: %s', notification.id, channel.value, type(exc).__name__)
         finally:
             elapsed = (datetime.now(UTC) - start).total_seconds() * 1000
             await self._record_event(notification, 'dispatch', channel, notification.status, str(elapsed) if isinstance(elapsed, (int, float)) else None, session)

@@ -13,7 +13,7 @@ import { useHydrated } from '@/lib/use-hydrated';
 // initial bundle for unauthenticated visitors.  This eliminates the flash
 // of dashboard UI that appeared before AuthGuard could redirect to /landing.
 const DashboardContent = dynamic(
-  () => import('../components/dashboard/DashboardContent'),
+  () => import('@/components/dashboard/DashboardContent'),
   {
     ssr: false,
     loading: () => (

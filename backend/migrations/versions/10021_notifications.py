@@ -178,7 +178,7 @@ def upgrade() -> None:
         sa.Column('occurred_at', sa.DateTime(timezone=True), nullable=False, server_default=sa.text('now()')),
         sa.PrimaryKeyConstraint('id'),
     )
-    op.create_index('ix_notification_events_notification_id', 'notification_events', ['notification_id'])
+
     op.create_index('ix_notification_events_occurred_at', 'notification_events', ['occurred_at'])
 
 

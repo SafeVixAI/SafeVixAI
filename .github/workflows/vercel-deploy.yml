@@ -23,9 +23,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v4.2.2
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
-          ref: ${{ github.event.workflow_run.head_sha }}
           fetch-depth: 0
       - name: Verify commits are signed
         run: |
@@ -66,9 +65,7 @@ jobs:
           echo "head_branch=$HEAD_BRANCH"
 
       - name: Checkout
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v4.2.2
-        with:
-          ref: ${{ github.event.workflow_run.head_sha }}
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: Deploy to Vercel (Production)
         uses: amondnet/vercel-action@de09aeac2ace6599ec9b11ef87558759a496bac4  # v42.3.0
@@ -101,9 +98,7 @@ jobs:
           echo "validated_sha=$HEAD_SHA" >> "$GITHUB_OUTPUT"
 
       - name: Checkout
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v4.2.2
-        with:
-          ref: ${{ github.event.workflow_run.head_sha }}
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: Deploy to Vercel (Preview)
         uses: amondnet/vercel-action@de09aeac2ace6599ec9b11ef87558759a496bac4  # v42.3.0

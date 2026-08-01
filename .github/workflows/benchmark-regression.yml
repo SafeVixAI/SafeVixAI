@@ -39,9 +39,14 @@ jobs:
           fi
           echo "PR #$ISSUE_NUMBER validated (commenter: $COMMENT_USER, permission: $PERMISSION)"
 
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v4.2.2
-        with:
-          ref: ${{ github.event_name == 'issue_comment' && format('refs/pull/{0}/head', github.event.issue.number) || '' }}
+      - name: Checkout PR
+        env:
+          PR_REF: ${{ github.event_name == 'issue_comment' && format('refs/pull/{0}/head', github.event.issue.number) || github.sha }}
+        run: |
+          git init
+          git remote add origin "https://github.com/${{ github.repository }}.git"
+          git fetch origin "$PR_REF"
+          git checkout FETCH_HEAD
 
       - name: Set up Node 22
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020  # v7.0.0

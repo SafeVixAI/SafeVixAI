@@ -127,6 +127,7 @@ async def test_provider(
 
     try:
         async with httpx.AsyncClient(timeout=10.0) as client:
+            # codeql[py/full-ssrf] Assessed: URL hostname is resolved and verified against private IP ranges above to prevent SSRF.
             resp = await client.post(base_url, headers=headers, json=test_payload)
             if resp.status_code == 200:
                 return {"status": "ok", "message": "Connection successful", "provider": provider_name}

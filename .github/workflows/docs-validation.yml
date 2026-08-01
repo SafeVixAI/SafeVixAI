@@ -10,12 +10,14 @@ on:
       - '**.md'
       - 'docs/**'
       - 'mkdocs.yml'
+      - '.markdownlint.json'
   pull_request:
     branches: [ "main" ]
     paths:
       - '**.md'
       - 'docs/**'
       - 'mkdocs.yml'
+      - '.markdownlint.json'
 
 jobs:
   validate-markdown:

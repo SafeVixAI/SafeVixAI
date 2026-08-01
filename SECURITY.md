@@ -34,7 +34,7 @@ flowchart TD
 
     subgraph LLM["LLM Security Layer"]
         L1[SafetyChecker<br/>Prompt injection guard]
-        L2[Harmful Output Filter<br/>"Call 112" enforcement]
+        L2["Harmful Output Filter<br/>'Call 112' enforcement"]
         L3[9-Provider Fallback<br/>No single point of failure]
         L4[PII Redaction<br/>Before LLM context]
     end

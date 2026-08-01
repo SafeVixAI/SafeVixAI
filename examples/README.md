@@ -11,7 +11,7 @@ This directory contains ready-to-run examples demonstrating how to use SafeVixAI
 | Example | Description | Files |
 |---------|-------------|-------|
 | [`api-client/`](api-client/) | Python & TypeScript API client classes | `client.py`, `client.ts` |
-| [`emergency/`](../Emergency) | SOS trigger, emergency lookup, offline queue | `emergency.py`, `offline-queue.ts` |
+| [`emergency/`](emergency/) | SOS trigger, emergency lookup, offline queue | `emergency.py`, `offline-queue.ts` |
 | [`challan/`](challan/) | Online + DuckDB-Wasm offline challan calc | `calculate.py`, `offline.ts`, `query.sql` |
 | [`chatbot/`](chatbot/) | Simple, streaming, provider override, tool routing | `examples.py` |
 | [`cookbook/`](cookbook/) | 5 integration recipes + WebSocket tracking | `recipes.py`, `tracking.ts` |

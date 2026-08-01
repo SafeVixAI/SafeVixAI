@@ -74,28 +74,24 @@ jobs:
   test:
     name: Test Suite
     needs: [validate]
-    timeout-minutes: 30
     uses: ./.github/workflows/backend.yml
     secrets: inherit
 
   lint:
     name: Lint & Type Check
     needs: [validate]
-    timeout-minutes: 30
     uses: ./.github/workflows/frontend.yml
     secrets: inherit
 
   sbom:
     name: Generate SBOM
     needs: [validate]
-    timeout-minutes: 30
     uses: ./.github/workflows/security.yml
     secrets: inherit
 
   license-scan:
     name: License Compliance Check
     needs: [validate]
-    timeout-minutes: 30
     uses: ./.github/workflows/license-scan.yml
     secrets: inherit
 
@@ -208,7 +204,7 @@ jobs:
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@d27e3f3d7c64b4bbf8e4abda7ba63b30ab72da38  # v5.4.0
         with:
           python-version: "3.11"
 

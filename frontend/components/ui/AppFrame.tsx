@@ -32,6 +32,7 @@ export function AppFrame({ children }: AppFrameProps) {
   const isDesktopSidebarCollapsed = useAppStore((state) => state.isDesktopSidebarCollapsed);
   const setDesktopSidebarCollapsed = useAppStore((state) => state.setDesktopSidebarCollapsed);
   const isThinSidebarEnabled = useAppStore((state) => state.isThinSidebarEnabled);
+  const isAuthenticated = useAppStore((state) => state.isAuthenticated);
 
   // Define routes that should NOT have the global navigation shell (e.g. auth, public emergency views)
   const NO_NAV_ROUTES = [
@@ -40,10 +41,11 @@ export function AppFrame({ children }: AppFrameProps) {
     '/track', '/landing', '/privacy', '/terms', '/offline'
   ];
   
-  // Check if current path matches or starts with a no-nav route
+  // Check if current path matches or starts with a no-nav route,
+  // or if visiting root '/' while unauthenticated (prevents dashboard flash before AuthGuard redirect)
   const isNoNavRoute = NO_NAV_ROUTES.some(route => 
     pathname === route || pathname.startsWith(`${route}/`)
-  );
+  ) || (pathname === '/' && isAuthenticated === false);
 
   if (isNoNavRoute) {
     return (

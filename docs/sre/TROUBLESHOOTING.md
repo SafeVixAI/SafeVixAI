@@ -70,8 +70,8 @@ flowchart TD
     B -->|No| C[Add to layout.tsx:<br/>import 'maplibre-gl/dist/maplibre-gl.css']
     C --> D[Reload page]
 
-    B -->|Yes| E{Component wrapped in<br/>dynamic({ssr:false})?}
-    E -->|No| F[Use: dynamic(() => import('...'),<br/>{ ssr: false })]
+    B -->|Yes| E{"Component wrapped in<br/>dynamic({ssr:false})?"}
+    E -->|No| F["Use dynamic(() => import('...'),<br/>{ ssr: false })"]
     F --> D
 
     E -->|Yes| G{Tile provider API key set?}

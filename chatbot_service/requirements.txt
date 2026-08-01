@@ -62,6 +62,6 @@ prometheus-client>=0.26.0
 tenacity==9.1.4
 asyncpg==0.31.0
 pgvector==0.5.0
-ragas>=0.5.0
+ragas>=0.4.3
 nest-asyncio==1.6.0
 testcontainers[postgresql]>=4.15.0

@@ -104,6 +104,7 @@ jobs:
           format: 'sarif'
           output: 'trivy-results.sarif'
           severity: 'HIGH,CRITICAL'
+          limit-severities-for-sarif: true
           hide-progress: true
 
       - name: Upload Trivy results

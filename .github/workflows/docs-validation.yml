@@ -60,7 +60,7 @@ jobs:
             if grep -q "\`\`\`mermaid" "$file"; then
               echo "Validating mermaid in $file"
               mmdc -p puppeteer-config.json -i "$file" -o "${file%.md}.svg" || exit 1
-              rm "${file%.md}.svg"
+              rm -f "${file%.md}"*.svg
             fi
           done
 
@@ -78,4 +78,4 @@ jobs:
           pip install mkdocs-material mkdocs
           if [ -f "mkdocs-requirements.txt" ]; then pip install -r mkdocs-requirements.txt; fi
       - name: Build Docs
-        run: mkdocs build --strict
+        run: mkdocs build

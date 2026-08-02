@@ -85,7 +85,8 @@ function _addWarmingInterceptors(axiosInstance: ReturnType<typeof axios.create>)
 
 _addWarmingInterceptors(client);
 
-// S20/F9: Exponential-backoff retry interceptor (up to 3 retries, 1s/2s/4s delays).
+// S20/F9: Exponential-backoff retry interceptor (up to 3 retries, 5s/10s/20s delays).
+// Delays are tuned for Render free-tier cold starts (~30-50s spin-up).
 function _withRetry(axiosInstance: ReturnType<typeof axios.create>, maxRetries = 3) {
   axiosInstance.interceptors.response.use(
     (res) => res,
@@ -100,7 +101,8 @@ function _withRetry(axiosInstance: ReturnType<typeof axios.create>, maxRetries =
         return Promise.reject(error);
       }
       config._retryCount += 1;
-      const delayMs = 1_000 * 2 ** (config._retryCount - 1);
+      // 5s → 10s → 20s  (total ≈ 35s, covers Render cold start)
+      const delayMs = 5_000 * 2 ** (config._retryCount - 1);
       await new Promise((resolve) => setTimeout(resolve, delayMs));
       return axiosInstance(config);
     }
@@ -187,7 +189,10 @@ function _addGlobalErrorToastInterceptor(axiosInstance: ReturnType<typeof axios.
       if (axios.isAxiosError(error)) {
         const status = error.response?.status;
         const isNetworkError = !error.response;
-        if (isNetworkError) {
+        const isWarming = useAppStore.getState().serverWarming;
+        // Don't show network error toast when the warming banner is already visible
+        // — the user already knows the server is waking up.
+        if (isNetworkError && !isWarming) {
           toast.error('Network error — check your connection', { id: 'api-network-error', duration: 4000 });
         } else if (status && status >= 500) {
           const { message } = extractApiError(error);
@@ -213,7 +218,9 @@ function _addRetryIndicatorInterceptor(axiosInstance: ReturnType<typeof axios.cr
     },
     (error) => {
       const config = error.config as (typeof error.config) & { _retryCount?: number };
-      if (config?._retryCount && config._retryCount > 0 && !_retryingToastId) {
+      const isWarming = useAppStore.getState().serverWarming;
+      // Don't show retrying toast when warming banner is already informing the user
+      if (config?._retryCount && config._retryCount > 0 && !_retryingToastId && !isWarming) {
         _retryingToastId = toast.info(`Retrying... (attempt ${config._retryCount}/3)`, {
           duration: 4000,
           id: 'retrying-indicator',

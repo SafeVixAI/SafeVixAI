@@ -15,7 +15,7 @@ function requiredPublicUrl(name: string, value: string | undefined, fallback: st
 export const PUBLIC_API_BASE_URL = requiredPublicUrl(
   'NEXT_PUBLIC_API_URL or NEXT_PUBLIC_BACKEND_URL',
   process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_BACKEND_URL,
-  'https://safevixai-api.onrender.com',
+  'https://safevixai-backend.onrender.com',
 );
 
 export const PUBLIC_CHATBOT_BASE_URL = requiredPublicUrl(

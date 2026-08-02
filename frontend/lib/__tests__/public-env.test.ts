@@ -60,7 +60,7 @@ describe('public-env', function() {
         mod = require('../public-env');
       });
 
-      expect(mod!.PUBLIC_API_BASE_URL).toBe('https://safevixai-api.onrender.com');
+      expect(mod!.PUBLIC_API_BASE_URL).toBe('https://safevixai-backend.onrender.com');
       expect(mod!.PUBLIC_CHATBOT_BASE_URL).toBe('https://safevixai-chatbot.onrender.com');
 
       process.env.NEXT_PUBLIC_API_URL = OLD_API;

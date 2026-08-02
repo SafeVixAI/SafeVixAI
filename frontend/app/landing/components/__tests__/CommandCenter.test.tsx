@@ -62,10 +62,10 @@ describe('CommandCenter', function() {
     expect(p2Badges.length).toBeGreaterThanOrEqual(1)
   })
 
-  it('renders the India SVG map', function() {
+  it('renders the real map', function() {
     render(React.createElement(CommandCenter))
     const map = rtlScreen.getByRole('img')
-    expect(map.getAttribute('aria-label')).toContain('India')
+    expect(map.getAttribute('aria-label')).toContain('Live')
   })
 
   it('renders ACTIVE INCIDENTS panel label', function() {

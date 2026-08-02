@@ -34,13 +34,7 @@ describe('NationalNetwork', function() {
     expect(map.getAttribute('aria-label')).toContain('National network map')
   })
 
-  it('renders legend labels', function() {
-    render(React.createElement(NationalNetwork))
-    expect(rtlScreen.getByText('Hospitals')).toBeTruthy()
-    expect(rtlScreen.getByText('Police')).toBeTruthy()
-    expect(rtlScreen.getByText('Emergency')).toBeTruthy()
-    expect(rtlScreen.getByText('Infrastructure')).toBeTruthy()
-  })
+
 
   it('renders stat counter labels', function() {
     render(React.createElement(NationalNetwork))

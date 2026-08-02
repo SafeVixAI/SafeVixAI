@@ -271,7 +271,7 @@ export default function NationalNetwork() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           {/* ── Left: India Network Visualization ────────── */}
           <div className="reveal-item flex justify-center">
-            <div className="relative w-full max-w-md h-[450px]">
+            <div className="relative w-full max-w-md h-[450px]" role="img" aria-label="National network map">
               <MapLibreDashboard zoom={4} center={[78.9629, 20.5937]} />
             </div>
           </div>

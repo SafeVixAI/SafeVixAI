@@ -183,10 +183,10 @@ export default function NationalNetwork() {
     fetchPublicStats().then(data => {
       if (mounted && data) {
         setStatsData([
-          { value: data.total_complaints_filed || 0, suffix: '', label: 'Total Incidents', color: '#DC2626' },
-          { value: data.total_resolved || 0, suffix: '', label: 'Incidents Resolved', color: '#00C896' },
-          { value: data.active_field_officers || 0, suffix: '', label: 'Active Officers', color: '#3B82F6' },
-          { value: data.resolution_rate || 0, suffix: '%', label: 'Resolution Rate', color: 'var(--brand-light)' },
+          { value: Number(data.total_complaints_filed) || 0, suffix: '', label: 'Total Incidents', color: '#DC2626' },
+          { value: Number(data.total_resolved) || 0, suffix: '', label: 'Incidents Resolved', color: '#00C896' },
+          { value: Number(data.active_field_officers) || 0, suffix: '', label: 'Active Officers', color: '#3B82F6' },
+          { value: Number(data.resolution_rate) || 0, suffix: '%', label: 'Resolution Rate', color: 'var(--brand-light)' },
         ]);
       }
     }).catch(console.error);

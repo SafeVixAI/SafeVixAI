@@ -55,7 +55,6 @@ def get_redis_client(
             socket_connect_timeout=5.0,
             retry_on_timeout=True,
             password=password,
-            ssl=tls_enabled or None,
         )
     return Redis(connection_pool=_redis_pool)
 

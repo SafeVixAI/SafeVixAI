@@ -3,9 +3,6 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 SafeVixAI Team
 import React, { useState, useEffect } from 'react';
-import { useRef } from 'react';
-import { useGSAP } from '@gsap/react';
-import { gsap } from '@/lib/gsap';
 import { useScrollReveal, useCountUp } from '../hooks/useLandingGSAP';
 import { fetchPublicStats } from '@/lib/api';
 import MapLibreDashboard from '@/components/command-center/MapLibreDashboard';
@@ -14,115 +11,7 @@ import MapLibreDashboard from '@/components/command-center/MapLibreDashboard';
    NationalNetwork — Connected Intelligence Visualization
    ═══════════════════════════════════════════════════════════ */
 
-// ── India outline (geographically accurate silhouette for 400x500 viewBox) ──
-const INDIA_PATH = `
-  M 175 42
-  C 185 38, 195 40, 205 48
-  C 215 55, 222 62, 218 75
-  C 214 88, 220 98, 232 108
-  C 244 118, 258 128, 272 138
-  C 285 145, 292 142, 305 145
-  C 318 148, 332 152, 342 165
-  C 352 178, 348 195, 338 210
-  C 328 222, 318 228, 305 220
-  C 294 214, 288 218, 280 228
-  C 274 238, 268 252, 262 268
-  C 256 284, 248 302, 240 322
-  C 232 342, 226 365, 218 388
-  C 210 410, 200 430, 186 448
-  C 180 455, 174 452, 168 440
-  C 160 422, 154 402, 146 380
-  C 138 358, 132 332, 126 305
-  C 120 280, 110 268, 98 258
-  C 88 248, 84 235, 86 222
-  C 88 208, 98 205, 110 198
-  C 122 190, 130 178, 140 160
-  C 150 142, 158 120, 162 98
-  C 166 76, 170 55, 175 42 Z
-`;
 
-// ── Network node types ─────────────────────────────────────
-type NodeType = 'hospital' | 'police' | 'emergency' | 'infrastructure';
-
-interface NetworkNode {
-  cx: number;
-  cy: number;
-  type: NodeType;
-  pulse?: boolean;
-}
-
-const NODE_COLORS: Record<NodeType, string> = {
-  hospital: '#DC2626',
-  police: '#3B82F6',
-  emergency: '#D97706',
-  infrastructure: '#00C896',
-};
-
-const NODE_LABELS: Record<NodeType, string> = {
-  hospital: 'Hospitals',
-  police: 'Police',
-  emergency: 'Emergency',
-  infrastructure: 'Infrastructure',
-};
-
-// ── Node positions across India ────────────────────────────
-const NETWORK_NODES: NetworkNode[] = [
-  // Hospitals (red)
-  { cx: 195, cy: 145, type: 'hospital', pulse: true },
-  { cx: 130, cy: 290, type: 'hospital' },
-  { cx: 175, cy: 385, type: 'hospital', pulse: true },
-  { cx: 285, cy: 230, type: 'hospital' },
-  { cx: 225, cy: 180, type: 'hospital' },
-  { cx: 155, cy: 415, type: 'hospital' },
-  { cx: 250, cy: 160, type: 'hospital' },
-  { cx: 200, cy: 330, type: 'hospital', pulse: true },
-  // Police (blue)
-  { cx: 215, cy: 375, type: 'police' },
-  { cx: 155, cy: 175, type: 'police', pulse: true },
-  { cx: 190, cy: 250, type: 'police' },
-  { cx: 270, cy: 200, type: 'police' },
-  { cx: 145, cy: 340, type: 'police' },
-  { cx: 230, cy: 290, type: 'police', pulse: true },
-  // Emergency (amber)
-  { cx: 165, cy: 210, type: 'emergency', pulse: true },
-  { cx: 240, cy: 310, type: 'emergency' },
-  { cx: 120, cy: 250, type: 'emergency' },
-  { cx: 205, cy: 400, type: 'emergency', pulse: true },
-  // Infrastructure (green)
-  { cx: 180, cy: 125, type: 'infrastructure' },
-  { cx: 115, cy: 225, type: 'infrastructure', pulse: true },
-  { cx: 260, cy: 270, type: 'infrastructure' },
-  { cx: 195, cy: 355, type: 'infrastructure' },
-  { cx: 300, cy: 180, type: 'infrastructure', pulse: true },
-];
-
-// ── Connection lines between nearby nodes ──────────────────
-interface ConnectionLine {
-  x1: number;
-  y1: number;
-  x2: number;
-  y2: number;
-}
-
-function generateConnections(nodes: NetworkNode[], maxDist: number): ConnectionLine[] {
-  const lines: ConnectionLine[] = [];
-  for (let i = 0; i < nodes.length; i++) {
-    for (let j = i + 1; j < nodes.length; j++) {
-      const dx = nodes[i].cx - nodes[j].cx;
-      const dy = nodes[i].cy - nodes[j].cy;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      if (dist < maxDist && nodes[i].type !== nodes[j].type) {
-        lines.push({
-          x1: nodes[i].cx,
-          y1: nodes[i].cy,
-          x2: nodes[j].cx,
-          y2: nodes[j].cy,
-        });
-      }
-    }
-  }
-  return lines;
-}
 
 // ── Stat data ──────────────────────────────────────────────
 interface StatBlock {
@@ -171,8 +60,6 @@ function StatCounter({ stat }: { stat: StatBlock }) {
 
 export default function NationalNetwork() {
   const sectionRef = useScrollReveal({ y: 40, stagger: 0.1, start: 'top 80%' });
-  const connections = generateConnections(NETWORK_NODES, 80);
-  const svgRef = useRef<SVGSVGElement>(null);
   
   const [activeNodeIdx, setActiveNodeIdx] = useState(-1);
   const [syncCounter, setSyncCounter] = useState(2);
@@ -201,52 +88,7 @@ export default function NationalNetwork() {
     return () => clearInterval(interval);
   }, []);
 
-  // Random Activity Pulse Logic
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setActiveNodeIdx(Math.floor(Math.random() * NETWORK_NODES.length));
-      setTimeout(() => setActiveNodeIdx(-1), 1500);
-    }, 2500);
-    return () => clearInterval(interval);
-  }, []);
 
-  // Animate connection lines drawing on scroll
-  useGSAP(
-    () => {
-      if (!svgRef.current) return;
-      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      if (prefersReducedMotion) return;
-
-      const lines = svgRef.current.querySelectorAll<SVGLineElement>('.network-line');
-      lines.forEach((line) => {
-        const length = Math.sqrt(
-          Math.pow(Number(line.getAttribute('x2')) - Number(line.getAttribute('x1')), 2) +
-          Math.pow(Number(line.getAttribute('y2')) - Number(line.getAttribute('y1')), 2)
-        );
-        line.style.strokeDasharray = `${length}`;
-        line.style.strokeDashoffset = `${length}`;
-
-        gsap.to(line, {
-          strokeDashoffset: 0,
-          duration: 1.5,
-          ease: 'power2.out',
-          scrollTrigger: {
-            trigger: svgRef.current,
-            start: 'top 80%',
-            toggleActions: 'play none none none',
-          },
-        });
-      });
-    },
-    { scope: svgRef }
-  );
-
-  // Extract subset of connections for data flow dots
-  const dataFlowConnections = connections
-    .filter(line => 
-      NETWORK_NODES.some(n => n.pulse && ((n.cx === line.x1 && n.cy === line.y1) || (n.cx === line.x2 && n.cy === line.y2)))
-    )
-    .slice(0, 6); // Add up to 6 traveling dots
 
   return (
     <section

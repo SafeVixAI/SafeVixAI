@@ -202,58 +202,8 @@ class AlertService:
         details: str,
         solutions: list[str],
     ):
-        """Send alert with cooldown protection."""
-        now = time.time()
-        if now - _last_alert_time[alert_type] < ALERT_COOLDOWN_SECONDS:
-            logger.debug("Alert '%s' suppressed (cooldown)", alert_type)
-            return
-        _last_alert_time[alert_type] = now
-
-        solutions_text = "\n\n".join(
-            f"  {i+1}. {s}" for i, s in enumerate(solutions)
-        )
-
-        body = f"""SafeVixAI Production Alert
-{'=' * 50}
-
-{subject}
-
-Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
-
-DETAILS:
-{details}
-
-{'=' * 50}
-3 WAYS TO FIX THIS:
-
-{solutions_text}
-
-{'=' * 50}
-This alert was sent by SafeVixAI Alert Service.
-Cooldown: {ALERT_COOLDOWN_SECONDS}s between same-type alerts.
-Configure: ALERT_EMAIL + ALERT_EMAIL_PASSWORD in .env
-"""
-
-        logger.warning("ALERT [%s]: %s \u2014 %s", alert_type, subject, details.split('\n')[0])
-
-        if not self.enabled:
-            logger.info("Email not configured. Alert printed to logs only.")
-            return
-
-        try:
-            msg = MIMEText(body)
-            msg["Subject"] = f"[SafeVixAI] {subject}"
-            msg["From"] = self.smtp_user
-            msg["To"] = self.alert_to
-
-            with smtplib.SMTP("smtp.gmail.com", 587) as s:
-                s.starttls()
-                s.login(self.smtp_user, self.smtp_pass)
-                s.send_message(msg)
-
-            logger.info("Alert email sent to %s", self.alert_to)
-        except Exception as e:
-            logger.error("Failed to send alert email: %s", e)
+        """Service disabled per user request."""
+        pass
 
 
 _instance: AlertService | None = None

@@ -57,7 +57,7 @@ class Settings(BaseSettings):
     internal_api_key: str | None = Field(default=None, alias="CHATBOT_INTERNAL_API_KEY")
     chroma_persist_dir: Path = ROOT_DIR / "data" / "chroma_db"
     rag_data_dir: Path = ROOT_DIR / "data"
-    embedding_model: str = "sentence-transformers/all-MiniLM-L6-v2"
+    embedding_model: str = "safevixai-local-hash"
     rag_reranker: str | None = "cross-encoder/ms-marco-MiniLM-L-6-v2"
     rag_min_score: float = 0.55
     top_k_retrieval: int = 5

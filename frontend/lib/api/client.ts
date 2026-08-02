@@ -60,10 +60,14 @@ client.interceptors.request.use((config) => {
 
 function _addWarmingInterceptors(axiosInstance: ReturnType<typeof axios.create>) {
   axiosInstance.interceptors.request.use((config) => {
-    const timer = setTimeout(() => {
-      useAppStore.getState().setServerWarming(true);
-    }, 5000);
-    (config as any)._warmingTimer = timer;
+    // Only start warming timer on the very first attempt
+    const cfg = config as any;
+    if (!cfg._warmingTimer && !cfg._retryCount) {
+      const timer = setTimeout(() => {
+        useAppStore.getState().setServerWarming(true);
+      }, 5000);
+      cfg._warmingTimer = timer;
+    }
     return config;
   });
 
@@ -75,9 +79,17 @@ function _addWarmingInterceptors(axiosInstance: ReturnType<typeof axios.create>)
       return response;
     },
     (error) => {
-      const timer = error.config?._warmingTimer;
-      if (timer) clearTimeout(timer);
-      useAppStore.getState().setServerWarming(false);
+      const config = error.config as any;
+      const isNetworkError = !error.response;
+      const isServerError = error.response?.status >= 500;
+      const willRetry = config && (config._retryCount ?? 0) < 3 && (isNetworkError || isServerError);
+      
+      // ONLY clear warming state if we are giving up
+      if (!willRetry) {
+        const timer = config?._warmingTimer;
+        if (timer) clearTimeout(timer);
+        useAppStore.getState().setServerWarming(false);
+      }
       return Promise.reject(error);
     }
   );
@@ -219,8 +231,11 @@ function _addRetryIndicatorInterceptor(axiosInstance: ReturnType<typeof axios.cr
     (error) => {
       const config = error.config as (typeof error.config) & { _retryCount?: number };
       const isWarming = useAppStore.getState().serverWarming;
-      // Don't show retrying toast when warming banner is already informing the user
-      if (config?._retryCount && config._retryCount > 0 && !_retryingToastId && !isWarming) {
+      const isFinalFailure = config && (config._retryCount ?? 0) >= 3;
+      
+      // Don't show retrying toast when warming banner is already informing the user,
+      // and definitely don't show it on the final failure!
+      if (config?._retryCount && config._retryCount > 0 && !_retryingToastId && !isWarming && !isFinalFailure) {
         _retryingToastId = toast.info(`Retrying... (attempt ${config._retryCount}/3)`, {
           duration: 4000,
           id: 'retrying-indicator',

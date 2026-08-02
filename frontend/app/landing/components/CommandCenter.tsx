@@ -9,7 +9,7 @@ import { useRef, useState, useEffect } from 'react';
 import { useGSAP } from '@gsap/react';
 import { gsap } from '@/lib/gsap';
 import { useScrollReveal } from '../hooks/useLandingGSAP';
-import MapLibreDashboard from '@/components/command-center/MapLibreDashboard';
+
 import { fetchPublicStats, client } from '@/lib/api';
 
 /* ═══════════════════════════════════════════════════════════
@@ -289,13 +289,56 @@ export default function CommandCenter() {
                   NATIONAL OVERVIEW
                 </p>
 
-                {/* Live Real Map */}
+                {/* Abstract Tech SVG Grid */}
                 <div 
-                  className="relative flex justify-center h-[350px] md:h-[400px] w-full"
+                  className="relative flex justify-center h-[350px] md:h-[400px] w-full bg-brand-darkest border border-brand/20 rounded-lg overflow-hidden items-center"
                   role="img"
-                  aria-label="Live incident map"
+                  aria-label="Live incident abstract grid"
                 >
-                  <MapLibreDashboard zoom={4.5} center={[78.9629, 20.5937]} />
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3/4 h-3/4 bg-brand-primary/10 blur-[80px] rounded-full pointer-events-none" />
+                  <svg className="absolute inset-0 w-full h-full opacity-30" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                      <pattern id="cmdGrid" width="30" height="30" patternUnits="userSpaceOnUse">
+                        <path d="M 30 0 L 0 0 0 30" fill="none" stroke="currentColor" strokeWidth="1" className="text-brand-primary/30" />
+                        <circle cx="30" cy="30" r="1" className="fill-brand-light/40" />
+                      </pattern>
+                      <linearGradient id="cmdGlowLine" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stopColor="transparent" />
+                        <stop offset="50%" stopColor="#10b981" />
+                        <stop offset="100%" stopColor="transparent" />
+                      </linearGradient>
+                    </defs>
+                    <rect width="100%" height="100%" fill="url(#cmdGrid)" />
+                    <line x1="0" y1="50%" x2="100%" y2="50%" stroke="url(#cmdGlowLine)" strokeWidth="1.5" opacity="0.8">
+                      <animate attributeName="y1" values="0%;100%;0%" dur="8s" repeatCount="indefinite" />
+                      <animate attributeName="y2" values="0%;100%;0%" dur="8s" repeatCount="indefinite" />
+                    </line>
+                  </svg>
+                  
+                  {/* Radar Circles */}
+                  <div className="absolute w-32 h-32 rounded-full border border-brand-primary/20" />
+                  <div className="absolute w-64 h-64 rounded-full border border-brand-primary/20" />
+                  <div className="absolute w-96 h-96 rounded-full border border-brand-primary/20" />
+
+                  {/* Nodes */}
+                  <div className="absolute top-[40%] left-[30%]">
+                    <div className="w-2 h-2 rounded-full bg-brand-light animate-pulse shadow-[0_0_10px_#10b981]" />
+                  </div>
+                  <div className="absolute top-[70%] left-[60%]">
+                    <div className="w-2 h-2 rounded-full bg-amber-400 animate-pulse shadow-[0_0_10px_#fbbf24]" />
+                  </div>
+                  <div className="absolute top-[20%] left-[70%]">
+                    <div className="w-2 h-2 rounded-full bg-brand-primary animate-pulse shadow-[0_0_10px_#10b981]" />
+                  </div>
+
+                  <div className="relative z-10 flex flex-col items-center p-4 bg-brand-darkest/60 backdrop-blur-sm border border-brand/20 rounded-lg">
+                    <svg className="w-6 h-6 text-brand-primary mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    <span className="text-xs font-mono text-brand-light/80 tracking-widest uppercase">
+                      Spatial Tracking Active
+                    </span>
+                  </div>
                 </div>
 
                 {/* Stat pills */}

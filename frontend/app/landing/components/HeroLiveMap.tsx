@@ -1,148 +1,69 @@
-/* istanbul ignore file */
-'use client';
-
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 SafeVixAI Team
-import React, { useEffect, useRef, useState } from 'react';
-import maplibregl from 'maplibre-gl';
-import 'maplibre-gl/dist/maplibre-gl.css';
 
-/* ────────────────────────────────────────────────────────────
-   SafeVixAI Landing — Live Map
-   Displays active incidents and monitoring stations in India
-   ──────────────────────────────────────────────────────────── */
+'use client';
 
-const CITIES = [
-  // Emergency hotspots (red)
-  { name: 'Delhi', lng: 77.209, lat: 28.6139, type: 'emergency' },
-  { name: 'Mumbai', lng: 72.8777, lat: 19.076, type: 'emergency' },
-  { name: 'Chennai', lng: 80.2707, lat: 13.0827, type: 'emergency' },
-  { name: 'Kolkata', lng: 88.3639, lat: 22.5726, type: 'emergency' },
-  { name: 'Bangalore', lng: 77.5946, lat: 12.9716, type: 'emergency' },
-  // Monitoring cities (green)
-  { name: 'Hyderabad', lng: 78.4867, lat: 17.385, type: 'monitoring' },
-  { name: 'Ahmedabad', lng: 72.5714, lat: 23.0225, type: 'monitoring' },
-  { name: 'Pune', lng: 73.8567, lat: 18.5204, type: 'monitoring' },
-  { name: 'Jaipur', lng: 75.7873, lat: 26.9124, type: 'monitoring' },
-  { name: 'Lucknow', lng: 80.9462, lat: 26.8467, type: 'monitoring' },
-  { name: 'Kochi', lng: 76.2673, lat: 9.9312, type: 'monitoring' },
-  { name: 'Bhopal', lng: 77.4126, lat: 23.2599, type: 'monitoring' },
-  { name: 'Nagpur', lng: 79.0882, lat: 21.1458, type: 'monitoring' },
-  { name: 'Chandigarh', lng: 76.7794, lat: 30.7333, type: 'monitoring' },
-  { name: 'Guwahati', lng: 91.7362, lat: 26.1445, type: 'monitoring' },
-  { name: 'Patna', lng: 85.1376, lat: 25.5941, type: 'monitoring' },
-  { name: 'Varanasi', lng: 82.9739, lat: 25.3176, type: 'monitoring' },
-];
+import React from 'react';
 
+/**
+ * SafeVixAI Landing — Abstract SVG Grid Graphic
+ * Replaces MapLibre to improve performance and avoid network/rendering issues.
+ */
 export default function HeroLiveMap() {
-  const mapContainer = useRef<HTMLDivElement>(null);
-  const [mapLoaded, setMapLoaded] = useState(false);
-  const map = useRef<maplibregl.Map | null>(null);
-
-  useEffect(() => {
-    if (map.current || !mapContainer.current) return;
-
-    // Use a standard dark raster map style using Carto Dark Matter (no API key required)
-    map.current = new maplibregl.Map({
-      container: mapContainer.current,
-      style: {
-        version: 8,
-        sources: {
-          'carto-dark': {
-            type: 'raster',
-            tiles: [
-              'https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png',
-              'https://b.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png',
-              'https://c.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png',
-              'https://d.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png'
-            ],
-            tileSize: 256,
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-          }
-        },
-        layers: [
-          {
-            id: 'carto-dark-layer',
-            type: 'raster',
-            source: 'carto-dark',
-            minzoom: 0,
-            maxzoom: 22
-          }
-        ]
-      },
-      center: [78.9629, 22.5937], // Center of India
-      zoom: 3.8,
-      pitch: 45,
-      bearing: 10,
-      interactive: false, // Prevent scrolling/panning in Hero section
-    });
-
-    map.current.on('load', () => {
-      setMapLoaded(true);
-
-      // Add markers
-      CITIES.forEach(city => {
-        const isEmergency = city.type === 'emergency';
-        const color = isEmergency ? '#DC2626' : '#00C896';
-
-        // Create a custom DOM element for the marker to add glowing effect
-        const el = document.createElement('div');
-        el.className = 'custom-map-marker';
-        el.style.width = isEmergency ? '12px' : '10px';
-        el.style.height = isEmergency ? '12px' : '10px';
-        el.style.backgroundColor = color;
-        el.style.borderRadius = '50%';
-        el.style.boxShadow = `0 0 ${isEmergency ? '15px' : '10px'} ${color}`;
-
-        // Add a pulsing animation via standard CSS injected dynamically or globally
-        el.style.animation = `pulse-marker ${isEmergency ? '1.5s' : '2.5s'} infinite alternate`;
-
-        new maplibregl.Marker({ element: el })
-          .setLngLat([city.lng, city.lat])
-          .addTo(map.current!);
-      });
-
-      // Slowly rotate the map to give it a cinematic feel
-      let bearing = 10;
-      const rotateCamera = () => {
-        if (!map.current) return;
-        bearing += 0.05;
-        map.current.setBearing(bearing);
-        requestAnimationFrame(rotateCamera);
-      };
-      rotateCamera();
-    });
-
-    return () => {
-      map.current?.remove();
-      map.current = null;
-    };
-  }, []);
-
   return (
-    <div className="w-full h-full relative rounded-lg overflow-hidden" style={{ minHeight: '600px' }}>
-      {/* Map container */}
-      <div ref={mapContainer} className="absolute inset-0 w-full h-full" />
+    <div className="w-full h-full relative rounded-lg overflow-hidden bg-brand-darkest border border-brand/20 flex flex-col items-center justify-center" style={{ minHeight: '600px' }}>
       
-      {/* Loading state fallback */}
-      {!mapLoaded && (
-        <div className="absolute inset-0 flex items-center justify-center bg-[#0a3d1f]/10 backdrop-blur-sm z-10">
-          <div className="flex flex-col items-center">
-            <div className="w-8 h-8 rounded-full border-2 border-brand-light border-t-transparent animate-spin mb-4" />
-            <span className="text-xs text-brand-light font-mono uppercase tracking-wider animate-pulse">
-              Initializing Spatial Grid...
-            </span>
-          </div>
-        </div>
-      )}
+      {/* Background glow */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3/4 h-3/4 bg-brand-primary/10 blur-[100px] rounded-full pointer-events-none" />
 
-      {/* Embedded CSS for marker animations */}
-      <style dangerouslySetInnerHTML={{ __html: `
-        @keyframes pulse-marker {
-          0% { transform: scale(0.9); opacity: 0.7; }
-          100% { transform: scale(1.3); opacity: 1; }
-        }
-      `}} />
+      {/* Abstract Tech SVG Grid */}
+      <svg className="absolute inset-0 w-full h-full opacity-30" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <pattern id="gridPattern" width="40" height="40" patternUnits="userSpaceOnUse">
+            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="currentColor" strokeWidth="1" className="text-brand-primary/20" />
+            <circle cx="40" cy="40" r="1.5" className="fill-brand-light/50" />
+          </pattern>
+          <linearGradient id="glowLine" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="transparent" />
+            <stop offset="50%" stopColor="#10b981" />
+            <stop offset="100%" stopColor="transparent" />
+          </linearGradient>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#gridPattern)" />
+        
+        {/* Animated scanning line */}
+        <line x1="0" y1="20%" x2="100%" y2="20%" stroke="url(#glowLine)" strokeWidth="2" opacity="0.8">
+          <animate attributeName="y1" values="0%;100%;0%" dur="10s" repeatCount="indefinite" />
+          <animate attributeName="y2" values="0%;100%;0%" dur="10s" repeatCount="indefinite" />
+        </line>
+      </svg>
+
+      {/* Nodes / Pulses */}
+      <div className="absolute top-[30%] left-[20%]">
+        <div className="w-3 h-3 rounded-full bg-brand-light animate-pulse shadow-[0_0_15px_#10b981]" />
+        <div className="w-12 h-12 rounded-full border border-brand-primary absolute -top-[18px] -left-[18px] animate-ping opacity-20" />
+      </div>
+      <div className="absolute top-[60%] left-[70%]">
+        <div className="w-4 h-4 rounded-full bg-brand-primary animate-pulse shadow-[0_0_20px_#10b981]" />
+        <div className="w-16 h-16 rounded-full border border-brand-primary absolute -top-[24px] -left-[24px] animate-ping opacity-20 delay-700" />
+      </div>
+      <div className="absolute top-[40%] left-[50%]">
+        <div className="w-2 h-2 rounded-full bg-amber-400 animate-pulse shadow-[0_0_10px_#fbbf24]" />
+        <div className="w-8 h-8 rounded-full border border-amber-400 absolute -top-[12px] -left-[12px] animate-ping opacity-20 delay-300" />
+      </div>
+
+      <div className="relative z-10 flex flex-col items-center justify-center text-center p-8 bg-brand-darkest/60 backdrop-blur-md border border-brand/20 rounded-xl">
+        <div className="w-12 h-12 mb-4 rounded-full border-2 border-brand-primary/50 flex items-center justify-center">
+          <svg className="w-6 h-6 text-brand-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+        </div>
+        <h3 className="text-xl font-bold text-white font-display tracking-wide mb-2">INTELLIGENCE NETWORK ONLINE</h3>
+        <p className="text-sm font-mono text-brand-light/70 uppercase tracking-widest">
+          Spatial analysis grid active.
+        </p>
+      </div>
+
     </div>
   );
 }

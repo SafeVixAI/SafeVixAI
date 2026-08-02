@@ -38,7 +38,7 @@ jobs:
           cache-dependency-path: "mkdocs-requirements.txt"
 
       - name: Install MkDocs + dependencies
-        run: pip install -r mkdocs-requirements.txt
+        run: pip install --require-hashes -r mkdocs-requirements.txt
 
       - name: Inject root docs
         run: |

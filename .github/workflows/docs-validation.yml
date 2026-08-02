@@ -74,6 +74,6 @@ jobs:
           cache: 'pip'
           cache-dependency-path: 'mkdocs-requirements.txt'
       - name: Install MkDocs Dependencies
-        run: pip install -r mkdocs-requirements.txt
+        run: pip install --require-hashes -r mkdocs-requirements.txt
       - name: Build Docs
         run: mkdocs build

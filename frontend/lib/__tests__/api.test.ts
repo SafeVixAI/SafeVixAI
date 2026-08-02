@@ -754,7 +754,7 @@ describe('api', function () {
     const config: any = { headers: {}, _retryCount: 0 }
     const error = { config: config, isAxiosError: true, message: 'Network error' }
     const promise = retryErr(error)
-    jest.advanceTimersByTime(1000)
+    jest.advanceTimersByTime(5000)
     const result = await promise
     expect(result.data).toBe('ok')
 

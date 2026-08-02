@@ -15,13 +15,13 @@ function requiredPublicUrl(name: string, value: string | undefined, fallback: st
 export const PUBLIC_API_BASE_URL = requiredPublicUrl(
   'NEXT_PUBLIC_API_URL or NEXT_PUBLIC_BACKEND_URL',
   process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_BACKEND_URL,
-  'http://localhost:8000',
+  'https://safevixai-api.onrender.com',
 );
 
 export const PUBLIC_CHATBOT_BASE_URL = requiredPublicUrl(
   'NEXT_PUBLIC_CHATBOT_URL',
   process.env.NEXT_PUBLIC_CHATBOT_URL,
-  'http://localhost:8010',
+  'https://safevixai-chatbot.onrender.com',
 );
 
 export function publicApiWebSocketUrl(path: string): string {

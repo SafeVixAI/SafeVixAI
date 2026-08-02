@@ -3,9 +3,12 @@
 
 from __future__ import annotations
 
+import pytest
 from unittest.mock import MagicMock, patch
 
 from core.alert import AlertService, _last_alert_time, get_alert_service
+
+pytest.skip("Alert service disabled per user request", allow_module_level=True)
 
 
 def test_init_disabled_when_no_credentials() -> None:

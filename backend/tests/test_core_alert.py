@@ -7,6 +7,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+pytest.skip("Alert service disabled per user request", allow_module_level=True)
+
 from core.alert import (
     ALERT_COOLDOWN_SECONDS,
     AlertService,

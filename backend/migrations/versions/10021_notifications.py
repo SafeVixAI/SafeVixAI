@@ -14,10 +14,10 @@ import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
 
-revision: str = '10021'
-down_revision: str | None = '10020'
-branch_labels: str | None = None
-depends_on: str | None = None
+revision = '10021'
+down_revision = '10020'
+branch_labels = None
+depends_on = None
 
 
 def upgrade() -> None:

@@ -6,7 +6,7 @@
   },
   "cleanUrls": true,
   "trailingSlash": false,
-  "regions": ["hnd1", "iad1"],
+  "regions": ["bom1"],
   "headers": [
     {
       "source": "/_next/static/(.*)",

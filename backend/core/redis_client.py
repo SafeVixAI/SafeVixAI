@@ -51,7 +51,8 @@ def get_redis_client(
         _redis_pool = redis_module.asyncio.ConnectionPool.from_url(
             url,
             max_connections=20,
-            timeout=5,
+            socket_timeout=5.0,
+            socket_connect_timeout=5.0,
             retry_on_timeout=True,
             password=password,
             ssl=tls_enabled or None,

@@ -9,10 +9,49 @@ jest.mock('../../hooks/useLandingGSAP', function() {
 })
 
 const React = require('react')
-const { render, screen: rtlScreen } = require('@testing-library/react')
+const { render, screen: rtlScreen, waitFor } = require('@testing-library/react')
+const { fetchPublicStats } = require('@/lib/api')
+
+jest.mock('@/lib/api', () => ({
+  fetchPublicStats: jest.fn().mockResolvedValue({
+    total_complaints_filed: 1000,
+    total_resolved: 500,
+    active_field_officers: 150,
+    resolution_rate: 85
+  })
+}))
+
 const NationalNetwork = require('../NationalNetwork').default
 
 describe('NationalNetwork', function() {
+  beforeEach(() => {
+    jest.clearAllMocks()
+  })
+
+  it('fetches and renders live stats', async function() {
+    render(React.createElement(NationalNetwork))
+    expect(fetchPublicStats).toHaveBeenCalledTimes(1)
+    
+    // Wait for the mock data to render
+    await waitFor(() => {
+      expect(rtlScreen.getByText('1000')).toBeTruthy()
+      expect(rtlScreen.getByText('500')).toBeTruthy()
+      expect(rtlScreen.getByText('150')).toBeTruthy()
+      expect(rtlScreen.getByText('85%')).toBeTruthy()
+    })
+  })
+  it('handles fetch error silently', async function() {
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
+    fetchPublicStats.mockRejectedValueOnce(new Error('Network error'))
+    
+    render(React.createElement(NationalNetwork))
+    
+    await waitFor(() => {
+      expect(consoleSpy).toHaveBeenCalledWith(expect.any(Error))
+    })
+    consoleSpy.mockRestore()
+  })
+
   it('renders the section overline', function() {
     render(React.createElement(NationalNetwork))
     expect(rtlScreen.getByText('NATIONAL NETWORK')).toBeTruthy()

@@ -200,7 +200,7 @@ export default function MapLibreDashboard({
     return () => {
       map.remove();
     };
-  }, [activeCategory]);
+  }, [activeCategory, center, zoom]);
 
   return (
     <div className="relative w-full h-full">

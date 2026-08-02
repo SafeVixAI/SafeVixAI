@@ -9,7 +9,8 @@ import { useRef, useState, useEffect } from 'react';
 import { useGSAP } from '@gsap/react';
 import { gsap } from '@/lib/gsap';
 import { useScrollReveal } from '../hooks/useLandingGSAP';
-import IntelligenceGlobe from './three/IntelligenceGlobe';
+import MapLibreDashboard from '@/components/command-center/MapLibreDashboard';
+import { fetchPublicStats, client } from '@/lib/api';
 
 /* ═══════════════════════════════════════════════════════════
    CommandCenter — Live Intelligence Dashboard Simulation
@@ -69,12 +70,41 @@ export default function CommandCenter() {
   const severityRef = useRef<HTMLDivElement>(null);
   const [activeIncidentIdx, setActiveIncidentIdx] = useState(0);
 
+  const [liveIncidents, setLiveIncidents] = useState<Incident[]>(INCIDENTS);
+  const [liveStats, setLiveStats] = useState<any>(null);
+
+  useEffect(() => {
+    let mounted = true;
+
+    // Fetch real stats
+    fetchPublicStats().then(data => {
+      if (mounted) setLiveStats(data);
+    }).catch(console.error);
+
+    // Fetch real open issues map
+    client.get('/api/v1/public/open-issues-map').then(res => {
+       const features = res.data?.features || [];
+       if (features.length > 0 && mounted) {
+         const mapped = features.slice(0, 5).map((f: any) => ({
+           severity: f.properties.severity >= 4 ? 'P0' : f.properties.severity === 3 ? 'P1' : 'P2',
+           type: f.properties.issue_type || f.properties.category || 'Incident',
+           location: f.properties.ward_name || 'Unknown Location',
+           time: f.properties.days_old === 0 ? 'Today' : `${f.properties.days_old}d ago`
+         }));
+         const finalIncidents = [...mapped, ...INCIDENTS].slice(0, 5);
+         setLiveIncidents(finalIncidents);
+       }
+    }).catch(console.error);
+
+    return () => { mounted = false; };
+  }, []);
+
   useEffect(() => {
     const interval = setInterval(() => {
-      setActiveIncidentIdx((prev) => (prev + 1) % INCIDENTS.length);
+      setActiveIncidentIdx((prev) => (prev + 1) % liveIncidents.length);
     }, 4000);
     return () => clearInterval(interval);
-  }, []);
+  }, [liveIncidents.length]);
 
   // ── Animate bar chart heights on scroll ──────────────────
   useGSAP(
@@ -214,7 +244,7 @@ export default function CommandCenter() {
                 </p>
 
                 <div className="space-y-0">
-                  {INCIDENTS.map((inc, i) => (
+                  {liveIncidents.map((inc, i) => (
                     <div
                       key={i}
                       className={`py-2.5 px-2 -mx-2 rounded border-b border-white/[0.04] last:border-b-0 group transition-colors duration-300 ${
@@ -225,7 +255,7 @@ export default function CommandCenter() {
                         {/* Severity dot */}
                         <span
                           className="mt-1.5 w-2 h-2 rounded-full flex-shrink-0"
-                          style={{ backgroundColor: SEVERITY_COLOR[inc.severity] }}
+                          style={{ backgroundColor: SEVERITY_COLOR[inc.severity as 'P0'|'P1'|'P2'] || SEVERITY_COLOR['P2'] }}
                         />
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center justify-between gap-2">
@@ -235,8 +265,8 @@ export default function CommandCenter() {
                             <span
                               className="text-[10px] font-mono px-1.5 py-0.5 rounded text-text-3 flex-shrink-0"
                               style={{
-                                backgroundColor: `${SEVERITY_COLOR[inc.severity]}15`,
-                                color: SEVERITY_COLOR[inc.severity],
+                                backgroundColor: `${SEVERITY_COLOR[inc.severity as 'P0'|'P1'|'P2'] || SEVERITY_COLOR['P2']}15`,
+                                color: SEVERITY_COLOR[inc.severity as 'P0'|'P1'|'P2'] || SEVERITY_COLOR['P2'],
                               }}
                             >
                               {inc.severity}
@@ -259,18 +289,23 @@ export default function CommandCenter() {
                   NATIONAL OVERVIEW
                 </p>
 
-                {/* 3D Intelligence Globe */}
+                {/* Live Real Map */}
                 <div 
-                  className="relative flex justify-center h-[350px] md:h-[400px]"
+                  className="relative flex justify-center h-[350px] md:h-[400px] w-full"
                   role="img"
-                  aria-label="India SVG map"
+                  aria-label="Live incident map"
                 >
-                  <IntelligenceGlobe />
+                  <MapLibreDashboard zoom={4.5} center={[78.9629, 20.5937]} />
                 </div>
 
                 {/* Stat pills */}
                 <div className="flex flex-wrap items-center justify-center gap-2 mt-4">
-                  {STAT_PILLS.map((pill) => (
+                  {(liveStats ? [
+                    { label: 'Active', value: liveStats.currently_active?.toString(), color: '#DC2626', bg: 'rgba(220,38,38,0.12)' },
+                    { label: 'Resolved', value: liveStats.total_resolved?.toString(), color: '#00C896', bg: 'rgba(0,200,150,0.12)' },
+                    { label: 'Monitoring', value: liveStats.total_complaints_filed?.toString(), color: '#3B82F6', bg: 'rgba(59,130,246,0.12)' },
+                    { label: 'Res. Rate', value: `${liveStats.resolution_rate}%`, color: '#D97706', bg: 'rgba(217,119,6,0.12)' },
+                  ] : STAT_PILLS).map((pill) => (
                     <div
                       key={pill.label}
                       className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-mono"
@@ -318,11 +353,26 @@ export default function CommandCenter() {
                   <p className="text-[10px] font-mono text-text-3 uppercase tracking-wider mb-2 mt-4">
                     Severity Distribution
                   </p>
-                  {[
-                    { label: 'P0 Critical', pct: 30, color: '#DC2626' },
-                    { label: 'P1 High', pct: 45, color: '#D97706' },
-                    { label: 'P2 Medium', pct: 25, color: '#3B82F6' },
-                  ].map((sev) => (
+                  {(() => {
+                    if (liveStats && liveStats.severity_distribution && Object.keys(liveStats.severity_distribution).length > 0) {
+                      const dist = liveStats.severity_distribution;
+                      const total = Object.values(dist).reduce((a: any, b: any) => a + b, 0) as number;
+                      const getPct = (keys: string[]) => {
+                        const sum = keys.reduce((acc, k) => acc + (dist[k] || 0), 0);
+                        return total > 0 ? Math.round((sum / total) * 100) : 0;
+                      };
+                      return [
+                        { label: 'P0 Critical', pct: getPct(['4', '5']), color: '#DC2626' },
+                        { label: 'P1 High', pct: getPct(['3']), color: '#D97706' },
+                        { label: 'P2 Medium', pct: getPct(['1', '2']), color: '#3B82F6' },
+                      ];
+                    }
+                    return [
+                      { label: 'P0 Critical', pct: 30, color: '#DC2626' },
+                      { label: 'P1 High', pct: 45, color: '#D97706' },
+                      { label: 'P2 Medium', pct: 25, color: '#3B82F6' },
+                    ];
+                  })().map((sev) => (
                     <div key={sev.label} className="mb-2">
                       <div className="flex justify-between text-[10px] mb-1">
                         <span className="text-text-2">{sev.label}</span>

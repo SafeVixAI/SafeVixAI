@@ -7,6 +7,8 @@ import { useRef } from 'react';
 import { useGSAP } from '@gsap/react';
 import { gsap } from '@/lib/gsap';
 import { useScrollReveal, useCountUp } from '../hooks/useLandingGSAP';
+import { fetchPublicStats } from '@/lib/api';
+import MapLibreDashboard from '@/components/command-center/MapLibreDashboard';
 
 /* ═══════════════════════════════════════════════════════════
    NationalNetwork — Connected Intelligence Visualization
@@ -130,7 +132,7 @@ interface StatBlock {
   color: string;
 }
 
-const STATS: StatBlock[] = [
+const MOCK_STATS: StatBlock[] = [
   { value: 28, suffix: '', label: 'States Connected', color: '#00C896' },
   { value: 5000, suffix: '+', label: 'Hospitals Linked', color: '#DC2626' },
   { value: 15000, suffix: '+', label: 'Police Stations', color: '#3B82F6' },
@@ -174,6 +176,22 @@ export default function NationalNetwork() {
   
   const [activeNodeIdx, setActiveNodeIdx] = useState(-1);
   const [syncCounter, setSyncCounter] = useState(2);
+  const [statsData, setStatsData] = useState<StatBlock[]>(MOCK_STATS);
+
+  useEffect(() => {
+    let mounted = true;
+    fetchPublicStats().then(data => {
+      if (mounted && data) {
+        setStatsData([
+          { value: data.total_complaints_filed || 0, suffix: '', label: 'Total Incidents', color: '#DC2626' },
+          { value: data.total_resolved || 0, suffix: '', label: 'Incidents Resolved', color: '#00C896' },
+          { value: data.active_field_officers || 0, suffix: '', label: 'Active Officers', color: '#3B82F6' },
+          { value: data.resolution_rate || 0, suffix: '%', label: 'Resolution Rate', color: 'var(--brand-light)' },
+        ]);
+      }
+    }).catch(console.error);
+    return () => { mounted = false; };
+  }, []);
 
   // Sync Counter Logic
   useEffect(() => {
@@ -253,124 +271,8 @@ export default function NationalNetwork() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           {/* ── Left: India Network Visualization ────────── */}
           <div className="reveal-item flex justify-center">
-            <div className="relative w-full max-w-md">
-              <svg
-                ref={svgRef}
-                viewBox="0 0 400 500"
-                className="w-full h-auto"
-                aria-label="National network map showing connected nodes across India"
-                role="img"
-              >
-                {/* Background glow */}
-                <defs>
-                  <radialGradient id="map-glow" cx="50%" cy="50%" r="50%">
-                    <stop offset="0%" stopColor="rgba(0,200,150,0.06)" />
-                    <stop offset="100%" stopColor="transparent" />
-                  </radialGradient>
-                </defs>
-                <rect width="400" height="500" fill="url(#map-glow)" />
-
-                {/* Country outline */}
-                <path
-                  d={INDIA_PATH}
-                  fill="rgba(0,200,150,0.02)"
-                  stroke="rgba(255,255,255,0.1)"
-                  strokeWidth="1.5"
-                />
-
-                {/* Connection lines */}
-                {connections.map((line, i) => (
-                  <line
-                    key={`conn-${i}`}
-                    x1={line.x1}
-                    y1={line.y1}
-                    x2={line.x2}
-                    y2={line.y2}
-                    stroke="rgba(0,200,150,0.12)"
-                    strokeWidth="0.8"
-                    className="network-line"
-                  />
-                ))}
-
-                {/* Data flow dots */}
-                {dataFlowConnections.map((line, i) => (
-                  <circle key={`flow-${i}`} cx={line.x1} cy={line.y1} r="2" fill="var(--brand-light)">
-                    <animate attributeName="cx" values={`${line.x1};${line.x2}`} dur={`${2 + (i % 3) * 0.5}s`} repeatCount="indefinite" begin={`${i * 0.4}s`} />
-                    <animate attributeName="cy" values={`${line.y1};${line.y2}`} dur={`${2 + (i % 3) * 0.5}s`} repeatCount="indefinite" begin={`${i * 0.4}s`} />
-                    <animate attributeName="opacity" values="0;1;1;0" dur={`${2 + (i % 3) * 0.5}s`} repeatCount="indefinite" begin={`${i * 0.4}s`} />
-                  </circle>
-                ))}
-
-                {/* Network nodes */}
-                {NETWORK_NODES.map((node, i) => {
-                  const color = NODE_COLORS[node.type];
-                  return (
-                    <g key={`node-${i}`}>
-                      {/* Random activity pulse */}
-                      {activeNodeIdx === i && (
-                        <circle cx={node.cx} cy={node.cy} r="6" fill="none" stroke={color} strokeWidth="1.5">
-                          <animate attributeName="r" from="6" to="24" dur="1.5s" fill="freeze" />
-                          <animate attributeName="opacity" from="0.8" to="0" dur="1.5s" fill="freeze" />
-                        </circle>
-                      )}
-
-                      {/* Pulse ring */}
-                      {node.pulse && (
-                        <circle
-                          cx={node.cx}
-                          cy={node.cy}
-                          r="4"
-                          fill="none"
-                          stroke={color}
-                          strokeWidth="0.6"
-                        >
-                          <animate
-                            attributeName="r"
-                            from="4"
-                            to="14"
-                            dur="2.5s"
-                            repeatCount="indefinite"
-                          />
-                          <animate
-                            attributeName="opacity"
-                            from="0.5"
-                            to="0"
-                            dur="2.5s"
-                            repeatCount="indefinite"
-                          />
-                        </circle>
-                      )}
-
-                      {/* Outer glow */}
-                      <circle
-                        cx={node.cx}
-                        cy={node.cy}
-                        r="5"
-                        fill={color}
-                        opacity="0.15"
-                      />
-
-                      {/* Core dot */}
-                      <circle
-                        cx={node.cx}
-                        cy={node.cy}
-                        r="2.5"
-                        fill={color}
-                      />
-                    </g>
-                  );
-                })}
-              </svg>
-
-              {/* Legend */}
-              <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 mt-4">
-                {(Object.entries(NODE_LABELS) as [NodeType, string][]).map(([type, label]) => (
-                  <div key={type} className="flex items-center gap-1.5">
-                    <span
-                      className="w-2.5 h-2.5 rounded-full"
-                      style={{ backgroundColor: NODE_COLORS[type] }}
-                    />
-                    <span className="text-xs text-text-3 font-mono">{label}</span>
+            <div className="relative w-full h-[450px]">
+              <MapLibreDashboard zoom={4} center={[78.9629, 20.5937]} />
                   </div>
                 ))}
               </div>
@@ -381,7 +283,7 @@ export default function NationalNetwork() {
           <div className="space-y-8">
             {/* Stat blocks */}
             <div className="grid grid-cols-2 gap-6">
-              {STATS.map((stat) => (
+              {statsData.map((stat) => (
                 <StatCounter key={stat.label} stat={stat} />
               ))}
             </div>

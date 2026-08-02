@@ -14,9 +14,15 @@ import { client } from '@/lib/api';
 
 interface MapLibreDashboardProps {
   activeCategory?: string;
+  zoom?: number;
+  center?: [number, number];
 }
 
-export default function MapLibreDashboard({ activeCategory = '' }: MapLibreDashboardProps) {
+export default function MapLibreDashboard({ 
+  activeCategory = '',
+  zoom = 11,
+  center = [80.2707, 13.0827]
+}: MapLibreDashboardProps) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const [loading, setLoading] = useState(true);
@@ -28,8 +34,8 @@ export default function MapLibreDashboard({ activeCategory = '' }: MapLibreDashb
     const map = new maplibregl.Map({
       container: mapContainerRef.current,
       style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
-      center: [80.2707, 13.0827], // Center on Chennai
-      zoom: 11,
+      center: center,
+      zoom: zoom,
       attributionControl: { compact: false },
     });
 

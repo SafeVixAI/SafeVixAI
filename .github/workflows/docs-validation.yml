@@ -52,7 +52,7 @@ jobs:
         with:
           node-version: '22'
       - name: Install Mermaid CLI
-        run: npm install -g @mermaid-js/mermaid-cli
+        run: npm install -g @mermaid-js/mermaid-cli@11.4.2
       - name: Validate Mermaid Diagrams
         run: |
           echo '{"args": ["--no-sandbox", "--disable-setuid-sandbox"]}' > puppeteer-config.json
@@ -75,7 +75,7 @@ jobs:
           python-version: '3.11'
       - name: Install MkDocs Dependencies
         run: |
-          pip install mkdocs-material mkdocs
+          pip install mkdocs-material==9.5.49 mkdocs==1.6.1
           if [ -f "mkdocs-requirements.txt" ]; then pip install -r mkdocs-requirements.txt; fi
       - name: Build Docs
         run: mkdocs build

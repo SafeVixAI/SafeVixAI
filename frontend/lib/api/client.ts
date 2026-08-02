@@ -41,7 +41,7 @@ export function setCsrfToken(token: string | null) {
 
 export const client = axios.create({
   baseURL: BASE_URL,
-  timeout: 8_000,
+  timeout: 60_000,
   withCredentials: true,
 });
 
@@ -112,7 +112,7 @@ _withRetry(client);
 
 export const chatbotClient = axios.create({
   baseURL: CHATBOT_URL,
-  timeout: 15_000,
+  timeout: 60_000,
   withCredentials: true,
 });
 

@@ -35,23 +35,27 @@ function SystemBanners() {
 
   useEffect(() => {
     if (skipAuth) return;
+    let timeoutId: NodeJS.Timeout;
+    
     const checkHealth = async () => {
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 2000);
+        const fetchTimeout = setTimeout(() => controller.abort(), 2000);
         const res = await fetch(`${PUBLIC_CHATBOT_BASE_URL}/speech/status`, { signal: controller.signal });
-        clearTimeout(timeoutId);
+        clearTimeout(fetchTimeout);
         if (!res.ok) throw new Error('Not ready');
         setLocalWarming(false);
         setServerWarming(false);
       } catch (err) {
-        if ((err as Error).name === 'AbortError') {
-          setLocalWarming(true);
-          setServerWarming(true);
-        }
+        setLocalWarming(true);
+        setServerWarming(true);
+        // Retry after 5 seconds if server is still warming up
+        timeoutId = setTimeout(checkHealth, 5000);
       }
     };
+    
     checkHealth();
+    return () => clearTimeout(timeoutId);
   }, [setServerWarming, skipAuth]);
 
   return (

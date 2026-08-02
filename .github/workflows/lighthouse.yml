@@ -40,7 +40,7 @@ jobs:
       - name: Run Lighthouse CI
         working-directory: frontend
         run: |
-          npm install -g @lhci/cli@0.14
+          npm install -g @lhci/cli@0.14.0
           lhci autorun --config=lighthouserc.json || true
         env:
           LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}

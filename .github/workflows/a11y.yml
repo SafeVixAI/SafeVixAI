@@ -38,7 +38,7 @@ jobs:
       - name: Install MkDocs + dependencies
         run: |
           pip install -r mkdocs-requirements.txt
-          pip install mkdocs
+          pip install mkdocs==1.6.1
 
       - name: Inject root docs
         run: |
@@ -57,7 +57,7 @@ jobs:
           node-version: "22"
 
       - name: Install pa11y-ci
-        run: npm install -g pa11y-ci@3
+        run: npm install -g pa11y-ci@3.1.0
 
       - name: Serve site and run accessibility tests
         run: |

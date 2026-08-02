@@ -16,7 +16,6 @@ import {
 } from 'lucide-react';
 import { useAppStore } from '@/lib/store';
 import { useShallow } from 'zustand/react/shallow';
-import { getOfflineAI, askOfflineAI, isOfflineAIReady } from '@/lib/offline-ai';
 import { track } from '@/lib/analytics';
 import TopSearch from '@/components/dashboard/TopSearch';
 import { TerminalHeader } from '@/components/ui/TerminalHeader';
@@ -131,6 +130,7 @@ export default function ChatPage() {
     if (mode === 'online') {
       setAiMode('online');
     } else {
+      const { isOfflineAIReady, getOfflineAI } = await import('@/lib/offline-ai');
       const isAlreadyReady = isOfflineAIReady();
       if (!isAlreadyReady) {
         /* istanbul ignore next */const conn = typeof navigator !== 'undefined' ? (navigator as any).connection : null;
@@ -298,12 +298,13 @@ export default function ChatPage() {
    // Track chatbot query event
    track.chatbotQueried('chat_message', aiMode === 'offline' ? 'local_gemma' : 'backend_sse');
 
-   try {
-     if (aiMode === 'offline') {
-       // Ensure offline AI is initialized
-       await getOfflineAI();
-       const offlineReply = await askOfflineAI(text);
-       setMessages(prev =>
+    try {
+      if (aiMode === 'offline') {
+        const { getOfflineAI, askOfflineAI } = await import('@/lib/offline-ai');
+        // Ensure offline AI is initialized
+        await getOfflineAI();
+        const offlineReply = await askOfflineAI(text);
+        setMessages(prev =>
          prev.map(m =>
            m.id === assistantId
              ? { ...m, text: offlineReply, citations: ['Offline Knowledge Base'], provider: 'Local Gemma' }

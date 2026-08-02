@@ -21,7 +21,6 @@ const nextConfig = {
     removeConsole: process.env.NODE_ENV === 'production',
   },
   output: process.env.STANDALONE === 'true' ? 'standalone' : undefined,
-  serverExternalPackages: ['@huggingface/transformers', 'onnxruntime-node', '@duckdb/duckdb-wasm'],
   outputFileTracingExcludes: {
     '*': [
       'node_modules/onnxruntime-node/**/*',

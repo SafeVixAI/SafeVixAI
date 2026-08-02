@@ -23,9 +23,9 @@ const splitText = (text: string) => {
   ));
 };
 
-/* ── Dynamic 3D Globe (SSR disabled) ── */
-const GlobeScene = dynamic(
-  () => import('./three/IntelligenceGlobe'),
+/* ── Dynamic Live Map (SSR disabled) ── */
+const HeroLiveMap = dynamic(
+  () => import('./HeroLiveMap'),
   {
     ssr: false,
     loading: () => <GlobeFallback />,
@@ -379,8 +379,8 @@ export default function HeroSection() {
         {/* ── Right Column: 3D Globe + Stat Panels ── */}
         <div className="hidden lg:flex items-center justify-center relative">
           <div className="relative w-full h-[600px] lg:h-full">
-            {/* 3D Canvas */}
-            <GlobeScene />
+            {/* Live Map Canvas */}
+            <HeroLiveMap />
 
             {/* Floating stat panels */}
             <div ref={panelsRef} className="absolute inset-0 pointer-events-none">

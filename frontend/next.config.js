@@ -11,6 +11,7 @@ try {
 const nextConfig = {
   experimental: {
     optimizePackageImports: ['lucide-react', 'date-fns', '@radix-ui/react-icons', 'recharts'],
+    serverExternalPackages: ['@huggingface/transformers', 'onnxruntime-node', '@duckdb/duckdb-wasm'],
   },
   reactStrictMode: true,
   poweredByHeader: false,

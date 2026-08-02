@@ -12,8 +12,8 @@ from collections.abc import Sequence
 import sqlalchemy as sa
 from alembic import op
 
-revision: str = "10019_add_retry_on_failure"
-down_revision: str | None = "10018_add_gpg_public_key"
+revision = "10019_add_retry_on_failure"
+down_revision = "10018_add_gpg_public_key"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 

@@ -49,8 +49,10 @@ describe('public-env', function() {
   describe('fallback behavior', function() {
     it('uses fallback defaults when env vars are missing', function() {
       const OLD_API = process.env.NEXT_PUBLIC_API_URL;
+      const OLD_BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL;
       const OLD_CHAT = process.env.NEXT_PUBLIC_CHATBOT_URL;
       delete process.env.NEXT_PUBLIC_API_URL;
+      delete process.env.NEXT_PUBLIC_BACKEND_URL;
       delete process.env.NEXT_PUBLIC_CHATBOT_URL;
 
       let mod: typeof import('../public-env');
@@ -62,14 +64,17 @@ describe('public-env', function() {
       expect(mod!.PUBLIC_CHATBOT_BASE_URL).toBe('https://safevixai-chatbot.onrender.com');
 
       process.env.NEXT_PUBLIC_API_URL = OLD_API;
+      process.env.NEXT_PUBLIC_BACKEND_URL = OLD_BACKEND;
       process.env.NEXT_PUBLIC_CHATBOT_URL = OLD_CHAT;
     });
 
     it('logs warning when env vars missing and not in test mode', function() {
       const OLD_API = process.env.NEXT_PUBLIC_API_URL;
+      const OLD_BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL;
       const OLD_CHAT = process.env.NEXT_PUBLIC_CHATBOT_URL;
       const OLD_NODE_ENV = process.env.NODE_ENV;
       delete process.env.NEXT_PUBLIC_API_URL;
+      delete process.env.NEXT_PUBLIC_BACKEND_URL;
       delete process.env.NEXT_PUBLIC_CHATBOT_URL;
       process.env.NODE_ENV = 'development';
       const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
@@ -79,14 +84,17 @@ describe('public-env', function() {
       expect(warnSpy).toHaveBeenCalled();
       warnSpy.mockRestore();
       process.env.NEXT_PUBLIC_API_URL = OLD_API;
+      process.env.NEXT_PUBLIC_BACKEND_URL = OLD_BACKEND;
       process.env.NEXT_PUBLIC_CHATBOT_URL = OLD_CHAT;
       process.env.NODE_ENV = OLD_NODE_ENV;
     });
 
     it('does not log warning in test mode when env vars missing', function() {
       const OLD_API = process.env.NEXT_PUBLIC_API_URL;
+      const OLD_BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL;
       const OLD_CHAT = process.env.NEXT_PUBLIC_CHATBOT_URL;
       delete process.env.NEXT_PUBLIC_API_URL;
+      delete process.env.NEXT_PUBLIC_BACKEND_URL;
       delete process.env.NEXT_PUBLIC_CHATBOT_URL;
       const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
       jest.isolateModules(() => {
@@ -95,6 +103,7 @@ describe('public-env', function() {
       expect(warnSpy).not.toHaveBeenCalled();
       warnSpy.mockRestore();
       process.env.NEXT_PUBLIC_API_URL = OLD_API;
+      process.env.NEXT_PUBLIC_BACKEND_URL = OLD_BACKEND;
       process.env.NEXT_PUBLIC_CHATBOT_URL = OLD_CHAT;
     });
   });

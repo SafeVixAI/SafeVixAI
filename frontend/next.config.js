@@ -21,14 +21,14 @@ const nextConfig = {
     removeConsole: process.env.NODE_ENV === 'production',
   },
   output: process.env.STANDALONE === 'true' ? 'standalone' : undefined,
-  ...(process.env.STANDALONE === 'true' ? {
-    outputFileTracingExcludes: {
-      '*': [
-        'node_modules/onnxruntime-node/**/*',
-        'node_modules/@huggingface/transformers/**/*',
-      ],
-    },
-  } : {}),
+  serverExternalPackages: ['@huggingface/transformers', 'onnxruntime-node', '@duckdb/duckdb-wasm'],
+  outputFileTracingExcludes: {
+    '*': [
+      'node_modules/onnxruntime-node/**/*',
+      'node_modules/@huggingface/transformers/**/*',
+      'node_modules/@duckdb/duckdb-wasm/**/*',
+    ],
+  },
   images: {
     formats: ['image/avif', 'image/webp'],
     remotePatterns: [

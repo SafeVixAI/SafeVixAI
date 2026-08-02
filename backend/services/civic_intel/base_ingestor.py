@@ -126,7 +126,12 @@ class BaseIngestor(ABC):
     async def _fetch_with_retry(
         self, url: str, *, params: dict | None = None, max_retries: int = 3,
     ) -> httpx.Response:
-        """Fetch URL with exponential backoff retry."""
+        """Fetch URL with exponential backoff retry.
+
+        Only retries on 5xx server errors and transport/network errors.
+        4xx client errors (404, 403, etc.) are raised immediately — retrying
+        a 404 endpoint wastes time and pollutes logs.
+        """
         settings = get_settings()
         import asyncio
 
@@ -137,7 +142,18 @@ class BaseIngestor(ABC):
                     resp = await client.get(url, params=params)
                     resp.raise_for_status()
                     return resp
-            except (httpx.HTTPStatusError, httpx.TransportError) as exc:
+            except httpx.HTTPStatusError as exc:
+                # 4xx = client error — endpoint is gone/forbidden, don't retry
+                if exc.response.status_code < 500:
+                    raise
+                last_exc = exc
+                wait = settings.upstream_retry_backoff_seconds * (2 ** attempt)
+                logger.warning(
+                    '[ETL:%s] Retry %d/%d for %s: %s (wait %.1fs)',
+                    self.name, attempt + 1, max_retries, url, exc, wait,
+                )
+                await asyncio.sleep(wait)
+            except httpx.TransportError as exc:
                 last_exc = exc
                 wait = settings.upstream_retry_backoff_seconds * (2 ** attempt)
                 logger.warning(

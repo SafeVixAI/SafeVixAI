@@ -20,8 +20,7 @@ permissions:
   contents: read
 
 env:
-  AWS_REGION: ap-south-1
-  ECR_REPOSITORY: safevixai/backend
+
 
 jobs:
   test:
@@ -166,25 +165,9 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-      - name: Configure AWS credentials
-        continue-on-error: true
-        id: aws-config
-        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c  # v4.1.0
-        with:
-          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-          aws-region: ${{ env.AWS_REGION }}
-      - name: Login to Amazon ECR
-        if: steps.aws-config.outcome == 'success'
-        uses: aws-actions/amazon-ecr-login@d539f0932e70871a027e9d5a9d8fc38589180a64  # v2.0.1
-      - name: Build, tag, and push image
-        if: steps.aws-config.outcome == 'success'
+      - name: Build Docker image
         working-directory: backend
-        run: |
-          IMAGE_TAG=${{ github.sha }}
-          docker build -t $ECR_REPOSITORY:$IMAGE_TAG .
-          docker tag $ECR_REPOSITORY:$IMAGE_TAG $ECR_REPOSITORY:latest
-          docker push $ECR_REPOSITORY:$IMAGE_TAG
-          docker push $ECR_REPOSITORY:latest
+        run: docker build -t safevixai-backend:test .
 
   notify-failure:
     if: always() && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled'))

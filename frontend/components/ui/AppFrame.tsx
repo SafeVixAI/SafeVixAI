@@ -57,7 +57,9 @@ export function AppFrame({ children }: AppFrameProps) {
         <ServerHealthStatus />
         {/* Intentionally omitting GlobalSOS, Sidebar, and BottomNav for these standalone pages */}
         <main className="flex-1 w-full relative flex flex-col">
-          {children}
+          <AuthGuard>
+            {children}
+          </AuthGuard>
         </main>
       </div>
     );

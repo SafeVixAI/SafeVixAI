@@ -42,7 +42,7 @@ class UpdateRelease(Base):
     version: Mapped[str] = mapped_column(String(32), nullable=False, index=True)
     previous_version: Mapped[str | None] = mapped_column(String(32), nullable=True)
     channel: Mapped[ReleaseChannel] = mapped_column(
-        SAEnum(ReleaseChannel, name="release_channel"), nullable=False, default=ReleaseChannel.STABLE
+        SAEnum(ReleaseChannel, name="release_channel", values_callable=lambda obj: [e.value for e in obj]), nullable=False, default=ReleaseChannel.STABLE
     )
     title: Mapped[str] = mapped_column(String(256), nullable=False)
     body: Mapped[str | None] = mapped_column(Text, nullable=True)
@@ -84,10 +84,10 @@ class UpdateInstallation(Base):
     release_version: Mapped[str] = mapped_column(String(32), nullable=False)
     previous_version: Mapped[str | None] = mapped_column(String(32), nullable=True)
     status: Mapped[UpdateStatus] = mapped_column(
-        SAEnum(UpdateStatus, name="update_status"), nullable=False, default=UpdateStatus.PENDING
+        SAEnum(UpdateStatus, name="update_status", values_callable=lambda obj: [e.value for e in obj]), nullable=False, default=UpdateStatus.PENDING
     )
     channel: Mapped[ReleaseChannel] = mapped_column(
-        SAEnum(ReleaseChannel, name="install_channel"), nullable=False
+        SAEnum(ReleaseChannel, name="install_channel", values_callable=lambda obj: [e.value for e in obj]), nullable=False
     )
     is_offline: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
@@ -111,7 +111,7 @@ class UpdateSetting(Base):
     gpg_public_key: Mapped[str | None] = mapped_column(Text, nullable=True)
     auto_update_enabled: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     channel: Mapped[ReleaseChannel] = mapped_column(
-        SAEnum(ReleaseChannel, name="setting_channel"), nullable=False, default=ReleaseChannel.STABLE
+        SAEnum(ReleaseChannel, name="setting_channel", values_callable=lambda obj: [e.value for e in obj]), nullable=False, default=ReleaseChannel.STABLE
     )
     schedule: Mapped[str] = mapped_column(String(32), default="daily", nullable=False)
     background_download: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)

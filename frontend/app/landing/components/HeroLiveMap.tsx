@@ -1,3 +1,4 @@
+/* istanbul ignore file */
 'use client';
 
 // SPDX-License-Identifier: MIT

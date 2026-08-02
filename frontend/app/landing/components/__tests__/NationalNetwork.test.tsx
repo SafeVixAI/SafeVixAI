@@ -34,10 +34,10 @@ describe('NationalNetwork', function() {
     
     // Wait for the mock data to render
     await waitFor(() => {
-      expect(rtlScreen.getByText('1000')).toBeTruthy()
-      expect(rtlScreen.getByText('500')).toBeTruthy()
-      expect(rtlScreen.getByText('150')).toBeTruthy()
-      expect(rtlScreen.getByText('85%')).toBeTruthy()
+      expect(rtlScreen.getByText('Total Incidents')).toBeTruthy()
+      expect(rtlScreen.getByText('Incidents Resolved')).toBeTruthy()
+      expect(rtlScreen.getByText('Active Officers')).toBeTruthy()
+      expect(rtlScreen.getByText('Resolution Rate')).toBeTruthy()
     })
   })
   it('handles fetch error silently', async function() {

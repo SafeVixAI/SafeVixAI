@@ -1,8 +1,8 @@
 # SafeVixAI Backend - Python 3.11 dependencies
 
 # --- Web Framework ---
-fastapi==0.140.0
-uvicorn[standard]==0.51.0
+fastapi==0.141.1
+uvicorn[standard]==0.52.0
 slowapi==0.1.10
 
 # --- AI / LLM / RAG ---
@@ -22,13 +22,13 @@ alembic==1.18.5
 psycopg2-binary==2.9.12
 
 # --- Cache ---
-redis[hiredis]==8.0.1
+redis[hiredis]==8.1.0
 
 # --- HTTP Client ---
 httpx==0.28.1
 
 # --- GPG Signature Verification ---
-python-gnupg==0.5.4
+python-gnupg==0.5.6
 
 # --- Geospatial ---
 geopandas==1.1.4
@@ -60,7 +60,7 @@ pytest>=9.1.1,<10
 pytest-asyncio>=1.4.0
 pytest-cov>=7.1.0
 pytest-httpx>=0.36.2
-hypothesis>=6.161.5
+hypothesis>=6.164.0
 
 # --- Dev / Data Tools ---
 kaggle>=2.2.4

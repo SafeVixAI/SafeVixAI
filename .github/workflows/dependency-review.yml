@@ -23,7 +23,7 @@ jobs:
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: Dependency Review
-        uses: actions/dependency-review-action@5bbc3ba658137598e464255e8c5f89526926038b  # v4.5.0
+        uses: actions/dependency-review-action@v4
         with:
           fail-on-severity: high
           deny-licenses: GPL-3.0, AGPL-3.0

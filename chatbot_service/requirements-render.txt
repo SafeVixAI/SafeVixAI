@@ -1,8 +1,8 @@
 # Lightweight Render deployment dependencies.
 # Local ASR/transformer stacks are intentionally excluded for free-tier memory safety.
 
-fastapi==0.140.0
-uvicorn[standard]==0.51.0
+fastapi==0.141.1
+uvicorn[standard]==0.52.0
 slowapi==0.1.10
 
 pydantic==2.13.4
@@ -14,10 +14,10 @@ chromadb==1.5.9
 
 groq==1.6.0
 google-generativeai==0.8.6
-openai==2.48.0
-mistralai==2.7.2
+openai==2.51.0
+mistralai==2.8.0
 
-redis==8.0.1
+redis==8.1.0
 httpx==0.28.1
 requests==2.34.2
 asyncpg==0.31.0

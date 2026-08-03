@@ -12,7 +12,7 @@ langchain-community==0.4.2
 langchain-huggingface==1.2.2
 chromadb==1.5.9
 sentence-transformers==5.6.1
-mcp==1.28.1
+mcp==2.0.0
 
 # --- Database ---
 sqlalchemy[asyncio]==2.0.51

@@ -8,10 +8,7 @@ on:
       - "v*"
 
 permissions:
-  contents: write
-  packages: write
-  attestations: write
-  id-token: write
+  contents: read
 
 concurrency:
   group: release-${{ github.ref }}
@@ -100,6 +97,11 @@ jobs:
     needs: [validate, test, lint]
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
     outputs:
       digest: ${{ steps.push.outputs.digest }}
     strategy:

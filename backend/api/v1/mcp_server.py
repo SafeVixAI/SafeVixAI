@@ -10,7 +10,7 @@ from typing import Any
 
 import httpx
 from fastapi import APIRouter, Depends, Request
-from mcp.server.fastmcp import FastMCP
+from mcp.server import MCPServer
 from mcp.server.sse import SseServerTransport
 from starlette.applications import Starlette
 from starlette.requests import Request as StarletteRequest
@@ -21,7 +21,7 @@ from core.rbac import Role, require_role
 
 logger = logging.getLogger("safevixai.mcp")
 
-mcp = FastMCP("SafeVixAI")
+mcp = MCPServer("SafeVixAI")
 
 # ---------------------------------------------------------------------------
 # MCP Authentication & Rate Limiting
@@ -442,16 +442,14 @@ async def get_location_from_what3words(words: str) -> str:
 _sse_transport = SseServerTransport("/mcp/messages/")
 
 
-async def _handle_sse(request: StarletteRequest) -> None:
+async def _handle_sse(request: StarletteRequest) -> Response:
     async with _sse_transport.connect_sse(
-        request.scope,
-        request.receive,
-        request._send,
+        request.scope, request.receive, request._send
     ) as streams:
-        await mcp._mcp_server.run(
+        await mcp._lowlevel_server.run(
             streams[0],
             streams[1],
-            mcp._mcp_server.create_initialization_options(),
+            mcp._lowlevel_server.create_initialization_options(),
         )
 
 
@@ -504,7 +502,7 @@ async def get_mcp_health() -> dict[str, Any]:
             "status": "healthy",
             "mcp_server": "online",
             "transport": "sse",
-            "tools_count": len(mcp._mcp_server.tools) if hasattr(mcp._mcp_server, "tools") else 7,
+            "tools_count": len(mcp._lowlevel_server.tools) if hasattr(mcp._lowlevel_server, "tools") else 7,
         }
     except Exception as exc:
         logger.exception("MCP health check failed")

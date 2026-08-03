@@ -152,8 +152,8 @@ async def test_mcp_health_endpoint():
     assert res["mcp_server"] == "online"
 
     with patch("api.v1.mcp_server.mcp", MagicMock()) as mock_mcp:
-        mock_mcp._mcp_server = MagicMock()
-        mock_mcp._mcp_server.tools = object()  # object() has no __len__ -> TypeError -> HTTPException(500)
+        mock_mcp._lowlevel_server = MagicMock()
+        mock_mcp._lowlevel_server.tools = object()  # object() has no __len__ -> TypeError -> HTTPException(500)
         with patch("api.v1.mcp_server.logger.exception") as mock_logger:
             with pytest.raises(HTTPException) as exc_info:
                 await get_mcp_health()

@@ -2,7 +2,7 @@
 # RAG ingestion, data science, and local ML packages stay in requirements.txt for local scripts.
 
 fastapi==0.141.1
-uvicorn[standard]==0.52.0
+uvicorn[standard]==0.52.1
 slowapi==0.1.10
 
 sqlalchemy[asyncio]==2.0.51

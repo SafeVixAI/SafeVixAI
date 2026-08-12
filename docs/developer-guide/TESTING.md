@@ -81,7 +81,7 @@ flowchart LR
         BE1[pip install]
         BE2["ruff lint + fix"]
         BE3["pytest --cov=100%"]
-        BE4[""mutation (info")"]
+        BE4["mutation (info)"]
     end
 
     CB --> CB_STEPS

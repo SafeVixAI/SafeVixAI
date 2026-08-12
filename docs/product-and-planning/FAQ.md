@@ -72,7 +72,7 @@ flowchart TD
     ONLINE -->|Yes| API["POST /api/v1/emergency/sos"]
     API --> DISPATCH["Create sos_incident record<br/>PostGIS point"]
     DISPATCH --> NOTIFY["Send SMS + WhatsApp<br/>to Emergency Contacts"]
-    NOTIFY --> TRACKING[""Start WebSocket Tracking<br/>ws://host/tracking/{group_id"}"]
+    NOTIFY --> TRACKING["Start WebSocket Tracking<br/>ws://host/tracking/{group_id}"]
     TRACKING --> DONE[Dispatch Confirmed]
 
     ONLINE -->|No| QUEUE["Enqueue in IndexedDB<br/>offline-sos-queue.ts"]

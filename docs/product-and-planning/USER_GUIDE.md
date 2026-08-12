@@ -188,4 +188,4 @@ See [PRIVACY.md](../compliance-and-reports/PRIVACY.md) for complete privacy poli
 - In-app help: Use the chatbot with "help"
 - [FAQ.md](FAQ.md) — Frequently asked questions
 - [GitHub Issues](https://github.com/SafeVixAI/SafeVixAI/issues) — Bug reports and feature requests
-- [SUPPORT.md](../../SUPPORT.md) — All support channels
+- [SUPPORT.md](https://github.com/SafeVixAI/SafeVixAI/blob/main/SUPPORT.md) — All support channels

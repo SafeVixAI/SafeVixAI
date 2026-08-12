@@ -103,25 +103,34 @@ Core rules:
 
 ```mermaid
 flowchart LR
+    classDef edge fill:#dbeafe,stroke:#3b82f6,stroke-width:2px,color:#1e3a5f
+    classDef control fill:#dcfce7,stroke:#22c55e,stroke-width:2px,color:#14532d
+    classDef ai fill:#f3e8ff,stroke:#a855f7,stroke-width:2px,color:#581c87
+    classDef data fill:#fef3c7,stroke:#f59e0b,stroke-width:2px,color:#78350f
+    classDef security fill:#fee2e2,stroke:#ef4444,stroke-width:2px,color:#7f1d1d
+    classDef external fill:#f1f5f9,stroke:#94a3b8,stroke-width:2px,stroke-dasharray:5 5,color:#334155
+    classDef decision fill:#e0e7ff,stroke:#6366f1,stroke-width:2px,color:#312e81
+    classDef success fill:#d1fae5,stroke:#10b981,stroke-width:2px,color:#064e3b
+
     subgraph Primitive["Primitive Tokens"]
-        P1[--color-brand: #1A5C38]
-        P2[--color-emergency: #DC2626]
-        P3[--color-bg: #0A0E14]
-        P4[--font-sans: Inter Variable]
+        P1["--color-brand: #1A5C38"]:::data
+        P2["--color-emergency: #DC2626"]:::data
+        P3["--color-bg: #0A0E14"]:::data
+        P4["--font-sans: Inter Variable"]:::data
     end
 
     subgraph Semantic["Semantic Tokens"]
-        S1[--surface-1: card bg]
-        S2[--text-1: primary text]
-        S3[--border: subtle borders]
-        S4[--r-lg: 8px cards]
+        S1["--surface-1: card bg"]:::control
+        S2["--text-1: primary text"]:::control
+        S3["--border: subtle borders"]:::control
+        S4["--r-lg: 8px cards"]:::control
     end
 
     subgraph Component["Component Tokens"]
-        C1[Standard Card: bg surface-1, border border, r-lg]
-        C2[Emergency SOS: gradient, border-red, r-hero]
-        C3[Button Primary: bg brand, r-md]
-        C4[Filter Chip: bg dim, r-pill]
+        C1["Standard Card: bg surface-1, border border, r-lg"]:::edge
+        C2["Emergency SOS: gradient, border-red, r-hero"]:::edge
+        C3["Button Primary: bg brand, r-md"]:::edge
+        C4["Filter Chip: bg dim, r-pill"]:::edge
     end
 
     P1 --> S1
@@ -138,41 +147,59 @@ flowchart LR
 
 ```mermaid
 flowchart LR
-    A[Page Mount] --> B{prefers-reduced-motion?}
-    B -->|yes| C[Skip animation, show immediately]
-    B -->|no| D[gsap.fromTo: opacity 0→1]
-    D --> E[Stagger children by 0.05s]
-    E --> F[GPU-composited transform/opacity only]
-    F --> G[will-change managed on mount]
-    G --> H[Unmount: kill timeline, reset will-change]
+    classDef edge fill:#dbeafe,stroke:#3b82f6,stroke-width:2px,color:#1e3a5f
+    classDef control fill:#dcfce7,stroke:#22c55e,stroke-width:2px,color:#14532d
+    classDef ai fill:#f3e8ff,stroke:#a855f7,stroke-width:2px,color:#581c87
+    classDef data fill:#fef3c7,stroke:#f59e0b,stroke-width:2px,color:#78350f
+    classDef security fill:#fee2e2,stroke:#ef4444,stroke-width:2px,color:#7f1d1d
+    classDef external fill:#f1f5f9,stroke:#94a3b8,stroke-width:2px,stroke-dasharray:5 5,color:#334155
+    classDef decision fill:#e0e7ff,stroke:#6366f1,stroke-width:2px,color:#312e81
+    classDef success fill:#d1fae5,stroke:#10b981,stroke-width:2px,color:#064e3b
+
+    A["Page Mount"]:::edge --> B{"prefers-reduced-motion?"}:::decision
+    B -->|"yes"| C["Skip animation, show immediately"]:::edge
+    B -->|"no"| D["gsap.fromTo: opacity 0 -> 1"]:::control
+    D --> E["Stagger children by 0.05s"]:::control
+    E --> F["GPU-composited transform/opacity only"]:::control
+    F --> G["will-change managed on mount"]:::control
+    G --> H["Unmount: kill timeline, reset will-change"]:::control
 ```
 
 ## Component Hierarchy
 
 ```mermaid
 flowchart TB
-    L[Layout] --> S[Sidebar]
-    L --> H[Header Bar]
-    L --> M[Main Content]
-    L --> B[Bottom Nav]
+    classDef edge fill:#dbeafe,stroke:#3b82f6,stroke-width:2px,color:#1e3a5f
+    classDef control fill:#dcfce7,stroke:#22c55e,stroke-width:2px,color:#14532d
+    classDef ai fill:#f3e8ff,stroke:#a855f7,stroke-width:2px,color:#581c87
+    classDef data fill:#fef3c7,stroke:#f59e0b,stroke-width:2px,color:#78350f
+    classDef security fill:#fee2e2,stroke:#ef4444,stroke-width:2px,color:#7f1d1d
+    classDef external fill:#f1f5f9,stroke:#94a3b8,stroke-width:2px,stroke-dasharray:5 5,color:#334155
+    classDef decision fill:#e0e7ff,stroke:#6366f1,stroke-width:2px,color:#312e81
+    classDef success fill:#d1fae5,stroke:#10b981,stroke-width:2px,color:#064e3b
+
+    L["Layout"]:::edge --> S["Sidebar"]:::edge
+    L --> H["Header Bar"]:::edge
+    L --> M["Main Content"]:::edge
+    L --> B["Bottom Nav"]:::edge
 
     subgraph Sidebar2["Sidebar 192px"]
-        SN[Nav Items]
-        ED[Emergency Dial]
+        SN["Nav Items"]:::edge
+        ED["Emergency Dial"]:::edge
     end
 
     subgraph Main2["Main Content Area"]
-        MP[Map / Dashboard]
-        CH[Chat Interface]
-        FG[Form + Grid]
+        MP["Map / Dashboard"]:::edge
+        CH["Chat Interface"]:::edge
+        FG["Form + Grid"]:::edge
     end
 
     subgraph Bottom2["Bottom Nav 64px"]
-        T1[Map]
-        T2[Chat]
-        T3[Locator]
-        T4[Report]
-        T5[First Aid]
+        T1["Map"]:::edge
+        T2["Chat"]:::edge
+        T3["Locator"]:::edge
+        T4["Report"]:::edge
+        T5["First Aid"]:::edge
     end
 
     S --> Sidebar2

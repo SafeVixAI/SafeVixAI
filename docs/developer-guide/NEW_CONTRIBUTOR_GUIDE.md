@@ -89,8 +89,8 @@ Pick the service that matches your interest:
 
 ## Community
 
-- **Code of Conduct:** [CODE_OF_CONDUCT.md](../../CODE_OF_CONDUCT.md)
-- **Governance:** [GOVERNANCE.md](../../GOVERNANCE.md)
+- **Code of Conduct:** [CODE_OF_CONDUCT.md](https://github.com/SafeVixAI/SafeVixAI/blob/main/CODE_OF_CONDUCT.md)
+- **Governance:** [GOVERNANCE.md](https://github.com/SafeVixAI/SafeVixAI/blob/main/GOVERNANCE.md)
 - **Roadmap:** [ROADMAP.md](chatbot/roadmap.md)
 - **Discussions:** [GitHub Discussions](https://github.com/SafeVixAI/SafeVixAI/discussions)
 

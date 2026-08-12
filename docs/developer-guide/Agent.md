@@ -153,35 +153,64 @@ POST /api/v1/chat/stream
 
 ```mermaid
 flowchart LR
-    subgraph Frontend["frontend/ — Next.js 15 PWA"]
+    subgraph Frontend[" frontend/ — Next.js 15 PWA "]
         F1[Port 3000]
-        F2[MapLibre GL / WebLLM / DuckDB-Wasm]
-        F3[Zustand / Tailwind CSS 3]
+        F2["MapLibre GL / WebLLM / DuckDB-Wasm"]
+        F3["Zustand / Tailwind CSS 3"]
     end
 
-    subgraph Backend["backend/ — FastAPI :8000"]
-        B1[PostgreSQL + PostGIS]
+    subgraph Backend[" backend/ — FastAPI :8000 "]
+        B1["PostgreSQL + PostGIS"]
         B2[Redis Cache]
-        B3[DuckDB - Challan SQL]
-        B4[Overpass / Nominatim]
-        B5[WebSocket - Tracking]
+        B3["DuckDB - Challan SQL"]
+        B4["Overpass / Nominatim"]
+        B5["WebSocket - Tracking"]
     end
 
-    subgraph Chatbot["chatbot_service/ — FastAPI :8010"]
-        C1[10-Provider LLM Fallback]
+    subgraph Chatbot[" chatbot_service/ — FastAPI :8010 "]
+        C1["10-Provider LLM Fallback"]
         C2[ChromaDB RAG Vectorstore]
         C3[13 Agent Tools]
         C4[Redis Conversation Memory]
     end
 
-    Frontend -- "REST/WS (JWT Bearer)" --> Backend
-    Frontend -- "REST (JWT Bearer)" --> Chatbot
+    Frontend -- "REST/WS(JWT Bearer)" --> Backend
+    Frontend -- "REST(JWT Bearer)" --> Chatbot
     Backend <--> Chatbot
 
     style Frontend fill:#1f6feb,color:#fff
     style Backend fill:#238636,color:#fff
     style Chatbot fill:#9e6a03,color:#fff
-```
+
+
+    classDef edge fill:#dbeafe,stroke:#3b82f6,stroke-width:2px,color:#1e3a5f
+    classDef control fill:#dcfce7,stroke:#22c55e,stroke-width:2px,color:#14532d
+    classDef ai fill:#f3e8ff,stroke:#a855f7,stroke-width:2px,color:#581c87
+    classDef data fill:#fef3c7,stroke:#f59e0b,stroke-width:2px,color:#78350f
+    classDef security fill:#fee2e2,stroke:#ef4444,stroke-width:2px,color:#7f1d1d
+    classDef external fill:#f1f5f9,stroke:#94a3b8,stroke-width:2px,stroke-dasharray:5 5,color:#334155
+    classDef decision fill:#e0e7ff,stroke:#6366f1,stroke-width:2px,color:#312e81
+    classDef success fill:#d1fae5,stroke:#10b981,stroke-width:2px,color:#064e3b
+    classDef action fill:#fff7ed,stroke:#f97316,stroke-width:2px,color:#7c2d12
+    classDef neutral fill:#f8fafc,stroke:#64748b,stroke-width:2px,color:#1e293b
+
+    class Frontend edge
+    class F1 neutral
+    class F2 data
+    class F3 ai
+    class Backend edge
+    class B1 data
+    class B2 data
+    class B3 data
+    class B4 success
+    class B5 neutral
+    class Chatbot ai
+    class C1 ai
+    class C2 data
+    class C3 neutral
+    class C4 data
+    class WS security
+    class REST security```
 
 ---
 

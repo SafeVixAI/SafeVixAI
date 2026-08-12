@@ -6,21 +6,21 @@ Complete guide to install dependencies and run both backend and frontend locally
 
 ```mermaid
 flowchart LR
-    subgraph DevEnv["Development Environment"]
-        T1[Terminal 1<br/>Backend :8000]
-        T2[Terminal 2<br/>Chatbot :8010]
-        T3[Terminal 3<br/>Frontend :3000]
+    subgraph DevEnv[" Development Environment "]
+        T1["Terminal 1<br/>Backend :8000"]
+        T2["Terminal 2<br/>Chatbot :8010"]
+        T3["Terminal 3<br/>Frontend :3000"]
     end
 
-    subgraph Code["Source Code"]
-        BE_REPO[backend/<br/>FastAPI + SQLAlchemy]
-        CB_REPO[chatbot_service/<br/>FastAPI + ChromaDB]
-        FE_REPO[frontend/<br/>Next.js 15 + React 19]
+    subgraph Code[" Source Code "]
+        BE_REPO["backend/<br/>FastAPI + SQLAlchemy"]
+        CB_REPO["chatbot_service/<br/>FastAPI + ChromaDB"]
+        FE_REPO["frontend/<br/>Next.js 15 + React 19"]
     end
 
-    subgraph Data["Data Layer"]
-        PG[PostgreSQL 16 + PostGIS<br/>Supabase / Local]
-        RD[Redis 7<br/>Upstash / Local]
+    subgraph Data[" Data Layer "]
+        PG["PostgreSQL 16 + PostGIS<br/>Supabase / Local"]
+        RD["Redis 7<br/>Upstash / Local"]
     end
 
     T1 --> BE_REPO
@@ -30,46 +30,104 @@ flowchart LR
     BE_REPO --> PG
     BE_REPO --> RD
     CB_REPO --> RD
-    FE_REPO -->|REST/WS| BE_REPO
+    FE_REPO -->|"REST/WS"| BE_REPO
     FE_REPO -->|REST| CB_REPO
-```
+
+
+    classDef edge fill:#dbeafe,stroke:#3b82f6,stroke-width:2px,color:#1e3a5f
+    classDef control fill:#dcfce7,stroke:#22c55e,stroke-width:2px,color:#14532d
+    classDef ai fill:#f3e8ff,stroke:#a855f7,stroke-width:2px,color:#581c87
+    classDef data fill:#fef3c7,stroke:#f59e0b,stroke-width:2px,color:#78350f
+    classDef security fill:#fee2e2,stroke:#ef4444,stroke-width:2px,color:#7f1d1d
+    classDef external fill:#f1f5f9,stroke:#94a3b8,stroke-width:2px,stroke-dasharray:5 5,color:#334155
+    classDef decision fill:#e0e7ff,stroke:#6366f1,stroke-width:2px,color:#312e81
+    classDef success fill:#d1fae5,stroke:#10b981,stroke-width:2px,color:#064e3b
+    classDef action fill:#fff7ed,stroke:#f97316,stroke-width:2px,color:#7c2d12
+    classDef neutral fill:#f8fafc,stroke:#64748b,stroke-width:2px,color:#1e293b
+
+    class DevEnv neutral
+    class T1 control
+    class T2 ai
+    class T3 edge
+    class Code neutral
+    class BE_REPO data
+    class CB_REPO data
+    class FE_REPO edge
+    class Data neutral
+    class PG data
+    class RD data```
 
 ## Setup Workflow
 
 ```mermaid
 flowchart TD
     START[Start] --> CLONE[git clone]
-    CLONE --> VERIFY{Node >= 20<br/>Python >= 3.11}
+    CLONE --> VERIFY{"Node >= 20<br/>Python >= 3.11"}
 
     VERIFY -->|No| INSTALL_PRE[Install Prerequisites]
     INSTALL_PRE --> VERIFY
 
     VERIFY -->|Yes| BE_SETUP[Backend Setup]
-    BE_SETUP --> BE_VENV[Create .venv<br/>python -m venv .venv]
+    BE_SETUP --> BE_VENV["Create .venv<br/>python -m venv .venv"]
     BE_VENV --> BE_ACTIVATE[Activate venv]
-    BE_ACTIVATE --> BE_PIP[pip install -r requirements.txt]
-    BE_PIP --> BE_ENV[cp .env.example .env<br/>Configure API keys]
+    BE_ACTIVATE --> BE_PIP["pip install -r requirements.txt"]
+    BE_PIP --> BE_ENV["cp .env.example .env<br/>Configure API keys"]
     BE_ENV --> BE_DB["Run migrations<br/>alembic upgrade head"]
-    BE_DB --> BE_RUN[uvicorn main:app<br/>--reload --port 8000]
+    BE_DB --> BE_RUN["uvicorn main:app<br/>--reload --port 8000"]
 
     VERIFY --> CB_SETUP[Chatbot Setup]
-    CB_SETUP --> CB_VENV[Create .venv<br/>python -m venv .venv]
+    CB_SETUP --> CB_VENV["Create .venv<br/>python -m venv .venv"]
     CB_VENV --> CB_ACTIVATE[Activate venv]
-    CB_ACTIVATE --> CB_PIP[pip install -r requirements.txt]
-    CB_PIP --> CB_ENV[cp .env.example .env<br/>Configure LLM keys]
-    CB_ENV --> CB_RUN[uvicorn main:app<br/>--reload --port 8010]
+    CB_ACTIVATE --> CB_PIP["pip install -r requirements.txt"]
+    CB_PIP --> CB_ENV["cp .env.example .env<br/>Configure LLM keys"]
+    CB_ENV --> CB_RUN["uvicorn main:app<br/>--reload --port 8010"]
 
     VERIFY --> FE_SETUP[Frontend Setup]
     FE_SETUP --> FE_NPM[npm ci]
-    FE_NPM --> FE_ENV[cp .env.example .env]
+    FE_NPM --> FE_ENV["cp .env.example .env"]
     FE_ENV --> FE_RUN[npm run dev]
 
     BE_RUN --> DONE[All 3 services running]
     CB_RUN --> DONE
     FE_RUN --> DONE
 
-    DONE --> VERIFY_HEALTH[Verify localhost:8000/health<br/>localhost:8010/health<br/>localhost:3000]
-```
+    DONE --> VERIFY_HEALTH["Verify localhost:8000/health<br/>localhost:8010/health<br/>localhost:3000"]
+
+
+    classDef edge fill:#dbeafe,stroke:#3b82f6,stroke-width:2px,color:#1e3a5f
+    classDef control fill:#dcfce7,stroke:#22c55e,stroke-width:2px,color:#14532d
+    classDef ai fill:#f3e8ff,stroke:#a855f7,stroke-width:2px,color:#581c87
+    classDef data fill:#fef3c7,stroke:#f59e0b,stroke-width:2px,color:#78350f
+    classDef security fill:#fee2e2,stroke:#ef4444,stroke-width:2px,color:#7f1d1d
+    classDef external fill:#f1f5f9,stroke:#94a3b8,stroke-width:2px,stroke-dasharray:5 5,color:#334155
+    classDef decision fill:#e0e7ff,stroke:#6366f1,stroke-width:2px,color:#312e81
+    classDef success fill:#d1fae5,stroke:#10b981,stroke-width:2px,color:#064e3b
+    classDef action fill:#fff7ed,stroke:#f97316,stroke-width:2px,color:#7c2d12
+    classDef neutral fill:#f8fafc,stroke:#64748b,stroke-width:2px,color:#1e293b
+
+    class START neutral
+    class CLONE neutral
+    class VERIFY neutral
+    class INSTALL_PRE edge
+    class BE_SETUP control
+    class BE_VENV action
+    class BE_ACTIVATE neutral
+    class BE_PIP edge
+    class BE_ENV edge
+    class BE_DB neutral
+    class BE_RUN ai
+    class CB_SETUP ai
+    class CB_VENV action
+    class CB_ACTIVATE neutral
+    class CB_PIP edge
+    class CB_ENV ai
+    class CB_RUN ai
+    class FE_SETUP edge
+    class FE_NPM neutral
+    class FE_ENV neutral
+    class FE_RUN neutral
+    class DONE control
+    class VERIFY_HEALTH neutral```
 
 ## Estimated Setup Times
 

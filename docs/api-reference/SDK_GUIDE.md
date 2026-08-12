@@ -8,8 +8,8 @@
 sequenceDiagram
     participant Client as Client App
     participant Auth as Auth Gateway
-    participant API as API Gateway :8000
-    participant Chatbot as Chatbot :8010
+    participant API as "API Gateway :8000"
+    participant Chatbot as "Chatbot :8010"
     participant DB as PostgreSQL
     participant Cache as Redis
 
@@ -59,7 +59,7 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     participant Client as SOS Initiator
-    participant WS as WebSocket :8000/ws
+    participant WS as "WebSocket :8000/ws"
     participant Tracker as Family Tracking
     participant DB as PostgreSQL
     participant Cache as Redis

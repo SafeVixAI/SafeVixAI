@@ -1,6 +1,6 @@
 # SafeVixAI — Testing Gap Analysis
 
-> **SNAPSHOT**: This document reflects the state as of its creation date. For current state see [AGENTS.md](../../../AGENTS.md).
+> **SNAPSHOT**: This document reflects the state as of its creation date. For current state see [AGENTS.md](https://github.com/SafeVixAI/SafeVixAI/blob/main/AGENTS.md).
 
 > Generated: 2026-05-22 | Coverage gaps, risk-based priorities, recommendations
 

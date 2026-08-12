@@ -6,29 +6,38 @@
 
 ```mermaid
 graph LR
+    classDef edge fill:#dbeafe,stroke:#3b82f6,stroke-width:2px,color:#1e3a5f
+    classDef control fill:#dcfce7,stroke:#22c55e,stroke-width:2px,color:#14532d
+    classDef ai fill:#f3e8ff,stroke:#a855f7,stroke-width:2px,color:#581c87
+    classDef data fill:#fef3c7,stroke:#f59e0b,stroke-width:2px,color:#78350f
+    classDef security fill:#fee2e2,stroke:#ef4444,stroke-width:2px,color:#7f1d1d
+    classDef external fill:#f1f5f9,stroke:#94a3b8,stroke-width:2px,stroke-dasharray:5 5,color:#334155
+    classDef decision fill:#e0e7ff,stroke:#6366f1,stroke-width:2px,color:#312e81
+    classDef success fill:#d1fae5,stroke:#10b981,stroke-width:2px,color:#064e3b
+
     subgraph HS256["HS256 — Supabase Sessions"]
-        H1[Supabase Auth]
-        H2[SUPABASE_JWT_SECRET<br/>Shared Secret Key]
-        H3[Frontend Sessions<br/>Signup, Login, Refresh]
+        H1["Supabase Auth"]:::security
+        H2["SUPABASE_JWT_SECRET<br/>Shared Secret Key"]:::security
+        H3["Frontend Sessions<br/>Signup, Login, Refresh"]:::edge
         H1 --> H2 --> H3
     end
 
     subgraph RS256["RS256 — JWKS Enterprise"]
-        R1[JWKSManager<br/>Key Rotation Service]
-        R2[RSA-2048 Key Pair<br/>Public + Private]
-        R3[Service Tokens<br/>Admin, Internal Services]
+        R1["JWKSManager<br/>Key Rotation Service"]:::control
+        R2["RSA-2048 Key Pair<br/>Public + Private"]:::security
+        R3["Service Tokens<br/>Admin, Internal Services"]:::security
         R1 --> R2 --> R3
     end
 
     subgraph Guest["Guest — Anonymous"]
-        G1[X-Guest-ID<br/>UUID v4]
-        G2[Anonymous Access<br/>7 days TTL]
+        G1["X-Guest-ID<br/>UUID v4"]:::security
+        G2["Anonymous Access<br/>7 days TTL"]:::edge
         G1 --> G2
     end
 
     subgraph Internal["Internal — Service-to-Service"]
-        I1[X-Internal-Api-Key<br/>Pre-shared Secret]
-        I2[Backend to Chatbot<br/>Chat Proxy Calls]
+        I1["X-Internal-Api-Key<br/>Pre-shared Secret"]:::security
+        I2["Backend to Chatbot<br/>Chat Proxy Calls"]:::control
         I1 --> I2
     end
 ```
@@ -37,47 +46,64 @@ graph LR
 
 ```mermaid
 flowchart TD
-    REQ[Incoming Request] --> AUTH{Authorization Header?}
+    classDef edge fill:#dbeafe,stroke:#3b82f6,stroke-width:2px,color:#1e3a5f
+    classDef control fill:#dcfce7,stroke:#22c55e,stroke-width:2px,color:#14532d
+    classDef ai fill:#f3e8ff,stroke:#a855f7,stroke-width:2px,color:#581c87
+    classDef data fill:#fef3c7,stroke:#f59e0b,stroke-width:2px,color:#78350f
+    classDef security fill:#fee2e2,stroke:#ef4444,stroke-width:2px,color:#7f1d1d
+    classDef external fill:#f1f5f9,stroke:#94a3b8,stroke-width:2px,stroke-dasharray:5 5,color:#334155
+    classDef decision fill:#e0e7ff,stroke:#6366f1,stroke-width:2px,color:#312e81
+    classDef success fill:#d1fae5,stroke:#10b981,stroke-width:2px,color:#064e3b
 
-    AUTH -->|No| OPT{get_current_user_optional?}
-    OPT -->|Yes| ANON[Return AnonymousUser<br/>with guest_id]
-    OPT -->|No| UNAUTH[Raise 401 UNAUTHORIZED]
+    REQ["Incoming Request"]:::edge --> AUTH{"Authorization Header?"}:::decision
+    AUTH -->|"No"| OPT{"get_current_user_optional?"}:::decision
+    OPT -->|"Yes"| ANON["Return AnonymousUser<br/>with guest_id"]:::success
+    OPT -->|"No"| UNAUTH["Raise 401 UNAUTHORIZED"]:::security
 
-    AUTH -->|Bearer token| DECODE[Decode header without verification]
-    DECODE --> ALG{Algorithm detected?}
+    AUTH -->|"Bearer token"| DECODE["Decode header without verification"]:::control
+    DECODE --> ALG{"Algorithm detected?"}:::decision
 
-    ALG -->|RS256| JWKS[Fetch JWKS public keys<br/>stampede protected]
-    JWKS --> VERIFY_RS[Verify with RSA public key]
+    ALG -->|"RS256"| JWKS["Fetch JWKS public keys<br/>stampede protected"]:::data
+    JWKS --> VERIFY_RS["Verify with RSA public key"]:::security
 
-    ALG -->|HS256| VERIFY_HS[Verify with SUPABASE_JWT_SECRET]
+    ALG -->|"HS256"| VERIFY_HS["Verify with SUPABASE_JWT_SECRET"]:::security
 
-    VERIFY_RS --> CHECK{Valid signature?}
+    VERIFY_RS --> CHECK{"Valid signature?"}:::decision
     VERIFY_HS --> CHECK
 
-    CHECK -->|No| INV[Raise 401 Invalid Token]
-    CHECK -->|Yes| USER[Load user from payload<br/>sub, role, org_id]
-    USER --> DONE[Return AuthenticatedUser]
+    CHECK -->|"No"| INV["Raise 401 Invalid Token"]:::security
+    CHECK -->|"Yes"| USER["Load user from payload<br/>sub, role, org_id"]:::control
+    USER --> DONE["Return AuthenticatedUser"]:::success
 ```
 
 ## Token Lifecycle
 
 ```mermaid
 flowchart LR
-    SIGNUP[Sign-up] --> ACCESS[Issue Access Token<br/>15 min TTL]
-    SIGNUP --> REFRESH[Issue Refresh Token<br/>30 day TTL]
+    classDef edge fill:#dbeafe,stroke:#3b82f6,stroke-width:2px,color:#1e3a5f
+    classDef control fill:#dcfce7,stroke:#22c55e,stroke-width:2px,color:#14532d
+    classDef ai fill:#f3e8ff,stroke:#a855f7,stroke-width:2px,color:#581c87
+    classDef data fill:#fef3c7,stroke:#f59e0b,stroke-width:2px,color:#78350f
+    classDef security fill:#fee2e2,stroke:#ef4444,stroke-width:2px,color:#7f1d1d
+    classDef external fill:#f1f5f9,stroke:#94a3b8,stroke-width:2px,stroke-dasharray:5 5,color:#334155
+    classDef decision fill:#e0e7ff,stroke:#6366f1,stroke-width:2px,color:#312e81
+    classDef success fill:#d1fae5,stroke:#10b981,stroke-width:2px,color:#064e3b
 
-    LOGIN[Sign-in] --> ACCESS
+    SIGNUP["Sign-up"]:::edge --> ACCESS["Issue Access Token<br/>15 min TTL"]:::security
+    SIGNUP --> REFRESH["Issue Refresh Token<br/>30 day TTL"]:::security
+
+    LOGIN["Sign-in"]:::edge --> ACCESS
     LOGIN --> REFRESH
 
-    ACCESS --> EXP{AuthZ check}
-    EXP -->|Valid| ALLOW[Allow Request]
-    EXP -->|Expired| REFRESH_FLOW[Use Refresh Token]
+    ACCESS --> EXP{"AuthZ check"}:::decision
+    EXP -->|"Valid"| ALLOW["Allow Request"]:::success
+    EXP -->|"Expired"| REFRESH_FLOW["Use Refresh Token"]:::control
 
-    REFRESH_FLOW --> ROTATE[Rotate Tokens]
+    REFRESH_FLOW --> ROTATE["Rotate Tokens"]:::security
     ROTATE --> ACCESS
     ROTATE --> REFRESH
 
-    GUEST[Guest Session] --> GUEST_ID[Issue X-Guest-ID<br/>7 day TTL]
+    GUEST["Guest Session"]:::edge --> GUEST_ID["Issue X-Guest-ID<br/>7 day TTL"]:::security
 ```
 
 ## Token Types

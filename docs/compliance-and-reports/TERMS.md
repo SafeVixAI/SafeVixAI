@@ -19,19 +19,19 @@ SafeVixAI provides:
 
 ```mermaid
 flowchart TB
-    subgraph Important["CRITICAL: NOT AN EMERGENCY SERVICE"]
-        WARNING[⚠️ SafeVixAI is informational only]
+    subgraph Important[" CRITICAL: NOT AN EMERGENCY SERVICE "]
+        WARNING["⚠️ SafeVixAI is informational only"]
         CALL112["ALWAYS call 112<br/>India's unified emergency number"]
         NEVER["NEVER delay contacting<br/>professional responders"]
     end
 
-    subgraph Usage["How to Use"]
-        INFO[AI-generated info for reference]
+    subgraph Usage[" How to Use "]
+        INFO["AI-generated info for reference"]
         VERIFY[Always verify with professionals]
-        AID[Supplemental tool, not primary response]
+        AID["Supplemental tool, not primary response"]
     end
 
-    subgraph Legal["Your Responsibilities"]
+    subgraph Legal[" Your Responsibilities "]
         ACCURATE[Provide accurate data]
         NO_MISUSE[No false SOS alerts]
         SECURE[Keep credentials safe]
@@ -47,7 +47,32 @@ flowchart TB
     ACCURATE --> NO_MISUSE
     NO_MISUSE --> SECURE
     SECURE --> COMPLY
-```
+
+
+    classDef edge fill:#dbeafe,stroke:#3b82f6,stroke-width:2px,color:#1e3a5f
+    classDef control fill:#dcfce7,stroke:#22c55e,stroke-width:2px,color:#14532d
+    classDef ai fill:#f3e8ff,stroke:#a855f7,stroke-width:2px,color:#581c87
+    classDef data fill:#fef3c7,stroke:#f59e0b,stroke-width:2px,color:#78350f
+    classDef security fill:#fee2e2,stroke:#ef4444,stroke-width:2px,color:#7f1d1d
+    classDef external fill:#f1f5f9,stroke:#94a3b8,stroke-width:2px,stroke-dasharray:5 5,color:#334155
+    classDef decision fill:#e0e7ff,stroke:#6366f1,stroke-width:2px,color:#312e81
+    classDef success fill:#d1fae5,stroke:#10b981,stroke-width:2px,color:#064e3b
+    classDef action fill:#fff7ed,stroke:#f97316,stroke-width:2px,color:#7c2d12
+    classDef neutral fill:#f8fafc,stroke:#64748b,stroke-width:2px,color:#1e293b
+
+    class Important control
+    class WARNING ai
+    class CALL112 neutral
+    class NEVER neutral
+    class Usage neutral
+    class INFO ai
+    class VERIFY neutral
+    class AID neutral
+    class Legal neutral
+    class ACCURATE neutral
+    class NO_MISUSE neutral
+    class SECURE neutral
+    class COMPLY edge```
 
 **SafeVixAI is NOT a replacement for professional emergency services.** Always call **112** (India's unified emergency number) in life-threatening situations. The Service provides informational tools and should never delay contacting professional responders.
 

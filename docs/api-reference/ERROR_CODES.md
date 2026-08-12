@@ -7,11 +7,11 @@
 ```mermaid
 stateDiagram-v2
     [*] --> Closed: Initial State
-    Closed --> Open: Failures >= threshold (5)<br/>within window (60s)
-    Open --> HalfOpen: Timeout elapsed (30s)
-    HalfOpen --> Closed: Probe success<br/>(single request passes)
-    HalfOpen --> Open: Probe failure<br/>(still failing)
-    Open --> Open: Reset timeout (30s)
+    Closed --> Open: "Failures >= threshold (5)<br/>within window (60s)"
+    Open --> HalfOpen: "Timeout elapsed (30s)"
+    HalfOpen --> Closed: "Probe success<br/>(single request passes)"
+    HalfOpen --> Open: "Probe failure<br/>(still failing)"
+    Open --> Open: "Reset timeout (30s)"
 
     note right of Closed
         Normal operation.
@@ -38,29 +38,29 @@ stateDiagram-v2
 ```mermaid
 classDiagram
     class _4xx_Client_Errors {
-        +400 Bad Request: ERR_INVALID_INPUT
-        +400 Bad Request: ERR_MISSING_FIELD
-        +401 Unauthorized: ERR_INVALID_TOKEN
-        +401 Unauthorized: ERR_TOKEN_EXPIRED
-        +403 Forbidden: ERR_INSUFFICIENT_PERMISSIONS
-        +404 Not Found: ERR_NOT_FOUND
-        +409 Conflict: ERR_DUPLICATE_ENTRY
-        +422 Unprocessable: ERR_VALIDATION_FAILED
-        +429 Rate Limited: ERR_RATE_LIMITED
+        +int status_400_ERR_INVALID_INPUT
+        +int status_400_ERR_MISSING_FIELD
+        +int status_401_ERR_INVALID_TOKEN
+        +int status_401_ERR_TOKEN_EXPIRED
+        +int status_403_ERR_INSUFFICIENT_PERMISSIONS
+        +int status_404_ERR_NOT_FOUND
+        +int status_409_ERR_DUPLICATE_ENTRY
+        +int status_422_ERR_VALIDATION_FAILED
+        +int status_429_ERR_RATE_LIMITED
     }
 
     class _5xx_Server_Errors {
-        +500 Internal: ERR_INTERNAL_ERROR
-        +502 Bad Gateway: ERR_UPSTREAM_TIMEOUT
-        +503 Unavailable: ERR_SERVICE_UNAVAILABLE
-        +503 Circuit Open: ERR_CIRCUIT_OPEN
-        +504 Gateway Timeout: ERR_GATEWAY_TIMEOUT
+        +int status_500_ERR_INTERNAL_ERROR
+        +int status_502_ERR_UPSTREAM_TIMEOUT
+        +int status_503_ERR_SERVICE_UNAVAILABLE
+        +int status_503_ERR_CIRCUIT_OPEN
+        +int status_504_ERR_GATEWAY_TIMEOUT
     }
 
     class _Business_Errors {
-        +200 Warning: ERR_WEAK_PASSWORD
-        +200 Warning: ERR_OFFLINE_QUEUED
-        +200 Warning: ERR_SESSION_EXPIRED
+        +int status_200_ERR_WEAK_PASSWORD
+        +int status_200_ERR_OFFLINE_QUEUED
+        +int status_200_ERR_SESSION_EXPIRED
     }
 
     _4xx_Client_Errors --> _5xx_Server_Errors : escalates

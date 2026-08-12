@@ -8,38 +8,43 @@
 
 ```mermaid
 flowchart LR
+    classDef edge fill:#dbeafe,stroke:#3b82f6,stroke-width:2px,color:#1e3a5f
+    classDef control fill:#dcfce7,stroke:#22c55e,stroke-width:2px,color:#14532d
+    classDef ai fill:#f3e8ff,stroke:#a855f7,stroke-width:2px,color:#581c87
+    classDef data fill:#fef3c7,stroke:#f59e0b,stroke-width:2px,color:#78350f
+    classDef security fill:#fee2e2,stroke:#ef4444,stroke-width:2px,color:#7f1d1d
+    classDef external fill:#f1f5f9,stroke:#94a3b8,stroke-width:2px,stroke-dasharray:5 5,color:#334155
+    classDef decision fill:#e0e7ff,stroke:#6366f1,stroke-width:2px,color:#312e81
+    classDef success fill:#d1fae5,stroke:#10b981,stroke-width:2px,color:#064e3b
+
     subgraph Frontend["frontend/ — Next.js 15 PWA"]
-        F1[Port 3000]
-        F2[MapLibre GL 5, WebLLM, DuckDB-Wasm]
-        F3[Zustand, Tailwind CSS, GSAP]
+        F1["Port 3000"]:::edge
+        F2["MapLibre GL 5, WebLLM, DuckDB-Wasm"]:::edge
+        F3["Zustand, Tailwind CSS, GSAP"]:::edge
     end
 
     subgraph Backend["backend/ — FastAPI :8000"]
-        B1[PostgreSQL + PostGIS]
-        B2[Redis Cache]
-        B3[DuckDB - Challan SQL]
-        B4[Overpass / Nominatim]
-        B5[WebSocket - Tracking]
-        B6[32 API route modules]
-        B7[CQRS bus + Redlock]
+        B1["PostgreSQL + PostGIS"]:::control
+        B2["Redis Cache"]:::control
+        B3["DuckDB - Challan SQL"]:::control
+        B4["Overpass / Nominatim"]:::control
+        B5["WebSocket - Tracking"]:::control
+        B6["32 API route modules"]:::control
+        B7["CQRS bus + Redlock"]:::control
     end
 
     subgraph Chatbot["chatbot_service/ — FastAPI :8010"]
-        C1[10-Provider LLM Fallback]
-        C2[ChromaDB RAG]
-        C3[13 Agent Tools]
-        C4[Redis Conversation Memory]
-        C5[IndicSeamless Speech]
-        C6[Lang Detection + Provider Registry]
+        C1["10-Provider LLM Fallback"]:::ai
+        C2["ChromaDB RAG"]:::ai
+        C3["13 Agent Tools"]:::ai
+        C4["Redis Conversation Memory"]:::ai
+        C5["IndicSeamless Speech"]:::ai
+        C6["Lang Detection + Provider Registry"]:::ai
     end
 
     Frontend -- "REST/WS (JWT Bearer)" --> Backend
     Frontend -- "REST (JWT Bearer)" --> Chatbot
     Backend <--> Chatbot
-
-    style Frontend fill:#1f6feb,color:#fff
-    style Backend fill:#238636,color:#fff
-    style Chatbot fill:#9e6a03,color:#fff
 ```
 
 | Service | Port | Tech Stack | Purpose |
@@ -56,43 +61,52 @@ flowchart LR
 
 ```mermaid
 graph TD
-    A[User Device - Browser] --> B[Next.js 15 PWA on Vercel CDN]
+    classDef edge fill:#dbeafe,stroke:#3b82f6,stroke-width:2px,color:#1e3a5f
+    classDef control fill:#dcfce7,stroke:#22c55e,stroke-width:2px,color:#14532d
+    classDef ai fill:#f3e8ff,stroke:#a855f7,stroke-width:2px,color:#581c87
+    classDef data fill:#fef3c7,stroke:#f59e0b,stroke-width:2px,color:#78350f
+    classDef security fill:#fee2e2,stroke:#ef4444,stroke-width:2px,color:#7f1d1d
+    classDef external fill:#f1f5f9,stroke:#94a3b8,stroke-width:2px,stroke-dasharray:5 5,color:#334155
+    classDef decision fill:#e0e7ff,stroke:#6366f1,stroke-width:2px,color:#312e81
+    classDef success fill:#d1fae5,stroke:#10b981,stroke-width:2px,color:#064e3b
 
-    B --> C[Emergency Locator]
-    B --> D[AI Chat - Online]
-    B --> E[Challan Calculator]
-    B --> F[Road Reporter]
+    A["User Device - Browser"]:::edge --> B["Next.js 15 PWA on Vercel CDN"]:::edge
 
-    B --> G[Browser Offline Layer]
-    G --> G1[WebLLM Phi-3 Mini]
-    G --> G2[DuckDB-Wasm]
-    G --> G3[IndexedDB + Service Worker]
-    G --> G4[GeoJSON + Turf.js]
+    B --> C["Emergency Locator"]:::edge
+    B --> D["AI Chat - Online"]:::edge
+    B --> E["Challan Calculator"]:::edge
+    B --> F["Road Reporter"]:::edge
 
-    B -->|HTTPS| H[FastAPI Backend :8000 on Render.com]
-    B -->|HTTPS| CS[FastAPI Chatbot Service :8010 on Render.com]
+    B --> G["Browser Offline Layer"]:::edge
+    G --> G1["WebLLM Phi-3 Mini"]:::ai
+    G --> G2["DuckDB-Wasm"]:::data
+    G --> G3["IndexedDB + Service Worker"]:::data
+    G --> G4["GeoJSON + Turf.js"]:::edge
 
-    H --> H1[Emergency API - PostGIS + Overpass]
-    H --> H3[Challan Service - DuckDB SQL]
-    H --> H4[RoadWatch Service - Authority Matrix]
-    H -->|proxy| CS
+    B -->|"HTTPS"| H["FastAPI Backend :8000 on Render.com"]:::control
+    B -->|"HTTPS"| CS["FastAPI Chatbot Service :8010 on Render.com"]:::ai
 
-    CS --> CS1[ChatEngine - Agentic RAG]
-    CS --> CS2[10-provider LLM Fallback Chain]
-    CS --> CS3[13 Agent Tools]
-    CS --> CS4[Sarvam AI - Indian Language Routing]
-    CS --> CS5[ChromaDB RAG Vectorstore]
+    H --> H1["Emergency API - PostGIS + Overpass"]:::control
+    H --> H3["Challan Service - DuckDB SQL"]:::control
+    H --> H4["RoadWatch Service - Authority Matrix"]:::control
+    H -->|"proxy"| CS
 
-    H --> I[Core Services]
-    I --> I1[Redis Cache - Upstash]
-    I --> I2[PostGIS Queries]
-    I --> I3[Nominatim Geocoding]
+    CS --> CS1["ChatEngine - Agentic RAG"]:::ai
+    CS --> CS2["10-provider LLM Fallback Chain"]:::ai
+    CS --> CS3["13 Agent Tools"]:::ai
+    CS --> CS4["Sarvam AI - Indian Language Routing"]:::ai
+    CS --> CS5["ChromaDB RAG Vectorstore"]:::data
 
-    H --> J[External Free Services]
-    J --> J1[Supabase PostgreSQL + PostGIS]
-    J --> J2[Upstash Redis]
-    J --> J3[OSM Overpass API]
-    J --> J4[HuggingFace Hub - WebLLM CDN]
+    H --> I["Core Services"]:::control
+    I --> I1["Redis Cache - Upstash"]:::data
+    I --> I2["PostGIS Queries"]:::data
+    I --> I3["Nominatim Geocoding"]:::external
+
+    H --> J["External Free Services"]:::external
+    J --> J1["Supabase PostgreSQL + PostGIS"]:::external
+    J --> J2["Upstash Redis"]:::external
+    J --> J3["OSM Overpass API"]:::external
+    J --> J4["HuggingFace Hub - WebLLM CDN"]:::external
 ```
 
 ---
@@ -143,24 +157,33 @@ All routes live in `backend/api/v1/`:
 
 ```mermaid
 flowchart TB
+    classDef edge fill:#dbeafe,stroke:#3b82f6,stroke-width:2px,color:#1e3a5f
+    classDef control fill:#dcfce7,stroke:#22c55e,stroke-width:2px,color:#14532d
+    classDef ai fill:#f3e8ff,stroke:#a855f7,stroke-width:2px,color:#581c87
+    classDef data fill:#fef3c7,stroke:#f59e0b,stroke-width:2px,color:#78350f
+    classDef security fill:#fee2e2,stroke:#ef4444,stroke-width:2px,color:#7f1d1d
+    classDef external fill:#f1f5f9,stroke:#94a3b8,stroke-width:2px,stroke-dasharray:5 5,color:#334155
+    classDef decision fill:#e0e7ff,stroke:#6366f1,stroke-width:2px,color:#312e81
+    classDef success fill:#d1fae5,stroke:#10b981,stroke-width:2px,color:#064e3b
+
     subgraph Middleware["Middleware Stack (applied in order)"]
         direction TB
-        M1[IdempotencyMiddleware]
-        M2[APIVersioningMiddleware]
-        M3[SecurityHeadersMiddleware]
-        M4[RequestIDMiddleware]
-        M5[PrometheusMetricsMiddleware]
-        M6[CSRFMiddleware]
-        M7[TenantIsolationMiddleware]
-        M8[AllowedHostsMiddleware]
-        M9[QueryProfilerMiddleware]
-        M10[GeoJSONCompressionMiddleware]
-        M11[CORSCheckMiddleware]
-        M12[FastAPI CORSMiddleware]
-        M13[ApiResponseMiddleware]
+        M1["IdempotencyMiddleware"]:::control
+        M2["APIVersioningMiddleware"]:::control
+        M3["SecurityHeadersMiddleware"]:::security
+        M4["RequestIDMiddleware"]:::control
+        M5["PrometheusMetricsMiddleware"]:::control
+        M6["CSRFMiddleware"]:::security
+        M7["TenantIsolationMiddleware"]:::control
+        M8["AllowedHostsMiddleware"]:::security
+        M9["QueryProfilerMiddleware"]:::control
+        M10["GeoJSONCompressionMiddleware"]:::control
+        M11["CORSCheckMiddleware"]:::security
+        M12["FastAPI CORSMiddleware"]:::security
+        M13["ApiResponseMiddleware"]:::control
     end
 
-    Request --> M1
+    Request:::edge --> M1
     M1 --> M2
     M2 --> M3
     M3 --> M4
@@ -173,23 +196,7 @@ flowchart TB
     M10 --> M11
     M11 --> M12
     M12 --> M13
-    M13 --> Response
-
-    style Request fill:#4a9eff,color:#fff
-    style Response fill:#4a9eff,color:#fff
-    style M1 fill:#1f6feb,color:#fff
-    style M2 fill:#1f6feb,color:#fff
-    style M3 fill:#1f6feb,color:#fff
-    style M4 fill:#1f6feb,color:#fff
-    style M5 fill:#1f6feb,color:#fff
-    style M6 fill:#1f6feb,color:#fff
-    style M7 fill:#1f6feb,color:#fff
-    style M8 fill:#1f6feb,color:#fff
-    style M9 fill:#1f6feb,color:#fff
-    style M10 fill:#1f6feb,color:#fff
-    style M11 fill:#1f6feb,color:#fff
-    style M12 fill:#1f6feb,color:#fff
-    style M13 fill:#1f6feb,color:#fff
+    M13 --> Response:::edge
 ```
 
 ### 57 Service Modules (46 top-level + 11 in civic_intel)
@@ -293,21 +300,30 @@ Enterprise-grade patterns added in Batch 16-22 hardening:
 
 ```mermaid
 flowchart TD
-    A[User Message] --> B[SafetyChecker.evaluate]
-    B -->|Blocked| C[Safety response]
-    B -->|Pass| D[IntentDetector.detect]
-    D --> E{9 intent classes}
-    E -->|emergency| F1[SosTool]
-    E -->|first_aid| F2[FirstAidTool]
-    E -->|challan| F3[ChallanTool]
-    E -->|legal| F4[LegalSearchTool]
-    E -->|road_weather| F5[WeatherTool / OpenMeteoTool]
-    E -->|safe_route| F6[EmergencyTool]
-    E -->|road_infrastructure| F7[RoadInfrastructureTool]
-    E -->|road_issue| F8[RoadIssuesTool / SubmitReportTool]
-    E -->|general| F9[ContextAssembler]
+    classDef edge fill:#dbeafe,stroke:#3b82f6,stroke-width:2px,color:#1e3a5f
+    classDef control fill:#dcfce7,stroke:#22c55e,stroke-width:2px,color:#14532d
+    classDef ai fill:#f3e8ff,stroke:#a855f7,stroke-width:2px,color:#581c87
+    classDef data fill:#fef3c7,stroke:#f59e0b,stroke-width:2px,color:#78350f
+    classDef security fill:#fee2e2,stroke:#ef4444,stroke-width:2px,color:#7f1d1d
+    classDef external fill:#f1f5f9,stroke:#94a3b8,stroke-width:2px,stroke-dasharray:5 5,color:#334155
+    classDef decision fill:#e0e7ff,stroke:#6366f1,stroke-width:2px,color:#312e81
+    classDef success fill:#d1fae5,stroke:#10b981,stroke-width:2px,color:#064e3b
 
-    F1 --> G[Tool results]
+    A["User Message"]:::edge --> B["SafetyChecker.evaluate"]:::security
+    B -->|"Blocked"| C["Safety response"]:::success
+    B -->|"Pass"| D["IntentDetector.detect"]:::ai
+    D --> E{"9 intent classes"}:::decision
+    E -->|"emergency"| F1["SosTool"]:::ai
+    E -->|"first_aid"| F2["FirstAidTool"]:::ai
+    E -->|"challan"| F3["ChallanTool"]:::ai
+    E -->|"legal"| F4["LegalSearchTool"]:::ai
+    E -->|"road_weather"| F5["WeatherTool / OpenMeteoTool"]:::ai
+    E -->|"safe_route"| F6["EmergencyTool"]:::ai
+    E -->|"road_infrastructure"| F7["RoadInfrastructureTool"]:::ai
+    E -->|"road_issue"| F8["RoadIssuesTool / SubmitReportTool"]:::ai
+    E -->|"general"| F9["ContextAssembler"]:::ai
+
+    F1 --> G["Tool results"]:::data
     F2 --> G
     F3 --> G
     F4 --> G
@@ -317,33 +333,42 @@ flowchart TD
     F8 --> G
     F9 --> G
 
-    G --> H[ChromaDB RAG - top 5 chunks]
-    H --> I[ProviderRouter.generate]
-    I --> J{Language detection}
-    J -->|Indian| K[Sarvam AI 30B / 105B]
-    J -->|English| L[Groq ? Cerebras ? Gemini ? ...]
-    K --> M[ConversationMemoryStore.append]
+    G --> H["ChromaDB RAG - top 5 chunks"]:::data
+    H --> I["ProviderRouter.generate"]:::ai
+    I --> J{"Language detection"}:::decision
+    J -->|"Indian"| K["Sarvam AI 30B / 105B"]:::external
+    J -->|"English"| L["Groq -> Cerebras -> Gemini -> ..."]:::external
+    K --> M["ConversationMemoryStore.append"]:::data
     L --> M
-    M --> N[ChatResponse]
+    M --> N["ChatResponse"]:::edge
 ```
 
 ### 10-provider LLM Fallback Chain
 
 ```mermaid
 flowchart LR
-    A[User Message] --> B{Language?}
-    B -->|Indian| S[Sarvam AI]
-    S --> S1[sarvam-30b General]
-    S --> S2[sarvam-105b Legal]
-    B -->|English| C[Groq 300+ tok/s]
-    C -->|fail| D[Cerebras 2000+ tok/s]
-    D -->|fail| E[Gemini 1M context]
-    E -->|fail| F[GitHub Models]
-    F -->|fail| G[NVIDIA NIM]
-    G -->|fail| H[OpenRouter]
-    H -->|fail| I[Mistral]
-    I -->|fail| J[Together]
-    J -->|fail| K[Template - deterministic fallback]
+    classDef edge fill:#dbeafe,stroke:#3b82f6,stroke-width:2px,color:#1e3a5f
+    classDef control fill:#dcfce7,stroke:#22c55e,stroke-width:2px,color:#14532d
+    classDef ai fill:#f3e8ff,stroke:#a855f7,stroke-width:2px,color:#581c87
+    classDef data fill:#fef3c7,stroke:#f59e0b,stroke-width:2px,color:#78350f
+    classDef security fill:#fee2e2,stroke:#ef4444,stroke-width:2px,color:#7f1d1d
+    classDef external fill:#f1f5f9,stroke:#94a3b8,stroke-width:2px,stroke-dasharray:5 5,color:#334155
+    classDef decision fill:#e0e7ff,stroke:#6366f1,stroke-width:2px,color:#312e81
+    classDef success fill:#d1fae5,stroke:#10b981,stroke-width:2px,color:#064e3b
+
+    A["User Message"]:::edge --> B{"Language?"}:::decision
+    B -->|"Indian"| S["Sarvam AI"]:::ai
+    S --> S1["sarvam-30b General"]:::external
+    S --> S2["sarvam-105b Legal"]:::external
+    B -->|"English"| C["Groq 300+ tok/s"]:::external
+    C -->|"fail"| D["Cerebras 2000+ tok/s"]:::external
+    D -->|"fail"| E["Gemini 1M context"]:::external
+    E -->|"fail"| F["GitHub Models"]:::external
+    F -->|"fail"| G["NVIDIA NIM"]:::external
+    G -->|"fail"| H["OpenRouter"]:::external
+    H -->|"fail"| I["Mistral"]:::external
+    I -->|"fail"| J["Together"]:::external
+    J -->|"fail"| K["Template - deterministic fallback"]:::ai
 ```
 
 > Language detection is regex-based (Unicode script ranges for Devanagari, Tamil, Telugu, Kannada, Bengali, etc.) � no NLTK dependency.
@@ -465,23 +490,32 @@ Online RAG with multi-provider fallback when connected, full offline AI using We
 
 ```mermaid
 flowchart TD
-    A[User sends message] --> B{Is network available?}
+    classDef edge fill:#dbeafe,stroke:#3b82f6,stroke-width:2px,color:#1e3a5f
+    classDef control fill:#dcfce7,stroke:#22c55e,stroke-width:2px,color:#14532d
+    classDef ai fill:#f3e8ff,stroke:#a855f7,stroke-width:2px,color:#581c87
+    classDef data fill:#fef3c7,stroke:#f59e0b,stroke-width:2px,color:#78350f
+    classDef security fill:#fee2e2,stroke:#ef4444,stroke-width:2px,color:#7f1d1d
+    classDef external fill:#f1f5f9,stroke:#94a3b8,stroke-width:2px,stroke-dasharray:5 5,color:#334155
+    classDef decision fill:#e0e7ff,stroke:#6366f1,stroke-width:2px,color:#312e81
+    classDef success fill:#d1fae5,stroke:#10b981,stroke-width:2px,color:#064e3b
 
-    B -->|YES| CS[Chatbot Service :8010]
-    B -->|NO| D[WebLLM Phi-3 Mini - runs on device]
+    A["User sends message"]:::edge --> B{"Is network available?"}:::decision
 
-    CS --> CS1[IntentDetector - classify query]
-    CS --> CS2[ContextAssembler - call tools]
-    CS --> CS3[ChromaDB RAG - top 5 law/medical chunks]
-    CS --> CS4[ProviderRouter - 10 LLM fallback]
-    CS4 --> CS5{Indian language?}
-    CS5 -->|YES| CS6[Sarvam AI 30B/105B]
-    CS5 -->|NO| CS7[Groq ? Cerebras ? Gemini ? ...]
+    B -->|"YES"| CS["Chatbot Service :8010"]:::control
+    B -->|"NO"| D["WebLLM Phi-3 Mini - runs on device"]:::ai
 
-    D --> D1[IndexedDB first-aid.json]
-    D --> D2[Turf.js GeoJSON for nearby POI]
+    CS --> CS1["IntentDetector - classify query"]:::ai
+    CS --> CS2["ContextAssembler - call tools"]:::ai
+    CS --> CS3["ChromaDB RAG - top 5 law/medical chunks"]:::data
+    CS --> CS4["ProviderRouter - 10 LLM fallback"]:::ai
+    CS4 --> CS5{"Indian language?"}:::decision
+    CS5 -->|"YES"| CS6["Sarvam AI 30B/105B"]:::external
+    CS5 -->|"NO"| CS7["Groq -> Cerebras -> Gemini -> ..."]:::external
 
-    CS6 --> E[Response to user]
+    D --> D1["IndexedDB first-aid.json"]:::data
+    D --> D2["Turf.js GeoJSON for nearby POI"]:::data
+
+    CS6 --> E["Response to user"]:::edge
     CS7 --> E
     D1 --> E
     D2 --> E
@@ -503,11 +537,20 @@ flowchart TD
 
 ```mermaid
 graph LR
-    L1[Layer 1 - App Shell] --> L1D["All UI, JS, CSS, fonts � Service Worker precache"]
-    L2[Layer 2 - Emergency POI] --> L2D["india-emergency.geojson � Turf.js haversine"]
-    L3[Layer 3 - Challan Calc] --> L3D["DuckDB-Wasm + violations.csv + state_overrides.csv"]
-    L4[Layer 4 - AI Chatbot] --> L4D["WebLLM Phi-3 Mini ~2.2GB + first-aid.json"]
-    L5[Layer 5 - Road Reports] --> L5D["IndexedDB + Background Sync � offline SOS queue"]
+    classDef edge fill:#dbeafe,stroke:#3b82f6,stroke-width:2px,color:#1e3a5f
+    classDef control fill:#dcfce7,stroke:#22c55e,stroke-width:2px,color:#14532d
+    classDef ai fill:#f3e8ff,stroke:#a855f7,stroke-width:2px,color:#581c87
+    classDef data fill:#fef3c7,stroke:#f59e0b,stroke-width:2px,color:#78350f
+    classDef security fill:#fee2e2,stroke:#ef4444,stroke-width:2px,color:#7f1d1d
+    classDef external fill:#f1f5f9,stroke:#94a3b8,stroke-width:2px,stroke-dasharray:5 5,color:#334155
+    classDef decision fill:#e0e7ff,stroke:#6366f1,stroke-width:2px,color:#312e81
+    classDef success fill:#d1fae5,stroke:#10b981,stroke-width:2px,color:#064e3b
+
+    L1["Layer 1 - App Shell"]:::edge --> L1D["All UI, JS, CSS, fonts - Service Worker precache"]:::data
+    L2["Layer 2 - Emergency POI"]:::control --> L2D["india-emergency.geojson - Turf.js haversine"]:::data
+    L3["Layer 3 - Challan Calc"]:::control --> L3D["DuckDB-Wasm + violations.csv + state_overrides.csv"]:::data
+    L4["Layer 4 - AI Chatbot"]:::ai --> L4D["WebLLM Phi-3 Mini ~2.2GB + first-aid.json"]:::data
+    L5["Layer 5 - Road Reports"]:::control --> L5D["IndexedDB + Background Sync - offline SOS queue"]:::data
 ```
 
 ---
@@ -524,7 +567,7 @@ sequenceDiagram
 
     U->>F: GET /api/v1/emergency/nearby?lat=X&lon=Y
     F->>R: Check cache key nearby:lat:lon
-    R-->>F: HIT � return cached result
+    R-->>F: HIT - return cached result
     F-->>U: Return cached hospitals/police/fire
 
     Note over F,R: On cache MISS:
@@ -538,7 +581,7 @@ sequenceDiagram
     U->>U: Render MapLibre GL markers by category
 ```
 
-> **Note:** `ST_MakePoint` takes **longitude FIRST**, latitude second. Always use `::geography` (meters), never `::geometry` (degrees).
+> **Note:** `ST_MakePoint` takes **longitude FIRST**, latitude second. Always use `::geography` (meters), never `::geometry`.
 
 ---
 
@@ -557,7 +600,7 @@ sequenceDiagram
     U->>FE: Types or speaks a message
     FE->>CS: POST /api/v1/chat/
     CS->>CS: SafetyChecker.evaluate()
-    CS->>CS: IntentDetector.detect() � classify into 9 intents
+    CS->>CS: IntentDetector.detect() - classify into 9 intents
     CS->>CS: ContextAssembler.assemble()
 
     alt Emergency intent
@@ -565,14 +608,14 @@ sequenceDiagram
         BE-->>CS: Nearby services
     end
     alt Legal intent
-        CS->>C: ChromaDB vector search � top 5 chunks
+        CS->>C: ChromaDB vector search - top 5 chunks
         C-->>CS: Relevant law text
     end
 
     CS->>R: Load conversation history
     R-->>CS: Previous messages
     CS->>PR: ProviderRouter.generate() with context
-    PR->>PR: Auto-detect language ? route to provider
+    PR->>PR: Auto-detect language - route to provider
     PR-->>CS: LLM response
     CS->>R: Store updated history
     CS-->>FE: ChatResponse (text + intent + sources)
@@ -619,10 +662,10 @@ sequenceDiagram
     BE->>AR: Route to appropriate authority (ONDC/SLA)
     AR-->>BE: Authority assigned
     BE-->>FE: ReportResponse with tracking ID
-    FE-->>U: "Report filed � Track status"
+    FE-->>U: "Report filed - Track status"
     U->>FE: GET /report/track?id=XXX
     FE->>BE: GET /api/v1/roads/status/{id}
-    BE-->>FE: Current status (filed ? investigating ? resolved)
+    BE-->>FE: Current status (filed - investigating - resolved)
 ```
 
 ---

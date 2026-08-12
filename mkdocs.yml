@@ -92,17 +92,26 @@ markdown_extensions:
         - name: mermaid
           class: mermaid
           format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
   - admonition
   - pymdownx.details
   - pymdownx.tasklist:
       custom_checkbox: true
   - tables
   - abbr
+  - attr_list
+  - md_in_html
+  - toc:
+      permalink: true
+      toc_depth: 3
 
 nav:
   - Overview: index.md
   - Developer Guide:
-      - Quick Start: ../README.md
       - Starter Guide: developer-guide/STARTER_GUIDE.md
       - Setup Guide: developer-guide/SETUP.md
       - Developer Guide: developer-guide/DEVELOPER_GUIDE.md

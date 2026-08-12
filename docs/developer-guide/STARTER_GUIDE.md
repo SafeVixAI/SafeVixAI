@@ -237,7 +237,7 @@ Comment on a `good first issue` saying "I'd like to work on this — could I get
 - Read [STYLE_GUIDE.md](STYLE_GUIDE.md) for coding conventions
 - Explore the [Documentation Site](https://safevixai.github.io/SafeVixAI/) for complete docs
 - Check [ROADMAP.md](chatbot/roadmap.md) for planned features
-- Look at [ADOPTERS.md](../../ADOPTERS.md) to see who's using SafeVixAI
+- Look at [ADOPTERS.md](https://github.com/SafeVixAI/SafeVixAI/blob/main/ADOPTERS.md) to see who's using SafeVixAI
 
 ## Related
 

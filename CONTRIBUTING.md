@@ -6,29 +6,45 @@ Thank you for contributing to SafeVixAI - an open-source, AI-powered road safety
 
 ```mermaid
 flowchart LR
-    A[Fork Repo] --> B[Create Branch<br/>feature/ or fix/]
-    B --> C[Write Code<br/>+ Tests]
-    C --> D[Run Tests<br/>npm test / pytest]
-    D --> E{All Pass?}
+    A["Fork Repo"] --> B["Create Branch\nfeature/ or fix/"]
+    B --> C["Write Code\n+ Tests"]
+    C --> D["Run Tests\nnpm test / pytest"]
+    D --> E{"All Pass?"}
     E -->|No| C
-    E -->|Yes| F[Commit & Push]
-    F --> G[Open PR<br/>against main]
-    G --> H[Code Review<br/>+ CI Checks]
-    H --> I{Approved?}
+    E -->|Yes| F["Commit & Push"]
+    F --> G["Open PR\nagainst main"]
+    G --> H["Code Review\n+ CI Checks"]
+    H --> I{"Approved?"}
     I -->|Changes Needed| C
-    I -->|Yes| J[Squash & Merge]
-    J --> K[Deploy to<br/>Vercel / Render]
+    I -->|Yes| J["Squash & Merge"]
+    J --> K["Deploy to\nVercel / Render"]
+
+    classDef neutral fill:#f8fafc,stroke:#64748b,stroke-width:2px,color:#1e293b
+    classDef action fill:#fff7ed,stroke:#f97316,stroke-width:2px,color:#7c2d12
+    classDef check fill:#e0e7ff,stroke:#6366f1,stroke-width:2px,color:#312e81
+    classDef success fill:#d1fae5,stroke:#10b981,stroke-width:2px,color:#064e3b
+    
+    class A neutral
+    class B,C,D,F,G,J action
+    class E,I check
+    class H,K success
 ```
 
 ## PR Lifecycle
 
 ```mermaid
 sequenceDiagram
+    box rgb(241, 245, 249) "Contributors"
     participant D as Developer
+    end
+    box rgb(224, 231, 255) "GitHub"
     participant PR as GitHub PR
     participant CI as CI Pipeline
+    end
+    box rgb(220, 252, 231) "Maintainers"
     participant R as Reviewer
     participant M as Maintainer
+    end
 
     D->>PR: Open PR (feature/fix branch)
     PR->>CI: Trigger workflows

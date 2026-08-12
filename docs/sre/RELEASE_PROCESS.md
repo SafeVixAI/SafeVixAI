@@ -2,7 +2,7 @@
 
 > **Version:** 1.0  
 > **Last updated:** 2026-07-26  
-> **Cross-references:** [VERSIONING.md](../developer-guide/VERSIONING.md), [CHANGELOG.md](../api-reference/api/changelog.md), [GOVERNANCE.md](../../GOVERNANCE.md)
+> **Cross-references:** [VERSIONING.md](../developer-guide/VERSIONING.md), [CHANGELOG.md](../api-reference/api/changelog.md), [GOVERNANCE.md](https://github.com/SafeVixAI/SafeVixAI/blob/main/GOVERNANCE.md)
 
 ---
 

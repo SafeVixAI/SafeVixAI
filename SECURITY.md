@@ -5,54 +5,72 @@
 ```mermaid
 flowchart TD
     subgraph Transport["Transport Layer"]
-        T1[HTTPS / TLS 1.3<br/>All communications]
-        T2[HSTS Preload<br/>HTTP Strict Transport Security]
-        T3[CSP Headers<br/>Content Security Policy]
+        T1["HTTPS / TLS 1.3\nAll communications"]
+        T2["HSTS Preload\nHTTP Strict Transport Security"]
+        T3["CSP Headers\nContent Security Policy"]
     end
 
     subgraph Auth["Authentication Layer"]
-        A1[JWT RS256 + HS256<br/>Dual-key system]
-        A2[JWKS Key Rotation<br/>24h grace period]
-        A3[Guest UUID v4<br/>7 day TTL]
-        A4[Internal API Keys<br/>Constant-time comparison]
+        A1["JWT RS256 + HS256\nDual-key system"]
+        A2["JWKS Key Rotation\n24h grace period"]
+        A3["Guest UUID v4\n7 day TTL"]
+        A4["Internal API Keys\nConstant-time comparison"]
     end
 
     subgraph API_Security["API Security Layer"]
-        S1[Rate Limiting<br/>TokenBucket per IP]
-        S2[CORS Validation<br/>Restricted origins]
-        S3[Host Header Validation<br/>Prevent host injection]
-        S4[CSRF Tokens<br/>State-changing requests]
-        S5[Request ID Tracking<br/>Full audit trail]
+        S1["Rate Limiting\nTokenBucket per IP"]
+        S2["CORS Validation\nRestricted origins"]
+        S3["Host Header Validation\nPrevent host injection"]
+        S4["CSRF Tokens\nState-changing requests"]
+        S5["Request ID Tracking\nFull audit trail"]
     end
 
     subgraph Data["Data Protection Layer"]
-        D1[IndexedDB Only<br/>Blood group, contacts]
-        D2[TLS for Redis<br/>rediss:// protocol]
-        D3[Secrets in .env<br/>gitignored, CI secrets]
-        D4[Data Retention Scheduler<br/>Auto-purge old records]
+        D1["IndexedDB Only\nBlood group, contacts"]
+        D2["TLS for Redis\nrediss:// protocol"]
+        D3["Secrets in .env\ngitignored, CI secrets"]
+        D4["Data Retention Scheduler\nAuto-purge old records"]
     end
 
     subgraph LLM["LLM Security Layer"]
-        L1[SafetyChecker<br/>Prompt injection guard]
-        L2["Harmful Output Filter<br/>'Call 112' enforcement"]
-        L3[9-Provider Fallback<br/>No single point of failure]
-        L4[PII Redaction<br/>Before LLM context]
+        L1["SafetyChecker\nPrompt injection guard"]
+        L2["Harmful Output Filter\n'Call 112' enforcement"]
+        L3["9-Provider Fallback\nNo single point of failure"]
+        L4["PII Redaction\nBefore LLM context"]
     end
 
     Transport --> Auth
     Auth --> API_Security
     API_Security --> Data
     Data --> LLM
+
+    classDef transport fill:#f1f5f9,stroke:#94a3b8,stroke-width:2px,color:#334155
+    classDef auth fill:#dbeafe,stroke:#3b82f6,stroke-width:2px,color:#1e3a5f
+    classDef api fill:#dcfce7,stroke:#22c55e,stroke-width:2px,color:#14532d
+    classDef data fill:#fef3c7,stroke:#f59e0b,stroke-width:2px,color:#78350f
+    classDef llm fill:#f3e8ff,stroke:#a855f7,stroke-width:2px,color:#581c87
+
+    class T1,T2,T3 transport
+    class A1,A2,A3,A4 auth
+    class S1,S2,S3,S4,S5 api
+    class D1,D2,D3,D4 data
+    class L1,L2,L3,L4 llm
 ```
 
 ## Vulnerability Disclosure Workflow
 
 ```mermaid
 sequenceDiagram
+    box rgb(241, 245, 249) "External"
     participant R as Reporter
-    participant S as Security Team
-    participant DEV as Development Team
     participant COM as Community
+    end
+    box rgb(254, 226, 226) "Internal Security"
+    participant S as Security Team
+    end
+    box rgb(220, 252, 231) "Internal Dev"
+    participant DEV as Development Team
+    end
 
     R->>S: Email security@safevixai.gov.in
     Note over R,S: Include: type, PoC, affected component

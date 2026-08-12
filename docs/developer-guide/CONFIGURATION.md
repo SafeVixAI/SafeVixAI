@@ -8,49 +8,97 @@ This document describes all configuration parameters across the three services.
 
 ```mermaid
 flowchart LR
-    subgraph Sources[".env Sources"]
+    subgraph Sources[" .env Sources "]
         BE[".env<br/>backend/"]
         CE[".env<br/>chatbot_service/"]
         FE[".env.local<br/>frontend/"]
     end
 
-    subgraph Pydantic["pydantic-settings Validation"]
-        BS[BackendSettings<br/>DATABASE_URL, REDIS_URL<br/>OVERPASS_URLS, ADMIN_SECRET]
-        CS[ChatbotSettings<br/>DEFAULT_LLM_PROVIDER<br/>CHROMA_PERSIST_DIR]
-        FS[PublicEnv<br/>NEXT_PUBLIC_BACKEND_URL<br/>NEXT_PUBLIC_CHATBOT_URL]
+    subgraph Pydantic[" pydantic-settings Validation "]
+        BS["BackendSettings<br/>DATABASE_URL, REDIS_URL<br/>OVERPASS_URLS, ADMIN_SECRET"]
+        CS["ChatbotSettings<br/>DEFAULT_LLM_PROVIDER<br/>CHROMA_PERSIST_DIR"]
+        FS["PublicEnv<br/>NEXT_PUBLIC_BACKEND_URL<br/>NEXT_PUBLIC_CHATBOT_URL"]
     end
 
-    subgraph State["App State (lifespan)"]
-        AS[app.state<br/>db, redis, services]
-        CAS[app.state<br/>ChatEngine, VectorStore]
+    subgraph State["  App State (lifespan ) "]
+        AS["app.state<br/>db, redis, services"]
+        CAS["app.state<br/>ChatEngine, VectorStore"]
     end
 
-    subgraph Services["Consumed By"]
-        BSRV[Backend Services<br/>challan, roadwatch<br/>emergency, tracking]
-        CSRV[Chatbot Services<br/>agent, providers<br/>rag, tools]
-        FSRV[Frontend Components<br/>pages, hooks<br/>offline-ai, duckdb]
+    subgraph Services[" Consumed By "]
+        BSRV["Backend Services<br/>challan, roadwatch<br/>emergency, tracking"]
+        CSRV["Chatbot Services<br/>agent, providers<br/>rag, tools"]
+        FSRV["Frontend Components<br/>pages, hooks<br/>offline-ai, duckdb"]
     end
 
     BE --> BS --> AS --> BSRV
     CE --> CS --> CAS --> CSRV
     FE --> FS --> FSRV
-```
+
+
+    classDef edge fill:#dbeafe,stroke:#3b82f6,stroke-width:2px,color:#1e3a5f
+    classDef control fill:#dcfce7,stroke:#22c55e,stroke-width:2px,color:#14532d
+    classDef ai fill:#f3e8ff,stroke:#a855f7,stroke-width:2px,color:#581c87
+    classDef data fill:#fef3c7,stroke:#f59e0b,stroke-width:2px,color:#78350f
+    classDef security fill:#fee2e2,stroke:#ef4444,stroke-width:2px,color:#7f1d1d
+    classDef external fill:#f1f5f9,stroke:#94a3b8,stroke-width:2px,stroke-dasharray:5 5,color:#334155
+    classDef decision fill:#e0e7ff,stroke:#6366f1,stroke-width:2px,color:#312e81
+    classDef success fill:#d1fae5,stroke:#10b981,stroke-width:2px,color:#064e3b
+    classDef action fill:#fff7ed,stroke:#f97316,stroke-width:2px,color:#7c2d12
+    classDef neutral fill:#f8fafc,stroke:#64748b,stroke-width:2px,color:#1e293b
+
+    class Sources neutral
+    class BE control
+    class CE ai
+    class FE edge
+    class Pydantic neutral
+    class BS data
+    class CS data
+    class FS ai
+    class State edge
+    class AS data
+    class CAS ai
+    class Services neutral
+    class BSRV control
+    class CSRV ai
+    class FSRV data```
 
 ## Redis Cache Key Patterns
 
 ```mermaid
 flowchart LR
-    subgraph Patterns["Redis Cache Key Patterns & TTL"]
+    subgraph Patterns[" Redis Cache Key Patterns & TTL "]
         direction TB
-        SK["session:{user_id}<br/>TTL: 24h"]
-        CK["challan:{violation}:{state}<br/>TTL: 1h"]
-        GK["geocode:{lat}:{lon}<br/>TTL: 7d"]
-        WK["weather:{lat}:{lon}<br/>TTL: 30min"]
-        EK["emergency:{lat}:{lon}<br/>TTL: 5min"]
-        RK["rate_limit:{ip}:{endpoint}<br/>TTL: 1min"]
-        LK["lock:{resource}<br/>TTL: 10s (NX EX mutex)"]
+        SK[""session:{user_id"}<br/>TTL: 24h"]
+        CK[""challan:{violation"}:{state}<br/>TTL: 1h"]
+        GK[""geocode:{lat"}:{lon}<br/>TTL: 7d"]
+        WK[""weather:{lat"}:{lon}<br/>TTL: 30min"]
+        EK[""emergency:{lat"}:{lon}<br/>TTL: 5min"]
+        RK[""rate_limit:{ip"}:{endpoint}<br/>TTL: 1min"]
+        LK[""lock:{resource"}<br/>TTL: n10s(NX EX mutex)"]
     end
-```
+
+
+    classDef edge fill:#dbeafe,stroke:#3b82f6,stroke-width:2px,color:#1e3a5f
+    classDef control fill:#dcfce7,stroke:#22c55e,stroke-width:2px,color:#14532d
+    classDef ai fill:#f3e8ff,stroke:#a855f7,stroke-width:2px,color:#581c87
+    classDef data fill:#fef3c7,stroke:#f59e0b,stroke-width:2px,color:#78350f
+    classDef security fill:#fee2e2,stroke:#ef4444,stroke-width:2px,color:#7f1d1d
+    classDef external fill:#f1f5f9,stroke:#94a3b8,stroke-width:2px,stroke-dasharray:5 5,color:#334155
+    classDef decision fill:#e0e7ff,stroke:#6366f1,stroke-width:2px,color:#312e81
+    classDef success fill:#d1fae5,stroke:#10b981,stroke-width:2px,color:#064e3b
+    classDef action fill:#fff7ed,stroke:#f97316,stroke-width:2px,color:#7c2d12
+    classDef neutral fill:#f8fafc,stroke:#64748b,stroke-width:2px,color:#1e293b
+
+    class Patterns data
+    class SK neutral
+    class CK neutral
+    class GK neutral
+    class WK neutral
+    class EK neutral
+    class RK neutral
+    class LK neutral
+    class n10s neutral```
 
 ## Backend Configuration (backend/.env)
 

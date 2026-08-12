@@ -13,22 +13,22 @@ The SafeVixAI AI chatbot is a **separate Python service** (port 8010) that conne
 
 ```mermaid
 flowchart TB
-    subgraph Frontend["Frontend — Chat UI"]
-        UI[Next.js 15 PWA]
+    subgraph Frontend[" Frontend — Chat UI "]
+        UI["Next.js 15 PWA"]
     end
 
-    subgraph Chatbot["Chatbot Service — FastAPI :8010"]
+    subgraph Chatbot[" Chatbot Service — FastAPI :8010 "]
         direction TB
         SC[SafetyChecker] --> ID[IntentDetector]
         ID --> CA[ContextAssembler]
         CA -->|tool calls| TE[Tool Execution]
         TE --> PR[ProviderRouter]
         PR --> LLM[LLM Generation]
-        LLM --> PC[Safety Post-Check]
+        LLM --> PC["Safety Post-Check"]
         PC --> MEM[Memory Persistence]
     end
 
-    subgraph External["External Dependencies"]
+    subgraph External[" External Dependencies "]
         B1["Backend API :8000<br/>PostGIS / DuckDB"]
         CV["ChromaDB<br/>Vector Store"]
         RM["Redis<br/>Conversation Memory"]
@@ -44,7 +44,35 @@ flowchart TB
     style Frontend fill:#1f6feb,color:#fff
     style Chatbot fill:#9e6a03,color:#fff
     style External fill:#238636,color:#fff
-```
+
+
+    classDef edge fill:#dbeafe,stroke:#3b82f6,stroke-width:2px,color:#1e3a5f
+    classDef control fill:#dcfce7,stroke:#22c55e,stroke-width:2px,color:#14532d
+    classDef ai fill:#f3e8ff,stroke:#a855f7,stroke-width:2px,color:#581c87
+    classDef data fill:#fef3c7,stroke:#f59e0b,stroke-width:2px,color:#78350f
+    classDef security fill:#fee2e2,stroke:#ef4444,stroke-width:2px,color:#7f1d1d
+    classDef external fill:#f1f5f9,stroke:#94a3b8,stroke-width:2px,stroke-dasharray:5 5,color:#334155
+    classDef decision fill:#e0e7ff,stroke:#6366f1,stroke-width:2px,color:#312e81
+    classDef success fill:#d1fae5,stroke:#10b981,stroke-width:2px,color:#064e3b
+    classDef action fill:#fff7ed,stroke:#f97316,stroke-width:2px,color:#7c2d12
+    classDef neutral fill:#f8fafc,stroke:#64748b,stroke-width:2px,color:#1e293b
+
+    class Frontend edge
+    class UI neutral
+    class Chatbot ai
+    class SC neutral
+    class ID ai
+    class CA neutral
+    class TE neutral
+    class PR neutral
+    class LLM ai
+    class PC action
+    class MEM neutral
+    class External external
+    class B1 data
+    class CV data
+    class RM data
+    class LP ai```
 
 ## Reliability: 10-provider Fallback Chain
 

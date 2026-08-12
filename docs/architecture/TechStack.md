@@ -6,33 +6,42 @@ SafeVixAI uses a **three-service architecture** with in-browser AI inference as 
 
 ```mermaid
 flowchart TB
+    classDef edge fill:#dbeafe,stroke:#3b82f6,stroke-width:2px,color:#1e3a5f
+    classDef control fill:#dcfce7,stroke:#22c55e,stroke-width:2px,color:#14532d
+    classDef ai fill:#f3e8ff,stroke:#a855f7,stroke-width:2px,color:#581c87
+    classDef data fill:#fef3c7,stroke:#f59e0b,stroke-width:2px,color:#78350f
+    classDef security fill:#fee2e2,stroke:#ef4444,stroke-width:2px,color:#7f1d1d
+    classDef external fill:#f1f5f9,stroke:#94a3b8,stroke-width:2px,stroke-dasharray:5 5,color:#334155
+    classDef decision fill:#e0e7ff,stroke:#6366f1,stroke-width:2px,color:#312e81
+    classDef success fill:#d1fae5,stroke:#10b981,stroke-width:2px,color:#064e3b
+
     subgraph Frontend["Frontend Layer — Free (Vercel)"]
-        F1[Next.js 15 + React 19 + Tailwind]
-        F2[MapLibre GL - Maps]
-        F3[DuckDB-Wasm - Edge SQL]
-        F4[Transformers.js + YOLOv8 - Edge Vision]
-        F5[WebLLM Phi-3 Mini - Offline LLM]
+        F1["Next.js 15 + React 19 + Tailwind"]:::edge
+        F2["MapLibre GL - Maps"]:::edge
+        F3["DuckDB-Wasm - Edge SQL"]:::edge
+        F4["Transformers.js + YOLOv8 - Edge Vision"]:::edge
+        F5["WebLLM Phi-3 Mini - Offline LLM"]:::ai
     end
 
     subgraph Backend["Backend Layer — Free (Render.com)"]
-        B1[FastAPI + Python 3.11]
-        B2[ChromaDB - Vector Store]
-        B3[Redis - Cache via Upstash]
-        B4[PostgreSQL 16 + PostGIS]
+        B1["FastAPI + Python 3.11"]:::control
+        B2["ChromaDB - Vector Store"]:::data
+        B3["Redis - Cache via Upstash"]:::data
+        B4["PostgreSQL 16 + PostGIS"]:::data
     end
 
     subgraph AI["AI Layer — Free (Multi-Provider)"]
-        A1[Groq / Gemini / Sarvam AI]
-        A2[LocalHashEmbeddingFunction]
+        A1["Groq / Gemini / Sarvam AI"]:::external
+        A2["LocalHashEmbeddingFunction"]:::ai
     end
 
     subgraph Data["Data Sources — Free"]
-        D1[Overpass API - POI Data]
-        D2[Nominatim - Geocoding]
+        D1["Overpass API - POI Data"]:::external
+        D2["Nominatim - Geocoding"]:::external
     end
 
     subgraph CI["CI/CD — Free (GitHub Actions)"]
-        C1[2000 min/month]
+        C1["2000 min/month"]:::external
     end
 
     F1 --> B1
@@ -42,12 +51,6 @@ flowchart TB
     B1 --> D2
     A1 --> B2
     F3 --> B1
-
-    style Frontend fill:#1f6feb,color:#fff
-    style Backend fill:#238636,color:#fff
-    style AI fill:#9e6a03,color:#fff
-    style Data fill:#6e5494,color:#fff
-    style CI fill:#8957e5,color:#fff
 ```
 
 ---

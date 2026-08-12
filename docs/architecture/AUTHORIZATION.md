@@ -6,44 +6,57 @@
 
 ```mermaid
 graph BT
+    classDef edge fill:#dbeafe,stroke:#3b82f6,stroke-width:2px,color:#1e3a5f
+    classDef control fill:#dcfce7,stroke:#22c55e,stroke-width:2px,color:#14532d
+    classDef ai fill:#f3e8ff,stroke:#a855f7,stroke-width:2px,color:#581c87
+    classDef data fill:#fef3c7,stroke:#f59e0b,stroke-width:2px,color:#78350f
+    classDef security fill:#fee2e2,stroke:#ef4444,stroke-width:2px,color:#7f1d1d
+    classDef external fill:#f1f5f9,stroke:#94a3b8,stroke-width:2px,stroke-dasharray:5 5,color:#334155
+    classDef decision fill:#e0e7ff,stroke:#6366f1,stroke-width:2px,color:#312e81
+    classDef success fill:#d1fae5,stroke:#10b981,stroke-width:2px,color:#064e3b
+
     subgraph Roles["Role Hierarchy — Levels"]
-        SYS[system<br/>Level 3]
-        ADMIN[admin<br/>Level 2]
-        OFFICER[officer<br/>Level 1]
-        CITIZEN[citizen<br/>Level 0]
+        SYS["system<br/>Level 3"]:::security
+        ADMIN["admin<br/>Level 2"]:::control
+        OFFICER["officer<br/>Level 1"]:::edge
+        CITIZEN["citizen<br/>Level 0"]:::data
     end
 
-    CITIZEN -->|elevated to| OFFICER
-    OFFICER -->|elevated to| ADMIN
-    ADMIN -->|elevated to| SYS
-
-    style SYS fill:#e74c3c,color:#fff
-    style ADMIN fill:#e67e22,color:#fff
-    style OFFICER fill:#3498db,color:#fff
-    style CITIZEN fill:#2ecc71,color:#fff
+    CITIZEN -->|"elevated to"| OFFICER
+    OFFICER -->|"elevated to"| ADMIN
+    ADMIN -->|"elevated to"| SYS
 ```
 
 ## Permission Check Flow
 
 ```mermaid
 flowchart TD
-    REQ[Incoming Request] --> EXTRACT[Extract JWT from Authorization header]
-    EXTRACT --> VALIDATE[Validate JWT signature]
-    VALIDATE -->|Invalid| 401[401 Unauthorized]
-    VALIDATE -->|Valid| PARSE[Parse payload: sub, role, org_id]
+    classDef edge fill:#dbeafe,stroke:#3b82f6,stroke-width:2px,color:#1e3a5f
+    classDef control fill:#dcfce7,stroke:#22c55e,stroke-width:2px,color:#14532d
+    classDef ai fill:#f3e8ff,stroke:#a855f7,stroke-width:2px,color:#581c87
+    classDef data fill:#fef3c7,stroke:#f59e0b,stroke-width:2px,color:#78350f
+    classDef security fill:#fee2e2,stroke:#ef4444,stroke-width:2px,color:#7f1d1d
+    classDef external fill:#f1f5f9,stroke:#94a3b8,stroke-width:2px,stroke-dasharray:5 5,color:#334155
+    classDef decision fill:#e0e7ff,stroke:#6366f1,stroke-width:2px,color:#312e81
+    classDef success fill:#d1fae5,stroke:#10b981,stroke-width:2px,color:#064e3b
 
-    PARSE --> CHECK{Route requires role?}
+    REQ["Incoming Request"]:::edge --> EXTRACT["Extract JWT from Authorization header"]:::control
+    EXTRACT --> VALIDATE["Validate JWT signature"]:::security
+    VALIDATE -->|"Invalid"| N401["401 Unauthorized"]:::security
+    VALIDATE -->|"Valid"| PARSE["Parse payload: sub, role, org_id"]:::control
 
-    CHECK -->|No| AUTHZ_PUBLIC[Allow — Public endpoint]
-    CHECK -->|Yes, require_role| ROLE_CHECK{User.role >= required?}
+    PARSE --> CHECK{"Route requires role?"}:::decision
 
-    ROLE_CHECK -->|No| 403[403 Forbidden]
-    ROLE_CHECK -->|Yes| ALLOW[Allow — Authorized]
+    CHECK -->|"No"| AUTHZ_PUBLIC["Allow — Public endpoint"]:::success
+    CHECK -->|"Yes, require_role"| ROLE_CHECK{"User.role >= required?"}:::decision
+
+    ROLE_CHECK -->|"No"| N403["403 Forbidden"]:::security
+    ROLE_CHECK -->|"Yes"| ALLOW["Allow — Authorized"]:::success
 
     subgraph Protected["Protected Route Examples"]
-        ADMIN_P["/admin/cache/purge<br/>requires: admin or system"]
-        OFFICER_P["/api/v1/officer/*<br/>requires: officer or higher"]
-        USER_P["/api/v1/user/profile<br/>requires: authenticated"]
+        ADMIN_P["/admin/cache/purge<br/>requires: admin or system"]:::security
+        OFFICER_P["/api/v1/officer/*<br/>requires: officer or higher"]:::control
+        USER_P["/api/v1/user/profile<br/>requires: authenticated"]:::edge
     end
 
     ALLOW --> ADMIN_P
@@ -55,34 +68,43 @@ flowchart TD
 
 ```mermaid
 flowchart LR
+    classDef edge fill:#dbeafe,stroke:#3b82f6,stroke-width:2px,color:#1e3a5f
+    classDef control fill:#dcfce7,stroke:#22c55e,stroke-width:2px,color:#14532d
+    classDef ai fill:#f3e8ff,stroke:#a855f7,stroke-width:2px,color:#581c87
+    classDef data fill:#fef3c7,stroke:#f59e0b,stroke-width:2px,color:#78350f
+    classDef security fill:#fee2e2,stroke:#ef4444,stroke-width:2px,color:#7f1d1d
+    classDef external fill:#f1f5f9,stroke:#94a3b8,stroke-width:2px,stroke-dasharray:5 5,color:#334155
+    classDef decision fill:#e0e7ff,stroke:#6366f1,stroke-width:2px,color:#312e81
+    classDef success fill:#d1fae5,stroke:#10b981,stroke-width:2px,color:#064e3b
+
     subgraph Public["Public — No Auth Required"]
-        LAND["/landing"]
-        LOGIN["/login"]
-        SIGNUP["/signup"]
-        FORGOT["/forgot-password"]
-        RESET["/reset-password"]
-        PRIV["/privacy"]
-        TERMS["/terms"]
+        LAND["/landing"]:::external
+        LOGIN["/login"]:::external
+        SIGNUP["/signup"]:::external
+        FORGOT["/forgot-password"]:::external
+        RESET["/reset-password"]:::external
+        PRIV["/privacy"]:::external
+        TERMS["/terms"]:::external
     end
 
     subgraph Authenticated["Authenticated — Any Valid JWT"]
-        SOS["/sos"]
-        PROFILE["/profile"]
-        SETTINGS["/settings"]
-        CHALLAN["/challan"]
-        EMERGENCY["/emergency"]
-        ASSISTANT["/assistant"]
-        GUIDE["/guide"]
-        BYSTANDER["/bystander"]
-        TRACKING["/tracking"]
-        OFFICER["/officer"]
-        REPORT["/report"]
-        LOCATOR["/locator"]
-        CMD_CENTER["/command-center"]
+        SOS["/sos"]:::edge
+        PROFILE["/profile"]:::edge
+        SETTINGS["/settings"]:::edge
+        CHALLAN["/challan"]:::edge
+        EMERGENCY["/emergency"]:::edge
+        ASSISTANT["/assistant"]:::edge
+        GUIDE["/guide"]:::edge
+        BYSTANDER["/bystander"]:::edge
+        TRACKING["/tracking"]:::edge
+        OFFICER["/officer"]:::edge
+        REPORT["/report"]:::edge
+        LOCATOR["/locator"]:::edge
+        CMD_CENTER["/command-center"]:::edge
     end
 
     subgraph Admin["Admin — admin/system role"]
-        ADMIN_PANEL["/admin/*"]
+        ADMIN_PANEL["/admin/*"]:::security
     end
 
     Public --> Authenticated --> Admin

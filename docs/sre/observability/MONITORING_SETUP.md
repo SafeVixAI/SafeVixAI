@@ -2,7 +2,7 @@
 
 > **Version:** 1.0  
 > **Last updated:** 2026-07-26  
-> **Cross-references:** [Observability](./observability/), [ADVANCED_SETUP.md](../../developer-guide/ADVANCED_SETUP.md)
+> **Cross-references:** [observability index](../OBSERVABILITY.md), [ADVANCED_SETUP.md](../../developer-guide/ADVANCED_SETUP.md)
 
 ---
 

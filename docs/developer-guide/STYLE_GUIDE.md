@@ -9,48 +9,97 @@
 
 ```mermaid
 flowchart TB
-    FILE{What language?}
+    FILE{"What language?"}
     FILE -->|Python| PY[Python rules]
-    FILE -->|TypeScript/React| TS[TS/React rules]
+    FILE -->|"TypeScript/React"| TS["TS/React rules"]
 
-    PY --> PY_FMT{Formatter}
+    PY --> PY_FMT{"Formatter"}
     PY_FMT -->|Black| BLC[88 char line length]
-    PY --> PY_LINT{Ruff linter}
-    PY --> PY_TYPE{Type annotations}
+    PY --> PY_LINT{"Ruff linter"}
+    PY --> PY_TYPE{"Type annotations"}
     PY_TYPE -->|Public func| TA[Required]
-    PY_TYPE -->|Python 3.11+| UNION["str or None over Optional"]
+    PY_TYPE -->|"Python 3.11+"| UNION["str or None over Optional"]
 
-    TS --> TS_FMT{Formatter}
-    TS_FMT -->|ESLint + Prettier| PRT[Single quotes, semicolons]
-    TS --> TS_REACT{Component?}
+    TS --> TS_FMT{"Formatter"}
+    TS_FMT -->|"ESLint + Prettier"| PRT["Single quotes, semicolons"]
+    TS --> TS_REACT{"Component?"}
     TS_REACT -->|Interactive| CLIENT["'use client' directive"]
     TS_REACT -->|Props| IFACE["interface over type"]
 
-    PY --> IMPORT{Import Order}
-    IMPORT --> STDLIB[stdlib → third-party → local]
-```
+    PY --> IMPORT{"Import Order"}
+    IMPORT --> STDLIB["stdlib → third-party → local"]
+
+
+    classDef edge fill:#dbeafe,stroke:#3b82f6,stroke-width:2px,color:#1e3a5f
+    classDef control fill:#dcfce7,stroke:#22c55e,stroke-width:2px,color:#14532d
+    classDef ai fill:#f3e8ff,stroke:#a855f7,stroke-width:2px,color:#581c87
+    classDef data fill:#fef3c7,stroke:#f59e0b,stroke-width:2px,color:#78350f
+    classDef security fill:#fee2e2,stroke:#ef4444,stroke-width:2px,color:#7f1d1d
+    classDef external fill:#f1f5f9,stroke:#94a3b8,stroke-width:2px,stroke-dasharray:5 5,color:#334155
+    classDef decision fill:#e0e7ff,stroke:#6366f1,stroke-width:2px,color:#312e81
+    classDef success fill:#d1fae5,stroke:#10b981,stroke-width:2px,color:#064e3b
+    classDef action fill:#fff7ed,stroke:#f97316,stroke-width:2px,color:#7c2d12
+    classDef neutral fill:#f8fafc,stroke:#64748b,stroke-width:2px,color:#1e293b
+
+    class FILE decision
+    class PY neutral
+    class TS neutral
+    class PY_FMT neutral
+    class BLC neutral
+    class PY_LINT neutral
+    class PY_TYPE neutral
+    class TA edge
+    class UNION neutral
+    class TS_FMT neutral
+    class PRT neutral
+    class TS_REACT decision
+    class CLIENT edge
+    class IFACE neutral
+    class IMPORT neutral
+    class STDLIB neutral```
 
 ## Import Ordering Rules
 
 ```mermaid
 flowchart LR
-    subgraph StdLib["Standard Library"]
-        S1[os, sys, json]
-        S2[typing, datetime]
+    subgraph StdLib[" Standard Library "]
+        S1["os, sys, json"]
+        S2["typing, datetime"]
     end
 
-    subgraph ThirdParty["Third-Party"]
-        T1[fastapi, sqlalchemy]
-        T2[pydantic, redis]
+    subgraph ThirdParty[" Third-Party "]
+        T1["fastapi, sqlalchemy"]
+        T2["pydantic, redis"]
     end
 
-    subgraph Local["Local"]
+    subgraph Local[" Local "]
         L1["from core.config import Settings"]
         L2["from models import User"]
     end
 
     StdLib --> ThirdParty --> Local
-```
+
+
+    classDef edge fill:#dbeafe,stroke:#3b82f6,stroke-width:2px,color:#1e3a5f
+    classDef control fill:#dcfce7,stroke:#22c55e,stroke-width:2px,color:#14532d
+    classDef ai fill:#f3e8ff,stroke:#a855f7,stroke-width:2px,color:#581c87
+    classDef data fill:#fef3c7,stroke:#f59e0b,stroke-width:2px,color:#78350f
+    classDef security fill:#fee2e2,stroke:#ef4444,stroke-width:2px,color:#7f1d1d
+    classDef external fill:#f1f5f9,stroke:#94a3b8,stroke-width:2px,stroke-dasharray:5 5,color:#334155
+    classDef decision fill:#e0e7ff,stroke:#6366f1,stroke-width:2px,color:#312e81
+    classDef success fill:#d1fae5,stroke:#10b981,stroke-width:2px,color:#064e3b
+    classDef action fill:#fff7ed,stroke:#f97316,stroke-width:2px,color:#7c2d12
+    classDef neutral fill:#f8fafc,stroke:#64748b,stroke-width:2px,color:#1e293b
+
+    class StdLib neutral
+    class S1 neutral
+    class S2 neutral
+    class ThirdParty neutral
+    class T1 data
+    class T2 data
+    class Local neutral
+    class L1 neutral
+    class L2 ai```
 
 ## Python (Backend & Chatbot)
 

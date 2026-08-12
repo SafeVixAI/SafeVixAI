@@ -208,4 +208,4 @@ services:
 3. **Data corruption**: Restore from backup, replay write-ahead log
 4. **Security incident**: Isolate affected service, rotate all secrets, restore from clean backup
 
-See [docs/sre/runbooks/](../sre/runbooks/) for detailed incident response procedures.
+See [runbooks](../sre/runbooks/README.md) for detailed incident response procedures.

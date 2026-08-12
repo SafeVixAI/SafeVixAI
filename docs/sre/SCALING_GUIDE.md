@@ -2,7 +2,7 @@
 
 > **Version:** 1.0  
 > **Last updated:** 2026-07-26  
-> **Cross-references:** [Architecture.md](../architecture/Architecture.md), [DEPLOYMENT_STRATEGIES.md](DEPLOYMENT_STRATEGIES.md), [ADVANCED_SETUP.md](../developer-guide/ADVANCED_SETUP.md)
+> **Cross-references:** [Architecture Overview](../architecture/Architecture.md), [DEPLOYMENT_STRATEGIES.md](DEPLOYMENT_STRATEGIES.md), [ADVANCED_SETUP.md](../developer-guide/ADVANCED_SETUP.md)
 
 ---
 

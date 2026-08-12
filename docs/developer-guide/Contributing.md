@@ -214,5 +214,5 @@ Before opening a PR, confirm:
 
 - [TESTING.md](TESTING.md) — Testing standards and coverage
 - [STYLE_GUIDE.md](STYLE_GUIDE.md) — Coding style conventions
-- [CODE_OF_CONDUCT.md](../../CODE_OF_CONDUCT.md) — Contributor Covenant
+- [CODE_OF_CONDUCT.md](https://github.com/SafeVixAI/SafeVixAI/blob/main/CODE_OF_CONDUCT.md) — Contributor Covenant
 - [docs/DEVELOPER_GUIDE.md](DEVELOPER_GUIDE.md) — Developer onboarding and workflow

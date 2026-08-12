@@ -4,47 +4,47 @@
 
 ```mermaid
 flowchart TB
-    subgraph EMERGENCY["Module 1: Emergency Locator"]
-        F1a[GPS Auto-Detection]
+    subgraph EMERGENCY[" Module 1: Emergency Locator "]
+        F1a["GPS Auto-Detection"]
         F1b[Nearby Services Map]
         F1c[Tiered Radius Fallback]
         F1d[SOS WhatsApp Share]
         F1e[Emergency Numbers Bar]
         F1f[Crash Detection]
-        F1g[Offline Map - 25 Cities]
+        F1g["Offline Map - 25 Cities"]
         F1h[First Aid Guidance]
     end
 
-    subgraph CHATBOT["Module 2: AI Chatbot"]
-        F2a[Intent Detection - 9 Classes]
+    subgraph CHATBOT[" Module 2: AI Chatbot "]
+        F2a["Intent Detection - 9 Classes"]
         F2b[Online RAG Chatbot]
         F2c[Offline WebLLM]
-        F2d[Multilingual - 14 Languages]
-        F2e[Voice Input/Output]
-        F2f[LLM Fallback Chain - 10 Providers]
+        F2d["Multilingual - 14 Languages"]
+        F2e["Voice Input/Output"]
+        F2f["LLM Fallback Chain - 10 Providers"]
         F2g[Conversation Memory]
         F2h[Streaming Chat SSE]
     end
 
-    subgraph CHALLAN["Module 3: Challan Calculator"]
+    subgraph CHALLAN[" Module 3: Challan Calculator "]
         F3a[Fine Calculation Engine]
         F3b[MVA AI Assistant]
     end
 
-    subgraph ROADWATCH["Module 4: RoadWatch Reporter"]
+    subgraph ROADWATCH[" Module 4: RoadWatch Reporter "]
         F4a[Geotagged Issue Reporting]
         F4b[Automatic Authority Routing]
         F4c[Road Infrastructure Transparency]
         F4d[Community Issues Map Layer]
     end
 
-    subgraph SAFETY["Module 5: Safety & Auth"]
+    subgraph SAFETY[" Module 5: Safety & Auth "]
         F5a[Safety Checker]
         F5b[JWT Authentication]
         F5c[Circuit Breakers]
     end
 
-    subgraph OFFLINE["Module 6: Offline"]
+    subgraph OFFLINE[" Module 6: Offline "]
         F6a[Offline SOS Queue]
         F6b[WebLLM Offline AI]
         F6c[PWA Share Target]
@@ -56,7 +56,53 @@ flowchart TB
     style ROADWATCH fill:#238636,color:#fff
     style SAFETY fill:#6e5494,color:#fff
     style OFFLINE fill:#8957e5,color:#fff
-```
+
+
+    classDef edge fill:#dbeafe,stroke:#3b82f6,stroke-width:2px,color:#1e3a5f
+    classDef control fill:#dcfce7,stroke:#22c55e,stroke-width:2px,color:#14532d
+    classDef ai fill:#f3e8ff,stroke:#a855f7,stroke-width:2px,color:#581c87
+    classDef data fill:#fef3c7,stroke:#f59e0b,stroke-width:2px,color:#78350f
+    classDef security fill:#fee2e2,stroke:#ef4444,stroke-width:2px,color:#7f1d1d
+    classDef external fill:#f1f5f9,stroke:#94a3b8,stroke-width:2px,stroke-dasharray:5 5,color:#334155
+    classDef decision fill:#e0e7ff,stroke:#6366f1,stroke-width:2px,color:#312e81
+    classDef success fill:#d1fae5,stroke:#10b981,stroke-width:2px,color:#064e3b
+    classDef action fill:#fff7ed,stroke:#f97316,stroke-width:2px,color:#7c2d12
+    classDef neutral fill:#f8fafc,stroke:#64748b,stroke-width:2px,color:#1e293b
+
+    class EMERGENCY neutral
+    class F1a neutral
+    class F1b control
+    class F1c neutral
+    class F1d edge
+    class F1e neutral
+    class F1f neutral
+    class F1g neutral
+    class F1h ai
+    class CHATBOT ai
+    class F2a ai
+    class F2b ai
+    class F2c ai
+    class F2d neutral
+    class F2e neutral
+    class F2f ai
+    class F2g neutral
+    class F2h neutral
+    class CHALLAN neutral
+    class F3a control
+    class F3b ai
+    class ROADWATCH neutral
+    class F4a neutral
+    class F4b security
+    class F4c neutral
+    class F4d neutral
+    class SAFETY security
+    class F5a neutral
+    class F5b security
+    class F5c edge
+    class OFFLINE neutral
+    class F6a neutral
+    class F6b ai
+    class F6c neutral```
 
 ## Feature Status (25/25 Complete)
 

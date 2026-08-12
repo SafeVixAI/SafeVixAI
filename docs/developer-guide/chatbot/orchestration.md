@@ -15,7 +15,7 @@ Instead of fine-tuning, which is static and compute-intensive, we use a **Retrie
 
 ```mermaid
 flowchart TB
-    subgraph AgentPipeline["ChatEngine — Execution Pipeline"]
+    subgraph AgentPipeline[" ChatEngine — Execution Pipeline "]
         direction TB
         S1["1. SafetyChecker<br/>Harmful content filter"] --> S2["2. IntentDetector<br/>Rule-based intent classification"]
         S2 --> S3["3. ContextAssembler<br/>Determine tools + gather context"]
@@ -38,7 +38,33 @@ flowchart TB
     style GC fill:#6e5494,color:#fff
     style SA fill:#9e6a03,color:#fff
     style RM fill:#238636,color:#fff
-```
+
+
+    classDef edge fill:#dbeafe,stroke:#3b82f6,stroke-width:2px,color:#1e3a5f
+    classDef control fill:#dcfce7,stroke:#22c55e,stroke-width:2px,color:#14532d
+    classDef ai fill:#f3e8ff,stroke:#a855f7,stroke-width:2px,color:#581c87
+    classDef data fill:#fef3c7,stroke:#f59e0b,stroke-width:2px,color:#78350f
+    classDef security fill:#fee2e2,stroke:#ef4444,stroke-width:2px,color:#7f1d1d
+    classDef external fill:#f1f5f9,stroke:#94a3b8,stroke-width:2px,stroke-dasharray:5 5,color:#334155
+    classDef decision fill:#e0e7ff,stroke:#6366f1,stroke-width:2px,color:#312e81
+    classDef success fill:#d1fae5,stroke:#10b981,stroke-width:2px,color:#064e3b
+    classDef action fill:#fff7ed,stroke:#f97316,stroke-width:2px,color:#7c2d12
+    classDef neutral fill:#f8fafc,stroke:#64748b,stroke-width:2px,color:#1e293b
+
+    class AgentPipeline control
+    class S1 neutral
+    class S2 ai
+    class S3 neutral
+    class S4 neutral
+    class S5 neutral
+    class S6 ai
+    class S7 action
+    class S8 data
+    class BE data
+    class CV data
+    class GC external
+    class SA ai
+    class RM data```
 
 The agent follows a deterministic yet flexible execution sequence defined in `agent/graph.py`:
 

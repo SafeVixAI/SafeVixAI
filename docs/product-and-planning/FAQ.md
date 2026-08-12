@@ -61,28 +61,56 @@ mindmap
 ```mermaid
 flowchart TD
     USER[User in Emergency] --> PRESS[Press & Hold SOS Button]
-    PRESS --> ANIM[2-second hold animation<br/>RAF + performance.now]
+    PRESS --> ANIM["2-second hold animation<br/>RAF + performance.now"]
 
-    ANIM --> ACTIVATE{SOS Activated}
+    ANIM --> ACTIVATE{"SOS Activated"}
 
-    ACTIVATE --> GEO[Capture GPS Coordinates<br/>navigator.geolocation]
+    ACTIVATE --> GEO["Capture GPS Coordinates<br/>navigator.geolocation"]
 
-    GEO --> ONLINE{Device Online?}
+    GEO --> ONLINE{"Device Online?"}
 
-    ONLINE -->|Yes| API[POST /api/v1/emergency/sos]
-    API --> DISPATCH[Create sos_incident record<br/>PostGIS point]
-    DISPATCH --> NOTIFY[Send SMS + WhatsApp<br/>to Emergency Contacts]
-    NOTIFY --> TRACKING["Start WebSocket Tracking<br/>ws://host/tracking/{group_id}"]
+    ONLINE -->|Yes| API["POST /api/v1/emergency/sos"]
+    API --> DISPATCH["Create sos_incident record<br/>PostGIS point"]
+    DISPATCH --> NOTIFY["Send SMS + WhatsApp<br/>to Emergency Contacts"]
+    NOTIFY --> TRACKING[""Start WebSocket Tracking<br/>ws://host/tracking/{group_id"}"]
     TRACKING --> DONE[Dispatch Confirmed]
 
-    ONLINE -->|No| QUEUE[Enqueue in IndexedDB<br/>offline-sos-queue.ts]
+    ONLINE -->|No| QUEUE["Enqueue in IndexedDB<br/>offline-sos-queue.ts"]
     QUEUE --> WAIT[Wait for online event]
-    WAIT --> FLUSH[Auto-flush on<br/>navigator.onLine]
+    WAIT --> FLUSH["Auto-flush on<br/>navigator.onLine"]
     FLUSH --> DISPATCH
 
-    DONE --> SHARE[Share Tracking URL<br/>with family members]
-    SHARE --> LIVE["Live Tracking Active<br/>(location every 5s)"]
-```
+    DONE --> SHARE["Share Tracking URL<br/>with family members"]
+    SHARE --> LIVE[""Live Tracking Active<br/>(location every 5s")"]
+
+
+    classDef edge fill:#dbeafe,stroke:#3b82f6,stroke-width:2px,color:#1e3a5f
+    classDef control fill:#dcfce7,stroke:#22c55e,stroke-width:2px,color:#14532d
+    classDef ai fill:#f3e8ff,stroke:#a855f7,stroke-width:2px,color:#581c87
+    classDef data fill:#fef3c7,stroke:#f59e0b,stroke-width:2px,color:#78350f
+    classDef security fill:#fee2e2,stroke:#ef4444,stroke-width:2px,color:#7f1d1d
+    classDef external fill:#f1f5f9,stroke:#94a3b8,stroke-width:2px,stroke-dasharray:5 5,color:#334155
+    classDef decision fill:#e0e7ff,stroke:#6366f1,stroke-width:2px,color:#312e81
+    classDef success fill:#d1fae5,stroke:#10b981,stroke-width:2px,color:#064e3b
+    classDef action fill:#fff7ed,stroke:#f97316,stroke-width:2px,color:#7c2d12
+    classDef neutral fill:#f8fafc,stroke:#64748b,stroke-width:2px,color:#1e293b
+
+    class USER neutral
+    class PRESS neutral
+    class ANIM neutral
+    class ACTIVATE neutral
+    class GEO neutral
+    class ONLINE decision
+    class API edge
+    class DISPATCH data
+    class NOTIFY edge
+    class TRACKING edge
+    class DONE neutral
+    class QUEUE data
+    class WAIT ai
+    class FLUSH neutral
+    class SHARE neutral
+    class LIVE neutral```
 
 ---
 
@@ -162,7 +190,7 @@ Run `docker compose up --build` from the project root. This starts all 5 service
 ## Configuration
 
 ### Where are environment variables configured?
-Each service has its own `.env` file. Backend uses `backend/.env`, chatbot uses `chatbot_service/.env`, frontend uses `frontend/.env.local`. See [AGENTS.md](../../AGENTS.md) for the full variable reference.
+Each service has its own `.env` file. Backend uses `backend/.env`, chatbot uses `chatbot_service/.env`, frontend uses `frontend/.env.local`. See [AGENTS.md](https://github.com/SafeVixAI/SafeVixAI/blob/main/AGENTS.md) for the full variable reference.
 
 ### How do I configure the chatbot provider?
 Set `DEFAULT_LLM_PROVIDER` and `DEFAULT_LLM_MODEL` in `chatbot_service/.env`. The fallback chain is: Groq to Cerebras to Gemini to GitHub Models to NVIDIA NIM to OpenRouter to Mistral to Together to Template.
@@ -242,7 +270,7 @@ Open a GitHub Issue using the feature request template. Describe the problem, pr
 ### Where do I get help?
 - [GitHub Issues](https://github.com/SafeVixAI/SafeVixAI/issues) for bug reports and feature requests
 - [GitHub Discussions](https://github.com/SafeVixAI/SafeVixAI/discussions) for Q&A
-- [SUPPORT.md](../../SUPPORT.md) for support channels and response times
+- [SUPPORT.md](https://github.com/SafeVixAI/SafeVixAI/blob/main/SUPPORT.md) for support channels and response times
 
 ### How do I report a security vulnerability?
 Email **security@safevixai.gov.in**. Do not file a public issue. See [SECURITY.md](../architecture/Security.md) for the disclosure policy.
@@ -255,5 +283,5 @@ Email **security@safevixai.gov.in**. Do not file a public issue. See [SECURITY.m
 
 - [TROUBLESHOOTING.md](../sre/TROUBLESHOOTING.md) — Common issues and resolutions
 - [RUNBOOKS.md](../sre/RUNBOOKS.md) — Incident response procedures
-- [SUPPORT.md](../../SUPPORT.md) — All support channels
+- [SUPPORT.md](https://github.com/SafeVixAI/SafeVixAI/blob/main/SUPPORT.md) — All support channels
 - [FAQ.md](FAQ.md) — Frequently asked questions

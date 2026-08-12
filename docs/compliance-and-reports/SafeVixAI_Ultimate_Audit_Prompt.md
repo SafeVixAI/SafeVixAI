@@ -1,6 +1,6 @@
 # SafeVixAI — Ultimate Enterprise-Grade Codebase Audit Prompt
 
-> **SNAPSHOT**: This document reflects the state as of 2026-05-25. For current state see [AGENTS.md](../../AGENTS.md).
+> **SNAPSHOT**: This document reflects the state as of 2026-05-25. For current state see [AGENTS.md](https://github.com/SafeVixAI/SafeVixAI/blob/main/AGENTS.md).
 
 ---
 
@@ -24,7 +24,7 @@ You are auditing **SafeVixAI** — an AI-powered road safety PWA built for the A
 **Current State (2026-05-25):**
 - **Tests**: Backend 1365/1365, Chatbot 892/892, Frontend 572/572 = **2829 total passing** (100% passing)
 - **Features**: 25/25 COMPLETE, 0 PARTIAL, 0 BROKEN, 0 MISSING
-- **Scores (aspirational targets — see [AGENTS.md](../../AGENTS.md) for current verified state)**: 96/100 range targets across modules
+- **Scores (aspirational targets — see [AGENTS.md](https://github.com/SafeVixAI/SafeVixAI/blob/main/AGENTS.md) for current verified state)**: 96/100 range targets across modules
 - **Known Critical Issues**: None. All database migrations successfully applied to Supabase, core metros emergency and municipal directories seeded (164 entries loaded), double-engine declaration in database.py resolved, and all dataset files / RAG indexes fully verified and pushed to Hugging Face!
 
 **Stack:**

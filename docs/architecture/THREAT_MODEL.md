@@ -10,21 +10,22 @@
 
 ```mermaid
 flowchart TB
-    U[User Device]
-    U -->|"TLS 1.2+ (HTTPS/WSS)"| F[Frontend - Vercel / PWA]
-    F -->|"JWT Bearer + Internal API Key"| B[Backend - Render]
-    B -->|"Internal API Key"| C[Chatbot Service - Render]
-    C -->|"API Key"| LLM[LLM Providers - Groq, Cerebras, Gemini, etc.]
-    B --> PG[PostgreSQL + PostGIS - Supabase]
-    B --> RS[Redis - Upstash]
+    classDef edge fill:#dbeafe,stroke:#3b82f6,stroke-width:2px,color:#1e3a5f
+    classDef control fill:#dcfce7,stroke:#22c55e,stroke-width:2px,color:#14532d
+    classDef ai fill:#f3e8ff,stroke:#a855f7,stroke-width:2px,color:#581c87
+    classDef data fill:#fef3c7,stroke:#f59e0b,stroke-width:2px,color:#78350f
+    classDef security fill:#fee2e2,stroke:#ef4444,stroke-width:2px,color:#7f1d1d
+    classDef external fill:#f1f5f9,stroke:#94a3b8,stroke-width:2px,stroke-dasharray:5 5,color:#334155
+    classDef decision fill:#e0e7ff,stroke:#6366f1,stroke-width:2px,color:#312e81
+    classDef success fill:#d1fae5,stroke:#10b981,stroke-width:2px,color:#064e3b
 
-    style U fill:#6e5494,color:#fff
-    style F fill:#1f6feb,color:#fff
-    style B fill:#238636,color:#fff
-    style C fill:#9e6a03,color:#fff
-    style LLM fill:#da3633,color:#fff
-    style PG fill:#238636,color:#fff
-    style RS fill:#da3633,color:#fff
+    U["User Device"]:::edge
+    U -->|"TLS 1.2+ (HTTPS/WSS)"| F["Frontend - Vercel / PWA"]:::edge
+    F -->|"JWT Bearer + Internal API Key"| B["Backend - Render"]:::control
+    B -->|"Internal API Key"| C["Chatbot Service - Render"]:::ai
+    C -->|"API Key"| LLM["LLM Providers - Groq, Cerebras, Gemini, etc."]:::external
+    B --> PG["PostgreSQL + PostGIS - Supabase"]:::data
+    B --> RS["Redis - Upstash"]:::data
 ```
 
 ### Boundary A: User ↔ Frontend (Untrusted)

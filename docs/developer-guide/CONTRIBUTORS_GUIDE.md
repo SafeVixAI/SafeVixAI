@@ -214,4 +214,4 @@ Open a pull request on GitHub with:
 - Comment on your issue or PR — a mentor will respond
 - Join [GitHub Discussions](https://github.com/SafeVixAI/SafeVixAI/discussions)
 - Email `safevixai@googlegroups.com` for project-level questions
-- See [SUPPORT.md](../../SUPPORT.md) for all support channels
+- See [SUPPORT.md](https://github.com/SafeVixAI/SafeVixAI/blob/main/SUPPORT.md) for all support channels

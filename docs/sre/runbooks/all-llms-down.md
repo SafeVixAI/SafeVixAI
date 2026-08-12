@@ -1,6 +1,6 @@
 # SafeVixAI — Runbook: All LLM Providers Down
 
-> **SNAPSHOT**: This document reflects the state as of its creation date. For current state see [AGENTS.md](../../../AGENTS.md).
+> **SNAPSHOT**: This document reflects the state as of its creation date. For current state see [AGENTS.md](https://github.com/SafeVixAI/SafeVixAI/blob/main/AGENTS.md).
 
 **Severity:** P1  
 **Service:** Chatbot  

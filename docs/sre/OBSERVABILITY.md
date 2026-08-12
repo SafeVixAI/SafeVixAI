@@ -8,28 +8,53 @@ SafeVixAI provides production-grade observability with zero-cost tooling: struct
 
 ```mermaid
 flowchart TD
-    subgraph Logging["Pillar 1: Logging"]
-        L1[Structured JSON Logs<br/>NDJSON stdout]
-        L2[Consistent Fields<br/>timestamp, level, service<br/>request_id, duration_ms]
-        L3[Sentry Error Tracking<br/>0.05 sample rate]
+    subgraph Logging[" Pillar 1: Logging "]
+        L1["Structured JSON Logs<br/>NDJSON stdout"]
+        L2["Consistent Fields<br/>timestamp, level, service<br/>request_id, duration_ms"]
+        L3["Sentry Error Tracking<br/>0.05 sample rate"]
     end
 
-    subgraph Metrics["Pillar 2: Metrics"]
-        M1[Prometheus Collection<br/>/metrics endpoints]
-        M2[Grafana Dashboards<br/>Provisioned as code]
-        M3[Key Metrics<br/>HTTP rate, latency, errors<br/>DB pool, memory, cache]
+    subgraph Metrics[" Pillar 2: Metrics "]
+        M1["Prometheus Collection<br/>/metrics endpoints"]
+        M2["Grafana Dashboards<br/>Provisioned as code"]
+        M3["Key Metrics<br/>HTTP rate, latency, errors<br/>DB pool, memory, cache"]
     end
 
-    subgraph Alerting["Pillar 3: Alerting"]
-        A1[Prometheus Alert Rules<br/>prometheus-rules.yml]
-        A2[Email Alerts<br/>SMTP with 5-min cooldown]
-        A3[Health Check Endpoints<br/>GET /health on each service]
+    subgraph Alerting[" Pillar 3: Alerting "]
+        A1["Prometheus Alert Rules<br/>prometheus-rules.yml"]
+        A2["Email Alerts<br/>SMTP with 5-min cooldown"]
+        A3["Health Check Endpoints<br/>GET /health on each service"]
     end
 
     Logging --> OBS[Full Observability]
     Metrics --> OBS
     Alerting --> OBS
-```
+
+
+    classDef edge fill:#dbeafe,stroke:#3b82f6,stroke-width:2px,color:#1e3a5f
+    classDef control fill:#dcfce7,stroke:#22c55e,stroke-width:2px,color:#14532d
+    classDef ai fill:#f3e8ff,stroke:#a855f7,stroke-width:2px,color:#581c87
+    classDef data fill:#fef3c7,stroke:#f59e0b,stroke-width:2px,color:#78350f
+    classDef security fill:#fee2e2,stroke:#ef4444,stroke-width:2px,color:#7f1d1d
+    classDef external fill:#f1f5f9,stroke:#94a3b8,stroke-width:2px,stroke-dasharray:5 5,color:#334155
+    classDef decision fill:#e0e7ff,stroke:#6366f1,stroke-width:2px,color:#312e81
+    classDef success fill:#d1fae5,stroke:#10b981,stroke-width:2px,color:#064e3b
+    classDef action fill:#fff7ed,stroke:#f97316,stroke-width:2px,color:#7c2d12
+    classDef neutral fill:#f8fafc,stroke:#64748b,stroke-width:2px,color:#1e293b
+
+    class Logging neutral
+    class L1 neutral
+    class L2 control
+    class L3 neutral
+    class Metrics neutral
+    class M1 neutral
+    class M2 neutral
+    class M3 data
+    class Alerting neutral
+    class A1 neutral
+    class A2 ai
+    class A3 control
+    class OBS neutral```
 
 ## Structured Log Schema
 

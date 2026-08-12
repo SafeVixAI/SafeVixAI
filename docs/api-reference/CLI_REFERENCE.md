@@ -8,67 +8,132 @@ All commands are run from the repository root. The Makefile provides the primary
 
 ```mermaid
 flowchart TB
-    TASK[What do you need?] --> CMD
+    TASK["What do you need?"] --> CMD
 
-    CMD{Choose category}
+    CMD{"Choose category"}
     CMD -->|Develop| DEV[Development commands]
     CMD -->|Test| TEST[Testing commands]
     CMD -->|Deploy| DEP[Deployment commands]
     CMD -->|Infrastructure| INFRA[Infra commands]
 
-    DEV --> DEV_C{Task type}
+    DEV --> DEV_C{"Task type"}
     DEV_C -->|Setup| S[make setup]
-    DEV_C -->|Run backend| UB[uvicorn main:app :8000]
-    DEV_C -->|Run chatbot| UC[uvicorn main:app :8010]
+    DEV_C -->|Run backend| UB["uvicorn main:app :8000"]
+    DEV_C -->|Run chatbot| UC["uvicorn main:app :8010"]
     DEV_C -->|Run frontend| UF[npm run dev]
 
-    TEST --> T_C{Test type}
+    TEST --> T_C{"Test type"}
     T_C -->|All| TA[make test]
-    T_C -->|Backend| TB[pytest tests/ -v --cov]
-    T_C -->|Chatbot| TC[pytest tests/ -v]
+    T_C -->|Backend| TB["pytest tests/ -v --cov"]
+    T_C -->|Chatbot| TC["pytest tests/ -v"]
     T_C -->|Frontend| TF[npm test]
     T_C -->|E2E| TE[make e2e]
 
-    DEP --> D_C{Target}
-    D_C -->|Docker| DK[make docker-up]
-    D_C -->|K8s| K8[make k8s-apply]
-    D_C -->|Terraform| TF2[make tf-apply]
+    DEP --> D_C{"Target"}
+    D_C -->|Docker| DK["make docker-up"]
+    D_C -->|K8s| K8["make k8s-apply"]
+    D_C -->|Terraform| TF2["make tf-apply"]
 
-    INFRA --> I_C{Type}
+    INFRA --> I_C{"Type"}
     I_C -->|Migration| MIG[alembic upgrade head]
-    I_C -->|Load test| K6[make k6-load]
-    I_C -->|Security| SEC[make security-scan]
-```
+    I_C -->|Load test| K6["make k6-load"]
+    I_C -->|Security| SEC["make security-scan"]
+
+
+    classDef edge fill:#dbeafe,stroke:#3b82f6,stroke-width:2px,color:#1e3a5f
+    classDef control fill:#dcfce7,stroke:#22c55e,stroke-width:2px,color:#14532d
+    classDef ai fill:#f3e8ff,stroke:#a855f7,stroke-width:2px,color:#581c87
+    classDef data fill:#fef3c7,stroke:#f59e0b,stroke-width:2px,color:#78350f
+    classDef security fill:#fee2e2,stroke:#ef4444,stroke-width:2px,color:#7f1d1d
+    classDef external fill:#f1f5f9,stroke:#94a3b8,stroke-width:2px,stroke-dasharray:5 5,color:#334155
+    classDef decision fill:#e0e7ff,stroke:#6366f1,stroke-width:2px,color:#312e81
+    classDef success fill:#d1fae5,stroke:#10b981,stroke-width:2px,color:#064e3b
+    classDef action fill:#fff7ed,stroke:#f97316,stroke-width:2px,color:#7c2d12
+    classDef neutral fill:#f8fafc,stroke:#64748b,stroke-width:2px,color:#1e293b
+
+    class TASK decision
+    class CMD success
+    class DEV neutral
+    class TEST neutral
+    class DEP action
+    class INFRA neutral
+    class DEV_C neutral
+    class S neutral
+    class UB ai
+    class UC ai
+    class UF neutral
+    class T_C neutral
+    class TA neutral
+    class TB neutral
+    class TC neutral
+    class TF neutral
+    class TE neutral
+    class D_C neutral
+    class DK neutral
+    class K8 edge
+    class TF2 edge
+    class I_C neutral
+    class MIG neutral
+    class K6 neutral
+    class SEC security```
 
 ## Makefile Workflow
 
 ```mermaid
 flowchart LR
-    subgraph Setup["Setup"]
+    subgraph Setup[" Setup "]
         SETUP[make setup]
-        SETUP --> BE_INST[pip install backend/]
-        SETUP --> CB_INST[pip install chatbot/]
-        SETUP --> FE_INST[npm ci frontend/]
-        SETUP --> ENV[copy .env templates]
+        SETUP --> BE_INST["pip install backend/"]
+        SETUP --> CB_INST["pip install chatbot/"]
+        SETUP --> FE_INST["npm ci frontend/"]
+        SETUP --> ENV["copy .env templates"]
     end
 
-    subgraph Daily["Daily Development"]
+    subgraph Daily[" Daily Development "]
         TEST2[make test]
         LINT[make lint]
         TYPE[make typecheck]
         BUILD[make build]
     end
 
-    subgraph Deploy2["Deployment"]
-        DOCKER[make docker-up]
-        KUBE[make k8s-apply]
-        TF3[make tf-apply]
-        ECR[make ecr-build-push-all]
+    subgraph Deploy2[" Deployment "]
+        DOCKER["make docker-up"]
+        KUBE["make k8s-apply"]
+        TF3["make tf-apply"]
+        ECR["make ecr-build-push-all"]
     end
 
     Setup --> Daily
     Daily --> Deploy2
-```
+
+
+    classDef edge fill:#dbeafe,stroke:#3b82f6,stroke-width:2px,color:#1e3a5f
+    classDef control fill:#dcfce7,stroke:#22c55e,stroke-width:2px,color:#14532d
+    classDef ai fill:#f3e8ff,stroke:#a855f7,stroke-width:2px,color:#581c87
+    classDef data fill:#fef3c7,stroke:#f59e0b,stroke-width:2px,color:#78350f
+    classDef security fill:#fee2e2,stroke:#ef4444,stroke-width:2px,color:#7f1d1d
+    classDef external fill:#f1f5f9,stroke:#94a3b8,stroke-width:2px,stroke-dasharray:5 5,color:#334155
+    classDef decision fill:#e0e7ff,stroke:#6366f1,stroke-width:2px,color:#312e81
+    classDef success fill:#d1fae5,stroke:#10b981,stroke-width:2px,color:#064e3b
+    classDef action fill:#fff7ed,stroke:#f97316,stroke-width:2px,color:#7c2d12
+    classDef neutral fill:#f8fafc,stroke:#64748b,stroke-width:2px,color:#1e293b
+
+    class Setup neutral
+    class SETUP neutral
+    class BE_INST control
+    class CB_INST ai
+    class FE_INST edge
+    class ENV neutral
+    class Daily ai
+    class TEST2 neutral
+    class LINT neutral
+    class TYPE neutral
+    class BUILD edge
+    class Deploy2 action
+    class DOCKER neutral
+    class KUBE edge
+    class TF3 edge
+    class ECR edge```
 
 ## Development Commands
 

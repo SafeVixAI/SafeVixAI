@@ -78,12 +78,12 @@ The Project Lead is responsible for enforcing the Code of Conduct. Reports are s
 
 ```mermaid
 flowchart TB
-    PL[Project Lead] --> CC[Core Contributors]
-    CC --> BE[Backend Team]
-    CC --> CB[Chatbot Team]
-    CC --> FE[Frontend Team]
-    CC --> INF[Infra Team]
-    CC --> SEC[Security Team]
+    PL["Project Lead"] --> CC["Core Contributors"]
+    CC --> BE["Backend Team"]
+    CC --> CB["Chatbot Team"]
+    CC --> FE["Frontend Team"]
+    CC --> INF["Infra Team"]
+    CC --> SEC["Security Team"]
 
     BE --> BE1["FastAPI, PostgreSQL, Redis, API Design"]
     CB --> CB1["Agentic RAG, LLM Providers, Safety"]
@@ -91,13 +91,21 @@ flowchart TB
     INF --> INF1["CI/CD, Docker, K8s, Terraform"]
     SEC --> SEC1["Audit, Pentesting, Supply Chain"]
 
-    style PL fill:#9e6a03,color:#fff
-    style CC fill:#1f6feb,color:#fff
-    style BE fill:#238636,color:#fff
-    style CB fill:#6e5494,color:#fff
-    style FE fill:#8957e5,color:#fff
-    style INF fill:#da3633,color:#fff
-    style SEC fill:#da3633,color:#fff
+    classDef lead fill:#fef3c7,stroke:#f59e0b,stroke-width:2px,color:#78350f
+    classDef core fill:#dbeafe,stroke:#3b82f6,stroke-width:2px,color:#1e3a5f
+    classDef backend fill:#dcfce7,stroke:#22c55e,stroke-width:2px,color:#14532d
+    classDef ai fill:#f3e8ff,stroke:#a855f7,stroke-width:2px,color:#581c87
+    classDef frontend fill:#fff7ed,stroke:#f97316,stroke-width:2px,color:#7c2d12
+    classDef infra fill:#f1f5f9,stroke:#94a3b8,stroke-width:2px,color:#334155
+    classDef security fill:#fee2e2,stroke:#ef4444,stroke-width:2px,color:#7f1d1d
+
+    class PL lead
+    class CC core
+    class BE,BE1 backend
+    class CB,CB1 ai
+    class FE,FE1 frontend
+    class INF,INF1 infra
+    class SEC,SEC1 security
 ```
 
 ## Access Continuity

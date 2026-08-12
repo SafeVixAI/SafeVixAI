@@ -1,6 +1,6 @@
 # SafeVixAI — Performance Risk Map
 
-> **SNAPSHOT**: This document reflects the state as of its creation date. For current state see [AGENTS.md](../../../AGENTS.md).
+> **SNAPSHOT**: This document reflects the state as of its creation date. For current state see [AGENTS.md](https://github.com/SafeVixAI/SafeVixAI/blob/main/AGENTS.md).
 
 > Generated: 2026-05-22 | Bottlenecks, scaling limits, optimization targets
 

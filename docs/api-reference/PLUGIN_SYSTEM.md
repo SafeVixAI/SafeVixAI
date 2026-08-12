@@ -12,23 +12,23 @@ SafeVixAI supports a plugin system for extending functionality across all three 
 
 ```mermaid
 flowchart TB
-    subgraph Plugin["Plugin Manifest - plugin.json"]
-        M[Name, Version, Description]
+    subgraph Plugin[" Plugin Manifest - plugin.json "]
+        M["Name, Version, Description"]
     end
 
-    subgraph Backend["Backend Plugins"]
-        BP1[Middleware - Request/Response]
-        BP2[Storage - Custom Backend]
+    subgraph Backend[" Backend Plugins "]
+        BP1["Middleware - Request/Response"]
+        BP2["Storage - Custom Backend"]
     end
 
-    subgraph Chatbot["Chatbot Plugins"]
-        CP1[Provider - New LLM]
-        CP2[Tool - API Integration]
+    subgraph Chatbot[" Chatbot Plugins "]
+        CP1["Provider - New LLM"]
+        CP2["Tool - API Integration"]
     end
 
-    subgraph Frontend["Frontend Plugins"]
-        FP1[UI - Custom Components]
-        FP2[Pages - New Routes]
+    subgraph Frontend[" Frontend Plugins "]
+        FP1["UI - Custom Components"]
+        FP2["Pages - New Routes"]
     end
 
     Plugin --> Backend
@@ -39,7 +39,30 @@ flowchart TB
     style Backend fill:#238636,color:#fff
     style Chatbot fill:#1f6feb,color:#fff
     style Frontend fill:#6e5494,color:#fff
-```
+
+
+    classDef edge fill:#dbeafe,stroke:#3b82f6,stroke-width:2px,color:#1e3a5f
+    classDef control fill:#dcfce7,stroke:#22c55e,stroke-width:2px,color:#14532d
+    classDef ai fill:#f3e8ff,stroke:#a855f7,stroke-width:2px,color:#581c87
+    classDef data fill:#fef3c7,stroke:#f59e0b,stroke-width:2px,color:#78350f
+    classDef security fill:#fee2e2,stroke:#ef4444,stroke-width:2px,color:#7f1d1d
+    classDef external fill:#f1f5f9,stroke:#94a3b8,stroke-width:2px,stroke-dasharray:5 5,color:#334155
+    classDef decision fill:#e0e7ff,stroke:#6366f1,stroke-width:2px,color:#312e81
+    classDef success fill:#d1fae5,stroke:#10b981,stroke-width:2px,color:#064e3b
+    classDef action fill:#fff7ed,stroke:#f97316,stroke-width:2px,color:#7c2d12
+    classDef neutral fill:#f8fafc,stroke:#64748b,stroke-width:2px,color:#1e293b
+
+    class Plugin neutral
+    class M neutral
+    class Backend control
+    class BP1 neutral
+    class BP2 data
+    class Chatbot ai
+    class CP1 ai
+    class CP2 edge
+    class Frontend edge
+    class FP1 edge
+    class FP2 neutral```
 
 ---
 

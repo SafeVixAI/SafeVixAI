@@ -104,44 +104,46 @@ SafeVixAI implements a **multi-layer offline architecture** that ensures core em
 
 ```mermaid
 flowchart TB
-    UA[User Action - Offline]
+    classDef edge fill:#dbeafe,stroke:#3b82f6,stroke-width:2px,color:#1e3a5f
+    classDef control fill:#dcfce7,stroke:#22c55e,stroke-width:2px,color:#14532d
+    classDef ai fill:#f3e8ff,stroke:#a855f7,stroke-width:2px,color:#581c87
+    classDef data fill:#fef3c7,stroke:#f59e0b,stroke-width:2px,color:#78350f
+    classDef security fill:#fee2e2,stroke:#ef4444,stroke-width:2px,color:#7f1d1d
+    classDef external fill:#f1f5f9,stroke:#94a3b8,stroke-width:2px,stroke-dasharray:5 5,color:#334155
+    classDef decision fill:#e0e7ff,stroke:#6366f1,stroke-width:2px,color:#312e81
+    classDef success fill:#d1fae5,stroke:#10b981,stroke-width:2px,color:#064e3b
 
-    UA --> SOS[SOS Button]
-    SOS --> IQ1[IndexedDB Queue]
-    IQ1 -->|"online event"| BA[Backend API]
+    UA["User Action - Offline"]:::edge
 
-    UA --> CH[AI Chat]
-    CH --> WM[WebLLM Phi-3 Mini]
-    WM --> LI[Local Inference]
-    WM -->|"fallback"| CA[Chrome AI]
-    CA -->|"fallback"| TJ[Transformers.js]
-    TJ -->|"fallback"| KW[Keyword Matching]
+    UA --> SOS["SOS Button"]:::security
+    SOS --> IQ1["IndexedDB Queue"]:::data
+    IQ1 -->|"online event"| BA["Backend API"]:::control
 
-    UA --> CC[Challan Calc]
-    CC --> DW[DuckDB-Wasm]
-    DW --> VC[violations.csv cached]
+    UA --> CH["AI Chat"]:::ai
+    CH --> WM["WebLLM Phi-3 Mini"]:::ai
+    WM --> LI["Local Inference"]:::ai
+    WM -->|"fallback"| CA["Chrome AI"]:::external
+    CA -->|"fallback"| TJ["Transformers.js"]:::ai
+    TJ -->|"fallback"| KW["Keyword Matching"]:::control
 
-    UA --> RR[Road Report]
-    RR --> IQ2[IndexedDB Queue]
+    UA --> CC["Challan Calc"]:::control
+    CC --> DW["DuckDB-Wasm"]:::data
+    DW --> VC["violations.csv cached"]:::data
+
+    UA --> RR["Road Report"]:::edge
+    RR --> IQ2["IndexedDB Queue"]:::data
     IQ2 -->|"online"| BA
-    RR --> YO[YOLOv8 photo]
+    RR --> YO["YOLOv8 photo"]:::ai
     YO --> TJ
 
-    UA --> EM[Emergency Map]
-    EM --> SW[Service Worker]
-    SW --> CA2[Cache - india-emergency.geojson]
+    UA --> EM["Emergency Map"]:::edge
+    EM --> SW["Service Worker"]:::control
+    SW --> CA2["Cache - india-emergency.geojson"]:::data
 
-    UA --> CD[Crash Detection]
-    CD --> DM[DeviceMotion API]
-    DM --> CU[CrashCountdown UI]
-    CU -->|"online"| BA2[Backend SOS Dispatch]
-
-    style UA fill:#6e5494,color:#fff
-    style BA fill:#238636,color:#fff
-    style BA2 fill:#238636,color:#fff
-    style SW fill:#1f6feb,color:#fff
-    style WM fill:#9e6a03,color:#fff
-    style DW fill:#9e6a03,color:#fff
+    UA --> CD["Crash Detection"]:::security
+    CD --> DM["DeviceMotion API"]:::data
+    DM --> CU["CrashCountdown UI"]:::security
+    CU -->|"online"| BA2["Backend SOS Dispatch"]:::control
 ```
 
 ---

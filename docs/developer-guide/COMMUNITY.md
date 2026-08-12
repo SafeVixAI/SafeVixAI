@@ -1,13 +1,13 @@
 # Community Guide
 
 > **Last updated:** 2026-07-26  
-> **Cross-references:** [CODE_OF_CONDUCT.md](../../CODE_OF_CONDUCT.md), [CONTRIBUTING.md](Contributing.md), [GOVERNANCE.md](../../GOVERNANCE.md), [SUPPORT.md](../../SUPPORT.md)
+> **Cross-references:** [CODE_OF_CONDUCT.md](https://github.com/SafeVixAI/SafeVixAI/blob/main/CODE_OF_CONDUCT.md), [CONTRIBUTING.md](Contributing.md), [GOVERNANCE.md](https://github.com/SafeVixAI/SafeVixAI/blob/main/GOVERNANCE.md), [SUPPORT.md](https://github.com/SafeVixAI/SafeVixAI/blob/main/SUPPORT.md)
 
 ---
 
 ## Code of Conduct
 
-SafeVixAI follows the [Contributor Covenant v2.1](../../CODE_OF_CONDUCT.md). All community spaces — GitHub Issues, Discussions, pull requests — are governed by this code.
+SafeVixAI follows the [Contributor Covenant v2.1](https://github.com/SafeVixAI/SafeVixAI/blob/main/CODE_OF_CONDUCT.md). All community spaces — GitHub Issues, Discussions, pull requests — are governed by this code.
 
 **Reporting violations:** `safevixai@googlegroups.com` — all reports are kept confidential.
 
@@ -72,7 +72,7 @@ First-Time Contributor → Contributor → Core Contributor → Security Team �
 | Security Team | Sub-group of Core Contributors |
 | Project Lead | Founding team (currently) |
 
-See [GOVERNANCE.md](../../GOVERNANCE.md) for detailed criteria.
+See [GOVERNANCE.md](https://github.com/SafeVixAI/SafeVixAI/blob/main/GOVERNANCE.md) for detailed criteria.
 
 ---
 
@@ -103,7 +103,7 @@ To be mentored: comment on a `good first issue` or `help wanted` issue.
 2. **Mediation** — Ask a Core Contributor to mediate
 3. **Escalation** — Project Lead makes final binding decision
 
-All conflicts handled under the [Code of Conduct](../../CODE_OF_CONDUCT.md). Retaliation is not tolerated.
+All conflicts handled under the [CODE_OF_CONDUCT.md](https://github.com/SafeVixAI/SafeVixAI/blob/main/CODE_OF_CONDUCT.md). Retaliation is not tolerated.
 
 ---
 

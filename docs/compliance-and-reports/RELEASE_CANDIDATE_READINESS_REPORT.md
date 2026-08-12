@@ -187,26 +187,49 @@
 
 ```mermaid
 flowchart TB
-    START[RC Assessment] --> T1{Tests Passing?}
-    T1 -->|Yes| T2{Coverage Thresholds Met?}
-    T1 -->|No| NOGO[NO-GO]
+    START[RC Assessment] --> T1{"Tests Passing?"}
+    T1 -->|Yes| T2{"Coverage Thresholds Met?"}
+    T1 -->|No| NOGO["NO-GO"]
 
-    T2 -->|Yes| T3{Build Successful?}
+    T2 -->|Yes| T3{"Build Successful?"}
     T2 -->|No| NOGO
 
-    T3 -->|Yes| T4{P0/P1 Blockers?}
+    T3 -->|Yes| T4{"P0/P1 Blockers?"}
     T3 -->|No| NOGO
 
-    T4 -->|None| GO[GO - Release]
-    T4 -->|Has Blockers| B1{Blocker Type?}
+    T4 -->|None| GO["GO - Release"]
+    T4 -->|Has Blockers| B1{"Blocker Type?"}
 
-    B1 -->|P0: Critical| NOGO
-    B1 -->|P1: Minor| COND[CONDITIONAL GO]
+    B1 -->|"P0: Critical"| NOGO
+    B1 -->|"P1: Minor"| COND[CONDITIONAL GO]
     COND --> GO
 
     GO --> VERIFY[CI Workflows]
     VERIFY --> TAG[Create GitHub Tag]
-```
+
+
+    classDef edge fill:#dbeafe,stroke:#3b82f6,stroke-width:2px,color:#1e3a5f
+    classDef control fill:#dcfce7,stroke:#22c55e,stroke-width:2px,color:#14532d
+    classDef ai fill:#f3e8ff,stroke:#a855f7,stroke-width:2px,color:#581c87
+    classDef data fill:#fef3c7,stroke:#f59e0b,stroke-width:2px,color:#78350f
+    classDef security fill:#fee2e2,stroke:#ef4444,stroke-width:2px,color:#7f1d1d
+    classDef external fill:#f1f5f9,stroke:#94a3b8,stroke-width:2px,stroke-dasharray:5 5,color:#334155
+    classDef decision fill:#e0e7ff,stroke:#6366f1,stroke-width:2px,color:#312e81
+    classDef success fill:#d1fae5,stroke:#10b981,stroke-width:2px,color:#064e3b
+    classDef action fill:#fff7ed,stroke:#f97316,stroke-width:2px,color:#7c2d12
+    classDef neutral fill:#f8fafc,stroke:#64748b,stroke-width:2px,color:#1e293b
+
+    class START neutral
+    class T1 success
+    class T2 ai
+    class NOGO success
+    class T3 edge
+    class T4 decision
+    class GO success
+    class B1 decision
+    class COND success
+    class VERIFY edge
+    class TAG external```
 
 ## Release Readiness Stages
 
@@ -219,7 +242,7 @@ stateDiagram-v2
 
     RC --> RC_Assessment : Readiness review
     RC_Assessment --> Ready : All checks pass
-    RC_Assessment --> Blocked : P0/P1 blockers
+    RC_Assessment --> Blocked : "P0/P1 blockers"
 
     Blocked --> Development : Fix blockers
 

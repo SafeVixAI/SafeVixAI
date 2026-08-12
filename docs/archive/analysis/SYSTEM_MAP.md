@@ -1,6 +1,6 @@
 # SafeVixAI — Complete System Map (Updated 2026-05-26)
 
-> **SNAPSHOT**: This document reflects the state as of its creation date. For current state see [AGENTS.md](../../../AGENTS.md).
+> **SNAPSHOT**: This document reflects the state as of its creation date. For current state see [AGENTS.md](https://github.com/SafeVixAI/SafeVixAI/blob/main/AGENTS.md).
 
 > Verified connectivity and data flows from actual code. 23 routes, 35+ endpoints, 11 LLM providers, 13 agent tools.
 

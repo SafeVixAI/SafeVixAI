@@ -4,26 +4,26 @@
 
 ```mermaid
 flowchart TB
-    subgraph Vercel["Vercel — Frontend CDN"]
-        F1[Next.js 15 PWA]
+    subgraph Vercel[" Vercel — Frontend CDN "]
+        F1["Next.js 15 PWA"]
         F2[Service Worker]
-        F3[DuckDB-Wasm / WebLLM]
+        F3["DuckDB-Wasm / WebLLM"]
     end
 
-    subgraph Render["Render.com — Backend Services"]
+    subgraph Render[" Render.com — Backend Services "]
         direction TB
         B1["Backend API :8000<br/>FastAPI"]
         C1["Chatbot Service :8010<br/>FastAPI"]
     end
 
-    subgraph FreeTier["Free Tier Dependencies"]
+    subgraph FreeTier[" Free Tier Dependencies "]
         S1["Supabase<br/>PostgreSQL + PostGIS"]
         R1["Upstash<br/>Redis Cache"]
         H1["Hugging Face<br/>Model CDN"]
         O1["OSM Overpass API<br/>Mapping Data"]
     end
 
-    subgraph LLM["10-Provider LLM Chain"]
+    subgraph LLM[" 10-Provider LLM Chain "]
         direction LR
         G1[Groq] --> C2[Cerebras]
         C2 --> G2[Gemini]
@@ -35,16 +35,16 @@ flowchart TB
         T --> TP[Template]
     end
 
-    subgraph GitHub["GitHub Actions CI/CD"]
+    subgraph GitHub[" GitHub Actions CI/CD "]
         W1["backend.yml"]
         W2["frontend.yml"]
         W3["chatbot.yml"]
         W4["e2e.yml"]
     end
 
-    GitHub -->|auto-deploy| Vercel
-    GitHub -->|auto-deploy| Render
-    Vercel -->|REST/WS| B1
+    GitHub -->|"auto-deploy"| Vercel
+    GitHub -->|"auto-deploy"| Render
+    Vercel -->|"REST/WS"| B1
     Vercel -->|REST| C1
     B1 --> S1
     B1 --> R1
@@ -59,7 +59,46 @@ flowchart TB
     style FreeTier fill:#238636,color:#fff
     style LLM fill:#9e6a03,color:#fff
     style GitHub fill:#6e5494,color:#fff
-```
+
+
+    classDef edge fill:#dbeafe,stroke:#3b82f6,stroke-width:2px,color:#1e3a5f
+    classDef control fill:#dcfce7,stroke:#22c55e,stroke-width:2px,color:#14532d
+    classDef ai fill:#f3e8ff,stroke:#a855f7,stroke-width:2px,color:#581c87
+    classDef data fill:#fef3c7,stroke:#f59e0b,stroke-width:2px,color:#78350f
+    classDef security fill:#fee2e2,stroke:#ef4444,stroke-width:2px,color:#7f1d1d
+    classDef external fill:#f1f5f9,stroke:#94a3b8,stroke-width:2px,stroke-dasharray:5 5,color:#334155
+    classDef decision fill:#e0e7ff,stroke:#6366f1,stroke-width:2px,color:#312e81
+    classDef success fill:#d1fae5,stroke:#10b981,stroke-width:2px,color:#064e3b
+    classDef action fill:#fff7ed,stroke:#f97316,stroke-width:2px,color:#7c2d12
+    classDef neutral fill:#f8fafc,stroke:#64748b,stroke-width:2px,color:#1e293b
+
+    class Vercel edge
+    class F1 neutral
+    class F2 control
+    class F3 data
+    class Render control
+    class B1 edge
+    class C1 ai
+    class FreeTier neutral
+    class S1 data
+    class R1 data
+    class H1 ai
+    class O1 edge
+    class LLM ai
+    class G1 neutral
+    class C2 neutral
+    class G2 neutral
+    class GH ai
+    class NV neutral
+    class OR neutral
+    class M neutral
+    class T neutral
+    class TP neutral
+    class GitHub external
+    class W1 control
+    class W2 edge
+    class W3 ai
+    class W4 neutral```
 
 ## Infrastructure Overview (All Free Tier)
 

@@ -1,10 +1,10 @@
 # SafeVixAI Complete Project Resource Checklist
 
 Generated from:
-- [SafeVixAI_Complete_Resources_main.docx](C:/Projects/IITM/SafeVixAI_Complete_Resources_main.docx)
-- [SafeVixAI_Chatbot_Impl_Plan.txt](C:/Projects/IITM/SafeVixAI_Chatbot_Impl_Plan.txt)
-- [SafeVixAI_Chatbot_Guide.txt](C:/Projects/IITM/SafeVixAI_Chatbot_Guide.txt)
-- [doc_text.txt](C:/Projects/IITM/doc_text.txt)
+- SafeVixAI_Complete_Resources_main.docx
+- SafeVixAI_Chatbot_Impl_Plan.txt
+- SafeVixAI_Chatbot_Guide.txt
+- doc_text.txt
 
 Last updated: 2026-06-09 — Brought in sync with actual repo state. All 25 features complete.
 

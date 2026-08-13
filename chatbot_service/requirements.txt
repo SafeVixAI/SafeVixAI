@@ -10,7 +10,7 @@ datasets>=5.0.1
 
 # --- Web Framework ---
 fastapi==0.141.1
-uvicorn[standard]==0.52.0
+uvicorn[standard]==0.52.1
 slowapi==0.1.10
 
 # --- Data validation ---
@@ -21,13 +21,13 @@ python-multipart==0.0.32
 
 # --- RAG / Embeddings ---
 chromadb==1.5.9
-sentence-transformers>=5.6.1,<6.0.0
+sentence-transformers>=5.7.0,<6.0.0
 
 # --- LLM Provider SDKs ---
 groq==1.6.0
 google-generativeai==0.8.6
-openai==2.51.0
-mistralai==2.8.0
+openai==2.53.0
+mistralai==2.9.1
 
 # --- Cache / Memory ---
 redis==8.1.0
@@ -47,7 +47,7 @@ pandas==3.0.5
 numpy==2.4.6
 
 # --- Document loading ---
-pypdf==6.14.2
+pypdf==6.15.0
 pdfplumber==0.11.10
 Pillow==12.3.0
 
@@ -57,7 +57,7 @@ pytest>=9.1.1,<10
 pytest-asyncio>=1.4.0
 pytest-cov>=7.1.0
 pytest-httpx>=0.36.2
-hypothesis>=6.164.0
+hypothesis>=6.165.2
 prometheus-client>=0.26.0
 tenacity==9.1.4
 asyncpg==0.31.0

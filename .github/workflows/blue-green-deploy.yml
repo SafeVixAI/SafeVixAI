@@ -83,19 +83,7 @@ jobs:
         env:
           RENDER_DEPLOY_HOOK_CHATBOT: ${{ secrets.RENDER_DEPLOY_HOOK_CHATBOT }}
 
-      - name: Create GitHub Deployment
-        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3  # v9.0.0
-        with:
-          script: |
-            await github.rest.repos.createDeployment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: context.sha,
-              environment: 'production',
-              auto_merge: false,
-              required_contexts: [],
-              description: 'Blue-green deployment promoted after CI + smoke tests passed',
-            });
+
 
   notify-failure:
     if: always() && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled'))

@@ -38,8 +38,6 @@
     "first_occurrence": "முதல் முறை",
     "repeat_offence": "மீண்டும் மீறுதல்",
     "ai_guidance_default": "சமீபத்திய எம்விஏ திருத்தங்களின் அடிப்படையில், மதுபோதையில் வாகனம் ஓட்டுதல் ({{mva}}) போன்ற அதிக ஆபத்துள்ள மீறல்களுக்கு {{state}} இல் உடனடியாக ஓட்டுநர் உரிமம் ரத்து செய்யும் நெறிமுறைகள் செயல்பாட்டில் உள்ளன.",
-    "rupees_symbol": "ரூ. ",
-    "swipe_indicator": "Swipe ↔",
-    "ai_tactical_insight": "AI Tactical Insight"
+    "rupees_symbol": "ரூ. "
   }
 }

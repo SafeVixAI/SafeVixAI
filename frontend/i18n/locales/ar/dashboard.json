@@ -1,28 +1,28 @@
 {
   "dashboard": {
-    "priority_vectors": "تم الكشف عن المتجهات ذات الأولوية",
+    "priority_vectors": "Priority Vectors Detected",
     "secure_region": "Secure Region",
-    "secure_region_sub": "لا توجد حالات شاذة خطيرة في دائرة نصف قطرها {{radius}} كم",
+    "secure_region_sub": "No critical anomalies in {{radius}}km radius",
     "caution_zone": "Caution Zone",
-    "caution_zone_sub_one": "1 خطر نشط قريب — تابع بحذر",
-    "caution_zone_sub_other": "{{count}} المخاطر النشطة القريبة - تابع بحذر",
+    "caution_zone_sub_one": "1 active hazard nearby — proceed with care",
+    "caution_zone_sub_other": "{{count}} active hazards nearby — proceed with care",
     "high_risk_area": "High Risk Area",
     "high_risk_area_one": "High Risk Area",
-    "high_risk_area_sub_one": "تم اكتشاف خطر واحد لم يتم حله — SOS جاهز",
-    "high_risk_area_sub_other": "{{count}} تم اكتشاف مخاطر لم يتم حلها — جاهز للاتصال بالطوارئ"
+    "high_risk_area_sub_one": "1 unresolved hazard detected — SOS ready",
+    "high_risk_area_sub_other": "{{count}} unresolved hazards detected — SOS ready"
   },
   "map_layers": {
-    "title": "طبقات الخريطة",
-    "satellite": "القمر الصناعي",
-    "traffic": "مرور",
-    "safe_spaces": "مساحات آمنة",
-    "hazard_heatmap": "خريطة المخاطر الحرارية",
-    "emergency_services": "خدمات الطوارئ",
-    "hazard_legend": "أسطورة الخطر",
-    "high_severity": "خطورة عالية (S4+)",
-    "traffic_accident": "حركة المرور والحوادث",
-    "weather_flood": "الطقس والفيضانات",
-    "relocate_sentinel": "نقل الحارس",
-    "tomtom_unavailable": "لم يتم تكوين مفتاح TomTom API"
+    "title": "Map Layers",
+    "satellite": "Satellite",
+    "traffic": "Traffic",
+    "safe_spaces": "Safe Spaces",
+    "hazard_heatmap": "Hazard Heatmap",
+    "emergency_services": "Emergency Services",
+    "hazard_legend": "Hazard Legend",
+    "high_severity": "High Severity (S4+)",
+    "traffic_accident": "Traffic & Accident",
+    "weather_flood": "Weather & Flood",
+    "relocate_sentinel": "Relocate Sentinel",
+    "tomtom_unavailable": "TomTom API key not configured"
   }
 }

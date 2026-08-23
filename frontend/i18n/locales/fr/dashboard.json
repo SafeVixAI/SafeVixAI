@@ -1,28 +1,28 @@
 {
   "dashboard": {
-    "priority_vectors": "Vecteurs prioritaires détectés",
+    "priority_vectors": "Priority Vectors Detected",
     "secure_region": "Secure Region",
-    "secure_region_sub": "Aucune anomalie critique dans un rayon de {{radius}} km",
+    "secure_region_sub": "No critical anomalies in {{radius}}km radius",
     "caution_zone": "Caution Zone",
-    "caution_zone_sub_one": "1 danger actif à proximité – procédez avec prudence",
-    "caution_zone_sub_other": "{{count}} dangers actifs à proximité – procédez avec prudence",
+    "caution_zone_sub_one": "1 active hazard nearby — proceed with care",
+    "caution_zone_sub_other": "{{count}} active hazards nearby — proceed with care",
     "high_risk_area": "High Risk Area",
     "high_risk_area_one": "High Risk Area",
-    "high_risk_area_sub_one": "1 danger non résolu détecté – SOS prêt",
-    "high_risk_area_sub_other": "{{count}} dangers non résolus détectés – SOS prêt"
+    "high_risk_area_sub_one": "1 unresolved hazard detected — SOS ready",
+    "high_risk_area_sub_other": "{{count}} unresolved hazards detected — SOS ready"
   },
   "map_layers": {
-    "title": "Couches de carte",
+    "title": "Map Layers",
     "satellite": "Satellite",
-    "traffic": "Trafic",
-    "safe_spaces": "Espaces sûrs",
-    "hazard_heatmap": "Carte thermique des dangers",
-    "emergency_services": "Services d'urgence",
-    "hazard_legend": "Légende des dangers",
-    "high_severity": "Haute gravité (S4+)",
-    "traffic_accident": "Circulation et accidents",
-    "weather_flood": "Météo et inondations",
-    "relocate_sentinel": "Déplacer la Sentinelle",
-    "tomtom_unavailable": "Clé API TomTom non configurée"
+    "traffic": "Traffic",
+    "safe_spaces": "Safe Spaces",
+    "hazard_heatmap": "Hazard Heatmap",
+    "emergency_services": "Emergency Services",
+    "hazard_legend": "Hazard Legend",
+    "high_severity": "High Severity (S4+)",
+    "traffic_accident": "Traffic & Accident",
+    "weather_flood": "Weather & Flood",
+    "relocate_sentinel": "Relocate Sentinel",
+    "tomtom_unavailable": "TomTom API key not configured"
   }
 }

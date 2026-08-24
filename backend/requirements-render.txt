@@ -2,10 +2,10 @@
 # RAG ingestion, data science, and local ML packages stay in requirements.txt for local scripts.
 
 fastapi==0.141.1
-uvicorn[standard]==0.52.1
+uvicorn[standard]==0.52.4
 slowapi==0.1.10
 
-sqlalchemy[asyncio]==2.0.51
+sqlalchemy[asyncio]==2.0.52
 asyncpg==0.31.0
 geoalchemy2==0.20.0
 shapely==2.1.2
@@ -19,11 +19,11 @@ aiofiles==25.1.0
 
 PyJWT[crypto]>=2.13.0,<3.0
 pydantic==2.13.4
-pydantic-settings==2.14.2
-python-dotenv==1.2.2
+pydantic-settings==2.15.0
+python-dotenv==1.2.3
 python-multipart==0.0.32
 
 mcp==2.0.0
-sentry-sdk[fastapi]==2.66.1
+sentry-sdk[fastapi]==2.68.0
 prometheus-client>=0.26.0
 

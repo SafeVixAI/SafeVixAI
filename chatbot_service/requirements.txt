@@ -5,29 +5,29 @@
 # Render deployment uses requirements-render.txt without these for 512MB RAM
 torch>=2.13.0
 torchaudio>=2.11.0
-transformers>=5.14.1
+transformers>=5.15.1
 datasets>=5.0.1
 
 # --- Web Framework ---
 fastapi==0.141.1
-uvicorn[standard]==0.52.1
+uvicorn[standard]==0.52.4
 slowapi==0.1.10
 
 # --- Data validation ---
 pydantic==2.13.4
-pydantic-settings>=2.14.2
-python-dotenv==1.2.2
+pydantic-settings>=2.15.0
+python-dotenv==1.2.3
 python-multipart==0.0.32
 
 # --- RAG / Embeddings ---
 chromadb==1.5.9
-sentence-transformers>=5.7.0,<6.0.0
+sentence-transformers>=6.0.0,<7.0.0
 
 # --- LLM Provider SDKs ---
 groq==1.6.0
 google-generativeai==0.8.6
-openai==2.53.0
-mistralai==2.9.1
+openai==3.3.1
+mistralai==2.9.3
 
 # --- Cache / Memory ---
 redis==8.1.0
@@ -36,7 +36,7 @@ redis==8.1.0
 PyYAML>=6.0.3
 
 # --- Observability ---
-sentry-sdk[fastapi]==2.66.1
+sentry-sdk[fastapi]==2.68.0
 
 # --- HTTP client ---
 httpx==0.28.1
@@ -47,7 +47,7 @@ pandas==3.0.5
 numpy==2.4.6
 
 # --- Document loading ---
-pypdf==6.15.0
+pypdf==6.16.1
 pdfplumber==0.11.10
 Pillow==12.3.0
 
@@ -57,7 +57,7 @@ pytest>=9.1.1,<10
 pytest-asyncio>=1.4.0
 pytest-cov>=7.1.0
 pytest-httpx>=0.36.2
-hypothesis>=6.165.2
+hypothesis>=6.165.10
 prometheus-client>=0.26.0
 tenacity==9.1.4
 asyncpg==0.31.0

@@ -113,7 +113,7 @@ classDiagram
 | Prometheus Config | [`docs/observability/prometheus-config.yml`](observability/observability/prometheus-config.yml) |
 | Telemetry Guide | [`docs/TELEMETRY.md`](observability/TELEMETRY.md) |
 | Performance Benchmarks | [`docs/PERFORMANCE_BENCHMARKS.md`](PERFORMANCE_BENCHMARKS.md) |
-| Error Codes | [`ERROR_CODES.md`](../api-reference/ERROR_CODES.md) |
+| Error Codes | [`ERROR_CODES.md`](../spec/api/circuit_breaker.spec.md) |
 
 ---
 
@@ -162,5 +162,5 @@ Email alerts via SMTP with 5-minute cooldown for:
 ## Related
 
 - [`MONITORING.md`](MONITORING.md) — metrics, dashboards, uptime
-- [`OPERATIONS.md`](OPERATIONS.md) — runbooks, incident response
+- [`OPERATIONS.md`](operations_manual.md) — runbooks, incident response
 - [`docs/observability/README.md`](incident-response/README.md) — detailed observability guides

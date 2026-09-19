@@ -2,7 +2,7 @@
 
 > **Version:** 1.0  
 > **Last updated:** 2026-07-26  
-> **Cross-references:** [STYLE_GUIDE.md](STYLE_GUIDE.md), [TESTING_POLICY.md](TESTING_POLICY.md), [SECURITY.md](chatbot/security.md)
+> **Cross-references:** [STYLE_GUIDE.md](style_guide.md), [TESTING_POLICY.md](../spec/engineering/testing_policy.spec.md), [SECURITY.md](chatbot/security.md)
 
 ---
 
@@ -47,7 +47,7 @@ POST /api/v1/roads/report
 - URL path versioning: `/api/v1/`
 - Backward-compatible additions only within a major version
 - Deprecated endpoints return `DeprecationWarning` header
-- See [VERSIONING.md](VERSIONING.md) for full policy
+- See [VERSIONING.md](../spec/engineering/versioning_policy.spec.md) for full policy
 
 ---
 
@@ -253,7 +253,7 @@ async def lifespan(app: FastAPI):
 
 ## Related
 
-- [TESTING.md](TESTING.md) — Testing standards and coverage
-- [OPERATIONS.md](../sre/OPERATIONS.md) — Production operations best practices
+- [TESTING.md](testing_guide.md) — Testing standards and coverage
+- [OPERATIONS.md](../sre/operations_manual.md) — Production operations best practices
 - [CONTRIBUTING.md](Contributing.md) — Contribution workflow and standards
-- [STYLE_GUIDE.md](STYLE_GUIDE.md) — Coding style conventions
+- [STYLE_GUIDE.md](style_guide.md) — Coding style conventions

@@ -509,6 +509,6 @@ npm run dev -- -p 3001
 
 ## Related
 
-- [TESTING.md](TESTING.md) — Testing standards and coverage
-- [OPERATIONS.md](../sre/OPERATIONS.md) — Day-to-day operations and scaling
+- [TESTING.md](testing_guide.md) — Testing standards and coverage
+- [OPERATIONS.md](../sre/operations_manual.md) — Day-to-day operations and scaling
 - [docs/MONITORING_SETUP.md](../sre/observability/MONITORING_SETUP.md) — Prometheus/Grafana/Loki setup

@@ -177,6 +177,6 @@ Report vulnerabilities to **security@safevixai.gov.in** - do not file public iss
 ## Related
 
 - [docs/CONTRIBUTING.md](CONTRIBUTING.md) — Full contribution guidelines
-- [docs/STYLE_GUIDE.md](docs/developer-guide/STYLE_GUIDE.md) — Coding style conventions
-- [TESTING.md](docs/developer-guide/TESTING.md) — Testing standards and coverage
-- [docs/DEVELOPER_GUIDE.md](docs/developer-guide/DEVELOPER_GUIDE.md) — Developer onboarding and workflow
+- [docs/STYLE_GUIDE.md](docs/developer-guide/style_guide.md) — Coding style conventions
+- [TESTING.md](docs/developer-guide/testing_guide.md) — Testing standards and coverage
+- [docs/DEVELOPER_GUIDE.md](docs/developer-guide/developer_environment.md) — Developer onboarding and workflow

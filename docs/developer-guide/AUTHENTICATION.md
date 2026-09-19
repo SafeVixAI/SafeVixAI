@@ -101,7 +101,7 @@ Keys are cached with distributed locking (see `core/jwks.py`) for 3600 seconds.
 | `operator` | Municipal authority | Command center, report management |
 | `admin` | System administrator | All endpoints, cache management, user admin |
 
-See [AUTHORIZATION.md](AUTHORIZATION.md) for the complete RBAC matrix.
+See [AUTHORIZATION.md](../spec/security/rbac_matrix.spec.md) for the complete RBAC matrix.
 
 ---
 

@@ -2,7 +2,7 @@
 
 > **Version:** 1.0  
 > **Last updated:** 2026-07-26  
-> **Cross-references:** [Deployment.md](Deployment.md), [ADVANCED_SETUP.md](../developer-guide/ADVANCED_SETUP.md), [SCALING_GUIDE.md](SCALING_GUIDE.md)
+> **Cross-references:** [Deployment.md](Deployment.md), [ADVANCED_SETUP.md](../developer-guide/ADVANCED_SETUP.md), [SCALING_GUIDE.md](scaling_guide.md)
 
 ---
 

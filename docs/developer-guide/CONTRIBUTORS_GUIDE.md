@@ -2,7 +2,7 @@
 
 > **Version:** 1.0  
 > **Last updated:** 2026-07-26  
-> **Cross-references:** [CONTRIBUTING.md](Contributing.md), [SETUP.md](SETUP.md), [STYLE_GUIDE.md](STYLE_GUIDE.md), [TESTING_POLICY.md](TESTING_POLICY.md)
+> **Cross-references:** [CONTRIBUTING.md](Contributing.md), [SETUP.md](SETUP.md), [STYLE_GUIDE.md](style_guide.md), [TESTING_POLICY.md](../spec/engineering/testing_policy.spec.md)
 
 ---
 
@@ -71,7 +71,7 @@ Branch naming: `feature/<issue>-<description>`, `fix/<issue>-<description>`, `do
 - Use Tailwind CSS (no inline styles)
 - Use Lucide icons
 
-See [STYLE_GUIDE.md](STYLE_GUIDE.md) for detailed coding standards.
+See [STYLE_GUIDE.md](style_guide.md) for detailed coding standards.
 
 ### 5. Write Tests
 
@@ -118,7 +118,7 @@ git commit -m "feat(backend): add SOS cancel endpoint"
 ```
 Use Conventional Commits: `type(scope): description`
 
-See [STYLE_GUIDE.md](STYLE_GUIDE.md#commit-conventions) for commit types and scopes.
+See [STYLE_GUIDE.md](style_guide.md#commit-conventions) for commit types and scopes.
 
 ### 8. Push and Create PR
 ```bash

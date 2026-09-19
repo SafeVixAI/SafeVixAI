@@ -375,8 +375,8 @@ Only activates in production (`npm run build && npm start`), not in dev mode.
 
 ## Related
 
-- [TESTING.md](TESTING.md) — AI testing standards
-- [BENCHMARKS.md](../compliance-and-reports/BENCHMARKS.md) — Benchmarking methodology
+- [TESTING.md](testing_guide.md) — AI testing standards
+- [BENCHMARKS.md](../spec/engineering/performance_benchmarks.spec.md) — Benchmarking methodology
 - [AGENTS.md](https://github.com/SafeVixAI/SafeVixAI/blob/main/AGENTS.md) — Agent configuration and tool definitions
-- [docs/MEMORY.md](../architecture/MEMORY.md) — Conversation memory architecture
-- [docs/RAG.md](../architecture/RAG.md) — Vector search and retrieval
+- [docs/MEMORY.md](../architecture/memory_architecture.md) — Conversation memory architecture
+- [docs/RAG.md](../spec/ai/rag_vectorstore.spec.md) — Vector search and retrieval

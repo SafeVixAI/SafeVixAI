@@ -107,7 +107,7 @@ stateDiagram-v2
 | Alert Rules | `docs/observability/alerts/` |
 | Telemetry Guide | [`docs/TELEMETRY.md`](observability/TELEMETRY.md) |
 | Performance Benchmarks | [`docs/PERFORMANCE_BENCHMARKS.md`](PERFORMANCE_BENCHMARKS.md) |
-| Observability Overview | [`OBSERVABILITY.md`](OBSERVABILITY.md) |
+| Observability Overview | [`OBSERVABILITY.md`](observability.md) |
 
 ---
 
@@ -138,6 +138,6 @@ The Grafana dashboard covers four golden signals for every service:
 
 ## Related
 
-- [`OBSERVABILITY.md`](OBSERVABILITY.md) — logging, metrics, alerting
-- [`OPERATIONS.md`](OPERATIONS.md) — deployment, scaling
+- [`OBSERVABILITY.md`](observability.md) — logging, metrics, alerting
+- [`OPERATIONS.md`](operations_manual.md) — deployment, scaling
 - [`RUNBOOKS.md`](RUNBOOKS.md) — incident response

@@ -608,7 +608,7 @@ When a request takes >5 seconds (cold start signal), a "Connecting..." banner ap
 
 ## Related
 
-- [OPERATIONS.md](OPERATIONS.md) — Day-to-day operations runbook
+- [OPERATIONS.md](operations_manual.md) — Day-to-day operations runbook
 - [RUNBOOKS.md](RUNBOOKS.md) — Incident response runbooks
 - [MONITORING.md](MONITORING.md) — Metrics and uptime monitoring
-- [DEPLOYMENT_STRATEGIES.md](DEPLOYMENT_STRATEGIES.md) — Blue-green, canary, rolling updates
+- [DEPLOYMENT_STRATEGIES.md](deployment_strategies.md) — Blue-green, canary, rolling updates

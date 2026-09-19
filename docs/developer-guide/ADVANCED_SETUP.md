@@ -2,7 +2,7 @@
 
 > **Audience:** DevOps engineers, platform administrators  
 > **Last updated:** 2026-07-26  
-> **Cross-references:** [Deployment.md](chatbot/deployment.md), [Environment.md](Environment.md), [Database.md](../architecture/Database.md)
+> **Cross-references:** [Deployment.md](chatbot/deployment.md), [Environment.md](Environment.md), [Database.md](../spec/data/database_schema.spec.md)
 
 ---
 

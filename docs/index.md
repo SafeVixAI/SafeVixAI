@@ -31,16 +31,16 @@ flowchart LR
 
 | Section | Key Documents |
 |:--------|:-------------|
-| **Getting Started** | [Setup Guide](developer-guide/SETUP.md) · [Starter Guide](developer-guide/STARTER_GUIDE.md) |
-| **Architecture** | [System Architecture](architecture/Architecture.md) · [Tech Stack](architecture/TechStack.md) · [Design](architecture/DESIGN.md) |
-| **AI & Agents** | [AI Overview](architecture/AI.md) · [Chatbot Pipeline](developer-guide/AI_Instructions.md) · [RAG](architecture/RAG.md) · [Memory](architecture/MEMORY.md) |
-| **API & SDK** | [API Reference](api-reference/API.md) · [SDK Guide](api-reference/SDK_GUIDE.md) · [Error Codes](api-reference/ERROR_CODES.md) |
-| **Database** | [Schema](architecture/Database.md) |
-| **Security** | [Security Policy](architecture/Security.md) · [Authentication](architecture/AUTHENTICATION.md) · [Authorization](architecture/AUTHORIZATION.md) · [Privacy](compliance-and-reports/PRIVACY.md) |
-| **Operations** | [Operations Overview](sre/OPERATIONS.md) · [Monitoring](sre/MONITORING.md) · [Observability](sre/OBSERVABILITY.md) · [Benchmarks](compliance-and-reports/BENCHMARKS.md) |
-| **Runbooks** | [Runbooks Overview](sre/RUNBOOKS.md) |
-| **Development** | [Contributing](developer-guide/Contributing.md) · [Style Guide](developer-guide/STYLE_GUIDE.md) · [Testing](developer-guide/TESTING.md) · [Best Practices](developer-guide/BEST_PRACTICES.md) |
-| **Community** | [Roadmap](product-and-planning/Roadmap.md) · [FAQ](product-and-planning/FAQ.md) |
+| **Getting Started** | [Setup Guide](developer-guide/getting_started.md) · [Starter Guide](developer-guide/starter_guide.md) |
+| **Architecture** | [System Architecture](architecture/system_overview.md) · [Tech Stack](architecture/tech_stack.md) · [Design](architecture/uiux_design_system.md) |
+| **AI & Agents** | [AI Overview](spec/ai/fallback_chain.spec.md) · [Chatbot Pipeline](spec/ai/tools_matrix.spec.md) · [RAG](spec/ai/rag_vectorstore.spec.md) · [Memory](architecture/memory_architecture.md) |
+| **API & SDK** | [API Reference](api-reference/api_overview.md) · [SDK Guide](api-reference/sdk_guide.md) · [Error Codes](spec/api/circuit_breaker.spec.md) |
+| **Database** | [Schema](spec/data/database_schema.spec.md) |
+| **Security** | [Security Policy](architecture/security_overview.md) · [Authentication](spec/security/authentication.spec.md) · [Authorization](spec/security/rbac_matrix.spec.md) · [Privacy](spec/security/privacy_boundary.spec.md) |
+| **Operations** | [Operations Overview](sre/operations_manual.md) · [Monitoring](sre/monitoring_overview.md) · [Observability](sre/observability.md) · [Benchmarks](spec/engineering/performance_benchmarks.spec.md) |
+| **Runbooks** | [Runbooks Overview](sre/runbooks_overview.md) |
+| **Development** | [Contributing](developer-guide/contributing_guide.md) · [Style Guide](developer-guide/style_guide.md) · [Testing](developer-guide/testing_guide.md) · [Best Practices](developer-guide/best_practices.md) |
+| **Community** | [Roadmap](product/roadmap.md) · [FAQ](product/faq.md) |
 
 ---
 
@@ -82,5 +82,5 @@ cd frontend && npm run dev
 
 ## Contributing
 
-See [CONTRIBUTING.md](developer-guide/Contributing.md) for contribution guidelines.
+See [CONTRIBUTING.md](developer-guide/contributing_guide.md) for contribution guidelines.
 All contributions under [MIT License](../LICENSE).

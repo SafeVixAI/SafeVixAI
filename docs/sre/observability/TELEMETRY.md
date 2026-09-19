@@ -2,7 +2,7 @@
 
 > **Version:** 1.0  
 > **Last updated:** 2026-07-26  
-> **Cross-references:** [PRIVACY.md](../../compliance-and-reports/PRIVACY.md), [Security.md](../../architecture/Security.md)
+> **Cross-references:** [PRIVACY.md](../../spec/security/privacy_boundary.spec.md), [Security.md](../../architecture/security_overview.md)
 
 ---
 

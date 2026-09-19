@@ -3,7 +3,7 @@
 > **Version:** 1.0  
 > **Last updated:** 2026-07-26  
 > **Applies to:** v0.x → v1.0  
-> **Cross-references:** [UPGRADE_GUIDE.md](UPGRADE_GUIDE.md), [CHANGELOG.md](../api-reference/api/changelog.md)
+> **Cross-references:** [UPGRADE_GUIDE.md](upgrade_guide.md), [CHANGELOG.md](../api-reference/api/changelog.md)
 
 ---
 

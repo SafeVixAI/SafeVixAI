@@ -462,6 +462,6 @@ If the above doesn't solve your issue:
 ## Related
 
 - [RUNBOOKS.md](RUNBOOKS.md) — Incident response runbooks
-- [OBSERVABILITY.md](OBSERVABILITY.md) — Logging, metrics, traces, alerting
+- [OBSERVABILITY.md](observability.md) — Logging, metrics, traces, alerting
 - [SUPPORT.md](https://github.com/SafeVixAI/SafeVixAI/blob/main/SUPPORT.md) — Support channels and response times
-- [FAQ.md](../product-and-planning/FAQ.md) — Frequently asked questions
+- [FAQ.md](../product/faq.md) — Frequently asked questions

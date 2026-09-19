@@ -2,7 +2,7 @@
 
 > **Version:** 1.0  
 > **Last updated:** 2026-07-26  
-> **Cross-references:** [Architecture Overview](../architecture/Architecture.md), [DEPLOYMENT_STRATEGIES.md](DEPLOYMENT_STRATEGIES.md), [ADVANCED_SETUP.md](../developer-guide/ADVANCED_SETUP.md)
+> **Cross-references:** [Architecture Overview](../architecture/system_overview.md), [DEPLOYMENT_STRATEGIES.md](deployment_strategies.md), [ADVANCED_SETUP.md](../developer-guide/ADVANCED_SETUP.md)
 
 ---
 
@@ -217,7 +217,7 @@ spec:
 
 ## CQRS for Write Scaling
 
-The existing [CQRS event bus](../architecture/Architecture.md#cqrs) separates commands (writes) from queries (reads):
+The existing [CQRS event bus](../spec/architecture/adr/ADR-004-cqrs-command-query.md) separates commands (writes) from queries (reads):
 
 ```
 Command: POST /api/v1/roads/report → SubmitReportCommand → Event Bus → Handler → DB

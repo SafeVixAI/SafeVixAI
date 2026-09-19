@@ -111,82 +111,122 @@ markdown_extensions:
 
 nav:
   - Overview: index.md
+  - System Specifications (SPEC):
+      - Specifications Index: spec/README.md
+      - Architecture Decisions (ADRs):
+          - ADR Index: spec/architecture/adr/README.md
+          - ADR-001 Two-Service Architecture: spec/architecture/adr/ADR-001-two-service-architecture.md
+          - ADR-002 LLM Fallback Chain: spec/architecture/adr/ADR-002-llm-fallback-chain.md
+          - ADR-003 PostGIS Over Mongo: spec/architecture/adr/ADR-003-postgis-over-mongo.md
+          - ADR-004 CQRS Command Query: spec/architecture/adr/ADR-004-cqrs-command-query.md
+          - ADR-005 Redlock Distributed Locking: spec/architecture/adr/ADR-005-redlock-distributed-locking.md
+          - ADR-006 Offline SOS Queue: spec/architecture/adr/ADR-006-offline-sos-queue.md
+          - ADR-007 DuckDB WASM: spec/architecture/adr/ADR-007-duckdb-wasm.md
+          - ADR-008 MapLibre Engine: spec/architecture/adr/ADR-008-maplibre.md
+          - ADR-009 JWKS Token Validation: spec/architecture/adr/ADR-009-jwks-token-validation.md
+          - ADR-010 Service Worker Cache: spec/architecture/adr/ADR-010-service-worker.md
+          - ADR-011 WebSocket Tracking: spec/architecture/adr/ADR-011-websocket.md
+          - ADR-012 RAG Vector Store: spec/architecture/adr/ADR-012-rag-vectorstore.md
+      - Security & Regulatory:
+          - RBAC Access Matrix: spec/security/rbac_matrix.spec.md
+          - Authentication & Tokens: spec/security/authentication.spec.md
+          - Privacy Boundary (DPDP Act): spec/security/privacy_boundary.spec.md
+          - Threat Model: spec/security/threat_model.spec.md
+          - Security Requirements: spec/security/security_requirements.spec.md
+          - GDPR Compliance: spec/security/gdpr_compliance.spec.md
+          - HIPAA Compliance: spec/security/hipaa_compliance.spec.md
+          - SOC2 Type II Controls: spec/security/soc2_compliance.spec.md
+          - Telemetry Privacy: spec/security/telemetry_privacy.spec.md
+      - Data & Storage:
+          - Database Schema (PostGIS 16): spec/data/database_schema.spec.md
+          - Dataset Asset Conventions: spec/data/dataset_placement.spec.md
+      - AI & Chatbot:
+          - LLM Fallback Chain: spec/ai/fallback_chain.spec.md
+          - Agent Tools Matrix: spec/ai/tools_matrix.spec.md
+          - Agent Personas: spec/ai/personas.spec.md
+          - RAG & ChromaDB: spec/ai/rag_vectorstore.spec.md
+          - Prompt Safety: spec/ai/prompt_safety.spec.md
+      - API Contracts:
+          - Error Codes Catalog: spec/api/error_codes.spec.md
+          - Circuit Breaker State Machine: spec/api/circuit_breaker.spec.md
+          - Webhooks: spec/api/webhooks.spec.md
+      - Engineering & Quality:
+          - Testing Policy & Thresholds: spec/engineering/testing_policy.spec.md
+          - Coding Standards: spec/engineering/code_standards.spec.md
+          - Environment Validation: spec/engineering/env_validation.spec.md
+          - Service Level Objectives (SLO): spec/engineering/slo.spec.md
+          - Performance Benchmarks: spec/engineering/performance_benchmarks.spec.md
+          - Supported Versions: spec/engineering/supported_versions.spec.md
+          - Versioning Policy: spec/engineering/versioning_policy.spec.md
+          - WCAG 2.1 AA Accessibility: spec/engineering/wcag_compliance.spec.md
+  - Architecture (DOCS):
+      - System Overview: architecture/system_overview.md
+      - C4 System Design: architecture/c4_system_design.md
+      - UI/UX Design System: architecture/uiux_design_system.md
+      - Memory & Offline Architecture: architecture/memory_architecture.md
+      - Technology Stack: architecture/tech_stack.md
+      - Security Overview: architecture/security_overview.md
+      - Data Sources: architecture/data_sources.md
   - Developer Guide:
-      - Starter Guide: developer-guide/STARTER_GUIDE.md
-      - Setup Guide: developer-guide/SETUP.md
-      - Developer Guide: developer-guide/DEVELOPER_GUIDE.md
-      - Configuration: developer-guide/CONFIGURATION.md
-      - Coding Standards: developer-guide/CODING_STANDARDS.md
-      - Best Practices: developer-guide/BEST_PRACTICES.md
-      - Style Guide: developer-guide/STYLE_GUIDE.md
-      - Testing: developer-guide/TESTING.md
-      - Testing Policy: developer-guide/TESTING_POLICY.md
-      - Versioning: developer-guide/VERSIONING.md
-      - Contributing: developer-guide/Contributing.md
-      - Contributors Guide: developer-guide/CONTRIBUTORS_GUIDE.md
-      - New Contributor Guide: developer-guide/NEW_CONTRIBUTOR_GUIDE.md
-      - Chatbot:
-          - Overview: developer-guide/chatbot/prd.md
-          - Architecture: developer-guide/chatbot/architecture.md
-          - Prompts & Instructions: developer-guide/chatbot/prompts_and_instructions.md
-          - Personas: developer-guide/chatbot/personas.md
-          - Team Setup: developer-guide/chatbot/team_setup.md
-  - Architecture:
-      - System Architecture: architecture/Architecture.md
-      - System Design: architecture/SYSTEM_DESIGN.md
-      - Design Specs: architecture/DESIGN.md
-      - Offline Architecture: architecture/Offline_Architecture.md
-      - Database Schema: architecture/Database.md
-      - AI Agents: developer-guide/Agent.md
-      - AI System: architecture/AI.md
-      - RAG: architecture/RAG.md
-      - Memory: architecture/MEMORY.md
-      - Security: architecture/Security.md
-      - Threat Model: architecture/THREAT_MODEL.md
-      - Authentication: architecture/AUTHENTICATION.md
-      - Authorization: architecture/AUTHORIZATION.md
+      - Getting Started: developer-guide/getting_started.md
+      - Docker Compose Guide: developer-guide/docker_compose_guide.md
+      - Contributing Guide: developer-guide/contributing_guide.md
+      - AI Coding Agent Guide: developer-guide/ai_agent_guide.md
+      - Testing Guide: developer-guide/testing_guide.md
+      - Code Review Guide: developer-guide/code_review_guide.md
+      - Best Practices: developer-guide/best_practices.md
+      - Internationalization: developer-guide/internationalization.md
+      - Chatbot Development: developer-guide/chatbot_development.md
+      - Developer Experience: developer-guide/developer_experience.md
+      - Community: developer-guide/community.md
   - API Reference:
-      - SDK Guide: api-reference/SDK_GUIDE.md
-      - CLI Reference: api-reference/CLI_REFERENCE.md
-      - API Routes: api-reference/API.md
-      - Webhooks: api-reference/WEBHOOKS.md
-      - Integrations: api-reference/THIRD_PARTY_INTEGRATIONS.md
-      - Error Codes: api-reference/ERROR_CODES.md
+      - API Overview: api-reference/api_overview.md
+      - Backend Swagger UI: api-reference/swagger_backend.md
+      - Chatbot Swagger UI: api-reference/swagger_chatbot.md
+      - SDK Guide: api-reference/sdk_guide.md
+      - CLI Reference: api-reference/cli_reference.md
+      - Third-Party Integrations: api-reference/third_party_integrations.md
   - SRE & Operations:
-      - Operations: sre/OPERATIONS.md
-      - Runbooks: sre/RUNBOOKS.md
-      - Troubleshooting: sre/TROUBLESHOOTING.md
-      - Deployment: sre/Deployment.md
-      - Scaling: sre/SCALING_GUIDE.md
-      - Performance: sre/PERFORMANCE.md
-      - Release: sre/RELEASE.md
-      - Supported Versions: sre/SUPPORTED_VERSIONS.md
-      - Observability:
-          - Observability: sre/OBSERVABILITY.md
-          - Monitoring: sre/MONITORING.md
-          - Setup: sre/observability/MONITORING_SETUP.md
-          - Telemetry: sre/observability/TELEMETRY.md
-  - Product & Planning:
-      - Roadmap: product-and-planning/Roadmap.md
-      - PRD: product-and-planning/PRD.md
-      - Features: product-and-planning/Features.md
-      - UI/UX: product-and-planning/UIUX.md
-      - FAQ: product-and-planning/FAQ.md
-  - Compliance & Reports:
-      - Privacy: compliance-and-reports/PRIVACY.md
-      - Terms: compliance-and-reports/TERMS.md
-      - Benchmarks: compliance-and-reports/BENCHMARKS.md
-      - Completion Status: compliance-and-reports/COMPLETION_STATUS.md
-      - Release Candidate: compliance-and-reports/RELEASE_CANDIDATE_READINESS_REPORT.md
-  - Certification Reports:
-      - Open Source Readiness: reports/OPEN_SOURCE_READINESS_REPORT.md
-      - Documentation Coverage: reports/DOCUMENTATION_COVERAGE_REPORT.md
-      - Repository Health: reports/REPOSITORY_HEALTH_REPORT.md
-      - Update System: reports/UPDATE_SYSTEM_REPORT.md
-      - Issue Reporting: reports/ISSUE_REPORTING_REPORT.md
-      - Notification System: reports/NOTIFICATION_SYSTEM_REPORT.md
-      - Final Integration: reports/FINAL_INTEGRATION_REPORT.md
-      - Enterprise Certification: reports/ENTERPRISE_OPEN_SOURCE_CERTIFICATION.md
-  - Archive:
-      - Legacy Audits: archive/analysis/SECURITY_AUDIT.md
+      - Operations Manual: sre/operations_manual.md
+      - Routine Maintenance Guide: sre/maintenance_guide.md
+      - Deployment Guide: sre/deployment_guide.md
+      - Deployment Strategies: sre/deployment_strategies.md
+      - Rollback Strategy: sre/rollback_strategy.md
+      - Observability Guide: sre/observability.md
+      - Scaling & Capacity Guide: sre/scaling_guide.md
+      - Troubleshooting: sre/troubleshooting.md
+      - Upgrade Guide: sre/upgrade_guide.md
+      - Release Process: sre/release_process.md
+      - Incident Response:
+          - Response Protocol: incident-response/response_protocol.md
+          - Escalation Tree: incident-response/escalation_tree.md
+  - Runbooks:
+      - Runbook Catalog: runbooks/README.md
+      - RB-001 LLM Outage Recovery: runbooks/RB-001-llm-outage.md
+      - RB-002 Database Failover: runbooks/RB-002-db-failover.md
+      - RB-003 Redis Recovery: runbooks/RB-003-redis-recovery.md
+      - RB-004 High Error Rate: runbooks/RB-004-high-error-rate.md
+      - RB-005 Deployment Rollback: runbooks/RB-005-rollback.md
+      - RB-006 Secret Rotation: runbooks/RB-006-secret-rotation.md
+      - RB-007 Disaster Recovery: runbooks/RB-007-disaster-recovery.md
+      - RB-008 ChromaDB Rebuild: runbooks/RB-008-chromadb-rebuild.md
+      - RB-009 OOM Kill Response: runbooks/RB-009-oom-kill.md
+      - RB-010 Smoke Tests: runbooks/RB-010-smoke-tests.md
+      - RB-011 Monitoring Setup: runbooks/RB-011-monitoring-setup.md
+  - Product & End-User:
+      - PRD: product/prd.md
+      - Features Catalog: product/features_catalog.md
+      - User Guide: product/user_guide.md
+      - FAQ: product/faq.md
+      - Terms of Service: product/terms_of_service.md
+      - Roadmap: product/roadmap.md
+  - Enterprise Reports:
+      - Open Source Certification: reports/open_source_certification.md
+      - Repository Health: reports/repository_health.md
+      - Documentation Coverage: reports/documentation_coverage.md
+      - Integration Matrix: reports/integration_matrix.md
+      - Open Source Readiness: reports/open_source_readiness.md
+      - Completion Status: reports/completion_status.md
+      - Release Candidate Readiness: reports/release_candidate_readiness.md
+      - Security Audit Report: reports/security_audit_report.md
   - Glossary: glossary.md

@@ -54,7 +54,7 @@ print(f"Fine amount: ₹{resp.json()['amount']}")
 
 ## Related
 
-- [`SDK_GUIDE.md`](../docs/api-reference/SDK_GUIDE.md) — comprehensive API integration guide
-- [`docs/INTEGRATION_GUIDE.md`](../docs/api-reference/INTEGRATION_GUIDE.md) — third-party integrations
-- [`docs/WEBHOOKS.md`](../docs/api-reference/WEBHOOKS.md) — webhook events
-- [`docs/PLUGIN_SYSTEM.md`](../docs/api-reference/PLUGIN_SYSTEM.md) — plugin development
+- [`SDK_GUIDE.md`](../docs/api-reference/sdk_guide.md) — comprehensive API integration guide
+- [`docs/INTEGRATION_GUIDE.md`](../docs/developer-guide/integration_guide.md) — third-party integrations
+- [`docs/WEBHOOKS.md`](../docs/spec/api/webhooks.spec.md) — webhook events
+- [`docs/PLUGIN_SYSTEM.md`](../docs/spec/domain/plugin_system.spec.md) — plugin development

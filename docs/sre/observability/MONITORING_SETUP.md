@@ -2,7 +2,7 @@
 
 > **Version:** 1.0  
 > **Last updated:** 2026-07-26  
-> **Cross-references:** [observability index](../OBSERVABILITY.md), [ADVANCED_SETUP.md](../../developer-guide/ADVANCED_SETUP.md)
+> **Cross-references:** [observability index](../observability.md), [ADVANCED_SETUP.md](../../developer-guide/ADVANCED_SETUP.md)
 
 ---
 
@@ -203,6 +203,6 @@ When alerts fire, the dashboard should link directly to the relevant runbook:
 ## Related
 
 - [MONITORING.md](../MONITORING.md) — Monitoring overview and dashboards
-- [OBSERVABILITY.md](../OBSERVABILITY.md) — Observability architecture
-- [OPERATIONS.md](../OPERATIONS.md) — Operations and incident response
+- [OBSERVABILITY.md](../observability.md) — Observability architecture
+- [OPERATIONS.md](../operations_manual.md) — Operations and incident response
 - [TELEMETRY.md](TELEMETRY.md) — Telemetry configuration and data collection

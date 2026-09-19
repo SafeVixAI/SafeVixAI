@@ -130,7 +130,7 @@ docker service update --image ghcr.io/safevixai/backend:vX.Y.Z-1 safevixai_backe
 ### Upgrade Path
 
 1. Review the [CHANGELOG.md](../api-reference/api/changelog.md) for breaking changes between versions.
-2. Check [RELEASE_NOTES.md](RELEASE_NOTES.md) for migration guides specific to your upgrade path.
+2. Check [RELEASE_NOTES.md](release_notes.md) for migration guides specific to your upgrade path.
 3. For database schema changes, run Alembic migrations: `alembic upgrade head` from `backend/`.
 4. Test the upgrade in a staging environment before applying to production.
 5. Rollback via `alembic downgrade -1` if issues arise (schema rollback supported within the same minor version).

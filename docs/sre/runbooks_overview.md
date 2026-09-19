@@ -1,0 +1,106 @@
+# Runbooks
+
+> **Incident response and operational runbooks for SafeVixAI services.**
+
+Comprehensive runbooks covering common failure scenarios, recovery procedures, and operational tasks.
+
+---
+
+## Quick Links
+
+| Runbook | Description |
+|---------|-------------|
+| [All LLMs Down](../runbooks/all-llms-down.md) | All 9 LLM providers failed |
+| [Database Down](../runbooks/db-down.md) | PostgreSQL/PostGIS outage |
+| [Redis Down](../runbooks/redis-down.md) | Redis cache outage |
+| [Redis Recovery](../runbooks/RB-003-redis-recovery.md) | Restoring Redis from persistence |
+| [Service Restart](../runbooks/service-restart.md) | Graceful service restart |
+| [High Error Rate](../runbooks/RB-004-high-error-rate.md) | Elevated error rate response |
+| [OOM Kill](../runbooks/RB-009-oom-kill.md) | Out-of-memory kill handling |
+| [DB Migration Rollback](../runbooks/db-migration-rollback.md) | Reverting schema migrations |
+| [Deployment Rollback](../runbooks/deployment-rollback.md) | Rolling back a deployment |
+| [API Key Rotation](../runbooks/RB-006-secret-rotation.md) | Rotating API keys |
+| [ChromaDB Rebuild](../runbooks/RB-008-chromadb-rebuild.md) | Rebuilding vector store |
+| [Disaster Recovery](../runbooks/RB-007-disaster-recovery.md) | Full disaster recovery plan |
+| [Smoke Tests](../runbooks/RB-010-smoke-tests.md) | Post-deployment verification |
+| [Monitoring Setup](../runbooks/RB-011-monitoring-setup.md) | Configuring monitoring stack |
+| [LLM Outage RB-001](../runbooks/RB-001-llm-outage.md) | LLM provider chain failure |
+| [DB Failover RB-002](../runbooks/RB-002-db-failover.md) | Database failover procedure |
+| [Rollback RB-005](../runbooks/RB-005-rollback.md) | Standard rollback procedure |
+
+---
+
+## Incident Response Flow
+
+```mermaid
+flowchart TB
+    DETECT[Incident Detected] --> TRIAGE[Triage]
+    TRIAGE --> SEV{Severity}
+    SEV -->|P0: Service Down| P0["< 5 min response"]
+    SEV -->|P1: Degraded| P1["< 15 min response"]
+    SEV -->|P2: Feature Broken| P2["< 1 hour response"]
+    SEV -->|P3: Cosmetic| P3["Next business day"]
+
+    P0 --> DIAGNOSE[Diagnose Root Cause]
+    P1 --> DIAGNOSE
+    P2 --> DIAGNOSE
+    P3 --> DIAGNOSE
+
+    DIAGNOSE --> RESOLVE[Apply Fix]
+    RESOLVE --> VERIFY[Verify Resolution]
+    VERIFY -->|Fixed| CLOSE[Close Incident]
+    VERIFY -->|Not Fixed| DIAGNOSE
+    CLOSE --> POST[Post-Mortem]
+```
+
+## Severity State Diagram
+
+```mermaid
+stateDiagram-v2
+    [*] --> Monitoring
+    Monitoring --> P0_Active : Service Unavailable
+    Monitoring --> P1_Active : Degraded Performance
+    Monitoring --> P2_Active : Feature Broken
+
+    P0_Active --> Diagnosing : Engineer assigned
+    P1_Active --> Diagnosing
+    P2_Active --> Diagnosing
+
+    Diagnosing --> Resolving : Root cause found
+    Resolving --> Verifying : Fix applied
+    Verifying --> Monitoring : Confirmed resolved
+
+    Verifying --> Diagnosing : Fix failed
+    P0_Active --> Escalated : > 5 min without fix
+```
+
+## Runbook Template
+
+Each runbook follows the same format:
+
+1. **Symptoms** — How to detect this incident
+2. **Severity** — P0/P1/P2 classification
+3. **Immediate Actions** — First 5-minute response
+4. **Diagnosis Steps** — How to identify root cause
+5. **Resolution Steps** — How to fix
+6. **Verification** — How to confirm resolution
+7. **Post-Mortem** — What to document after
+
+---
+
+## Incident Severity Levels
+
+| Level | Definition | Response Time |
+|-------|------------|---------------|
+| P0 | Service unavailable / data loss | < 5 min |
+| P1 | Degraded performance | < 15 min |
+| P2 | Non-critical feature broken | < 1 hour |
+| P3 | Cosmetic / non-urgent | Next business day |
+
+---
+
+## Related
+
+- [`OPERATIONS.md`](operations_manual.md) — deployment, scaling
+- [`OBSERVABILITY.md`](observability.md) — monitoring, alerting
+- [`MONITORING.md`](monitoring_overview.md) — dashboard setup

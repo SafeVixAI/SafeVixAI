@@ -101,6 +101,6 @@ Each runbook follows the same format:
 
 ## Related
 
-- [`OPERATIONS.md`](OPERATIONS.md) — deployment, scaling
-- [`OBSERVABILITY.md`](OBSERVABILITY.md) — monitoring, alerting
+- [`OPERATIONS.md`](operations_manual.md) — deployment, scaling
+- [`OBSERVABILITY.md`](observability.md) — monitoring, alerting
 - [`MONITORING.md`](MONITORING.md) — dashboard setup

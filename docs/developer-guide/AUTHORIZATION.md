@@ -2,7 +2,7 @@
 
 > **Version:** 1.0  
 > **Last updated:** 2026-07-26  
-> **Cross-references:** [AUTHENTICATION.md](AUTHENTICATION.md), [Security.md](chatbot/security.md)
+> **Cross-references:** [AUTHENTICATION.md](../spec/security/authentication.spec.md), [Security.md](chatbot/security.md)
 
 ---
 

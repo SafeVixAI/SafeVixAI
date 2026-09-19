@@ -281,12 +281,12 @@ SafeVixAI is exhaustively documented. Our enterprise documentation portal is bui
 
 | | Section | Key Documents |
 |:---:|:--------|:-------------|
-| 🏗️ | **Architecture** | [System Design](docs/architecture/Architecture.md) · [Offline Architecture](docs/architecture/Offline_Architecture.md) · [Tech Stack](docs/architecture/TechStack.md) |
-| 🧠 | **AI & Agents** | [AI System](docs/architecture/AI.md) · [RAG Pipeline](docs/architecture/RAG.md) · [Memory Architecture](docs/architecture/MEMORY.md) |
-| 👨‍💻 | **Developer Guide** | [Setup](docs/developer-guide/SETUP.md) · [Testing](docs/developer-guide/TESTING.md) · [Style Guide](docs/developer-guide/STYLE_GUIDE.md) |
-| 🔌 | **API Reference** | [SDK Guide](docs/api-reference/SDK_GUIDE.md) · [Error Codes](docs/api-reference/ERROR_CODES.md) · [Webhooks](docs/api-reference/WEBHOOKS.md) |
-| 📈 | **SRE & Ops** | [Operations](docs/sre/OPERATIONS.md) · [Monitoring](docs/sre/MONITORING.md) · [Deployment](docs/sre/Deployment.md) |
-| 🛡️ | **Security** | [Threat Model](docs/architecture/THREAT_MODEL.md) · [Privacy](docs/compliance-and-reports/PRIVACY.md) · [Auth](docs/architecture/AUTHENTICATION.md) |
+| 🏗️ | **Architecture** | [System Design](docs/architecture/system_overview.md) · [Offline Architecture](docs/spec/architecture/offline_engine.spec.md) · [Tech Stack](docs/architecture/tech_stack.md) |
+| 🧠 | **AI & Agents** | [AI System](docs/spec/ai/fallback_chain.spec.md) · [RAG Pipeline](docs/spec/ai/rag_vectorstore.spec.md) · [Memory Architecture](docs/architecture/memory_architecture.md) |
+| 👨‍💻 | **Developer Guide** | [Setup](docs/developer-guide/getting_started.md) · [Testing](docs/developer-guide/testing_guide.md) · [Style Guide](docs/developer-guide/style_guide.md) |
+| 🔌 | **API Reference** | [SDK Guide](docs/api-reference/sdk_guide.md) · [Error Codes](docs/spec/api/circuit_breaker.spec.md) · [Webhooks](docs/spec/api/webhooks.spec.md) |
+| 📈 | **SRE & Ops** | [Operations](docs/sre/operations_manual.md) · [Monitoring](docs/sre/monitoring_overview.md) · [Deployment](docs/sre/deployment_guide.md) |
+| 🛡️ | **Security** | [Threat Model](docs/spec/security/threat_model.spec.md) · [Privacy](docs/spec/security/privacy_boundary.spec.md) · [Auth](docs/spec/security/authentication.spec.md) |
 
 > **📖 Full documentation portal**: [safevixai.github.io/SafeVixAI](https://safevixai.github.io/SafeVixAI/)
 

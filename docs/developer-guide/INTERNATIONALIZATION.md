@@ -2,7 +2,7 @@
 
 > **Version:** 1.0  
 > **Last updated:** 2026-07-26  
-> **Cross-references:** [Features.md](chatbot/features.md), [SDK_GUIDE.md](../api-reference/SDK_GUIDE.md)
+> **Cross-references:** [Features.md](chatbot/features.md), [SDK_GUIDE.md](../api-reference/sdk_guide.md)
 
 ---
 

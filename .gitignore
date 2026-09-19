@@ -21,8 +21,11 @@ __pycache__/
 *.so
 .Python
 venv/
+venv*/
 env/
+env*/
 .venv/
+.venv*/
 pip-log.txt
 pip-delete-this-directory.txt
 *.egg-info/
@@ -69,6 +72,13 @@ node_modules/
 frontend/node_modules/
 .node_modules/
 frontend/.node_modules/
+.npm/
+.yarn/
+.pnpm-store/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
 .next/
 frontend/.next/
 out/
@@ -94,11 +104,18 @@ frontend/public/sw.js.map
 # ============================================================
 .DS_Store
 Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
 .idea/
 .vscode/
+.fleet/
+.zed/
 *.swp
 *.swo
 *.orig
+*.sublime-project
+*.sublime-workspace
 
 # ============================================================
 # MISC
@@ -106,6 +123,10 @@ Thumbs.db
 *.log
 *.err
 *.tmp
+*.temp
+temp/
+tmp/
+.cache/
 coverage/
 .nyc_output/
 .pytest_cache/
@@ -221,6 +242,8 @@ frontend/public/models/yolov8n_pothole.onnx
 # AGENT / KNOWLEDGE GRAPH OUTPUTS
 # ============================================================
 .agents/
+.antigravity/
+.system_generated/
 .opencode/
 .claude/
 .codebuddy/
@@ -233,6 +256,9 @@ frontend/public/models/yolov8n_pothole.onnx
 .pi/
 .qoder/
 .windsurf/
+.cline/
+.roo/
+.aider*
 graphify-out/
 
 # Local security-tool config
@@ -270,6 +296,7 @@ backend/.hypothesis/
 
 # Coverage files
 *.coverage
+.coverage.*
 *.py,cover
 *.lcov
 coverage.xml

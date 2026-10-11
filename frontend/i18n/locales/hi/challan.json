@@ -38,8 +38,6 @@
     "first_occurrence": "पहली बार",
     "repeat_offence": "बार-बार उल्लंघन",
     "ai_guidance_default": "हाल के एमवीए संशोधनों के आधार पर, शराब पीकर गाड़ी चलाने ({{mva}}) जैसे उच्च जोखिम वाले अपराधों के लिए {{state}} में तत्काल लाइसेंस अयोग्यता प्रोटोकॉल सक्रिय हैं।",
-    "rupees_symbol": "रु. ",
-    "swipe_indicator": "Swipe ↔",
-    "ai_tactical_insight": "AI Tactical Insight"
+    "rupees_symbol": "रु. "
   }
 }

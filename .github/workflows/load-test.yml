@@ -39,7 +39,7 @@ jobs:
           CHATBOT_BASE_URL: ${{ github.event.inputs.target_url || 'https://api.safevixai.com' }}
 
       - name: Upload results
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
         with:
           name: k6-results
           path: results.json
@@ -61,7 +61,7 @@ jobs:
           CHATBOT_BASE_URL: ${{ github.event.inputs.target_url }}
 
       - name: Upload results
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
         with:
           name: k6-load-results
           path: results.json
